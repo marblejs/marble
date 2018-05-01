@@ -1,4 +1,5 @@
 import * as http from 'http';
+import { StatusCode } from '../util/status-code.util';
 import { Observable, merge } from 'rxjs';
 import { RequestEffect } from './effects.interface';
 import { HttpRequest, HttpResponse } from '../http.interface';
