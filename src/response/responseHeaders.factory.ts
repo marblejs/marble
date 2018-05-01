@@ -1,7 +1,8 @@
 import { HttpHeaders } from '../http.interface';
+import { ContentType } from '../util';
 
 export const DEFAULT_HEADERS = {
-  'Content-Type': 'application/json',
+  'Content-Type': ContentType.APPLICATION_JSON,
 };
 
 export const headersFactory = (headers?: HttpHeaders) => ({

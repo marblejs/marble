@@ -1,10 +1,11 @@
 import * as http from 'http';
 import { Subject, of } from 'rxjs';
-import { map, tap, switchMap } from 'rxjs/operators';
+import { defaultIfEmpty, map, tap, switchMap } from 'rxjs/operators';
 import { Http, HttpRequest, HttpResponse } from './http.interface';
 import { combineEffects, RequestEffect, EffectResponse } from './effects';
 import { loggerMiddleware } from './middlewares';
 import { handleResponse } from './response';
+import { StatusCode } from './util';
 
 export const httpListener = (...effects: RequestEffect[]) => {
   const request$ = new Subject<Http>();
@@ -13,7 +14,10 @@ export const httpListener = (...effects: RequestEffect[]) => {
       map(loggerMiddleware),
       switchMap(({ req, res }) =>
         combineEffects(...effects)(of(req), res)
-          .pipe(tap(effect => handleResponse(res)(effect)))
+          .pipe(
+            defaultIfEmpty({ status: StatusCode.NOT_FOUND }),
+            tap(effect => handleResponse(res)(effect))
+          )
       ),
     );
 

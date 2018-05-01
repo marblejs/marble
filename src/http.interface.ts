@@ -8,7 +8,3 @@ export type Http = {
   req: HttpRequest,
   res: HttpResponse,
 };
-
-export enum ContentType {
-  APPLICATION_JSON = 'application/json',
-}
