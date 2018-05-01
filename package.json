@@ -46,6 +46,8 @@
   },
   "homepage": "https://github.com/JozefFlakus/node-rx#readme",
   "dependencies": {
+    "@types/chalk": "^2.2.0",
+    "chalk": "^2.4.1",
     "rxjs": "~6.0.0"
   },
   "devDependencies": {
