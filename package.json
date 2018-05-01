@@ -8,6 +8,7 @@
     "start": "npm run watch",
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
+    "example": "ts-node example/index.ts",
     "watch": "tsc -w",
     "lint": "tslint --config tslint.json --project tsconfig.json --type-check",
     "test": "NODE_ENV=test jest --expand",
@@ -52,11 +53,12 @@
     "rimraf": "^2.6.2",
     "supertest": "~3.0.0",
     "ts-jest": "~22.4.4",
+    "ts-node": "^6.0.2",
     "tsc": "~1.20150623.0",
     "tslint": "~5.9.1",
-    "typescript": "~2.8.3",
     "typedoc": "~0.11.1",
     "typedoc-plugin-external-module-name": "^1.1.1",
-    "typedoc-plugin-internal-external": "^1.0.10"
+    "typedoc-plugin-internal-external": "^1.0.10",
+    "typescript": "~2.8.3"
   }
 }
