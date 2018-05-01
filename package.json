@@ -1,0 +1,62 @@
+{
+  "name": "node-rx",
+  "version": "0.0.1",
+  "description": "Reactive Node APIs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start": "npm run watch",
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "watch": "tsc -w",
+    "lint": "tslint --config tslint.json --project tsconfig.json --type-check",
+    "test": "NODE_ENV=test jest --expand",
+    "test:all": "NODE_ENV=test jest --expand",
+    "test:watch": "NODE_ENV=test jest --expand --onlyChanged --watch",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "prepush": "npm run lint",
+    "prepublishOnly": "npm run build",
+    "doc": "typedoc --out doc src --name 'node-rx doc' --target ES6 --exclude \"**/*+(index|env|.spec|.e2e).ts\" --hideGenerator --mode modules --readme none"
+  },
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JozefFlakus/node-rx.git"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "npm": ">= 5.0.0"
+  },
+  "keywords": [
+    "API",
+    "JavaScript",
+    "RxJs",
+    "TypeScript"
+  ],
+  "authors": [
+    "Józef Flakus"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JozefFlakus/node-rx/issues"
+  },
+  "homepage": "https://github.com/JozefFlakus/node-rx#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^22.2.3",
+    "@types/supertest": "~2.0.4",
+    "husky": "^0.14.3",
+    "jest": "^22.4.3",
+    "rimraf": "^2.6.2",
+    "supertest": "~3.0.0",
+    "ts-jest": "~22.4.4",
+    "tsc": "~1.20150623.0",
+    "tslint": "~5.9.1",
+    "typescript": "~2.8.3",
+    "typedoc": "~0.11.1",
+    "typedoc-plugin-external-module-name": "^1.1.1",
+    "typedoc-plugin-internal-external": "^1.0.10"
+  }
+}

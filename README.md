@@ -1,0 +1,5 @@
+# node-rx
+
+## License
+
+MIT
