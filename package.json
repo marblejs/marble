@@ -44,7 +44,9 @@
     "url": "https://github.com/JozefFlakus/node-rx/issues"
   },
   "homepage": "https://github.com/JozefFlakus/node-rx#readme",
-  "dependencies": {},
+  "dependencies": {
+    "rxjs": "~6.0.0"
+  },
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/supertest": "~2.0.4",
