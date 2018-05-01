@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { HttpRequest } from '../http.interface';
+import { HttpRequest, HttpResponse } from '../http.interface';
 
 export type EffectResponse = {
   status: number,
@@ -7,4 +7,7 @@ export type EffectResponse = {
   headers?: Record<string, string>,
 };
 
-export type RequestEffect = (request$: Observable<HttpRequest>) => Observable<EffectResponse>;
+export type RequestEffect = (
+  request$: Observable<HttpRequest>,
+  response?: HttpResponse,
+) => Observable<EffectResponse>;

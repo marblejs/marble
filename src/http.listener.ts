@@ -8,18 +8,16 @@ import { handleResponse } from './response';
 
 export const httpListener = (...effects: RequestEffect[]) => {
   const request$ = new Subject<Http>();
-
-  request$
+  const effect$ = request$
     .pipe(
       map(loggerMiddleware),
-      switchMap(http => combineEffects(...effects)(of(http.req))
-        .pipe(
-          tap(effect => handleResponse(http.res)(effect))
-        )
+      switchMap(({ req, res }) =>
+        combineEffects(...effects)(of(req), res)
+          .pipe(tap(effect => handleResponse(res)(effect)))
       ),
-    )
-    .subscribe();
+    );
 
+  effect$.subscribe();
 
   return (req: HttpRequest, res: HttpResponse) => request$.next({ req, res });
 };
