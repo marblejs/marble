@@ -8,7 +8,7 @@ export type EffectResponse = {
   headers?: Record<string, string>,
 };
 
-export type RequestEffect = (
+export type Effect<T = EffectResponse> = (
   request$: Observable<HttpRequest>,
   response?: HttpResponse,
-) => Observable<EffectResponse>;
+) => Observable<T>;
