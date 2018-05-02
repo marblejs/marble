@@ -1,7 +1,11 @@
 import * as http from 'http';
 
-export type HttpRequest = http.IncomingMessage;
-export type HttpResponse = http.ServerResponse;
+export interface HttpRequest extends http.IncomingMessage {
+  [key: string]: any;
+}
+
+export interface HttpResponse extends http.ServerResponse {}
+
 export type HttpHeaders = Record<string, string>;
 
 export type Http = {

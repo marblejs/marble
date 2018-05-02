@@ -10,5 +10,5 @@ export type EffectResponse = {
 
 export type Effect<T = EffectResponse> = (
   request$: Observable<HttpRequest>,
-  response?: HttpResponse,
+  response: HttpResponse,
 ) => Observable<T>;
