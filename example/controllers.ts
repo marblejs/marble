@@ -4,18 +4,18 @@ import { StatusCode } from '../src/util';
 
 export const root$: Effect = request$ => request$
   .pipe(
-    filter(http => http.url === '/'),
-    map(http => ({
+    filter(req => req.url === '/'),
+    map(req => ({
       status: StatusCode.OK,
-      body: { data: `API root @ ${http.url}` },
+      body: { data: `API root @ ${req.url}` },
     }))
   );
 
 export const hello$: Effect = request$ => request$
   .pipe(
-    filter(http => http.url === '/hello'),
-    map(http => ({
+    filter(req => req.url === '/hello'),
+    map(req => ({
       status: StatusCode.OK,
-      body: { data: `Hello, world! @ ${http.url}` },
+      body: { data: `Hello, world! @ ${req.url}` },
     }))
   );
