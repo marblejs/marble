@@ -9,7 +9,7 @@
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
     "example": "ts-node example/index.ts",
-    "example:watch": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec npm run example",
+    "example:watch": "nodemon --watch src --watch example --ext ts --ignore '*.spec.ts' --exec npm run example",
     "watch": "tsc -w",
     "lint": "tslint --config tslint.json --project tsconfig.json --type-check",
     "test": "NODE_ENV=test jest --expand",
