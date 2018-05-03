@@ -6,8 +6,6 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "noEmitOnError": true,
     "outDir": "./dist",
     "pretty": true,

@@ -11,7 +11,7 @@
     "example": "ts-node example/index.ts",
     "example:watch": "nodemon --watch src --watch example --ext ts --ignore '*.spec.ts' --exec npm run example",
     "watch": "tsc -w",
-    "lint": "tslint --config tslint.json --project tsconfig.json --type-check",
+    "lint": "tslint --config tslint.json --project tsconfig.json",
     "test": "NODE_ENV=test jest --expand",
     "test:all": "NODE_ENV=test jest --expand",
     "test:watch": "NODE_ENV=test jest --expand --onlyChanged --watch",
