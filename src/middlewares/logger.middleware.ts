@@ -8,18 +8,13 @@ const getStatusCode = (statusCode: number): string =>
     ? chalk.yellow(statusCode.toString())
     : chalk.green(statusCode.toString());
 
-const getEndTime = (time: number): number =>
-  Math.round(time * 100) / 100;
+const getEndTime = (hrStartTime: [number, number]): number => {
+  const hrEndTime = process.hrtime(hrStartTime)[1] / 1000000;
+  return Math.round(hrEndTime * 100) / 100;
+};
 
-const printLog = (method: string, url: string, statusCode: number, startTime: [number, number]) => {
-  const endTime = process.hrtime(startTime)[1] / 1000000;
-  console.info(
-    `%s %s %s %dms`,
-    method,
-    url,
-    getStatusCode(statusCode),
-    getEndTime(endTime),
-  );
+const printLog = (method: string, url: string, statusCode: string, endTime: number) => {
+  console.info(`%s %s %s %dms`, method, url, statusCode, endTime);
 };
 
 export const logger$: Effect<HttpRequest> = (request$, response) => request$
@@ -30,8 +25,8 @@ export const logger$: Effect<HttpRequest> = (request$, response) => request$
       response.on('finish', () => printLog(
         request.method!,
         request.url!,
-        response.statusCode,
-        startTime
+        getStatusCode(response.statusCode),
+        getEndTime(startTime),
       ));
     }),
   );
