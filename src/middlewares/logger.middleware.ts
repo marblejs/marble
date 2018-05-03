@@ -5,7 +5,7 @@ import { Effect } from '../effects/effects.interface';
 
 const getStatusCode = (statusCode: number): string =>
   statusCode >= 400
-    ? chalk.red(statusCode.toString())
+    ? chalk.yellow(statusCode.toString())
     : chalk.green(statusCode.toString());
 
 const getEndTime = (time: number): number =>
