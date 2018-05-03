@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { root$, hello$ } from './controllers';
-import { httpListener, logger$ } from '../src';
+import { httpListener, logger$, bodyParser$ } from '../src';
 
 const createServer = () => {
   const HOSTNAME = '127.0.0.1';
@@ -8,6 +8,7 @@ const createServer = () => {
 
   const middlewares = [
     logger$,
+    bodyParser$,
   ];
 
   const effects = [

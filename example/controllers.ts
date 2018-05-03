@@ -14,8 +14,9 @@ export const root$: Effect = request$ => request$
 export const hello$: Effect = request$ => request$
   .pipe(
     filter(req => req.url === '/hello'),
+    filter(req => req.method === 'POST'),
     map(req => ({
       status: StatusCode.OK,
-      body: { data: `Hello, world! @ ${req.url}` },
+      body: { data: `Hello, ${req.body.data}! @ ${req.url}` },
     }))
   );
