@@ -1,22 +1,18 @@
-import { Observable, merge, of } from 'rxjs';
+import { merge, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { Effect, EffectResponse } from './effects.interface';
-import { HttpRequest, HttpResponse } from '../http.interface';
+import { EffectCombiner, MiddlewareCombiner } from './effects.interface';
+import { HttpRequest } from '../http.interface';
 
-export const combineEffects = (...effects: Effect<EffectResponse>[]) => (
-  request$: Observable<HttpRequest>,
-  response: HttpResponse
-) => {
-  const mappedEffects = effects.map(effect => effect(request$, response));
+export const combineEffects: EffectCombiner = effects => res => req => {
+  const req$ = of(req);
+  const mappedEffects = effects.map(effect => effect(req$, res));
   return merge(...mappedEffects);
 };
 
-export const combineMiddlewareEffects = (...effects: Effect<HttpRequest>[]) => (
-  request$: Observable<HttpRequest>,
-  response: HttpResponse
-) => {
+export const combineMiddlewareEffects: MiddlewareCombiner = effects => res => req => {
+  const req$ = of(req);
   const mappedEffects = effects.map(effect =>
-    switchMap((mappedReqest: HttpRequest) => effect(of(mappedReqest), response))
+    switchMap((mappedReqest: HttpRequest) => effect(of(mappedReqest), res))
   );
-  return request$.pipe(...mappedEffects);
+  return req$.pipe(...mappedEffects);
 };

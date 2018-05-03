@@ -1,4 +1,4 @@
-import { Subject, of } from 'rxjs';
+import { Subject } from 'rxjs';
 import { defaultIfEmpty, tap, switchMap } from 'rxjs/operators';
 import { Http, HttpRequest, HttpResponse } from './http.interface';
 import { combineEffects, Effect, combineMiddlewareEffects } from './effects';
@@ -10,9 +10,9 @@ export const httpListener = (middlewares: Effect<HttpRequest>[], effects: Effect
   const effect$ = request$
     .pipe(
       switchMap(({ req, res }) =>
-        combineMiddlewareEffects(...middlewares)(of(req), res)
+        combineMiddlewareEffects(middlewares)(res)(req)
           .pipe(
-            switchMap(req => combineEffects(...effects)(of(req), res)),
+            switchMap(combineEffects(effects)(res)),
             defaultIfEmpty({ status: StatusCode.NOT_FOUND }),
             tap(handleResponse(res))
           )

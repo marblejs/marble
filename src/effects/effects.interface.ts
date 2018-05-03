@@ -12,3 +12,10 @@ export type Effect<T = EffectResponse> = (
   request$: Observable<HttpRequest>,
   response: HttpResponse,
 ) => Observable<T>;
+
+
+export type EffectCombiner = (effects: Effect<EffectResponse>[]) => (res: HttpResponse) => (req: HttpRequest) =>
+  Observable<EffectResponse>;
+
+export type MiddlewareCombiner = (effects: Effect<HttpRequest>[]) => (res: HttpResponse) => (req: HttpRequest) =>
+  Observable<HttpRequest>;
