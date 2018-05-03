@@ -16,7 +16,7 @@ const createServer = () => {
     hello$,
   ];
 
-  const app = httpListener(middlewares, effects);
+  const app = httpListener({ middlewares, effects });
 
   const httpServer = http
     .createServer(app)

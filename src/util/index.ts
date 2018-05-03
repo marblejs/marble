@@ -1,2 +1,2 @@
-export * from './content-type.util';
-export * from './status-code.util';
+export * from './contentType.util';
+export * from './statusCode.util';

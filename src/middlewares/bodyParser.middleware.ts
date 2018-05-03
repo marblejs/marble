@@ -1,8 +1,9 @@
-import { Observable } from 'rxjs';
-import { switchMap, tap, toArray, map } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap, toArray } from 'rxjs/operators';
+import { Effect } from '../effects';
 import { HttpRequest } from '../http.interface';
-import { Effect } from '../effects/effects.interface';
 import { ContentType } from '../util';
+import { ServerError } from '../util/error.util';
 
 export const fromReadableStream = (stream: HttpRequest): Observable<any> => {
   stream.pause();
@@ -41,14 +42,15 @@ export const getBody = (req: HttpRequest) =>
       }),
     );
 
-export const bodyParser$: Effect<HttpRequest> = request$ => request$
+export const bodyParser$: Effect<HttpRequest> = (request$, response) => request$
   .pipe(
     switchMap(req =>
       req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH'
         ? request$.pipe(
             switchMap(getBody),
             tap(body => req.body = body),
-            map(body => req)
+            map(body => req),
+            catchError(error => throwError(new ServerError('Request body parse error', error)))
           )
         : request$
     )

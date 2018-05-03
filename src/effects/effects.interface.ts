@@ -8,9 +8,10 @@ export type EffectResponse = {
   headers?: Record<string, string>,
 };
 
-export type Effect<T = EffectResponse> = (
+export type Effect<T = EffectResponse, U = any> = (
   request$: Observable<HttpRequest>,
   response: HttpResponse,
+  metadata: U,
 ) => Observable<T>;
 
 
