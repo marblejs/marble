@@ -1,7 +1,5 @@
-import * as http from 'http';
-import { Observable, merge, forkJoin, of } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
-import { StatusCode } from '../util/status-code.util';
+import { Observable, merge, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { Effect, EffectResponse } from './effects.interface';
 import { HttpRequest, HttpResponse } from '../http.interface';
 

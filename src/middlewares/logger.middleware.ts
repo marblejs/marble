@@ -1,9 +1,7 @@
 import chalk from 'chalk';
-import { of } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
-import { Http, HttpResponse, HttpRequest } from '../http.interface';
+import { tap } from 'rxjs/operators';
+import { HttpRequest } from '../http.interface';
 import { Effect } from '../effects/effects.interface';
-import { start } from 'repl';
 
 const getStatusCode = (statusCode: number): string =>
   statusCode >= 400
@@ -24,7 +22,7 @@ const printLog = (method: string, url: string, statusCode: number, startTime: [n
   );
 };
 
-export const loggerMiddleware: Effect<HttpRequest> = (request$, response) => request$
+export const logger$: Effect<HttpRequest> = (request$, response) => request$
   .pipe(
     tap(request => {
       const startTime = process.hrtime();

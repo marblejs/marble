@@ -1,5 +1,5 @@
 import { filter, map } from 'rxjs/operators';
-import { Effect, EffectResponse } from '../src';
+import { Effect } from '../src';
 import { StatusCode } from '../src/util';
 
 export const root$: Effect = request$ => request$

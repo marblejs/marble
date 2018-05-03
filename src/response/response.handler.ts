@@ -1,5 +1,4 @@
-import * as http from 'http';
-import { HttpResponse, HttpHeaders } from '../http.interface';
+import { HttpResponse } from '../http.interface';
 import { EffectResponse } from '../effects/effects.interface';
 import { headersFactory } from './responseHeaders.factory';
 
