@@ -1,22 +1,9 @@
 import * as http from 'http';
-import { root$, hello$ } from './controllers';
-import { httpListener, logger$, bodyParser$ } from '../src';
+import { app } from './app';
 
-const createServer = () => {
+const createServer = app => {
   const HOSTNAME = '127.0.0.1';
   const PORT = 1337;
-
-  const middlewares = [
-    logger$,
-    bodyParser$,
-  ];
-
-  const effects = [
-    root$,
-    hello$,
-  ];
-
-  const app = httpListener({ middlewares, effects });
 
   const httpServer = http
     .createServer(app)
@@ -29,4 +16,4 @@ const createServer = () => {
     });
 };
 
-createServer();
+createServer(app);
