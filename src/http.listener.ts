@@ -1,15 +1,15 @@
 import { Subject, of } from 'rxjs';
 import { catchError, defaultIfEmpty, switchMap, tap } from 'rxjs/operators';
-import { Effect, combineEffects, combineMiddlewareEffects } from './effects';
+import { Effect, EffectResponse, combineEffects, combineMiddlewareEffects } from './effects';
 import { Http, HttpRequest, HttpResponse } from './http.interface';
-import { getErrorMiddleware } from './middlewares/errorCatcher.middleware';
+import { getErrorMiddleware } from './middlewares';
 import { handleResponse } from './response';
 import { StatusCode } from './util';
 
 type HttpListenerConfig = {
   middlewares: Effect<HttpRequest>[],
   effects: Effect[],
-  errorMiddleware?: Effect<HttpRequest, Error>,
+  errorMiddleware?: Effect<EffectResponse, Error>,
 };
 
 export const httpListener = ({ middlewares, effects, errorMiddleware }: HttpListenerConfig) => {
@@ -22,7 +22,12 @@ export const httpListener = ({ middlewares, effects, errorMiddleware }: HttpList
             switchMap(combineEffects(effects)(res)),
             defaultIfEmpty({ status: StatusCode.NOT_FOUND }),
             tap(handleResponse(res)),
-            catchError(error => getErrorMiddleware(errorMiddleware)(of(req), res, error))
+            catchError(error =>
+              getErrorMiddleware(errorMiddleware)(of(req), res, error)
+                .pipe(
+                  tap(handleResponse(res)),
+                ),
+            )
           )
       )
     );
