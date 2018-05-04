@@ -7,7 +7,7 @@ import { ServerError } from '../util/error.util';
 
 export const fromReadableStream = (stream: HttpRequest): Observable<any> => {
   stream.pause();
-  return Observable.create(observer => {
+  return new Observable(observer => {
     const next = chunk => observer.next(chunk);
     const complete = () => observer.complete();
     const error = err => observer.error(err);
