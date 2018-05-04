@@ -18,17 +18,5 @@ export class HttpError extends ExtendableError {
   }
 }
 
-export class ServerError extends ExtendableError {
-  constructor(
-    public readonly message: string,
-    public readonly error: any,
-  ) {
-    super('ServerError', message);
-  }
-}
-
 export const isHttpError = (error: Error): error is HttpError =>
   error.name === 'HttpError';
-
-export const isServerError = (error: Error): error is ServerError =>
-  error.name === 'ServerError';
