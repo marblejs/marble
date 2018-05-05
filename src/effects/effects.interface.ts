@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 
 export interface EffectResponse {
-  status: HttpStatus;
+  status?: HttpStatus;
   body?: object;
   headers?: Record<string, string>;
 }
