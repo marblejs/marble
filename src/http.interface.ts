@@ -9,6 +9,8 @@ export interface HttpResponse extends http.ServerResponse {}
 
 export type HttpHeaders = Record<string, string>;
 
+export type HttpMethod = 'POST' | 'PUT' | 'PATCH' | 'GET' | 'HEAD' | 'DELETE' | 'CONNECT' | 'OPTIONS' | 'TRACE';
+
 export type Http = {
   req: HttpRequest,
   res: HttpResponse,
