@@ -1,4 +1,4 @@
-import { StatusCode } from './statusCode.util';
+import { HttpStatus } from '../http.interface';
 
 export class ExtendableError extends Error {
   constructor(
@@ -12,7 +12,7 @@ export class ExtendableError extends Error {
 export class HttpError extends ExtendableError {
   constructor(
     public readonly message: string,
-    public readonly status: StatusCode,
+    public readonly status: HttpStatus,
   ) {
     super('HttpError', message);
   }

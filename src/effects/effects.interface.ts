@@ -1,9 +1,8 @@
 import { Observable } from 'rxjs';
-import { HttpRequest, HttpResponse } from '../http.interface';
-import { StatusCode } from '../util';
+import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 
 export interface EffectResponse {
-  status: StatusCode;
+  status: HttpStatus;
   body?: object;
   headers?: Record<string, string>;
 }

@@ -1,6 +1,6 @@
 import { map } from 'rxjs/operators';
-import { Effect, EffectResponse } from '../effects';
-import { StatusCode } from '../util';
+import { Effect, EffectResponse } from '../effects/effects.interface';
+import { HttpStatus } from '../http.interface';
 import { HttpError, isHttpError } from '../util/error.util';
 
 export type Error = HttpError;
@@ -9,11 +9,11 @@ export const getErrorMiddleware = (customError$?: Effect<EffectResponse, Error>)
   ? customError$
   : error$;
 
-export const getStatusCode = (error: Error): StatusCode => isHttpError(error)
+export const getStatusCode = (error: Error): HttpStatus => isHttpError(error)
   ? error.status
-  : StatusCode.INTERNAL_SERVER_ERROR;
+  : HttpStatus.INTERNAL_SERVER_ERROR;
 
-export const errorFactory = (message: string, status: StatusCode, data?: any) => ({
+export const errorFactory = (message: string, status: HttpStatus, data?: any) => ({
   error: { status, message, data }
 });
 

@@ -1,12 +1,12 @@
 import { filter, map } from 'rxjs/operators';
-import { Effect } from '../src';
-import { StatusCode } from '../src/util';
+import { Effect, HttpStatus, ofType } from '../src';
 
 export const root$: Effect = request$ => request$
   .pipe(
     filter(req => req.url === '/'),
+    ofType('GET'),
     map(req => ({
-      status: StatusCode.OK,
+      status: HttpStatus.OK,
       body: { data: `API root @ ${req.url}` },
     }))
   );
@@ -14,9 +14,9 @@ export const root$: Effect = request$ => request$
 export const hello$: Effect = request$ => request$
   .pipe(
     filter(req => req.url === '/hello'),
-    filter(req => req.method === 'POST'),
+    ofType('POST'),
     map(req => ({
-      status: StatusCode.OK,
+      status: HttpStatus.OK,
       body: { data: `Hello, ${req.body.data}! @ ${req.url}` },
     }))
   );

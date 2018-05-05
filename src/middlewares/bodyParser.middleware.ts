@@ -1,8 +1,8 @@
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap, toArray } from 'rxjs/operators';
-import { Effect } from '../effects';
-import { HttpRequest } from '../http.interface';
-import { ContentType, StatusCode } from '../util';
+import { Effect } from '../effects/effects.interface';
+import { HttpRequest, HttpStatus } from '../http.interface';
+import { ContentType } from '../util/contentType.util';
 import { HttpError } from '../util/error.util';
 
 export const fromReadableStream = (stream: HttpRequest): Observable<any> => {
@@ -50,7 +50,7 @@ export const bodyParser$: Effect<HttpRequest> = (request$, response) => request$
             switchMap(getBody),
             tap(body => req.body = body),
             map(body => req),
-            catchError(error => throwError(new HttpError('Request body parse error', StatusCode.BAD_REQUEST)))
+            catchError(error => throwError(new HttpError('Request body parse error', HttpStatus.BAD_REQUEST)))
           )
         : request$
     )

@@ -1,5 +1,5 @@
 import { HttpHeaders } from '../http.interface';
-import { ContentType } from '../util';
+import { ContentType } from '../util/contentType.util';
 
 export const DEFAULT_HEADERS = {
   'Content-Type': ContentType.APPLICATION_JSON,
