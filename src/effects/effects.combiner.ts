@@ -2,7 +2,8 @@ import { merge, of } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { HttpRequest } from '../http.interface';
 import { matchPath } from '../operators/matchPath.operator';
-import { EffectCombiner, MiddlewareCombiner, RoutesCombiner, isGroup } from './effects.interface';
+import { isGroup } from './effects.helpers';
+import { EffectCombiner, MiddlewareCombiner, RouteCombiner } from './effects.interface';
 
 export const combineEffects: EffectCombiner = effects => res => req => {
   const req$ = of(req);
@@ -25,5 +26,5 @@ export const combineMiddlewareEffects: MiddlewareCombiner = effects => res => re
   return req$.pipe(...mappedEffects);
 };
 
-export const combineRoutes: RoutesCombiner = (path, effects) =>
+export const combineRoutes: RouteCombiner = (path, effects) =>
   ({ path, effects });
