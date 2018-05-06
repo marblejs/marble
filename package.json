@@ -50,7 +50,7 @@
     "@types/path-to-regexp": "^1.7.0",
     "chalk": "^2.4.1",
     "path-to-regexp": "^2.2.1",
-    "rxjs": "~6.0.0"
+    "rxjs": "~6.1.0"
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",
