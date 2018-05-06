@@ -1,14 +1,14 @@
 import { Subject, of } from 'rxjs';
 import { catchError, defaultIfEmpty, switchMap, tap } from 'rxjs/operators';
 import { combineEffects, combineMiddlewareEffects } from './effects/effects.combiner';
-import { Effect, EffectResponse } from './effects/effects.interface';
+import { Effect, EffectResponse, GroupedEffects } from './effects/effects.interface';
 import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
 import { getErrorMiddleware } from './middlewares/error.middleware';
 import { handleResponse } from './response/response.handler';
 
 type HttpListenerConfig = {
   middlewares: Effect<HttpRequest>[],
-  effects: Effect[],
+  effects: (Effect | GroupedEffects)[],
   errorMiddleware?: Effect<EffectResponse, Error>,
 };
 

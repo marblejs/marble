@@ -1,9 +1,20 @@
 import * as pathToRegexp from 'path-to-regexp';
 import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 import { HttpRequest } from '../http.interface';
 
-export const matchPath = (path: string) => (source$: Observable<HttpRequest>) =>
+const removeTrailingSlash = (path: string) =>
+  path.replace(/\/$/, '');
+
+const pathFactory = (matchers: string[], path: string, suffix?: string) =>
+  matchers.reduce((prev, cur) => prev + cur, '') + path + (suffix || '');
+
+export const matchPath = (path: string, suffix?: string) => (source$: Observable<HttpRequest>) =>
   source$.pipe(
-    filter(req => pathToRegexp(path).test(req.url!))
+    tap(req => req.matchers = req.matchers || []),
+    filter(req => {
+      const mappedPaths = removeTrailingSlash(pathFactory(req.matchers!, path, suffix));
+      return pathToRegexp(mappedPaths).test(req.url!);
+    }),
+    tap(req => (path !== '/') && req.matchers!.push(path))
   );

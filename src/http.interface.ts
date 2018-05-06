@@ -2,6 +2,7 @@ import * as http from 'http';
 
 export interface HttpRequest extends http.IncomingMessage {
   body?: any;
+  matchers?: string[];
   [key: string]: any;
 }
 

@@ -1,4 +1,5 @@
 export * from './effects/effects.interface';
+export { combineRoutes } from './effects/effects.combiner';
 export * from './middlewares/bodyParser.middleware';
 export * from './middlewares/error.middleware';
 export * from './middlewares/logger.middleware';

@@ -1,5 +1,5 @@
 import { bodyParser$, httpListener, logger$ } from '../src';
-import { hello$, root$ } from './controllers';
+import { apiV1$, hello$, root$ } from './controllers';
 
 const middlewares = [
   logger$,
@@ -9,6 +9,7 @@ const middlewares = [
 const effects = [
   root$,
   hello$,
+  apiV1$,
 ];
 
 export const app = httpListener({ middlewares, effects });
