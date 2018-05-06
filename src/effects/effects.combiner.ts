@@ -17,11 +17,6 @@ export const combineEffects: EffectCombiner = effects => res => req => {
   return merge(...mappedEffects);
 };
 
-export const combineRoutes: RoutesCombiner = (path, effects) => ({
-  path,
-  effects
-});
-
 export const combineMiddlewareEffects: MiddlewareCombiner = effects => res => req => {
   const req$ = of(req);
   const mappedEffects = effects.map(effect =>
@@ -29,3 +24,6 @@ export const combineMiddlewareEffects: MiddlewareCombiner = effects => res => re
   );
   return req$.pipe(...mappedEffects);
 };
+
+export const combineRoutes: RoutesCombiner = (path, effects) =>
+  ({ path, effects });

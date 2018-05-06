@@ -22,8 +22,3 @@ export enum HttpStatus {
   INTERNAL_SERVER_ERROR = 500,
   SERVICE_UNAVAILABLE = 503,
 }
-
-export type Http = {
-  req: HttpRequest,
-  res: HttpResponse,
-};
