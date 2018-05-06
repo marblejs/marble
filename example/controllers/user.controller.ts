@@ -1,23 +1,25 @@
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { Effect, combineRoutes, matchPath, matchType } from '../../src';
+import { Dao } from '../fakes/dao.fake';
 
-const getUser$: Effect = request$ => request$
+const getUsers$: Effect = request$ => request$
   .pipe(
     matchPath('/'),
     matchType('GET'),
-    map(() => ({ id: '123', firstName: 'Jozef', lastName: 'Flakus' })),
-    map(body => ({ body }))
+    switchMap(Dao.getUsers),
+    map(users => ({ body: users }))
   );
 
 const postUser$: Effect = request$ => request$
   .pipe(
     matchPath('/'),
     matchType('POST'),
-    map(req => ({ data: req.body })),
-    map(body => ({ body }))
+    map(req => req.body),
+    switchMap(Dao.postUser),
+    map(response => ({ body: response }))
   );
 
 export const user$ = combineRoutes(
   '/user',
-  [ getUser$, postUser$ ],
+  [ getUsers$, postUser$ ],
 );
