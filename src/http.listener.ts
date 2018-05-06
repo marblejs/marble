@@ -20,7 +20,7 @@ export const httpListener = ({ middlewares, effects, errorMiddleware }: HttpList
         combineMiddlewareEffects(middlewares)(res)(req)
           .pipe(
             switchMap(combineEffects(effects)(res)),
-            defaultIfEmpty({ status: HttpStatus.NOT_FOUND }),
+            defaultIfEmpty({ status: HttpStatus.NOT_FOUND } as EffectResponse),
             tap(handleResponse(res)),
             catchError(error =>
               getErrorMiddleware(errorMiddleware)(of(req), res, error)
