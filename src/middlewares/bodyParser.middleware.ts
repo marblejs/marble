@@ -5,7 +5,7 @@ import { HttpRequest, HttpStatus } from '../http.interface';
 import { ContentType } from '../util/contentType.util';
 import { HttpError } from '../util/error.util';
 
-export const fromReadableStream = (stream: HttpRequest): Observable<any> => {
+const fromReadableStream = (stream: HttpRequest): Observable<any> => {
   stream.pause();
   return new Observable(observer => {
     const next = chunk => observer.next(chunk);
@@ -26,7 +26,7 @@ export const fromReadableStream = (stream: HttpRequest): Observable<any> => {
   });
 };
 
-export const getBody = (req: HttpRequest) =>
+const getBody = (req: HttpRequest) =>
   fromReadableStream(req)
     .pipe(
       toArray(),
