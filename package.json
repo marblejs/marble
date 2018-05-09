@@ -1,7 +1,7 @@
 {
-  "name": "node-rx",
-  "version": "0.0.1",
-  "description": "Reactive Node APIs",
+  "name": "marble-js",
+  "version": "0.1.0",
+  "description": "Reactive Node APIs made easy",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -12,10 +12,8 @@
     "example:watch": "nodemon --watch src --watch example --ext ts --ignore '*.spec.ts' --exec npm run example",
     "watch": "tsc -w",
     "lint": "tslint --config tslint.json --project tsconfig.json",
-    "test": "NODE_ENV=test jest --expand",
-    "test:all": "NODE_ENV=test jest --expand",
+    "test": "NODE_ENV=test jest --expand --coverage",
     "test:watch": "NODE_ENV=test jest --expand --onlyChanged --watch",
-    "test:coverage": "NODE_ENV=test jest --coverage",
     "prepush": "npm run lint",
     "prepublishOnly": "npm run build",
     "doc": "typedoc --out doc src --name 'node-rx doc' --target ES6 --exclude \"**/*+(index|env|.spec|.e2e).ts\" --hideGenerator --mode modules --readme none"
@@ -25,7 +23,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JozefFlakus/node-rx.git"
+    "url": "git+https://github.com/JozefFlakus/marble-js.git"
   },
   "engines": {
     "node": ">= 8.0.0",
@@ -42,9 +40,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/JozefFlakus/node-rx/issues"
+    "url": "https://github.com/JozefFlakus/marble-js/issues"
   },
-  "homepage": "https://github.com/JozefFlakus/node-rx#readme",
+  "homepage": "https://github.com/JozefFlakus/marble-js#readme",
   "dependencies": {
     "@types/chalk": "^2.2.0",
     "@types/path-to-regexp": "^1.7.0",
