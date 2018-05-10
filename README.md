@@ -18,18 +18,66 @@ The name comes from so called `marble diagrams` which are used to visually expre
 
 *@TODO*
 
-### Routing
+### Routes composition
 
-*@TODO*
+Every API requires composable routing. With **Marble.js** routing composition couldn't be easier:
+
+```javascript
+const root$ = request$ => request$
+  .pipe(
+    matchPath('/'),
+    matchType('GET'),
+    // ...
+  );
+
+const foo$ = request$ => request$
+  .pipe(
+    matchPath('/foo'),
+    matchType('GET'),
+    // ...
+  );
+
+const getUsers$ = request$ => request$
+  .pipe(
+    matchPath('/'),
+    matchType('GET'),
+    // ...
+  );
+
+const postUser$ = request$ => request$
+  .pipe(
+    matchPath('/'),
+    matchType('POST'),
+    // ...
+  );
+
+const user$ = combineRoutes(
+  '/user',
+  [ getUsers$, postUser$ ],
+);
+
+const api$ = combineRoutes(
+  '/api/v1',
+  [ root$, foo$, user$ ],
+);
+```
+
+Mapped to following API endpoints:
+```
+GET    /api/v1
+GET    /api/v1/foo
+GET    /api/v1/user
+POST   /api/v1/user
+```
 
 ### Middlewares
 
-Because everyting here is a stream, also plugged-in middlewares are based on simillar *Effect* interface.
+Because everything here is a stream, also plugged-in middlewares are based on simillar *Effect* interface.
 By default framework comes with composable middlewares like: logging, request body parsing.
 Below you can see how easily looks the dummy implementation of API requests logging middleware.
 
 ```javascript
-export const logger$ = (request$, response) => request$
+const logger$ = (request$, response) => request$
   .pipe(
     tap(req => console.log(`${req.method} ${req.url}`)),
   );
@@ -47,7 +95,7 @@ const middlewares = [
   logger$,
 ];
 
-export const app = httpListener({
+const app = httpListener({
   middlewares,
   effects,
 });
@@ -60,7 +108,7 @@ Because *Middlewares* and *Effects* are based on the same generic interface, you
 handling middlewares works very similar to normal API *Effects*.
 
 ```javascript
-export const error$ = (request$, response, error) => request$
+const error$ = (request$, response, error) => request$
   .pipe(
     map(req => ({
       status: // ...
@@ -77,7 +125,7 @@ To connect the custom middleware, all you need to do is to attach it to `errorMi
 `httpListener` config object.
 
 ```javascript
-export const app = httpListener({
+const app = httpListener({
   middlewares,
   effects,
 
