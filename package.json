@@ -1,5 +1,5 @@
 {
-  "name": "marble-js",
+  "name": "marble.js",
   "version": "0.1.0",
   "description": "Reactive Node APIs made easy",
   "main": "./dist/index.js",
@@ -16,14 +16,14 @@
     "test:watch": "NODE_ENV=test jest --expand --onlyChanged --watch",
     "prepush": "npm run lint",
     "prepublishOnly": "npm run build",
-    "doc": "typedoc --out doc src --name 'node-rx doc' --target ES6 --exclude \"**/*+(index|env|.spec|.e2e).ts\" --hideGenerator --mode modules --readme none"
+    "doc": "typedoc --out doc src --name 'marble.js doc' --target ES6 --exclude \"**/*+(index|env|.spec|.e2e).ts\" --hideGenerator --mode modules --readme none"
   },
   "files": [
     "dist/"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JozefFlakus/marble-js.git"
+    "url": "git+https://github.com/JozefFlakus/marble.js.git"
   },
   "engines": {
     "node": ">= 8.0.0",
@@ -40,9 +40,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/JozefFlakus/marble-js/issues"
+    "url": "https://github.com/JozefFlakus/marble.js/issues"
   },
-  "homepage": "https://github.com/JozefFlakus/marble-js#readme",
+  "homepage": "https://github.com/JozefFlakus/marble.js#readme",
   "dependencies": {
     "@types/chalk": "^2.2.0",
     "@types/path-to-regexp": "^1.7.0",
