@@ -16,7 +16,39 @@ The name comes from so called `marble diagrams` which are used to visually expre
 
 ### Effects
 
-*@TODO*
+*Effect* is the main building block of the whole framework. Using its generic interface we can define
+API endpoints (so called: `Effects`), middlewares and error handlers (see next chapters).
+The simplest implementation of API endpoint can look like this:
+
+```javascript
+const endpoint$ = request$ => request$
+  .pipe(
+    mapTo({ body: `Hello, world!` })
+  );
+```
+
+The sample *Effect* above matches every HTTP request that passes through `request$` stream and responds with `Hello, world!` message.
+Simple as hell, right? Every API *Effect* request has to be mapped to `EffectResponse` object type which can contain
+attributes like `body`, `status` or `headers`. If `status` code or `headers` are not passed, then API by default
+responds with `200` status and `application/json` content type.
+
+A little bit more complex example can look like this:
+
+```javascript
+const postUser$ = request$ => request$
+  .pipe(
+    matchPath('/user'),
+    matchType('POST'),
+    map(req => req.body),
+    switchMap(Dao.postUser),
+    map(response => ({ body: response }))
+  );
+```
+
+The framework by default comes with two handy operators for matching request urls -`matchPath`- and matching HTTP
+request method types -`matchType`-. The example above will match every *POST* request that matches `/user` url.
+Using previously parsed POST body (see `$bodyParser` middleware) we can map it to sample **Data Access Object**
+which returns a `response` object as an action confirmation.
 
 ### Routes composition
 
