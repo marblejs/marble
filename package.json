@@ -8,6 +8,8 @@
     "start": "npm run watch",
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
+    "prebench": "npm run build",
+    "bench": "make -C benchmarks",
     "example": "ts-node example/index.ts",
     "example:watch": "nodemon --watch src --watch example --ext ts --ignore '*.spec.ts' --exec npm run example",
     "watch": "tsc -w",
