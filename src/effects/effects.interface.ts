@@ -3,7 +3,7 @@ import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 
 export interface EffectResponse {
   status?: HttpStatus;
-  body?: object;
+  body?: any;
   headers?: Record<string, string>;
 }
 

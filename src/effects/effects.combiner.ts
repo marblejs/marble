@@ -9,7 +9,7 @@ export const combineEffects: EffectCombiner = effects => res => req => {
   const req$ = of(req);
   const mappedEffects = effects.map(effect => isGroup(effect)
     ? req$.pipe(
-        matchPath(effect.path, '/:foo*'),
+        matchPath(effect.path, { suffix: '/:foo*', combiner: true }),
         mergeMap(combineEffects(effect.effects)(res))
       )
     : effect(req$, res, undefined)

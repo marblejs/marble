@@ -7,12 +7,12 @@ import { getErrorMiddleware } from './middlewares/error.middleware';
 import { handleResponse } from './response/response.handler';
 
 type HttpListenerConfig = {
-  middlewares: Effect<HttpRequest>[],
+  middlewares?: Effect<HttpRequest>[],
   effects: (Effect | GroupedEffects)[],
   errorMiddleware?: Effect<EffectResponse, Error>,
 };
 
-export const httpListener = ({ middlewares, effects, errorMiddleware }: HttpListenerConfig) => {
+export const httpListener = ({ middlewares = [], effects, errorMiddleware }: HttpListenerConfig) => {
   const request$ = new Subject<Http>();
   const effect$ = request$
     .pipe(

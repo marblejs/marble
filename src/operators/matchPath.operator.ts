@@ -3,6 +3,11 @@ import { Observable } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { HttpRequest } from '../http.interface';
 
+type MatcherOpts = {
+  suffix?: string,
+  combiner?: boolean,
+};
+
 const removeTrailingSlash = (path: string): string =>
   path.replace(/\/$/, '');
 
@@ -18,13 +23,13 @@ const pathFactory = (matchers: string[], path: string, suffix?: string): string 
 const urlFactory = (path: string): string =>
   removeQueryParams(path);
 
-export const matchPath = (path: string, suffix?: string) => (source$: Observable<HttpRequest>) =>
+export const matchPath = (path: string, opts: MatcherOpts = {}) => (source$: Observable<HttpRequest>) =>
   source$.pipe(
     tap(req => req.matchers = req.matchers || []),
     filter(req => {
-      const match = pathFactory(req.matchers!, path, suffix);
+      const match = pathFactory(req.matchers!, path, opts.suffix);
       const url = urlFactory(req.url!);
       return pathToRegexp(match).test(url);
     }),
-    tap(req => (path !== '/') && req.matchers!.push(path))
+    tap(req => opts.combiner && req.matchers!.push(path))
   );

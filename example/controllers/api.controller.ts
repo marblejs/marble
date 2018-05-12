@@ -7,7 +7,7 @@ const root$: Effect = request$ => request$
     matchPath('/'),
     matchType('GET'),
     map(req => ({
-      body: { data: `API root @ ${req.url}` },
+      body: `API root @ ${req.url}`,
     }))
   );
 
