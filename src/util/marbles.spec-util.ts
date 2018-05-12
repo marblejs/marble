@@ -1,9 +1,8 @@
 import { Observable, OperatorFunction, from } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { Effect, EffectResponse } from '../effects/effects.interface';
+import { Effect } from '../effects/effects.interface';
 import { HttpRequest, HttpResponse } from '../http.interface';
 
-type _ = EffectResponse;
 type MarbleFlow = [string, object];
 type MarbleDependencies = { response: HttpResponse, error?: Error };
 
