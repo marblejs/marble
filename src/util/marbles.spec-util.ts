@@ -34,8 +34,8 @@ export namespace Marbles {
     scheduler.flush();
   };
 
-  export const assertEffect = (
-    effect: Effect,
+  export const assertEffect = <T>(
+    effect: Effect<T>,
     marbleflow: [MarbleFlow, MarbleFlow],
     depts: MarbleDependencies = { response: {} as HttpResponse },
   ) => {
