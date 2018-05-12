@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { tap } from 'rxjs/operators';
-import { HttpRequest } from '../http.interface';
 import { Effect } from '../effects/effects.interface';
+import { HttpRequest } from '../http.interface';
 
 const getStatusCode = (statusCode: number): string =>
   statusCode >= 400

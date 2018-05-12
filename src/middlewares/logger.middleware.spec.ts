@@ -16,7 +16,7 @@ describe('Logger middleware', () => {
     spyOn(console, 'error').and.stub();
   });
 
-  it('reacts to 200 status on the console', async () => {
+  it('reacts to 200 status on the console', () => {
     const request = createMockReq('/', 'GET');
     const response = createMockRes(200);
 
@@ -26,11 +26,10 @@ describe('Logger middleware', () => {
     ], { response });
 
     response.emit('finish');
-
-    setTimeout(() => expect(console.log).toHaveBeenCalled(), 10);
+    expect(console.info).toHaveBeenCalled();
   });
 
-  it('reacts to 400 status on the console', async () => {
+  it('reacts to 400 status on the console', () => {
     const request = createMockReq('/test', 'POST');
     const response = createMockRes(403);
 
@@ -40,8 +39,7 @@ describe('Logger middleware', () => {
     ], { response });
 
     response.emit('finish');
-
-    setTimeout(() => expect(console.log).toHaveBeenCalled(), 10);
+    expect(console.info).toHaveBeenCalled();
   });
 
 });
