@@ -225,6 +225,20 @@ To run example just execute following command inside root repository folder:
 $ npm run example
 ```
 
+## Roadmap
+
+**Marble.js** is not yet a final and production ready product. Its APIs can improve over time when reaching stable version `1.0.0`. But in the meantime you can play easily and contribute to the growing community of functional reactive programming freaks.
+
+- [x] core mechanics
+- [x] custom middlewares
+- [x] custom error handlers
+- [x] composable routing
+- [ ] ability to compose midddlewares inside `Effect` pipeline
+- [ ] intercepting query parameters (via middleware)
+- [ ] intercepting url parameters (via `matchPath` operator)
+- [ ] more middlewares! (can think about moving `logger$` and `bodyParser$` outside core library)
+- [ ] improved, dedicated documentation (to move outside README)
+
 ## Authors
 
 <table>
