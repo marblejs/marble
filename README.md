@@ -1,4 +1,4 @@
-Reactive and functional HTTP middleware framework based on <a href="http://nodejs.org" target="blank">Node.js</a> platform to make stream-based APIs development more enjoyable and simpler to write.
+Functional reactive HTTP middleware framework built on top of <a href="http://nodejs.org" target="blank">Node.js</a> platform, <a href="https://www.typescriptlang.org" target="blank">TypeScript</a> and <a href="http://reactivex.io/rxjs" target="blank">RxJS</a> library.
 
 ## Philosophy
 
@@ -8,11 +8,47 @@ The name comes from so called `marble diagrams` which are used to visually expre
 
 ## Installation
 
-*@TODO*
+**Marble.js** requires node **v8.0** or higher:
+
+```javascript
+$ npm i marblejs
+```
+
+or if you are a hipster:
+
+```javascript
+$ yarn add marblejs
+```
 
 ## Getting started
 
-*@TODO*
+The bootstraping consists of two very simple steps: *HTTP handler* definition and *HTTP server* configuration
+
+`httpListener` is the starting point of every *Marble.js* application. It includes definitions of all *middlewares* and API *effects*.
+
+```javascript
+
+const middlewares = [
+  logger$,
+  bodyParser$,
+];
+
+const effects = [
+  endpoint1$,
+  endpoint2$,
+  ...
+];
+
+const app = httpListener({ middlewares, effects });
+```
+
+Because **Marble.js** is built on top of **Node.js** platform and doesn't create any abstractions for server bootstraping - all you need to do is to call `createServer` with initialized *app* and then start listening on given *port* and *hostname*.
+
+```javascript
+const httpServer = http
+  .createServer(app)
+  .listen(PORT, HOSTNAME);
+```
 
 ### Effects
 
@@ -29,7 +65,7 @@ const endpoint$ = request$ => request$
 
 The sample *Effect* above matches every HTTP request that passes through `request$` stream and responds with `Hello, world!` message.
 Simple as hell, right? Every API *Effect* request has to be mapped to `EffectResponse` object type which can contain
-attributes like `body`, `status` or `headers`. If `status` code or `headers` are not passed, then API by default
+attributes like `body`, `status` or `headers`. If *status* code or *headers* are not passed, then API by default
 responds with `200` status and `application/json` content type.
 
 A little bit more complex example can look like this:
@@ -47,7 +83,7 @@ const postUser$ = request$ => request$
 
 The framework by default comes with two handy operators for matching request urls -`matchPath`- and matching HTTP
 request method types -`matchType`-. The example above will match every *POST* request that matches `/user` url.
-Using previously parsed POST body (see `$bodyParser` middleware) we can map it to sample **Data Access Object**
+Using previously parsed POST body (see `$bodyParser` middleware) we can map it to sample *DAO*
 which returns a `response` object as an action confirmation.
 
 ### Routes composition
@@ -94,7 +130,7 @@ const api$ = combineRoutes(
 );
 ```
 
-Mapped to following API endpoints:
+*Effects* above will be mapped to following API endpoints:
 ```
 GET    /api/v1
 GET    /api/v1/foo
@@ -117,9 +153,9 @@ const logger$ = (request$, response) => request$
 
 There are two important differences compared to API Effects:
 1. stream handler takes a response object as a second argument
-2. middlewares must return stream of `request` object at the end of middleware pipeline
+2. middlewares must return a stream of *requests* at the end of middleware pipeline
 
-In the example above we are taking the stream of request, tapping `console.log` side effect and returning the same
+In the example above we are getting the stream of *requests*, tapping `console.log` side effect and returning the same
 stream as a response of our middleware pipeline. Then all you need to do is to attach the middleware to `httpListener` config.
 
 ```javascript
@@ -127,10 +163,7 @@ const middlewares = [
   logger$,
 ];
 
-const app = httpListener({
-  middlewares,
-  effects,
-});
+const app = httpListener({ middlewares, effects });
 ```
 
 ### Custom error handling
@@ -149,7 +182,7 @@ const error$ = (request$, response, error) => request$
   );
 ```
 
-As any other *Effects* error middleware maps the stream of errored requests to objects of type `EffectsResponse`.
+As any other *Effects*, error middleware maps the stream of errored requests to objects of type `EffectsResponse`.
 The only one difference is that it takes as a third argument an intercepted error object which can be used
 for error handling-related logic.
 
