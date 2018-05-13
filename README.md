@@ -1,4 +1,12 @@
+<p align="center">
+  <a href="http://nestjs.com/"target="blank">
+    <img src="https://github.com/JozefFlakus/marble.js/blob/docs/readme/docs/assets/logo.png?raw=true" width="320" alt="Nest Logo"/>
+  </a>
+</p>
+
+<p align="center">
 Functional reactive HTTP middleware framework built on top of <a href="http://nodejs.org" target="blank">Node.js</a> platform, <a href="https://www.typescriptlang.org" target="blank">TypeScript</a> and <a href="http://reactivex.io/rxjs" target="blank">RxJS</a> library.
+</p>
 
 ## Philosophy
 
@@ -6,7 +14,7 @@ Functional reactive HTTP middleware framework built on top of <a href="http://no
 
 If we think closely how typical HTTP API works we can quickly recognize that it deals with streams of asynchonous events also called as HTTP requests. Describing it very briefly - typically each request needs to be transformed into response that goes back to the client (which is our event initiator) using custom middlewares or designated endpoints. In reactive programming world, all those core concepts we can translate into very simple marble diagram:
 
-![Marble.js core concept](https://github.com/JozefFlakus/marble.js/blob/5821a0595109a21917f6739ec0022e7a6f393a32/docs/assets/flow.png?raw=true)
+![Marble.js core concept](https://github.com/JozefFlakus/marble.js/blob/docs/readme/docs/assets/flow.png?raw=true)
 
 In this world everyting is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behaviour of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that laverages functional reactive paradigm, you will feel like in home. Still there? So lets get started!
 
