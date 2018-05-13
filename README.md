@@ -14,7 +14,7 @@ If we think closely how typical HTTP API works we can quickly recognize that it 
 
 ![Marble.js core concept](https://github.com/JozefFlakus/marble.js/blob/docs/readme/docs/assets/flow.png?raw=true)
 
-In this world everyting is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behaviour of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that laverages functional reactive paradigm, you will feel like in home. Still there? So lets get started!
+In this world everyting is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behaviour of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that leverages functional reactive paradigm, you will feel like in home. Still there? So lets get started!
 
 ## Installation
 
@@ -32,7 +32,7 @@ $ yarn add marblejs
 
 ## Getting started
 
-The bootstraping consists of two very simple steps: *HTTP handler* definition and *HTTP server* configuration
+The bootstrapping consists of two very simple steps: *HTTP handler* definition and *HTTP server* configuration.
 
 `httpListener` is the starting point of every *Marble.js* application. It includes definitions of all *middlewares* and API *effects*.
 
@@ -52,7 +52,7 @@ const effects = [
 const app = httpListener({ middlewares, effects });
 ```
 
-Because **Marble.js** is built on top of **Node.js** platform and doesn't create any abstractions for server bootstraping - all you need to do is to call `createServer` with initialized *app* and then start listening to given *port* and *hostname*.
+Because **Marble.js** is built on top of **Node.js** platform and doesn't create any abstractions for server bootstrapping - all you need to do is to call `createServer` with initialized *app* and then start listening to given *port* and *hostname*.
 
 ```javascript
 const httpServer = http
