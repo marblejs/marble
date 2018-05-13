@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/JozefFlakus/marble.js/blob/master/docs/assets/flow.png?raw=true" width="320" alt="Marble.js logo"/>
+<img src="https://github.com/JozefFlakus/marble.js/blob/master/docs/assets/logo.png?raw=true" width="320" alt="Marble.js logo"/>
 </p>
 
 <p align="center">
