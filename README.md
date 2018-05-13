@@ -57,7 +57,7 @@ API endpoints (so called: `Effects`), middlewares and error handlers (see next c
 The simplest implementation of API endpoint can look like this:
 
 ```javascript
-const endpoint$ = request$ => request$
+const endpoint$: Effect = request$ => request$
   .pipe(
     mapTo({ body: `Hello, world!` })
   );
@@ -71,7 +71,7 @@ responds with `200` status and `application/json` content type.
 A little bit more complex example can look like this:
 
 ```javascript
-const postUser$ = request$ => request$
+const postUser$: Effect = request$ => request$
   .pipe(
     matchPath('/user'),
     matchType('POST'),
@@ -91,28 +91,28 @@ which returns a `response` object as an action confirmation.
 Every API requires composable routing. With **Marble.js** routing composition couldn't be easier:
 
 ```javascript
-const root$ = request$ => request$
+const root$: Effect = request$ => request$
   .pipe(
     matchPath('/'),
     matchType('GET'),
     // ...
   );
 
-const foo$ = request$ => request$
+const foo$: Effect = request$ => request$
   .pipe(
     matchPath('/foo'),
     matchType('GET'),
     // ...
   );
 
-const getUsers$ = request$ => request$
+const getUsers$: Effect = request$ => request$
   .pipe(
     matchPath('/'),
     matchType('GET'),
     // ...
   );
 
-const postUser$ = request$ => request$
+const postUser$: Effect = request$ => request$
   .pipe(
     matchPath('/'),
     matchType('POST'),
@@ -145,7 +145,7 @@ By default framework comes with composable middlewares like: logging, request bo
 Below you can see how easily looks the dummy implementation of API requests logging middleware.
 
 ```javascript
-const logger$ = (request$, response) => request$
+const logger$: Effect<HttpRequest> = (request$, response) => request$
   .pipe(
     tap(req => console.log(`${req.method} ${req.url}`)),
   );
@@ -173,7 +173,7 @@ Because *Middlewares* and *Effects* are based on the same generic interface, you
 handling middlewares works very similar to normal API *Effects*.
 
 ```javascript
-const error$ = (request$, response, error) => request$
+const error$: Effect<EffectResponse, ThrowedError> = (request$, response, error) => request$
   .pipe(
     map(req => ({
       status: // ...
