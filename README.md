@@ -1,7 +1,5 @@
 <p align="center">
-  <a href="http://nestjs.com/"target="blank">
-    <img src="https://github.com/JozefFlakus/marble.js/blob/docs/readme/docs/assets/logo.png?raw=true" width="320" alt="Nest Logo"/>
-  </a>
+<img src="https://github.com/JozefFlakus/marble.js/blob/docs/readme/docs/assets/logo.png?raw=true" width="320" alt="Nest Logo"/>
 </p>
 
 <p align="center">
