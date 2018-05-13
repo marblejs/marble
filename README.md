@@ -2,7 +2,7 @@ Functional reactive HTTP middleware framework built on top of <a href="http://no
 
 ## Philosophy
 
-> If you don't have any experience with functional reactive programming, we strongly recommend to gain some basic overview first with <a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" target="blank">The introduction to Reactive Programming you've been missing</a> written by <a href="https://twitter.com/andrestaltz" target="blank">@andrestaltz</a>.
+> If you don't have any experience with functional reactive programming, we strongly recommend to gain some basic overview first with <a href="http://reactivex.io/intro.html" target="blank">ReactiveX intro</a> or with <a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" target="blank">The introduction to Reactive Programming you've been missing</a> written by <a href="https://twitter.com/andrestaltz" target="blank">@andrestaltz</a>.
 
 If we think closely how typical HTTP API works we can quickly recognize that it deals with streams of asynchonous events also called as HTTP requests. Describing it very briefly - typically each request needs to be transformed into response that goes back to the client (which is our event initiator) using custom middlewares or designated endpoints. In reactive programming world, all those core concepts we can translate into very simple marble diagram:
 
@@ -67,10 +67,9 @@ const endpoint$: Effect = request$ => request$
   );
 ```
 
-The sample *Effect* above matches every HTTP request that passes through `request$` stream and responds with `Hello, world!` message.
-Simple as hell, right? Every API *Effect* request has to be mapped to `EffectResponse` object type which can contain
-attributes like `body`, `status` or `headers`. If *status* code or *headers* are not passed, then API by default
-responds with `200` status and `application/json` content type.
+The sample *Effect* above matches every HTTP request that passes through `request$` stream and responds with `Hello, world!` message. Simple as hell, right?
+
+Every API *Effect* request has to be mapped to object which can contain attributes like `body`, `status` or `headers`. If *status* code or *headers* are not passed, then API by default will respond with `200` status and `application/json` *Content -Type* header.
 
 A little bit more complex example can look like this:
 
@@ -85,29 +84,19 @@ const postUser$: Effect = request$ => request$
   );
 ```
 
-The framework by default comes with two handy operators for matching request urls -`matchPath`- and matching HTTP
-request method types -`matchType`-. The example above will match every *POST* request that matches `/user` url.
+The framework by default comes with two handy operators for matching urls (`matchPath`) and matching 
+method types (`matchType`). The example above will match every *POST* request that matches to `/user` url.
 Using previously parsed POST body (see `$bodyParser` middleware) we can map it to sample *DAO*
 which returns a `response` object as an action confirmation.
+
+*The `matchType` operator can also deal with parameterized URLs like `/foo/:id/bar`*
 
 ### Routes composition
 
 Every API requires composable routing. With **Marble.js** routing composition couldn't be easier:
 
 ```javascript
-const root$: Effect = request$ => request$
-  .pipe(
-    matchPath('/'),
-    matchType('GET'),
-    // ...
-  );
-
-const foo$: Effect = request$ => request$
-  .pipe(
-    matchPath('/foo'),
-    matchType('GET'),
-    // ...
-  );
+// user.controller.ts
 
 const getUsers$: Effect = request$ => request$
   .pipe(
@@ -123,10 +112,28 @@ const postUser$: Effect = request$ => request$
     // ...
   );
 
-const user$ = combineRoutes(
+export const user$ = combineRoutes(
   '/user',
   [ getUsers$, postUser$ ],
 );
+
+// api.controller.ts
+
+import { user$ } from 'user.controller.ts';
+
+const root$: Effect = request$ => request$
+  .pipe(
+    matchPath('/'),
+    matchType('GET'),
+    // ...
+  );
+
+const foo$: Effect = request$ => request$
+  .pipe(
+    matchPath('/foo'),
+    matchType('GET'),
+    // ...
+  );
 
 const api$ = combineRoutes(
   '/api/v1',
@@ -186,8 +193,7 @@ const error$: Effect<EffectResponse, ThrowedError> = (request$, response, error)
   );
 ```
 
-As any other *Effects*, error middleware maps the stream of errored requests to objects of type `EffectsResponse`.
-The only one difference is that it takes as a third argument an intercepted error object which can be used
+As any other *Effects*, error middleware maps the stream of errored requests to objects of type `EffectsResponse` (`status`, `body`, `headers`). The difference is that it takes as a third argument an intercepted error object which can be used
 for error handling-related logic.
 
 To connect the custom middleware, all you need to do is to attach it to `errorMiddleware` property in
