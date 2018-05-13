@@ -18,7 +18,7 @@
     "test:watch": "NODE_ENV=test jest --expand --onlyChanged --watch",
     "prepush": "npm run lint",
     "prepublishOnly": "npm run build",
-    "doc": "typedoc --out doc src --name 'node-rx doc' --target ES6 --exclude \"**/*+(index|env|.spec|.e2e).ts\" --hideGenerator --mode modules --readme none"
+    "doc": "typedoc --out doc src --name 'marble.js doc' --target ES6 --exclude \"**/*+(index|env|.spec|.e2e).ts\" --hideGenerator --mode modules --readme none"
   },
   "files": [
     "dist/"
