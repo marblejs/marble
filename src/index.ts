@@ -7,3 +7,4 @@ export * from './operators/matchType.operator';
 export * from './operators/matchPath.operator';
 export * from './http.interface';
 export * from './http.listener';
+export { HttpError } from './util/error.util';

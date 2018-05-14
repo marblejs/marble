@@ -17,7 +17,8 @@
     "test": "NODE_ENV=test jest --expand --coverage",
     "test:watch": "NODE_ENV=test jest --expand --onlyChanged --watch",
     "prepush": "npm run lint",
-    "prepublishOnly": "npm run build",
+    "prepack": "npm run test && npm run build",
+    "prepublishOnly": "npm run test && npm run build",
     "doc": "typedoc --out doc src --name 'marble.js doc' --target ES6 --exclude \"**/*+(index|env|.spec|.e2e).ts\" --hideGenerator --mode modules --readme none"
   },
   "files": [
@@ -35,7 +36,8 @@
     "API",
     "JavaScript",
     "RxJs",
-    "TypeScript"
+    "TypeScript",
+    "Reactive"
   ],
   "authors": [
     "Józef Flakus"
@@ -46,8 +48,6 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "@types/chalk": "^2.2.0",
-    "@types/path-to-regexp": "^1.7.0",
     "chalk": "^2.4.1",
     "path-to-regexp": "^2.2.1",
     "rxjs": "~6.1.0"
@@ -55,6 +55,8 @@
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/supertest": "^2.0.4",
+    "@types/chalk": "^2.2.0",
+    "@types/path-to-regexp": "^1.7.0",
     "husky": "^0.14.3",
     "jest": "^22.4.3",
     "mock-req": "^0.2.0",
