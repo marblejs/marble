@@ -7,9 +7,9 @@
   "scripts": {
     "start": "npm run watch",
     "watch": "tsc -w",
-    "build": "tsc",
-    "prepack": "npm run build",
-    "postinstall": "npm run build"
+    "build:package": "tsc",
+    "prepack": "npm run build:package",
+    "postinstall": "npm run build:package"
   },
   "files": [
     "dist/"
