@@ -1,5 +1,5 @@
 import { map } from 'rxjs/operators';
-import { Effect, combineRoutes, matchPath, matchType } from '../../src';
+import { Effect, combineRoutes, matchPath, matchType } from '../../packages/core/src';
 import { user$ } from './user.controller';
 
 const root$: Effect = request$ => request$

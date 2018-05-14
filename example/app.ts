@@ -1,4 +1,4 @@
-import { bodyParser$, httpListener, logger$ } from '../src';
+import { bodyParser$, httpListener, logger$ } from '../packages/core/src';
 import { api$ } from './controllers/api.controller';
 
 const middlewares = [

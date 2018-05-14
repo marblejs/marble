@@ -1,0 +1,45 @@
+{
+  "name": "@marble/core",
+  "version": "0.1.1",
+  "description": "Reactive Node APIs made easy",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start": "npm run watch",
+    "watch": "tsc -w",
+    "build": "tsc",
+    "prepack": "npm run build",
+    "postinstall": "npm run build"
+  },
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "npm": ">= 5.0.0"
+  },
+  "author": "marblejs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "homepage": "https://github.com/marblejs/marble#readme",
+  "peerDependencies": {
+    "rxjs": "~6.1.0"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "path-to-regexp": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/path-to-regexp": "^1.7.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -2,28 +2,20 @@
   "name": "marblejs",
   "version": "0.1.1",
   "description": "Reactive Node APIs made easy",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "scripts": {
-    "start": "npm run watch",
-    "clean": "rimraf dist",
-    "build": "npm run clean && tsc",
-    "prebench": "npm run build",
-    "bench": "make -C benchmarks",
+    "postinstall": "npm run build",
+    "build": "lerna bootstrap",
+    "benchmark": "npm run build && make -C benchmarks",
     "example": "ts-node example/index.ts",
-    "example:watch": "nodemon --watch src --watch example --ext ts --ignore '*.spec.ts' --exec npm run example",
-    "watch": "tsc -w",
+    "example:watch": "nodemon --watch packages --watch example --ext ts --ignore '*.spec.ts' --exec npm run example",
     "lint": "tslint --config tslint.json --project tsconfig.json",
-    "test": "NODE_ENV=test jest --expand --coverage",
+    "test": "NODE_ENV=test jest --expand",
+    "test:coverage": "NODE_ENV=test jest --expand --coverage",
     "test:watch": "NODE_ENV=test jest --expand --onlyChanged --watch",
-    "prepush": "npm run lint",
-    "prepack": "npm run test && npm run build",
-    "prepublishOnly": "npm run test && npm run build",
-    "doc": "typedoc --out doc src --name 'marble.js doc' --target ES6 --exclude \"**/*+(index|env|.spec|.e2e).ts\" --hideGenerator --mode modules --readme none"
+    "prepublish": "npm run test",
+    "publish": "lerna publish",
+    "prepush": "npm run lint"
   },
-  "files": [
-    "dist/"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marblejs/marble.git"
@@ -48,17 +40,14 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "chalk": "^2.4.1",
-    "path-to-regexp": "^2.2.1",
     "rxjs": "~6.1.0"
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/supertest": "^2.0.4",
-    "@types/chalk": "^2.2.0",
-    "@types/path-to-regexp": "^1.7.0",
     "husky": "^0.14.3",
     "jest": "^22.4.3",
+    "lerna": "^2.11.0",
     "mock-req": "^0.2.0",
     "nodemon": "^1.17.3",
     "rimraf": "^2.6.2",
