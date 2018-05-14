@@ -18,12 +18,8 @@ install:
   - npm install
 
 script:
-  - npm run test
+  - npm run test:coverage
   - codecov
-
-after_success:
-  - npm run doc
-  - npm run doc:publish
 
 branches:
   only:

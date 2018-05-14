@@ -1,6 +1,6 @@
 const http = require('http');
 const { mapTo, filter } = require('rxjs/operators');
-const { httpListener, matchPath, matchType } = require('../dist');
+const { httpListener, matchPath, matchType } = require('../packages/core/dist');
 
 const n = parseInt(process.env.MW || '1', 10);
 

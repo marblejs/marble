@@ -21,13 +21,13 @@ In this world everyting is a stream. The core concept of **Marble.js** is based 
 **Marble.js** requires node **v8.0** or higher:
 
 ```javascript
-$ npm i marblejs
+$ npm i @marble/core
 ```
 
 or if you are a hipster:
 
 ```javascript
-$ yarn add marblejs
+$ yarn add @marble/core
 ```
 
 ## Getting started
@@ -90,7 +90,7 @@ const postUser$: Effect = request$ => request$
   );
 ```
 
-The framework by default comes with two handy operators for matching urls (`matchPath`) and matching 
+The framework by default comes with two handy operators for matching urls (`matchPath`) and matching
 method types (`matchType`). The example above will match every *POST* request that matches to `/user` url.
 Using previously parsed POST body (see `$bodyParser` middleware) we can map it to sample *DAO*
 which returns a `response` object as an action confirmation.

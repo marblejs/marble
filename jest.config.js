@@ -4,8 +4,8 @@ module.exports = {
   },
   testRegex: '(/__tests__/.*|\\.(test|spec))\\.(ts|tsx)$',
   coverageDirectory: './coverage/',
-  coveragePathIgnorePatterns: ['spec-util.ts$', 'index.ts$'],
-  collectCoverageFrom : ['src/**/*.ts'],
+  coveragePathIgnorePatterns: ['spec-util.ts$', 'index.ts$', '.d.ts$'],
+  collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [
     'ts',
     'js',
