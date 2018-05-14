@@ -21,13 +21,13 @@ In this world everyting is a stream. The core concept of **Marble.js** is based 
 **Marble.js** requires node **v8.0** or higher:
 
 ```javascript
-$ npm i @marble/core
+$ npm i @marblejs/core
 ```
 
 or if you are a hipster:
 
 ```javascript
-$ yarn add @marble/core
+$ yarn add @marblejs/core
 ```
 
 ## Getting started

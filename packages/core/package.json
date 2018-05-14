@@ -1,5 +1,5 @@
 {
-  "name": "@marble/core",
+  "name": "@marblejs/core",
   "version": "0.1.1",
   "description": "Reactive Node APIs made easy",
   "main": "./dist/index.js",
