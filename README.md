@@ -3,8 +3,12 @@
 </p>
 
 <p align="center">
-[![Build Status](https://travis-ci.com/marblejs/marble.svg?branch=master)](https://travis-ci.com/marblejs/marble)
-[![npm version](https://badge.fury.io/js/%40marblejs%2Fcore.svg)](https://badge.fury.io/js/%40marblejs%2Fcore)
+<a href="https://www.npmjs.com/package/@marblejs/core">
+  <img src="https://travis-ci.com/marblejs/marble.svg?branch=master" alt="Travis-CI status" height="18">
+</a>
+<a href="https://badge.fury.io/js/%40marblejs%2Fcore">
+  <img src="https://badge.fury.io/js/%40marblejs%2Fcore.svg" alt="npm version" height="18">
+</a>
 </p>
 
 <p align="center">
