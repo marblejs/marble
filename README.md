@@ -3,6 +3,11 @@
 </p>
 
 <p align="center">
+[![Build Status](https://travis-ci.com/marblejs/marble.svg?branch=master)](https://travis-ci.com/marblejs/marble)
+[![npm version](https://badge.fury.io/js/%40marblejs%2Fcore.svg)](https://badge.fury.io/js/%40marblejs%2Fcore)
+</p>
+
+<p align="center">
 Functional reactive HTTP middleware framework built on top of <a href="http://nodejs.org" target="blank">Node.js</a> platform, <a href="https://www.typescriptlang.org" target="blank">TypeScript</a> and <a href="http://reactivex.io/rxjs" target="blank">RxJS</a> library.
 </p>
 
