@@ -12,6 +12,9 @@
 <a href="https://codecov.io/gh/marblejs/marble?branch=master">
   <img src="https://codecov.io/gh/marblejs/marble/coverage.svg?branch=master" alt="Codecov coverage" height="18">
 </a>
+<a href="https://lernajs.io">
+  <img src="https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg" alt="Maintained with lerna" height="18">
+</a>
 </p>
 
 <p align="center">
