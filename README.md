@@ -258,6 +258,7 @@ $ npm run example
 - [ ] intercepting query parameters (via middleware)
 - [ ] intercepting url parameters (via `matchPath` operator)
 - [ ] more middlewares! (can think about moving `logger$` and `bodyParser$` outside core library)
+- [ ] testing utilities
 - [ ] improved, dedicated documentation (to move outside README)
 
 ## Authors
