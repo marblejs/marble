@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "pretty": true,
+    "strict": true,
+    "target": "es6",
+    "outDir": "./dist/",
+    "typeRoots": [
+      "node_modules/@types",
+      "../node_modules/@types"
+    ],
+    "lib": [
+      "dom",
+      "es7"
+    ],
+  },
+  "inputs": [
+    "src"
+  ],
+  "include": [
+    "node_modules/@types",
+    "src/**/*.ts"
+  ]
+}

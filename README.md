@@ -221,14 +221,14 @@ To view the example project structure, clone the **Marble.js** repository and in
 
 ```bash
 $ git clone git://github.com/marblejs/marble.git
-$ cd marble
-$ npm install
+$ cd marble/example
+$ npm i
 ```
 
 To run example just execute following command inside root repository folder:
 
 ```bash
-$ npm run example
+$ npm run start
 ```
 
 ## Roadmap

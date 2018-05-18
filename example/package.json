@@ -1,0 +1,34 @@
+{
+  "name": "@marblejs/example",
+  "version": "1.0.0",
+  "description": "Marble.js example playground",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node --project tsconfig.json src/index.ts",
+    "watch": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "keywords": [
+    "Reactive",
+    "RxJS"
+  ],
+  "author": "Józef Flakus",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "homepage": "https://github.com/marblejs/marble#readme",
+  "dependencies": {
+    "@marblejs/core": "^0.2.2",
+    "@types/node": "^10.1.2",
+    "rxjs": "^6.1.0",
+    "typescript": "~2.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.3",
+    "ts-node": "^6.0.2"
+  }
+}

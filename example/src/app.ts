@@ -1,4 +1,4 @@
-import { bodyParser$, httpListener, logger$ } from '../packages/core/src';
+import { bodyParser$, httpListener, logger$ } from '@marblejs/core';
 import { api$ } from './controllers/api.controller';
 
 const middlewares = [
