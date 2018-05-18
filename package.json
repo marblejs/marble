@@ -1,6 +1,5 @@
 {
   "name": "marblejs",
-  "version": "0.1.1",
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "postinstall": "npm run build",
@@ -9,11 +8,11 @@
     "example": "ts-node example/index.ts",
     "example:watch": "nodemon --watch packages --watch example --ext ts --ignore '*.spec.ts' --exec npm run example",
     "lint": "tslint --config tslint.json --project tsconfig.json",
-    "test": "NODE_ENV=test jest --expand",
-    "test:coverage": "NODE_ENV=test jest --expand --coverage",
-    "test:watch": "NODE_ENV=test jest --expand --onlyChanged --watch",
+    "test": "jest --expand",
+    "test:coverage": "jest --expand --coverage",
+    "test:watch": "jest --expand --onlyChanged --watch",
     "prepublish": "npm run test",
-    "publish": "lerna publish",
+    "publish": "./scripts/publish.sh",
     "prepush": "npm run lint"
   },
   "repository": {
