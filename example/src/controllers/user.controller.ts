@@ -1,5 +1,5 @@
+import { Effect, combineRoutes, matchPath, matchType } from '@marblejs/core';
 import { map, switchMap } from 'rxjs/operators';
-import { Effect, combineRoutes, matchPath, matchType } from '../../packages/core/src';
 import { Dao } from '../fakes/dao.fake';
 
 const getUsers$: Effect = request$ => request$
