@@ -1,9 +1,0 @@
-{
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "search.exclude": {
-    "**/node_modules": true,
-    "**/.git": true,
-    "dist": true,
-    "package-lock.json": true
-  }
-}
