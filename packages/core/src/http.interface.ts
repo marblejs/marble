@@ -7,12 +7,11 @@ export interface HttpRequest extends http.IncomingMessage {
   [key: string]: any;
 }
 
-export type HttpParameters = Record<string, string | number>;
+export type RouteParameters = Record<string, string | number>;
 
 export interface HttpRoute {
   url: string;
-  params?: HttpParameters;
-  query?: any;
+  params?: RouteParameters;
 }
 
 export interface HttpResponse extends http.ServerResponse {}
