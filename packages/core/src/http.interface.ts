@@ -3,7 +3,18 @@ import * as http from 'http';
 export interface HttpRequest extends http.IncomingMessage {
   body?: any;
   matchers?: string[];
+  route?: HttpRoute;
   [key: string]: any;
+}
+
+export interface HttpRoute {
+  url?: string;
+  params?: HttpParameters;
+  query?: HttpParameters;
+}
+
+export interface HttpParameters {
+  [key: string]: string | number;
 }
 
 export interface HttpResponse extends http.ServerResponse {}
