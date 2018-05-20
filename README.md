@@ -21,7 +21,19 @@
 Functional reactive HTTP middleware framework built on top of <a href="http://nodejs.org" target="blank">Node.js</a> platform, <a href="https://www.typescriptlang.org" target="blank">TypeScript</a> and <a href="http://reactivex.io/rxjs" target="blank">RxJS</a> library.
 </p>
 
-## Philosophy
+## Table of content
+
+ 1. [Philosophy](#philosophy)
+ 2. [Installation](#instal)
+ 3. [Getting started](#start)
+ 4. [Effects](#effects)
+ 5. [Routes composition](#routing)
+ 6. [Middlewares](#middlewares)
+ 7. [Custom error handling](#error)
+ 8. [Examples](#examples)
+ 9. [Roadmap](#roadmap)
+
+## <a name="philosophy"></a> Philosophy
 
 > If you don't have any experience with functional reactive programming, we strongly recommend to gain some basic overview first with <a href="http://reactivex.io/intro.html" target="blank">ReactiveX intro</a> or with <a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" target="blank">The introduction to Reactive Programming you've been missing</a> written by <a href="https://twitter.com/andrestaltz" target="blank">@andrestaltz</a>.
 
@@ -31,7 +43,7 @@ If we think closely how typical HTTP API works we can quickly recognize that it 
 
 In this world everyting is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behaviour of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that leverages functional reactive paradigm, you will feel like in home. Still there? So lets get started!
 
-## Installation
+## <a name="instal"></a> Installation
 
 **Marble.js** requires node **v8.0** or higher:
 
@@ -45,7 +57,7 @@ or if you are a hipster:
 $ yarn add @marblejs/core rxjs
 ```
 
-## Getting started
+## <a name="start"></a> Getting started
 
 The bootstrapping consists of two very simple steps: *HTTP handler* definition and *HTTP server* configuration.
 
@@ -75,7 +87,7 @@ const httpServer = http
   .listen(PORT, HOSTNAME);
 ```
 
-### Effects
+### <a name="effects"></a> Effects
 
 *Effect* is the main building block of the whole framework. Using its generic interface we can define
 API endpoints (so called: `Effects`), middlewares and error handlers (see next chapters).
@@ -112,7 +124,7 @@ which returns a `response` object as an action confirmation.
 
 *The `matchType` operator can also deal with parameterized URLs like `/foo/:id/bar`*
 
-### Routes composition
+### <a name="routing"></a> Routes composition
 
 Every API requires composable routing. With **Marble.js** routing composition couldn't be easier:
 
@@ -170,7 +182,7 @@ GET    /api/v1/user
 POST   /api/v1/user
 ```
 
-### Middlewares
+### <a name="middlewares"></a> Middlewares
 
 Because everything here is a stream, also plugged-in middlewares are based on simillar *Effect* interface.
 By default framework comes with composable middlewares like: logging, request body parsing.
@@ -198,7 +210,7 @@ const middlewares = [
 const app = httpListener({ middlewares, effects });
 ```
 
-### Custom error handling
+### <a name="error"></a> Custom error handling
 
 By default **Marble.js** comes with simple and lightweight error handling middleware.
 Because *Middlewares* and *Effects* are based on the same generic interface, your error
@@ -230,7 +242,7 @@ const app = httpListener({
 });
 ```
 
-## Examples
+## <a name="examples"></a> Examples
 
 To view the example project structure, clone the **Marble.js** repository and install the dependencies:
 
@@ -246,7 +258,7 @@ To run example just execute following command inside root repository folder:
 $ npm run start
 ```
 
-## Roadmap
+## <a name="roadmap"></a> Roadmap
 
 **Marble.js** is not yet a final and production ready product. Its APIs can improve over time when reaching stable version `1.0.0`. But in the meantime you can play easily and contribute to the growing community of functional reactive programming freaks.
 
