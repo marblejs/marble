@@ -11,8 +11,14 @@
     "test:watch": "jest --expand --onlyChanged --watch",
     "prepublish": "npm run test",
     "publish": "./scripts/publish.sh",
+    "prettier": "prettier --write",
     "prepush": "npm run lint"
   },
+  "pre-commit": [
+    "prettier",
+    "lint",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marblejs/marble.git"
@@ -42,10 +48,11 @@
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/supertest": "^2.0.4",
-    "husky": "^0.14.3",
     "jest": "^22.4.3",
     "lerna": "^2.11.0",
     "mock-req": "^0.2.0",
+    "pre-commit": "^1.2.2",
+    "prettier": "1.12.1",
     "rimraf": "^2.6.2",
     "supertest": "^3.0.0",
     "ts-jest": "~22.4.4",
