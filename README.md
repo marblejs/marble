@@ -266,7 +266,7 @@ $ npm run start
 - [x] custom middlewares
 - [x] custom error handlers
 - [x] composable routing
-- [ ] ability to compose midddlewares inside `Effect` pipeline
+- [x] ability to compose midddlewares inside `Effect` pipeline
 - [ ] intercepting query parameters (via middleware)
 - [ ] intercepting url parameters (via `matchPath` operator)
 - [ ] more middlewares! (can think about moving `logger$` and `bodyParser$` outside core library)
