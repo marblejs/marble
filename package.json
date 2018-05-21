@@ -10,7 +10,8 @@
     "test:coverage": "jest --expand --coverage",
     "test:watch": "jest --expand --onlyChanged --watch",
     "prepublish": "npm run test",
-    "publish": "./scripts/publish.sh"
+    "publish": "./scripts/publish.sh",
+    "precommit": "lint-staged"
   },
   "lint-staged": {
     "*.{ts}": [
@@ -19,11 +20,6 @@
       "git add",
       "jest --bail --findRelatedTests --passWithNoTests"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "repository": {
     "type": "git",
@@ -54,7 +50,7 @@
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/supertest": "^2.0.4",
-    "husky": "^1.0.0-rc.6",
+    "husky": "^0.14.0",
     "jest": "^22.4.3",
     "lerna": "^2.11.0",
     "lint-staged": "^7.1.1",
