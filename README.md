@@ -286,6 +286,25 @@ $ npm run start
   </tr>
 </table>
 
+## Contributors
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/sebastianmusial" style="color: white">
+        <img src="https://github.com/sebastianmusial.png?s=150" width="100"/>
+        <p style="text-align: center"><small>Sebastian Musial</small></p>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/pdomaleczny" style="color: white">
+        <img src="https://github.com/pdomaleczny.png?s=150" width="100"/>
+        <p style="text-align: center"><small>Patryk Domałeczny</small></p>
+      </a>
+    </td>
+  </tr>
+</table>
+
 ## License
 
 marble.js is MIT licensed
