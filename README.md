@@ -37,11 +37,11 @@ Functional reactive HTTP middleware framework built on top of <a href="http://no
 
 > If you don't have any experience with functional reactive programming, we strongly recommend to gain some basic overview first with <a href="http://reactivex.io/intro.html" target="blank">ReactiveX intro</a> or with <a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" target="blank">The introduction to Reactive Programming you've been missing</a> written by <a href="https://twitter.com/andrestaltz" target="blank">@andrestaltz</a>.
 
-If we think closely how typical HTTP API works we can quickly recognize that it deals with streams of asynchonous events also called as HTTP requests. Describing it very briefly - typically each request needs to be transformed into response that goes back to the client (which is our event initiator) using custom middlewares or designated endpoints. In reactive programming world, all those core concepts we can translate into very simple marble diagram:
+If we think closely how typical HTTP API works we can quickly recognize that it deals with streams of asynchronous events also called as HTTP requests. Describing it very briefly - typically each request needs to be transformed into response that goes back to the client (which is our event initiator) using custom middlewares or designated endpoints. In reactive programming world, all those core concepts we can translate into very simple marble diagram:
 
 ![Marble.js core concept](https://github.com/marblejs/marble/blob/master/docs/assets/flow.png?raw=true)
 
-In this world everyting is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behaviour of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that leverages functional reactive paradigm, you will feel like in home. Still there? So lets get started!
+In this world everything is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behavior of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that leverages functional reactive paradigm, you will feel like in home. Still there? So lets get started!
 
 ## <a name="instal"></a> Installation
 
@@ -184,7 +184,7 @@ POST   /api/v1/user
 
 ### <a name="middlewares"></a> Middlewares
 
-Because everything here is a stream, also plugged-in middlewares are based on simillar *Effect* interface.
+Because everything here is a stream, also plugged-in middlewares are based on similar *Effect* interface.
 By default framework comes with composable middlewares like: logging, request body parsing.
 Below you can see how easily looks the dummy implementation of API requests logging middleware.
 
