@@ -2,8 +2,8 @@ import * as pathToRegexp from 'path-to-regexp';
 import { Observable } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { HttpRequest, HttpRoute, RouteParameters } from '../http.interface';
-import { queryParams } from "./queryParams/queryParams.operator";
-import { urlParams } from "./urlParams/urlParams.operator";
+import { queryParams } from "./queryParamsFactory/queryParams.factory";
+import { urlParams } from "./urlParamsFactory/urlParams.factory";
 
 type MatcherOpts = {
   suffix?: string,
