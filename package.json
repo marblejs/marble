@@ -11,15 +11,7 @@
     "test:watch": "jest --expand --onlyChanged --watch",
     "prepublish": "npm run test",
     "publish": "./scripts/publish.sh",
-    "precommit": "lint-staged"
-  },
-  "lint-staged": {
-    "*.{ts}": [
-      "prettier --write",
-      "tslint --config tslint.json --project tsconfig.json",
-      "git add",
-      "jest --bail --findRelatedTests --passWithNoTests"
-    ]
+    "precommit": "npm run lint && npm run test"
   },
   "repository": {
     "type": "git",
