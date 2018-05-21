@@ -217,7 +217,7 @@ Because *Middlewares* and *Effects* are based on the same generic interface, you
 handling middlewares works very similar to normal API *Effects*.
 
 ```javascript
-const error$: Effect<EffectResponse, ThrowedError> = (request$, response, error) => request$
+const error$: Effect<EffectResponse, ThrownError> = (request$, response, error) => request$
   .pipe(
     map(req => ({
       status: // ...
