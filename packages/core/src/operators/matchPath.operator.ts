@@ -34,8 +34,8 @@ const paramFactory = (params: RegExpMatchArray | null, routes: pathToRegexp.Toke
     }), {});
 };
 
-const routeFactory = (req: HttpRequest, path: string, opts: MatcherOpts = {}): HttpRoute => {
-  const match = pathFactory(req.matchers!, path, opts.suffix);
+const routeFactory = (req: HttpRequest, path: string): HttpRoute => {
+  const match = pathFactory(req.matchers!, path);
   const url = urlFactory(req.url!);
   const params = pathToRegexp(match).exec(url);
   const routes = pathToRegexp.parse(match);
@@ -56,7 +56,7 @@ export const matchPath = (path: string, opts: MatcherOpts = {}) => (source$: Obs
     }),
     tap(req => req.route = {
       ...req.route,
-      ...routeFactory(req, path, opts),
+      ...routeFactory(req, path),
     }),
     tap(req => opts.combiner && req.matchers!.push(path))
   );
