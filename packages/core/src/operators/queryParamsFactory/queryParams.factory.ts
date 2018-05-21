@@ -1,4 +1,4 @@
-const querystring = require("querystring");
+import * as querystring from "querystring";
 
 const getNestedQueryParam = (key: string, paramValue: string | Object): string | Object => {
   const nestedKeys = /\[.*\]/.exec(key);
