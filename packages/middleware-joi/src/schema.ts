@@ -1,10 +1,10 @@
 const Joi = require('joi');
 
 export const SchemaValidator = Joi.object().keys({
-  headers: Joi.any(),
-  params: Joi.any(),
-  query: Joi.any(),
-  body: Joi.any(),
+  headers: Joi.object(),
+  params: Joi.object(),
+  query: Joi.object(),
+  body: Joi.object(),
 }).min(1);
 
 export interface Schema {

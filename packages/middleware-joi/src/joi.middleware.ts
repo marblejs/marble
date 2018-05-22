@@ -1,20 +1,16 @@
 import * as Joi from 'joi';
 import { Schema, SchemaValidator } from './schema';
 import { Effect, HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
-import { of, Observable, throwError, from, empty } from 'rxjs';
-import { tap, switchMap, toArray, map, catchError, mapTo, mergeMap, switchMapTo } from 'rxjs/operators';
-import { filter } from 'minimatch';
+import { from, of, throwError } from 'rxjs';
+import { mergeMap, flatMap, catchError, mapTo, tap, switchMap, toArray, map } from 'rxjs/operators';
 
 const validateSource = (req: HttpRequest, rules: Map<string, any>, options) => from(rules.keys()).pipe(
-  switchMap(rule => of(req[rule]).pipe(
-    mergeMap(item => {
-      return typeof item !== 'undefined'
-        ? of(item)
-        : empty();
-    }),
-    mergeMap(item => from(Joi.validate(item, rules.get(rule), options))),
+  mergeMap(rule => of(req[rule]).pipe(
+    flatMap(item => from(Joi.validate(item || {}, rules.get(rule), options))),
     catchError((err: Error) => throwError(new HttpError(err.message, HttpStatus.BAD_REQUEST))),
+    map(result => (req[rule] = result)),
   )),
+  toArray(),
   mapTo(req),
 );
 
