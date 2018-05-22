@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": true,
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "pretty": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "target": "es6",
+    "lib": [
+      "dom",
+      "es7"
+    ]
+  },
+
+  "inputs": [
+    "src"
+  ],
+
+  "include": [
+    "src/**/*.ts"
+  ],
+
+  "exclude": [
+    "**/*.spec.ts"
+  ]
+}

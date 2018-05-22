@@ -1,0 +1,35 @@
+{
+  "name": "marble-joi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciorubeens/marble-joi.git"
+  },
+  "keywords": [
+    "marble",
+    "joi",
+    "middleware",
+    "http",
+    "rxjs"
+  ],
+  "author": "Lúcio Rubens <luciorubeens@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/luciorubeens/marble-joi/issues"
+  },
+  "homepage": "https://github.com/luciorubeens/marble-joi#readme",
+  "dependencies": {
+    "@marblejs/core": "^0.2.2",
+    "joi": "^13.3.0",
+    "rxjs": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/joi": "^13.0.8",
+    "typescript": "^2.8.3"
+  }
+}
