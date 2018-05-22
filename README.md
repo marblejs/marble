@@ -284,7 +284,7 @@ $ npm run start
     </td>
     <td>
       <p><strong>Józef Flakus</strong></p>
-      <p><strong>contact: </strong><a href="https://github.com/JozefFlakus">hello@jflakus.com</a></p>
+      <p><strong>contact: </strong><a href="mailto:hello@jflakus.com">hello@jflakus.com</a></p>
       <p><strong>twitter: </strong><a href="https://twitter.com/jozflakus">@jozflakus</a></p>
     </td>
   </tr>
