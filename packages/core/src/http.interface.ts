@@ -3,16 +3,11 @@ import * as http from 'http';
 export interface HttpRequest extends http.IncomingMessage {
   body?: any;
   matchers?: string[];
-  route?: HttpRoute;
+  params?: RouteParameters;
   [key: string]: any;
 }
 
 export type RouteParameters = Record<string, string | number>;
-
-export interface HttpRoute {
-  url: string;
-  params?: RouteParameters;
-}
 
 export interface HttpResponse extends http.ServerResponse {}
 
