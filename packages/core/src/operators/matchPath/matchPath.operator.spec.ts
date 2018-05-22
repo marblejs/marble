@@ -3,11 +3,11 @@ import { Marbles } from '../../util/marbles.spec-util';
 import { matchPath } from './matchPath.operator';
 
 const req = (url: string) => ({ url } as HttpRequest);
-const reqMatched = (url: string, query = '', matchers: string[] = [], params?: RouteParameters) => ({
+const reqMatched = (url: string, query = '', matchers: string[] = [], params: RouteParameters = {}) => ({
   url: !!query ? `${url}?${query}` : url,
   matchers,
-  params: params,
-} as HttpRequest);
+  params,
+} as any as HttpRequest);
 
 describe('matchPath operator', () => {
   let operators;
