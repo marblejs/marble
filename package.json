@@ -11,7 +11,15 @@
     "test:watch": "jest --expand --onlyChanged --watch",
     "prepublish": "npm run test",
     "publish": "./scripts/publish.sh",
-    "prepush": "npm run lint"
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts}": [
+      "prettier --write",
+      "tslint --config tslint.json --project tsconfig.json",
+      "git add",
+      "jest --bail --findRelatedTests --passWithNoTests"
+    ]
   },
   "repository": {
     "type": "git",
@@ -42,11 +50,14 @@
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/supertest": "^2.0.4",
-    "husky": "^0.14.3",
+    "husky": "^0.14.0",
     "jest": "^22.4.3",
     "lerna": "^2.11.0",
+    "lint-staged": "^7.1.1",
     "mock-req": "^0.2.0",
+    "prettier": "1.12.1",
     "rimraf": "^2.6.2",
+    "rxjs-compat": "^6.1.0",
     "supertest": "^3.0.0",
     "ts-jest": "~22.4.4",
     "tsc": "~1.20150623.0",
