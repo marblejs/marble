@@ -5,6 +5,7 @@ export * from './middlewares/error.middleware';
 export * from './middlewares/logger.middleware';
 export * from './operators/matchType.operator';
 export * from './operators/matchPath.operator';
+export * from './operators/use.operator';
 export * from './http.interface';
 export * from './http.listener';
 export { HttpError } from './util/error.util';
