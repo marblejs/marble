@@ -5,7 +5,7 @@
     "postinstall": "npm run build",
     "build": "lerna bootstrap",
     "benchmark": "npm run build && make -C benchmarks",
-    "lint": "tslint --config tslint.json --project tsconfig.json",
+    "lint": "tslint --config tslint.json --project tsconfig.spec.json",
     "test": "jest --expand",
     "test:coverage": "jest --expand --coverage",
     "test:watch": "jest --expand --onlyChanged --watch",
@@ -16,7 +16,7 @@
   "lint-staged": {
     "*.ts": [
       "prettier --write",
-      "tslint --config tslint.json --project tsconfig.json",
+      "tslint --config tslint.json --project tsconfig.spec.json",
       "git add",
       "jest --bail --findRelatedTests --passWithNoTests"
     ]
