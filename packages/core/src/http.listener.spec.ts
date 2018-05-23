@@ -4,8 +4,7 @@ import { combineRoutes } from './effects/effects.combiner';
 import { Effect } from './effects/effects.interface';
 import { HttpRequest } from './http.interface';
 import { httpListener } from './http.listener';
-import { matchPath } from './operators/matchPath.operator';
-import { use } from './operators/use.operator';
+import { matchPath, use } from './operators';
 
 describe('Http listener', () => {
 
@@ -56,19 +55,19 @@ describe('Http listener', () => {
   it('integrates with "matchPath" operator', async () => {
     const effect$1: Effect = req$ => req$.pipe(
       matchPath('/test/:id/foo'),
-      map(req => req.route.params.id),
+      map(req => req.params.id),
       map(id => ({ status: 200, body: { id } })),
     );
 
     const effect$2: Effect = req$ => req$.pipe(
       matchPath('/test/:id/foo/:id/test'),
-      map(req => req.route.params),
+      map(req => req.params),
       map(params => ({ status: 200, body: { id: params.id } })),
     );
 
     const effect$3: Effect = req$ => req$.pipe(
       matchPath('/test/:id/bar/:type/test'),
-      map(req => req.route.params),
+      map(req => req.params),
       map(params => ({ status: 200, body: { id: params.id, type: params.type } })),
     );
 
@@ -92,7 +91,7 @@ describe('Http listener', () => {
   it('integrates with "combineRoutes"', async () => {
     const effect$: Effect = req$ => req$.pipe(
       matchPath('/user/:id'),
-      map(req => req.route.params),
+      map(req => req.params),
       map(params => ({ status: 200, body: { id: params.id, version: params.version } })),
     );
 

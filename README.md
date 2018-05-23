@@ -275,13 +275,17 @@ $ npm run start
 
 ## Authors
 
-<table>
+<table border="0">
   <tr>
     <td>
       <a href="https://github.com/JozefFlakus" style="color: white">
-        <img src="https://github.com/JozefFlakus.png?s=150" width="100"/>
-        <p style="text-align: center"><small>Józef Flakus</small></p>
+        <img src="https://github.com/JozefFlakus.png?s=150" width="150"/>
       </a>
+    </td>
+    <td>
+      <p><strong>Józef Flakus</strong></p>
+      <p><strong>contact: </strong><a href="mailto:hello@jflakus.com">hello@jflakus.com</a></p>
+      <p><strong>twitter: </strong><a href="https://twitter.com/jozflakus">@jozflakus</a></p>
     </td>
   </tr>
 </table>

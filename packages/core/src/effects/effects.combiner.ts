@@ -1,7 +1,7 @@
 import { merge, of } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { HttpRequest } from '../http.interface';
-import { matchPath } from '../operators/matchPath.operator';
+import { matchPath } from '../operators';
 import { isGroup } from './effects.helpers';
 import { EffectCombiner, MiddlewareCombiner, RouteCombiner } from './effects.interface';
 
