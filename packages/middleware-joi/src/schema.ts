@@ -1,10 +1,10 @@
-const Joi = require('joi');
+import { object, ObjectSchema } from 'joi';
 
-export const SchemaValidator = Joi.object().keys({
-  headers: Joi.object(),
-  params: Joi.object(),
-  query: Joi.object(),
-  body: Joi.object(),
+export const SchemaValidator: ObjectSchema = object().keys({
+  headers: object(),
+  params: object(),
+  query: object(),
+  body: object(),
 }).min(1);
 
 export interface Schema {
