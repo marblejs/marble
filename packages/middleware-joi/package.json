@@ -36,11 +36,11 @@
     "url": "https://github.com/marblejs/marble/issues"
   },
   "peerDependencies": {
-    "@marblejs/core": "^0.2.2",
     "rxjs": "~6.1.0"
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
+    "@marblejs/core": "^0.2.2",
     "joi": "^13.3.0"
   },
   "devDependencies": {
