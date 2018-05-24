@@ -16,7 +16,7 @@ export const httpListener = ({ middlewares = [], effects, errorMiddleware }: Htt
   const request$ = new Subject<Http>();
   const effect$ = request$
     .pipe(
-      switchMap(({ req, res }) =>
+      flatMap(({ req, res }) =>
         combineMiddlewareEffects(middlewares)(res)(req)
           .pipe(
             switchMap(combineEffects(effects)(res)),
