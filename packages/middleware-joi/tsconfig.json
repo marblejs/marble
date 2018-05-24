@@ -19,4 +19,8 @@
     "node_modules/@types",
     "src/**/*.ts"
   ],
+
+  "exclude": [
+    "__tests__"
+  ]
 }
