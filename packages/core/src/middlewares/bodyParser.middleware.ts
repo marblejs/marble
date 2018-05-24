@@ -49,7 +49,7 @@ export const bodyParser$: Effect<HttpRequest> = (request$, response) => request$
         ? of(req).pipe(
             switchMap(getBody),
             tap(body => req.body = body),
-            map(body => req),
+            map(() => req),
             catchError(error => throwError(new HttpError('Request body parse error', HttpStatus.BAD_REQUEST)))
           )
         : of(req)
