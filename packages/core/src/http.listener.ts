@@ -1,5 +1,5 @@
 import { Subject, of } from 'rxjs';
-import { catchError, defaultIfEmpty, switchMap, tap } from 'rxjs/operators';
+import { catchError, defaultIfEmpty, switchMap, flatMap, tap } from 'rxjs/operators';
 import { combineEffects, combineMiddlewareEffects } from './effects/effects.combiner';
 import { Effect, EffectResponse, GroupedEffects } from './effects/effects.interface';
 import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
