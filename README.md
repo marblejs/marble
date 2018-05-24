@@ -1,5 +1,7 @@
 <p align="center">
-<img src="https://github.com/marblejs/marble/blob/master/docs/assets/logo.png?raw=true" width="320" alt="Marble.js logo"/>
+  <a href="http://marblejs.com">
+    <img src="https://github.com/marblejs/marble/blob/master/docs/assets/logo.png?raw=true" width="320" alt="Marble.js logo"/>
+  </a>
 </p>
 
 <p align="center">
