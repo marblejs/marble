@@ -15,6 +15,7 @@ const getNestedQueryParam = (
     .replace(/\[/g, '')
     .split(']')
     .filter(v => v.length > 0);
+
   const nestedQueryObject = extractedKeys.reduceRight(
     (value, key) => ({ [key]: value }),
     paramValue
@@ -37,7 +38,6 @@ export const queryParamsFactory = (path: string): QueryParameters => {
   }
 
   const queryParamsString = path.split('?').pop();
-
   const extractedQueryParams = querystring.parse(queryParamsString!);
 
   return queryParamsArrayToObject(extractedQueryParams);
