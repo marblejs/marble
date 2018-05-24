@@ -1,4 +1,5 @@
-import * as querystring from "querystring";
+import * as querystring from 'querystring';
+import { QueryParameters } from '../../http.interface';
 
 const getNestedQueryParam = (key: string, paramValue: string | Object): string | Object => {
   const nestedKeys = /\[.*\]/.exec(key);
@@ -11,12 +12,12 @@ const getNestedQueryParam = (key: string, paramValue: string | Object): string |
   return { [key.replace(nestedKeys[0], '')]: nestedQueryObject };
 }
 
-const queryParamsArrayToObject = (queryParams: Object): Object => {
+const queryParamsArrayToObject = (queryParams: Object): QueryParameters => {
   const queryParamsKey = Object.keys(queryParams);
-  return Object.assign({}, ...queryParamsKey.map(key => getNestedQueryParam(key, queryParams[key])))
+  return {...queryParamsKey.map(key => getNestedQueryParam(key, queryParams[key]))};
 }
 
-export const queryParams = (path: string): Object => {
+export const queryParamsFactory = (path: string): QueryParameters => {
   const queryParamsString = path.split('?').pop();
 
   if (!queryParamsString) return {};
