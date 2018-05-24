@@ -1,7 +1,7 @@
 import * as pathToRegexp from 'path-to-regexp';
 import { RouteParameters } from '../../http.interface';
 
-export const urlParams = (params: RegExpMatchArray | null, routes: pathToRegexp.Token[]): RouteParameters => {
+export const urlParamsFactory = (params: RegExpMatchArray | null, routes: pathToRegexp.Token[]): RouteParameters => {
   if (!params || !routes) { return {}; }
 
   return routes

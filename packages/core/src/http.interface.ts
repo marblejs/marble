@@ -8,12 +8,12 @@ export interface HttpRequest extends http.IncomingMessage {
 }
 
 export type RouteParameters = Record<string, string | number>;
-export type QueryParameters = Record<string, string> | Object;
+export type QueryParameters = Record<string, string | number | object>;
 
 export interface HttpRoute {
   url: string;
   params?: RouteParameters;
-  queryParams?: QueryParameters;
+  query?: QueryParameters;
 }
 
 export interface HttpResponse extends http.ServerResponse {}

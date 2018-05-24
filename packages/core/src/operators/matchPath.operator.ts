@@ -2,8 +2,8 @@ import * as pathToRegexp from 'path-to-regexp';
 import { Observable } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { HttpRequest, HttpRoute, RouteParameters } from '../http.interface';
-import { queryParams } from "./queryParamsFactory/queryParams.factory";
-import { urlParams } from "./urlParamsFactory/urlParams.factory";
+import { queryParamsFactory } from "./queryParamsFactory/queryParams.factory";
+import { urlParamsFactory } from "./urlParamsFactory/urlParams.factory";
 
 type MatcherOpts = {
   suffix?: string,
@@ -33,8 +33,8 @@ const routeFactory = (req: HttpRequest, path: string): HttpRoute => {
 
   return {
     url,
-    params: urlParams(params, routes),
-    queryParams: queryParams(req.url!)
+    params: urlParamsFactory(params, routes),
+    query: queryParamsFactory(req.url!)
   };
 };
 
