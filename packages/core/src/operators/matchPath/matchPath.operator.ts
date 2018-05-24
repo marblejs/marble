@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { HttpRequest } from '../../http.interface';
 import { pathFactory, urlFactory } from './matchPath.factory';
+import { queryParamsFactory } from './queryParams.factory';
 import { urlParamsFactory } from './urlParams.factory';
 
 type MatcherOpts = {
@@ -23,5 +24,6 @@ export const matchPath = (path: string, opts: MatcherOpts = {}) => (
       return pathToRegexp(match).test(url);
     }),
     tap(req => (req.params = urlParamsFactory(req, path))),
+    tap(req => (req.query = queryParamsFactory(req.url!))),
     tap(req => opts.combiner && req.matchers!.push(path))
   );
