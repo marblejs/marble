@@ -1,13 +1,15 @@
-import { HttpRequest, RouteParameters } from '../../http.interface';
+import { HttpRequest, HttpRoute, RouteParameters, QueryParameters } from '../../http.interface';
 import { Marbles } from '../../util/marbles.spec-util';
 import { matchPath } from './matchPath.operator';
+import { queryParamsFactory } from "../../operators/queryParamsFactory/queryParams.factory";
 
 const req = (url: string) => ({ url } as HttpRequest);
-const reqMatched = (url: string, query = '', matchers: string[] = [], params: RouteParameters = {}) => ({
+const reqRoute = (url: string, params: RouteParameters = {}, query: QueryParameters = {}) => ({ url, params, query }) as HttpRoute;
+const reqMatched = (url: string, query = '', matchers: string[] = [], params?: RouteParameters) => ({
   url: !!query ? `${url}?${query}` : url,
   matchers,
   params,
-} as any as HttpRequest);
+} as HttpRequest);
 
 describe('matchPath operator', () => {
   let operators;

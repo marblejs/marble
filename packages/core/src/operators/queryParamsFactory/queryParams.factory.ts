@@ -14,15 +14,15 @@ const getNestedQueryParam = (key: string, paramValue: string | Object): string |
 
 const queryParamsArrayToObject = (queryParams: Object): QueryParameters => {
   const queryParamsKey = Object.keys(queryParams);
-  return {...queryParamsKey.map(key => getNestedQueryParam(key, queryParams[key]))};
+  return Object.assign({}, ...queryParamsKey.map(key => getNestedQueryParam(key, queryParams[key])));
 }
 
 export const queryParamsFactory = (path: string): QueryParameters => {
+  if (!path || !path.includes('?')) return {};
   const queryParamsString = path.split('?').pop();
 
-  if (!queryParamsString) return {};
 
-  const extractedQueryParams = querystring.parse(queryParamsString);
+  const extractedQueryParams = querystring.parse(queryParamsString!);
 
   return queryParamsArrayToObject(extractedQueryParams);
 }
