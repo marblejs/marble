@@ -6,18 +6,22 @@ import { pathFactory, urlFactory } from './matchPath.factory';
 import { urlParamsFactory } from './urlParams.factory';
 
 type MatcherOpts = {
-  suffix?: string,
-  combiner?: boolean,
+  suffix?: string;
+  combiner?: boolean;
 };
 
-export const matchPath = (path: string, opts: MatcherOpts = {}) => (source$: Observable<HttpRequest>) =>
+export const matchPath = (path: string, opts: MatcherOpts = {}) => (
+  source$: Observable<HttpRequest>
+) =>
   source$.pipe(
-    tap(req => req.matchers = req.matchers || []),
+    tap(req => (req.query = req.query || {})),
+    tap(req => (req.params = req.params || {})),
+    tap(req => (req.matchers = req.matchers || [])),
     filter(req => {
       const match = pathFactory(req.matchers!, path, opts.suffix);
       const url = urlFactory(req.url!);
       return pathToRegexp(match).test(url);
     }),
-    tap(req => req.params = urlParamsFactory(req, path)),
+    tap(req => (req.params = urlParamsFactory(req, path))),
     tap(req => opts.combiner && req.matchers!.push(path))
   );
