@@ -41,7 +41,7 @@ If we think closely how typical HTTP API works we can quickly recognize that it 
 
 ![Marble.js core concept](https://github.com/marblejs/marble/blob/master/docs/assets/flow.png?raw=true)
 
-In this world everything is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behavior of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that leverages functional reactive paradigm, you will feel like in home. Still there? So lets get started!
+In this world everything is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behavior of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that leverages functional reactive paradigm, you will feel like at home. Still there? So lets get started!
 
 ## <a name="instal"></a> Installation
 
@@ -275,13 +275,17 @@ $ npm run start
 
 ## Authors
 
-<table>
+<table border="0">
   <tr>
     <td>
       <a href="https://github.com/JozefFlakus" style="color: white">
-        <img src="https://github.com/JozefFlakus.png?s=150" width="100"/>
-        <p style="text-align: center"><small>Józef Flakus</small></p>
+        <img src="https://github.com/JozefFlakus.png?s=150" width="150"/>
       </a>
+    </td>
+    <td>
+      <p><strong>Józef Flakus</strong></p>
+      <p><strong>contact: </strong><a href="mailto:hello@jflakus.com">hello@jflakus.com</a></p>
+      <p><strong>twitter: </strong><a href="https://twitter.com/jozflakus">@jozflakus</a></p>
     </td>
   </tr>
 </table>

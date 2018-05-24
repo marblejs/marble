@@ -1,5 +1,5 @@
-import { HttpRequest } from '../http.interface';
-import { Marbles } from '../util/marbles.spec-util';
+import { HttpRequest } from '../../http.interface';
+import { Marbles } from '../../util/marbles.spec-util';
 import { matchType } from './matchType.operator';
 
 const createMockReq = (method: string) => ({ method } as HttpRequest);

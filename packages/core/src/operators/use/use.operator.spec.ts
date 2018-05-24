@@ -1,7 +1,7 @@
 import { tap } from 'rxjs/operators';
-import { Effect } from '../effects/effects.interface';
-import { HttpRequest } from '../http.interface';
-import { Marbles } from '../util/marbles.spec-util';
+import { Effect } from '../../effects/effects.interface';
+import { HttpRequest } from '../../http.interface';
+import { Marbles } from '../../util/marbles.spec-util';
 import { use } from './use.operator';
 
 const createMockReq = (test = 0) => ({ test } as any as HttpRequest);
