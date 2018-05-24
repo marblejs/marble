@@ -15,6 +15,8 @@ export const matchPath = (path: string, opts: MatcherOpts = {}) => (
   source$: Observable<HttpRequest>
 ) =>
   source$.pipe(
+    tap(req => (req.query = req.query || {})),
+    tap(req => (req.params = req.params || {})),
     tap(req => (req.matchers = req.matchers || [])),
     filter(req => {
       const match = pathFactory(req.matchers!, path, opts.suffix);
