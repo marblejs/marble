@@ -270,7 +270,7 @@ $ npm run start
 - [x] composable routing
 - [x] intercepting url parameters (via `matchPath` operator) *(v0.3.0)*
 - [x] ability to compose midddlewares inside `Effect` pipeline *(v0.3.0)*
-- [ ] intercepting query parameters *(v0.3.0)*
+- [x] intercepting query parameters *(v0.3.0)*
 - [ ] more middlewares! (can think about moving `logger$` and `bodyParser$` outside core library)
 - [ ] testing utilities
 - [ ] improved, dedicated documentation (to move outside README)
