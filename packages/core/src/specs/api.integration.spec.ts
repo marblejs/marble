@@ -28,8 +28,7 @@ const getUserSingle$: Effect = request$ =>
   request$.pipe(
     matchPath('/:id'),
     matchType('GET'),
-    map(req => req.params),
-    map(({ id, version }) => ({ body: { id, version } }))
+    map(({ params, query }) => ({ body: { params, query } }))
   );
 
 const postUser$: Effect = request$ =>
@@ -66,10 +65,13 @@ describe('API integration', () => {
       .get('/api/v1/user')
       .expect(200, MOCKED_USER_LIST));
 
-  it('intercepts :id and :version parameter from url: /api/v1/user/:id', async () =>
+  it('intercepts "query" and "params" from url: /api/v1/user/:id?filter=all', async () =>
     request(app)
-      .get('/api/v1/user/123')
-      .expect(200, { id: 123, version: 'v1' }));
+      .get('/api/v1/user/123?filter=all')
+      .expect(200, {
+        params: { id: 123, version: 'v1' },
+        query: { filter: 'all' },
+      }));
 
   it('parses body and returns echo for secured route: /api/v1/user', async () =>
     request(app)
