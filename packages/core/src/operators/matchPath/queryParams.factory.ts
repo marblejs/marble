@@ -7,7 +7,9 @@ const getNestedQueryParam = (
 ): string | Object => {
   const nestedKeys = /\[.*\]/.exec(key);
 
-  if (!nestedKeys) return { [key]: paramValue };
+  if (!nestedKeys) {
+    return { [key]: paramValue };
+  }
 
   const extractedKeys = nestedKeys[0]
     .replace(/\[/g, '')
@@ -30,7 +32,10 @@ const queryParamsArrayToObject = (queryParams: Object): QueryParameters => {
 };
 
 export const queryParamsFactory = (path: string): QueryParameters => {
-  if (!path || !path.includes('?')) return {};
+  if (!path || !path.includes('?')) {
+    return {};
+  }
+
   const queryParamsString = path.split('?').pop();
 
   const extractedQueryParams = querystring.parse(queryParamsString!);

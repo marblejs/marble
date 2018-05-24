@@ -6,7 +6,6 @@ import {
 import { Marbles } from '../../util/marbles.spec-util';
 import { matchPath } from './matchPath.operator';
 import { queryParamsFactory } from './queryParams.factory';
-import { urlParamsFactory } from './urlParams.factory';
 
 const req = (url: string) => ({ url } as HttpRequest);
 const reqMatched = (
