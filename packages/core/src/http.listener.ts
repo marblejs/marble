@@ -1,5 +1,5 @@
 import { Subject, of } from 'rxjs';
-import { catchError, defaultIfEmpty, switchMap, flatMap, tap } from 'rxjs/operators';
+import { catchError, defaultIfEmpty, switchMap, mergeMap, tap } from 'rxjs/operators';
 import { combineEffects, combineMiddlewareEffects } from './effects/effects.combiner';
 import { Effect, EffectResponse, GroupedEffects } from './effects/effects.interface';
 import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
@@ -16,7 +16,7 @@ export const httpListener = ({ middlewares = [], effects, errorMiddleware }: Htt
   const request$ = new Subject<Http>();
   const effect$ = request$
     .pipe(
-      flatMap(({ req, res }) =>
+      mergeMap(({ req, res }) =>
         combineMiddlewareEffects(middlewares)(res)(req)
           .pipe(
             switchMap(combineEffects(effects)(res)),
