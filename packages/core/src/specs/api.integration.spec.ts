@@ -11,10 +11,16 @@ import { matchPath, matchType, use } from '../operators';
 const MOCKED_USER_LIST = [{ id: 1 }, { id: 2 }];
 
 const authorize$: Effect<HttpRequest> = request$ =>
-  request$.pipe(filter(req => req.headers.authorization === 'Bearer test'));
+  request$.pipe(
+    filter(req => req.headers.authorization === 'Bearer test'),
+  );
 
 const root$: Effect = req$ =>
-  req$.pipe(matchPath('/'), matchType('GET'), mapTo({ status: 200 }));
+  req$.pipe(
+    matchPath('/'),
+    matchType('GET'),
+    mapTo({ status: 200 }),
+  );
 
 const getUserList$: Effect = request$ =>
   request$.pipe(
