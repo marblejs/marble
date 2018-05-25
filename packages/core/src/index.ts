@@ -5,3 +5,4 @@ export * from './operators';
 export * from './http.interface';
 export * from './http.listener';
 export { HttpError } from './util/error.util';
+export { ContentType } from './util/contentType.util';

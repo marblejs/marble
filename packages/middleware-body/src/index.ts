@@ -1,7 +1,12 @@
-import { Effect, HttpError, HttpRequest, HttpStatus } from '@marblejs/core';
+import {
+  ContentType,
+  Effect,
+  HttpError,
+  HttpRequest,
+  HttpStatus
+} from '@marblejs/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap, toArray } from 'rxjs/operators';
-import { ContentType } from '../../core/src/util/contentType.util';
 
 const fromReadableStream = (stream: HttpRequest): Observable<any> => {
   stream.pause();

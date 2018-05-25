@@ -32,6 +32,9 @@
     "@marblejs/core": "^0.2.2",
     "rxjs": "~6.1.0"
   },
+  "devDependencies": {
+    "@marblejs/core": "^0.2.2"
+  },
   "publishConfig": {
     "access": "public"
   }
