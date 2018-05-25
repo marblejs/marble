@@ -1,12 +1,8 @@
 import { of } from 'rxjs';
 import { filter, map, mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
-import { combineRoutes } from '../effects/effects.combiner';
-import { Effect } from '../effects/effects.interface';
-import { HttpRequest } from '../http.interface';
-import { httpListener } from '../http.listener';
-import { bodyParser$ } from '../middlewares/bodyParser.middleware';
-import { matchPath, matchType, use } from '../operators';
+import { Effect, HttpRequest, combineRoutes, httpListener, matchPath, matchType, use } from '../core/src';
+import { bodyParser$ } from '../middleware-body/src';
 
 const MOCKED_USER_LIST = [{ id: 1 }, { id: 2 }];
 

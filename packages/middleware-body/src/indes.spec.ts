@@ -1,7 +1,7 @@
+import { HttpRequest, HttpResponse } from '@marblejs/core';
 import { of } from 'rxjs';
-import { HttpRequest, HttpResponse } from '../http.interface';
-import { Marbles } from '../util/marbles.spec-util';
-import { bodyParser$ } from './bodyParser.middleware';
+import { Marbles } from '../../core/src/util/marbles.spec-util';
+import { bodyParser$ } from './index';
 
 const MockReq = require('mock-req');
 

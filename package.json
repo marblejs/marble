@@ -3,7 +3,7 @@
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "postinstall": "npm run build",
-    "build": "lerna bootstrap",
+    "build": "lerna bootstrap --hoist",
     "benchmark": "npm run build && make -C benchmarks",
     "lint": "tslint --config tslint.json --project tsconfig.spec.json",
     "test": "jest --expand",
@@ -48,6 +48,7 @@
     "rxjs": "~6.1.0"
   },
   "devDependencies": {
+    "@marblejs/core": "^0.2.2",
     "@types/jest": "^22.2.3",
     "@types/supertest": "^2.0.4",
     "husky": "^0.14.0",
