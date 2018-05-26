@@ -8,7 +8,7 @@ const root$: Effect = request$ => request$
     matchType('GET'),
     map(req => ({
       body: `API root @ ${req.url}`,
-    }))
+    })),
   );
 
 export const api$ = combineRoutes(
