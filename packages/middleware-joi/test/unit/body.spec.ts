@@ -31,9 +31,7 @@ describe('Joi middleware - Body', () => {
       },
       error => {
         expect(error).toBeDefined();
-        expect(error.message).toBe(
-          'child "token" fails because ["token" is required]'
-        );
+        expect(error.message).toBe('"token" is required');
         done();
       }
     );

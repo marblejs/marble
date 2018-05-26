@@ -14,14 +14,14 @@ const reqMatched = (
     params
   } as any) as HttpRequest);
 
-describe('Joi middleware - Query', () => {
+describe('Joi middleware - Params', () => {
   it('should throws an error if dont pass a required field', done => {
     expect.assertions(2);
 
     const req$ = of(reqMatched('/test', null, [], {}));
     const res = {} as HttpResponse;
     const schema = {
-      query: Joi.object({
+      params: Joi.object({
         id: Joi.string()
           .token()
           .required()
@@ -36,22 +36,19 @@ describe('Joi middleware - Query', () => {
       },
       error => {
         expect(error).toBeDefined();
-        expect(error.message).toBe(
-          'child "id" fails because ["id" is required]'
-        );
+        expect(error.message).toBe('"id" is required');
         done();
       }
     );
   });
 
-  // FIXME: fix after merge PR
-  it.skip('should throws an error if pass a invalid field', done => {
+  it('should throws an error if pass a invalid field', done => {
     expect.assertions(2);
 
-    const req$ = of(reqMatched('/test', 'id=@@@', [], {}));
+    const req$ = of(reqMatched('/test/@@@', null, [], { id: '@@@' }));
     const res = {} as HttpResponse;
     const schema = {
-      query: Joi.object({
+      params: Joi.object({
         id: Joi.string().token()
       })
     };
@@ -65,28 +62,30 @@ describe('Joi middleware - Query', () => {
       error => {
         expect(error).toBeDefined();
         expect(error.message).toBe(
-          'child "id" fails because ["id" must only contain alpha-numeric and underscore characters]'
+          '"id" must only contain alpha-numeric and underscore characters'
         );
         done();
       }
     );
   });
 
-  it.skip('should validates query with a valid value', done => {
+  it('should validates params with a default value', done => {
     expect.assertions(2);
 
-    const req$ = of(reqMatched('/test', 'id=181782881DB38D84', [], {}));
+    const req$ = of(reqMatched('/test', null, [], {}));
     const res = {} as HttpResponse;
     const schema = {
-      query: Joi.object({
-        id: Joi.string().token()
+      params: Joi.object({
+        id: Joi.string()
+          .token()
+          .default('181782881DB38D84')
       })
     };
     const http$ = validator$(schema)(req$, res, {});
 
     http$.subscribe(data => {
       expect(data).toBeDefined();
-      expect(data.query).toEqual({ id: '181782881DB38D84' });
+      expect(data.params).toEqual({ id: '181782881DB38D84' });
       done();
     });
   });
