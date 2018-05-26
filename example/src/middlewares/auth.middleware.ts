@@ -18,5 +18,8 @@ const unauthorized$ = (req$: Observable<HttpRequest>) =>
 
 export const authorize$: Effect<HttpRequest> = request$ =>
   request$.pipe(
-    switchMap(() => merge(authorized$(request$), unauthorized$(request$))),
+    switchMap(() => merge(
+      authorized$(request$),
+      unauthorized$(request$),
+    )),
   );
