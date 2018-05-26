@@ -250,8 +250,9 @@ To view the example project structure, clone the **Marble.js** repository and in
 
 ```bash
 $ git clone git://github.com/marblejs/marble.git
-$ cd marble/example
+$ cd marble
 $ npm i
+$ cd example
 ```
 
 To run example just execute following command inside root repository folder:

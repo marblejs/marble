@@ -3,7 +3,7 @@
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "postinstall": "npm run build",
-    "build": "lerna bootstrap",
+    "build": "lerna link && lerna bootstrap --hoist",
     "benchmark": "npm run build && make -C benchmarks",
     "lint": "tslint --config tslint.json --project tsconfig.spec.json",
     "test": "jest --expand",
@@ -62,9 +62,6 @@
     "ts-jest": "~22.4.4",
     "tsc": "~1.20150623.0",
     "tslint": "~5.9.1",
-    "typedoc": "~0.11.1",
-    "typedoc-plugin-external-module-name": "^1.1.1",
-    "typedoc-plugin-internal-external": "^1.0.10",
     "typescript": "~2.8.3"
   }
 }
