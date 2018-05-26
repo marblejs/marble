@@ -1,5 +1,7 @@
 <p align="center">
-<img src="https://github.com/marblejs/marble/blob/master/docs/assets/logo.png?raw=true" width="320" alt="Marble.js logo"/>
+  <a href="http://marblejs.com">
+    <img src="https://github.com/marblejs/marble/blob/master/docs/assets/logo.png?raw=true" width="320" alt="Marble.js logo"/>
+  </a>
 </p>
 
 <p align="center">
@@ -41,7 +43,7 @@ If we think closely how typical HTTP API works we can quickly recognize that it 
 
 ![Marble.js core concept](https://github.com/marblejs/marble/blob/master/docs/assets/flow.png?raw=true)
 
-In this world everything is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behavior of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that leverages functional reactive paradigm, you will feel like in home. Still there? So lets get started!
+In this world everything is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behavior of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that leverages functional reactive paradigm, you will feel like at home. Still there? So lets get started!
 
 ## <a name="instal"></a> Installation
 
@@ -248,8 +250,9 @@ To view the example project structure, clone the **Marble.js** repository and in
 
 ```bash
 $ git clone git://github.com/marblejs/marble.git
-$ cd marble/example
+$ cd marble
 $ npm i
+$ cd example
 ```
 
 To run example just execute following command inside root repository folder:
@@ -268,7 +271,7 @@ $ npm run start
 - [x] composable routing
 - [x] intercepting url parameters (via `matchPath` operator) *(v0.3.0)*
 - [x] ability to compose midddlewares inside `Effect` pipeline *(v0.3.0)*
-- [ ] intercepting query parameters *(v0.3.0)*
+- [x] intercepting query parameters *(v0.3.0)*
 - [ ] more middlewares! (can think about moving `logger$` and `bodyParser$` outside core library)
 - [ ] testing utilities
 - [ ] improved, dedicated documentation (to move outside README)

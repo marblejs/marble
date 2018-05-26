@@ -1,13 +1,15 @@
-import { HttpRequest, RouteParameters } from '../../http.interface';
+import { HttpRequest, QueryParameters, RouteParameters } from '../../http.interface';
 import { Marbles } from '../../util/marbles.spec-util';
 import { matchPath } from './matchPath.operator';
 
 const req = (url: string) => ({ url } as HttpRequest);
-const reqMatched = (url: string, query = '', matchers: string[] = [], params: RouteParameters = {}) => ({
-  url: !!query ? `${url}?${query}` : url,
-  matchers,
-  params,
-} as any as HttpRequest);
+
+const reqMatched = (
+  url: string,
+  matchers: string[] = [],
+  params: RouteParameters = {},
+  query: QueryParameters = {},
+) => ({ url, matchers, params, query } as any as HttpRequest);
 
 describe('matchPath operator', () => {
   let operators;
@@ -34,7 +36,7 @@ describe('matchPath operator', () => {
     operators = [matchPath('/test/:foo/bar')];
     Marbles.assert(operators, [
       ['-a-b---', { a: req('/test/bar'), b: req('/test/url/bar') }],
-      ['---b---', { b: reqMatched('/test/url/bar', null, [], { foo: 'url' }) }],
+      ['---b---', { b: reqMatched('/test/url/bar', [], { foo: 'url' }) }],
     ]);
   });
 
@@ -47,9 +49,9 @@ describe('matchPath operator', () => {
         c: req('/test/?foo=bar'),
       }],
       ['---b-c-', {
-        b: reqMatched('/test', 'foo=bar'),
-        c: reqMatched('/test/', 'foo=bar'),
-      }],
+        b: reqMatched('/test?foo=bar', [], {}, { foo: 'bar' } ),
+        c: reqMatched('/test/?foo=bar', [], {}, { foo: 'bar' }),
+      }]
     ]);
   });
 
@@ -58,9 +60,11 @@ describe('matchPath operator', () => {
     Marbles.assert(operators, [
       ['-a-b--', {
         a: req('/test/bar'),
-        b: req('/test/url/bar?foo=bar') }],
+        b: req('/test/url/bar?foo=bar'),
+      }],
       ['---b--', {
-        b: reqMatched('/test/url/bar', 'foo=bar', [], { foo: 'url' }) }],
+        b: reqMatched('/test/url/bar?foo=bar', [], { foo: 'url' }, { foo: 'bar' }),
+      }]
     ]);
   });
 
@@ -76,7 +80,7 @@ describe('matchPath operator', () => {
         a: reqMatched('/test'),
         b: reqMatched('/test/bar'),
         c: reqMatched('/test/url/bar'),
-      }],
+      }]
     ]);
   });
 
@@ -84,14 +88,15 @@ describe('matchPath operator', () => {
     operators = [matchPath('/test', { combiner: true })];
     Marbles.assert(operators, [
       ['-a--', { a: req('/test') }],
-      ['-a--', { a: reqMatched('/test', null, ['/test']) }],
+      ['-a--', { a: reqMatched('/test', ['/test']) }],
     ]);
 
-    operators = [matchPath('/test/:id/foo', { combiner: true, suffix: '/:foo*' })];
+    operators = [
+      matchPath('/test/:id/foo', { combiner: true, suffix: '/:foo*' })
+    ];
     Marbles.assert(operators, [
       ['-a--', { a: req('/test/2/foo') }],
-      ['-a--', { a: reqMatched('/test/2/foo', null, ['/test/:id/foo'], { id: '2' }) }],
+      ['-a--', { a: reqMatched('/test/2/foo', ['/test/:id/foo'], { id: '2' }) }],
     ]);
   });
-
 });

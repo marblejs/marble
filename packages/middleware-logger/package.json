@@ -1,7 +1,7 @@
 {
-  "name": "@marblejs/core",
+  "name": "@marblejs/middleware-logger",
   "version": "0.2.2",
-  "description": "Reactive Node APIs made easy",
+  "description": "Logger middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -29,13 +29,15 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
+    "@marblejs/core": "^0.2.2",
     "rxjs": "~6.1.0"
   },
   "dependencies": {
-    "path-to-regexp": "^2.2.1"
+    "chalk": "^2.4.1"
   },
   "devDependencies": {
-    "@types/path-to-regexp": "^1.7.0"
+    "@marblejs/core": "^0.2.2",
+    "@types/chalk": "^2.2.0"
   },
   "publishConfig": {
     "access": "public"
