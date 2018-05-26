@@ -48,12 +48,12 @@ export const bodyParser$: Effect<HttpRequest> = (request$, response) =>
   request$.pipe(
     switchMap(
       req =>
-        req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH'
+        ['POST', 'PUT', 'PATCH'].includes(req.method!)
           ? of(req).pipe(
               switchMap(getBody),
               tap(body => (req.body = body)),
               map(() => req),
-              catchError(error =>
+              catchError(() =>
                 throwError(
                   new HttpError(
                     'Request body parse error',
