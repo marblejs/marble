@@ -23,6 +23,8 @@
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
     "@marblejs/core": "^0.2.2",
+    "@marblejs/middleware-body": "^0.2.2",
+    "@marblejs/middleware-logger": "^0.2.2",
     "@types/node": "^10.1.2",
     "rxjs": "^6.1.0",
     "typescript": "~2.8.3"
@@ -30,5 +32,8 @@
   "devDependencies": {
     "nodemon": "^1.17.3",
     "ts-node": "^6.0.2"
+  },
+  "publishConfig": {
+    "access": "private"
   }
 }
