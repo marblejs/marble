@@ -1,6 +1,7 @@
 import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
-import { HttpRequest, HttpResponse, bodyParser$ } from '@marblejs/core';
+import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { bodyParser$ } from '@marblejs/middleware-body';
 const MockReq = require('mock-req');
 
 describe('Joi middleware - Body', () => {

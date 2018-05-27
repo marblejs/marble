@@ -39,11 +39,27 @@ describe('Joi middleware - Integration', () => {
       .then(res => expect(res.body).toEqual(expected));
   });
 
+  it('should send a get request with query', async () => {
+    return request(app)
+      .get('/api/post?page=2')
+      .set('token', token)
+      .expect(200, { page: 2 });
+  });
+
   it('should send a post request with body', async () => {
     return request(app)
       .post('/api/user')
       .set('token', token)
       .send({ name: 'lucio' })
       .expect(200, { name: 'lucio', passport: 'marble.js' });
+  });
+
+  it('should send a post request with query and body', async () => {
+    const time = Date.now();
+    return request(app)
+      .post(`/api/post?timestamp=${time}`)
+      .set('token', token)
+      .send({ title: 'Middleware Joi' })
+      .expect(200, { title: 'Middleware Joi', timestamp: new Date(time).toISOString() });
   });
 });

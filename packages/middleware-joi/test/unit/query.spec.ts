@@ -1,24 +1,19 @@
 import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
-import { HttpRequest, HttpResponse, RouteParameters } from '@marblejs/core';
+import { HttpRequest, HttpResponse, RouteParameters, QueryParameters } from '@marblejs/core';
 
 const reqMatched = (
   url: string,
-  query = '',
   matchers: string[] = [],
-  params: RouteParameters = {}
-) =>
-  (({
-    url: !!query ? `${url}?${query}` : url,
-    matchers,
-    params
-  } as any) as HttpRequest);
+  params: RouteParameters = {},
+  query: QueryParameters = {},
+) => ({ url, matchers, params, query } as any as HttpRequest);
 
 describe('Joi middleware - Query', () => {
   it('should throws an error if dont pass a required field', done => {
     expect.assertions(2);
 
-    const req$ = of(reqMatched('/test', null, [], {}));
+    const req$ = of(reqMatched('/test', null, {}, {}));
     const res = {} as HttpResponse;
     const schema = {
       query: Joi.object({
@@ -42,11 +37,10 @@ describe('Joi middleware - Query', () => {
     );
   });
 
-  // FIXME: fix after merge PR
-  it.skip('should throws an error if pass a invalid field', done => {
+  it('should throws an error if pass a invalid field', done => {
     expect.assertions(2);
 
-    const req$ = of(reqMatched('/test', 'id=@@@', [], {}));
+    const req$ = of(reqMatched('/test', null, {}, { id: '@@@' }));
     const res = {} as HttpResponse;
     const schema = {
       query: Joi.object({
@@ -70,10 +64,10 @@ describe('Joi middleware - Query', () => {
     );
   });
 
-  it.skip('should validates query with a valid value', done => {
+  it('should validates query with a valid value', done => {
     expect.assertions(2);
 
-    const req$ = of(reqMatched('/test', 'id=181782881DB38D84', [], {}));
+    const req$ = of(reqMatched('/test', null, {}, { id: '181782881DB38D84' }));
     const res = {} as HttpResponse;
     const schema = {
       query: Joi.object({

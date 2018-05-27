@@ -5,10 +5,27 @@ import {
   matchType,
   httpListener,
   use,
-  combineRoutes,
-  bodyParser$
+  combineRoutes
 } from '@marblejs/core';
+import { bodyParser$ } from '@marblejs/middleware-body';
 import { map } from 'rxjs/operators';
+
+const getPost$: Effect = request$ =>
+  request$.pipe(
+    matchPath('/post'),
+    matchType('GET'),
+    use(
+      validator$({
+        query: {
+          page: Joi.number()
+            .integer()
+            .greater(1)
+        }
+      })
+    ),
+    map(req => req.query),
+    map(query => ({ status: 200, body: { ...query } }))
+  );
 
 const getUser$: Effect = request$ =>
   request$.pipe(
@@ -29,6 +46,23 @@ const getUser$: Effect = request$ =>
     map(params => ({ status: 200, body: { id: params!.id } }))
   );
 
+const storePost$: Effect = request$ =>
+  request$.pipe(
+    matchPath('/post'),
+    matchType('POST'),
+    use(
+      validator$({
+        query: {
+          timestamp: Joi.date().required()
+        },
+        body: {
+          title: Joi.string().required()
+        }
+      })
+    ),
+    map(resp => ({ body: { ...resp.body, ...resp.query } }))
+  );
+
 const postUser$: Effect = request$ =>
   request$.pipe(
     matchPath('/user'),
@@ -45,7 +79,7 @@ const postUser$: Effect = request$ =>
     map(response => ({ body: response }))
   );
 
-const api$ = combineRoutes('/api', [getUser$, postUser$]);
+const api$ = combineRoutes('/api', [getPost$, getUser$, postUser$, storePost$]);
 
 const middlewares = [
   bodyParser$,
