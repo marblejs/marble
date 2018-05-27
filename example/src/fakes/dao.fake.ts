@@ -9,7 +9,7 @@ export namespace Dao {
   ]);
 
   export const postUser = (data: any) => of({
-    data
+    data,
   });
 
 }
