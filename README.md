@@ -309,6 +309,12 @@ $ npm run start
         <p style="text-align: center"><small>Patryk Domałeczny</small></p>
       </a>
     </td>
+    <td align="center">
+      <a href="https://github.com/luciorubeens" style="color: white">
+        <img src="https://github.com/luciorubeens.png?s=150" width="100"/>
+        <p style="text-align: center"><small>Lúcio Rubens</small></p>
+      </a>
+    </td>
   </tr>
 </table>
 
