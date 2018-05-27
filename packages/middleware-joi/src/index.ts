@@ -12,25 +12,18 @@ import {
   map
 } from 'rxjs/operators';
 
-const isJoiValidationError = (
-  err: Joi.ValidationError | Error
-): err is Joi.ValidationError => {
-  return (<Joi.ValidationError>err).isJoi === true;
-};
-
 const validateSource = (req: HttpRequest, rules: Map<string, any>, options) =>
   from(rules.keys()).pipe(
     mergeMap(rule =>
       of(req[rule]).pipe(
         flatMap(item =>
-          from(Joi.validate(item || {}, rules.get(rule), options))
+          from(Joi.validate(item || {}, rules.get(rule), options)).pipe(
+            catchError((err: Joi.ValidationError) => {
+              const message = err.details[0].message;
+              return throwError(new HttpError(message, HttpStatus.BAD_REQUEST));
+            })
+          )
         ),
-        catchError((err: Joi.ValidationError | Error) => {
-          const message = isJoiValidationError(err)
-            ? err.details[0].message
-            : err.message;
-          return throwError(new HttpError(message, HttpStatus.BAD_REQUEST));
-        }),
         map(result => (req[rule] = result))
       )
     ),
