@@ -1,0 +1,54 @@
+{
+  "name": "@marblejs/middleware-joi",
+  "version": "0.2.2",
+  "description": "A joi validation middleware for Marble.js",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start": "npm run watch",
+    "watch": "tsc -w",
+    "build": "tsc",
+    "test": "jest --config ../../jest.config.js",
+    "prepack": "npm run build",
+    "prepare": "npm run build"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "marble.js",
+    "joi",
+    "middleware",
+    "http",
+    "rxjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "npm": ">= 5.0.0"
+  },
+  "author": "Lúcio Rubens <luciorubeens@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "homepage": "https://github.com/marblejs/marble#readme",
+  "peerDependencies": {
+    "@marblejs/core": "^0.2.2",
+    "rxjs": "~6.1.0"
+  },
+  "dependencies": {
+    "joi": "^13.3.0"
+  },
+  "devDependencies": {
+    "@marblejs/core": "^0.2.2",
+    "@marblejs/middleware-body": "^0.2.2",
+    "@types/joi": "^13.0.8"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
