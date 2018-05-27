@@ -7,6 +7,7 @@
     "start": "ts-node --project tsconfig.json src/index.ts",
     "watch": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec npm run start"
   },
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marblejs/marble.git"
@@ -32,8 +33,5 @@
   "devDependencies": {
     "nodemon": "^1.17.3",
     "ts-node": "^6.0.2"
-  },
-  "publishConfig": {
-    "access": "private"
   }
 }
