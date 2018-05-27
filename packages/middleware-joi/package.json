@@ -35,15 +35,20 @@
   "bugs": {
     "url": "https://github.com/marblejs/marble/issues"
   },
+  "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
+    "@marblejs/core": "^0.2.2",
     "rxjs": "~6.1.0"
   },
-  "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "@marblejs/core": "^0.2.2",
     "joi": "^13.3.0"
   },
   "devDependencies": {
+    "@marblejs/core": "^0.2.2",
+    "@marblejs/middleware-body": "^0.2.2",
     "@types/joi": "^13.0.8"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
