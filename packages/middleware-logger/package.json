@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-logger",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Logger middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
