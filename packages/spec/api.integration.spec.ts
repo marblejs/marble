@@ -1,10 +1,14 @@
+import * as path from 'path';
 import { of } from 'rxjs';
 import { filter, map, mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
+import { ContentType } from '../core/dist/util/contentType.util';
 import { Effect, HttpRequest, combineRoutes, httpListener, matchPath, matchType, use } from '../core/src';
 import { bodyParser$ } from '../middleware-body/src';
+import { readFile } from '../util/fileReader.helper';
 
 const MOCKED_USER_LIST = [{ id: 1 }, { id: 2 }];
+const STATIC_PATH = path.resolve(__dirname, '../../docs/assets');
 
 const authorize$: Effect<HttpRequest> = request$ =>
   request$.pipe(
@@ -15,7 +19,7 @@ const root$: Effect = req$ =>
   req$.pipe(
     matchPath('/'),
     matchType('GET'),
-    mapTo({ status: 200 }),
+    mapTo({ status: 200, body: 'root' }),
   );
 
 const getUserList$: Effect = request$ =>
@@ -42,9 +46,18 @@ const postUser$: Effect = request$ =>
     map(response => ({ body: response }))
   );
 
+const file$: Effect = request$ =>
+  request$.pipe(
+    matchPath('/static/:dir'),
+    matchType('GET'),
+    map(req => req.params!.dir as string),
+    switchMap(readFile(STATIC_PATH)),
+    map(body => ({ body }))
+  );
+
 const user$ = combineRoutes('/user', [getUserList$, getUserSingle$, postUser$]);
 
-const api$ = combineRoutes('/api/:version', [root$, user$]);
+const api$ = combineRoutes('/api/:version', [root$, file$, user$]);
 
 const app = httpListener({
   middlewares: [bodyParser$],
@@ -60,7 +73,7 @@ describe('API integration', () => {
   it('returns only status 200: /api/v1', async () =>
     request(app)
       .get('/api/v1')
-      .expect(200));
+      .expect(200, '"root"'));
 
   it('returns object: /api/v1/user', async () =>
     request(app)
@@ -81,4 +94,11 @@ describe('API integration', () => {
       .set('Authorization', 'Bearer test')
       .send({ test: 'test' })
       .expect(200, { test: 'test' }));
+
+  it(`returns static file as ${ContentType.TEXT_HTML}: /api/v1/static/index.html`, async () =>
+    request(app)
+      .get('/api/v1/static/index.html')
+      .expect('Content-Type', ContentType.TEXT_HTML)
+      .then(res => expect(res.text).toContain('<h1>Test</h1>')));
+
 });

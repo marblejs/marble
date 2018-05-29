@@ -49,11 +49,13 @@
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",
+    "@types/mock-fs": "^3.6.30",
     "@types/supertest": "^2.0.4",
     "husky": "^0.14.0",
     "jest": "^22.4.3",
     "lerna": "^2.11.0",
     "lint-staged": "^7.1.1",
+    "mock-fs": "^4.5.0",
     "mock-req": "^0.2.0",
     "prettier": "1.12.1",
     "rimraf": "^2.6.2",

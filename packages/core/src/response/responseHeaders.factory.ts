@@ -1,11 +1,17 @@
-import { HttpHeaders } from '../http.interface';
-import { ContentType } from '../util/contentType.util';
+import { HttpHeaders, HttpStatus } from '../http.interface';
+import { contentTypeFactory } from './responseContentType.factory';
 
 export const DEFAULT_HEADERS = {
-  'Content-Type': ContentType.APPLICATION_JSON,
+  'Content-Type': 'application/json',
+  'X-Content-Type-Options': 'nosniff',
 };
 
-export const headersFactory = (headers?: HttpHeaders) => ({
+export const headersFactory = (data: {
+  body: any;
+  path: string;
+  status: HttpStatus;
+}) => (headers?: HttpHeaders) => ({
   ...DEFAULT_HEADERS,
+  ...contentTypeFactory(data),
   ...headers,
 });
