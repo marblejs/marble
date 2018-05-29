@@ -10,7 +10,7 @@
     "test:coverage": "jest --expand --coverage",
     "test:watch": "jest --expand --onlyChanged --watch",
     "prepublish": "npm run test",
-    "publish": "./scripts/publish.sh",
+    "publish": "lerna publish",
     "precommit": "lint-staged"
   },
   "lint-staged": {
