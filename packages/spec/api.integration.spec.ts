@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { of } from 'rxjs';
 import { filter, map, mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
@@ -7,6 +8,7 @@ import { bodyParser$ } from '../middleware-body/src';
 import { readFile } from '../util/fileReader.helper';
 
 const MOCKED_USER_LIST = [{ id: 1 }, { id: 2 }];
+const STATIC_PATH = path.resolve(__dirname, '../../docs/assets');
 
 const authorize$: Effect<HttpRequest> = request$ =>
   request$.pipe(
@@ -49,7 +51,7 @@ const file$: Effect = request$ =>
     matchPath('/static/:dir'),
     matchType('GET'),
     map(req => req.params!.dir as string),
-    switchMap(readFile(__dirname + './../../docs/assets')),
+    switchMap(readFile(STATIC_PATH)),
     map(body => ({ body }))
   );
 
