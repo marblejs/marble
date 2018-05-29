@@ -1,7 +1,7 @@
 import { mapTo } from 'rxjs/operators';
+import { Marbles } from '../../../util/marbles.spec-util';
 import { HttpRequest, HttpResponse } from '../http.interface';
 import { HttpError } from '../util/error.util';
-import { Marbles } from '../util/marbles.spec-util';
 import { error$, getErrorMiddleware } from './error.middleware';
 
 const createMockRes = () => ({} as HttpResponse);

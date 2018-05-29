@@ -1,22 +1,19 @@
 import { Observable, OperatorFunction, from } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { Effect } from '../effects/effects.interface';
-import { HttpRequest, HttpResponse } from '../http.interface';
+import { Effect } from '../core/src/effects/effects.interface';
+import { HttpRequest, HttpResponse } from '../core/src/http.interface';
 
 type MarbleFlow = [string, object];
-type MarbleDependencies = { response: HttpResponse, error?: Error };
+type MarbleDependencies = { response: HttpResponse; error?: Error };
 
 export namespace Marbles {
+  const deepEquals = (actual, expected) => expect(actual).toEqual(expected);
 
-  const deepEquals = (actual, expected) =>
-    expect(actual).toEqual(expected);
-
-  const createTestScheduler = () =>
-    new TestScheduler(deepEquals);
+  const createTestScheduler = () => new TestScheduler(deepEquals);
 
   export const assert = <T>(
     operators: OperatorFunction<T, any>[],
-    marbleflow: [MarbleFlow, MarbleFlow]
+    marbleflow: [MarbleFlow, MarbleFlow],
   ) => {
     const [initStream, initValues] = marbleflow[0];
     const [expectedStream, expectedValues] = marbleflow[1];
@@ -59,11 +56,8 @@ export namespace Marbles {
     const [expectedStream, expectedValues] = marbleflow;
     const scheduler = createTestScheduler();
 
-    scheduler
-      .expectObservable(effects$)
-      .toBe(expectedStream, expectedValues);
+    scheduler.expectObservable(effects$).toBe(expectedStream, expectedValues);
 
     scheduler.flush();
   };
-
 }

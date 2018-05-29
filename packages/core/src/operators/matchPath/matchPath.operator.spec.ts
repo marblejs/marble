@@ -1,5 +1,5 @@
+import { Marbles } from '../../../../util/marbles.spec-util';
 import { HttpRequest, QueryParameters, RouteParameters } from '../../http.interface';
-import { Marbles } from '../../util/marbles.spec-util';
 import { matchPath } from './matchPath.operator';
 
 const req = (url: string) => ({ url } as HttpRequest);
