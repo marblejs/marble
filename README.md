@@ -67,6 +67,7 @@ $ npm run start
 - [x] intercepting query parameters *(v0.3.0)*
 - [x] move `logger$` and `bodyParser$` outside core library
 - [x] improved, dedicated documentation (to move outside README)
+- [ ] ability to compose middlewares inside `combineRoutes()`
 - [ ] more middlewares!
 - [ ] testing utilities
 - [ ] and much more, still not defined...
