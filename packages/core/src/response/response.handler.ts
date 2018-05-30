@@ -3,14 +3,14 @@ import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { bodyFactory } from './responseBody.factory';
 import { headersFactory } from './responseHeaders.factory';
 
-export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (
-  effect: EffectResponse,
-) => {
+export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effect: EffectResponse) => {
   const status = effect.status || HttpStatus.OK;
-  const headers = headersFactory({ body: effect.body, path: req.url!, status })(
-    effect.headers,
-  );
-  const body = bodyFactory(headers)(effect.body);
+
+  const headersFactoryWithData = headersFactory({ body: effect.body, path: req.url!, status });
+  const headers = headersFactoryWithData(effect.headers);
+
+  const bodyFactoryWithHeaders = bodyFactory(headers);
+  const body = bodyFactoryWithHeaders(effect.body);
 
   if (body) {
     res.setHeader('Content-Length', Buffer.byteLength(body));
