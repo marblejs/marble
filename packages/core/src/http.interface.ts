@@ -2,9 +2,11 @@ import * as http from 'http';
 
 export interface HttpRequest extends http.IncomingMessage {
   body?: any;
-  matchers?: string[];
   params?: RouteParameters;
   query?: QueryParameters;
+  matchers?: string[];
+  matchPath: boolean;
+  matchType: boolean;
   [key: string]: any;
 }
 
