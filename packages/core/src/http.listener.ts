@@ -2,8 +2,8 @@ import { Subject, of } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { combineEffects, combineMiddlewareEffects } from './effects/effects.combiner';
 import { Effect, EffectResponse, GroupedEffects } from './effects/effects.interface';
+import { getErrorMiddleware } from './error/error.middleware';
 import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
-import { getErrorMiddleware } from './middlewares/error.middleware';
 import { handleResponse } from './response/response.handler';
 
 type HttpListenerConfig = {

@@ -2,9 +2,9 @@ import { throwError } from 'rxjs';
 import { mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
 import { Effect } from './effects/effects.interface';
+import { HttpError } from './error/error.model';
 import { httpListener } from './http.listener';
 import { matchPath } from './operators';
-import { HttpError } from './util/error.util';
 
 describe('Http listener', () => {
   it('reacts to attached effect', async () => {
