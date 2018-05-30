@@ -21,8 +21,11 @@ export const matchPath = (path: string, opts: MatcherOpts = {}) => (source$: Obs
     tap(req => (req.matchers = req.matchers || [])),
     filter(isRequestMatched),
     filter(req => {
+      if (path === '*') { return true; }
+
       const matcher = matcherFactory(req.matchers!, path, opts.suffix);
       const url = removeQueryParams(req.url!);
+
       return pathToRegexp(matcher).test(url);
     }),
     tap(req => (req.params = urlParamsFactory(req, path))),
