@@ -18,23 +18,20 @@ export const httpListener = ({
   errorMiddleware,
 }: HttpListenerConfig) => {
   const request$ = new Subject<Http>();
-  const effect$ = request$
-    .pipe(
-      mergeMap(({ req, res }) =>
-        combineMiddlewareEffects(middlewares)(res)(req)
-          .pipe(
-            switchMap(combineEffects(effects)(res)),
-            defaultIfEmpty({ status: HttpStatus.NOT_FOUND } as EffectResponse),
+  const effect$ = request$.pipe(
+    mergeMap(({ req, res }) =>
+      combineMiddlewareEffects(middlewares)(res)(req).pipe(
+        switchMap(combineEffects(effects)(res)),
+        defaultIfEmpty({ status: HttpStatus.NOT_FOUND } as EffectResponse),
+        tap(handleResponse(res)(req)),
+        catchError(error =>
+          getErrorMiddleware(errorMiddleware)(of(req), res, error).pipe(
             tap(handleResponse(res)(req)),
-            catchError(error =>
-              getErrorMiddleware(errorMiddleware)(of(req), res, error)
-                .pipe(
-                  tap(handleResponse(res)(req)),
-                ),
-            ),
           ),
+        ),
       ),
-    );
+    ),
+  );
 
   effect$.subscribe();
 
