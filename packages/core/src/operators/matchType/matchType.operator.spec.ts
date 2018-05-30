@@ -23,4 +23,12 @@ describe('matchType operator', () => {
     ]);
   });
 
+  it('matches all HTTP methods', () => {
+    const operators = [matchType('*')];
+    Marbles.assert(operators, [
+      ['-a-b---', { a: mockReq('GET'), b: mockReq('POST') }],
+      ['-a-b---', { a: mockReqMatched('GET'), b: mockReqMatched('POST') }],
+    ]);
+  });
+
 });
