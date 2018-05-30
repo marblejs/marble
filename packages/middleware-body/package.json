@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-body",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Body parser middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -33,7 +33,7 @@
     "rxjs": "~6.1.0"
   },
   "devDependencies": {
-    "@marblejs/core": "^0.3.2"
+    "@marblejs/core": "^0.4.0"
   },
   "publishConfig": {
     "access": "public"
