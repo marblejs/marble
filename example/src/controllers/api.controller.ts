@@ -1,5 +1,6 @@
-import { Effect, combineRoutes, matchPath, matchType } from '@marblejs/core';
-import { map } from 'rxjs/operators';
+import { Effect, HttpError, HttpStatus, combineRoutes, matchPath, matchType } from '@marblejs/core';
+import { throwError } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { user$ } from './user.controller';
 
 const root$: Effect = request$ => request$
@@ -11,7 +12,16 @@ const root$: Effect = request$ => request$
     })),
   );
 
+const notFound$: Effect = request$ => request$
+  .pipe(
+    matchPath('*'),
+    matchType('*'),
+    switchMap(() =>
+      throwError(new HttpError('Route not found', HttpStatus.NOT_FOUND))
+    )
+  );
+
 export const api$ = combineRoutes(
   '/api/v1',
-  [ root$, user$ ],
+  [ root$, user$, notFound$ ],
 );
