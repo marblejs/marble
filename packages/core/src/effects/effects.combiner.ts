@@ -1,5 +1,5 @@
-import { merge, of } from 'rxjs';
-import { mergeMap, switchMap } from 'rxjs/operators';
+import { concat, of } from 'rxjs';
+import { concatMap, switchMap } from 'rxjs/operators';
 import { HttpRequest } from '../http.interface';
 import { matchPath } from '../operators';
 import { isGroup } from './effects.helpers';
@@ -10,12 +10,12 @@ export const combineEffects: EffectCombiner = effects => res => req => {
   const mappedEffects = effects.map(effect => isGroup(effect)
     ? req$.pipe(
         matchPath(effect.path, { suffix: '/:foo*', combiner: true }),
-        mergeMap(combineEffects(effect.effects)(res))
+        concatMap(combineEffects(effect.effects)(res))
       )
     : effect(req$, res, undefined)
   );
 
-  return merge(...mappedEffects);
+  return concat(...mappedEffects);
 };
 
 export const combineMiddlewareEffects: MiddlewareCombiner = effects => res => req => {

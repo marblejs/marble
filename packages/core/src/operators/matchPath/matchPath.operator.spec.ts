@@ -9,7 +9,8 @@ const reqMatched = (
   matchers: string[] = [],
   params: RouteParameters = {},
   query: QueryParameters = {},
-) => ({ url, matchers, params, query } as any as HttpRequest);
+  matchPath = true,
+) => ({ url, matchers, params, query, matchPath } as any as HttpRequest);
 
 describe('matchPath operator', () => {
   let operators;
@@ -88,15 +89,13 @@ describe('matchPath operator', () => {
     operators = [matchPath('/test', { combiner: true })];
     Marbles.assert(operators, [
       ['-a--', { a: req('/test') }],
-      ['-a--', { a: reqMatched('/test', ['/test']) }],
+      ['-a--', { a: reqMatched('/test', ['/test'], undefined, undefined, false) }],
     ]);
 
-    operators = [
-      matchPath('/test/:id/foo', { combiner: true, suffix: '/:foo*' })
-    ];
+    operators = [matchPath('/test/:id/foo', { combiner: true, suffix: '/:foo*' })];
     Marbles.assert(operators, [
       ['-a--', { a: req('/test/2/foo') }],
-      ['-a--', { a: reqMatched('/test/2/foo', ['/test/:id/foo'], { id: '2' }) }],
+      ['-a--', { a: reqMatched('/test/2/foo', ['/test/:id/foo'], { id: '2' }, undefined, false) }],
     ]);
   });
 });
