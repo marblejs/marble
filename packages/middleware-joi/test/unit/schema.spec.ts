@@ -1,4 +1,4 @@
-import { validator$, Joi } from '../../src';
+import { validator$ } from '../../src';
 
 describe('Joi middleware - Schema', () => {
   it('should throws an error if using an invalid schema', done => {
