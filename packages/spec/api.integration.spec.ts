@@ -1,9 +1,10 @@
 import * as path from 'path';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { filter, map, mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
+import { HttpStatus } from '../core/dist/http.interface';
 import { ContentType } from '../core/dist/util/contentType.util';
-import { Effect, HttpRequest, combineRoutes, httpListener, matchPath, matchType, use } from '../core/src';
+import { Effect, HttpError, HttpRequest, combineRoutes, httpListener, matchPath, matchType, use } from '../core/src';
 import { bodyParser$ } from '../middleware-body/src';
 import { readFile } from '../util/fileReader.helper';
 
@@ -46,6 +47,13 @@ const postUser$: Effect = request$ =>
     map(response => ({ body: response }))
   );
 
+const error$: Effect = request$ =>
+  request$.pipe(
+    matchPath('/error'),
+    matchType('GET'),
+    switchMap(() => throwError(new HttpError('test', HttpStatus.METHOD_NOT_ALLOWED, { test: 'test' }))),
+  );
+
 const file$: Effect = request$ =>
   request$.pipe(
     matchPath('/static/:dir'),
@@ -57,7 +65,7 @@ const file$: Effect = request$ =>
 
 const user$ = combineRoutes('/user', [getUserList$, getUserSingle$, postUser$]);
 
-const api$ = combineRoutes('/api/:version', [root$, file$, user$]);
+const api$ = combineRoutes('/api/:version', [root$, file$, error$, user$]);
 
 const app = httpListener({
   middlewares: [bodyParser$],
@@ -70,10 +78,19 @@ describe('API integration', () => {
       .post('/')
       .expect(404));
 
-  it('returns only status 200: /api/v1', async () =>
+  it('returns status 200: /api/v1', async () =>
     request(app)
       .get('/api/v1')
       .expect(200, '"root"'));
+
+  it('returns error response: /api/v1/error', async () =>
+    request(app)
+      .get('/api/v1/error')
+      .expect(HttpStatus.METHOD_NOT_ALLOWED, { error: {
+        status: HttpStatus.METHOD_NOT_ALLOWED,
+        data: { test: 'test' },
+        message: 'test',
+      }}));
 
   it('returns object: /api/v1/user', async () =>
     request(app)

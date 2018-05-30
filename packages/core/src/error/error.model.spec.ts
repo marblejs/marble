@@ -1,4 +1,4 @@
-import { ExtendableError, HttpError, isHttpError } from './error.util';
+import { ExtendableError, HttpError, isHttpError } from './error.model';
 
 describe('Error', () => {
 
