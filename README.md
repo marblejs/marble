@@ -62,9 +62,9 @@ $ npm run start
 - [x] custom middlewares
 - [x] custom error handlers
 - [x] composable routing
-- [x] intercepting url parameters (via `matchPath` operator) *(v0.3.0)*
-- [x] ability to compose midddlewares inside `Effect` pipeline *(v0.3.0)*
-- [x] intercepting query parameters *(v0.3.0)*
+- [x] intercepting url parameters (via `matchPath` operator)
+- [x] ability to compose midddlewares inside `Effect` pipeline
+- [x] intercepting query parameters
 - [x] move `logger$` and `bodyParser$` outside core library
 - [x] improved, dedicated documentation (to move outside README)
 - [ ] ability to compose middlewares inside `combineRoutes()`
