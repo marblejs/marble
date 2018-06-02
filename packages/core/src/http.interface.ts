@@ -1,6 +1,7 @@
 import * as http from 'http';
 
 export interface HttpRequest extends http.IncomingMessage {
+  url: string;
   body?: any;
   params?: RouteParameters;
   query?: QueryParameters;

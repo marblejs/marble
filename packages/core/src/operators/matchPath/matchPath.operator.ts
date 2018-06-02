@@ -24,12 +24,12 @@ export const matchPath = (path: string, opts: MatcherOpts = {}) => (source$: Obs
       if (path === '*') { return true; }
 
       const matcher = matcherFactory(req.matchers!, path, opts.suffix);
-      const url = removeQueryParams(req.url!);
+      const url = removeQueryParams(req.url);
 
       return pathToRegexp(matcher).test(url);
     }),
     tap(req => (req.params = urlParamsFactory(req, path))),
-    tap(req => (req.query = queryParamsFactory(req.url!))),
+    tap(req => (req.query = queryParamsFactory(req.url))),
     tap(req => opts.combiner && req.matchers!.push(path)),
     tap(req => (req.matchPath = !opts.combiner ? true : false)),
   );

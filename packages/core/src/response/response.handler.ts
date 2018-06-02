@@ -6,7 +6,7 @@ import { headersFactory } from './responseHeaders.factory';
 export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effect: EffectResponse) => {
   const status = effect.status || HttpStatus.OK;
 
-  const headersFactoryWithData = headersFactory({ body: effect.body, path: req.url!, status });
+  const headersFactoryWithData = headersFactory({ body: effect.body, path: req.url, status });
   const headers = headersFactoryWithData(effect.headers);
 
   const bodyFactoryWithHeaders = bodyFactory(headers);
