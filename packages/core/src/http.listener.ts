@@ -1,9 +1,10 @@
+import { IncomingMessage, OutgoingMessage } from 'http';
 import { of, Subject } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { combineEffects, combineMiddlewareEffects } from './effects/effects.combiner';
 import { Effect, EffectResponse, GroupedEffects } from './effects/effects.interface';
 import { getErrorMiddleware } from './error/error.middleware';
-import { Http, HttpRequest, HttpStatus } from './http.interface';
+import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
 import { handleResponse } from './response/response.handler';
 
 type HttpListenerConfig = {
@@ -35,5 +36,8 @@ export const httpListener = ({
 
   effect$.subscribe();
 
-  return (req, res) => request$.next({ req, res });
+  return (req: IncomingMessage, res: OutgoingMessage) => request$.next({
+    req: req as HttpRequest,
+    res: res as HttpResponse,
+  });
 };
