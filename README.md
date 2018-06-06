@@ -58,17 +58,6 @@ $ npm run start
 
 **Marble.js** is not yet a final and production ready product. Its APIs can improve over time when reaching stable version `1.0.0`. But in the meantime you can play easily and contribute to the growing community of functional reactive programming freaks.
 
-- [x] core mechanics
-- [x] custom middlewares
-- [x] custom error handlers
-- [x] composable routing
-- [x] intercepting url parameters (via `matchPath` operator)
-- [x] ability to compose midddlewares inside `Effect` pipeline
-- [x] intercepting query parameters
-- [x] move `logger$` and `bodyParser$` outside core library
-- [x] improved, dedicated documentation (to move outside README)
-- [ ] ability to compose middlewares inside `combineRoutes()`
-
 ## Authors
 
 <table border="0">
