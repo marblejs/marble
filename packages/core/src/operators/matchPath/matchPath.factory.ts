@@ -3,7 +3,7 @@ export const removeTrailingSlash = (path: string): string =>
 
 export const removeQueryParams = (path: string): string => path.split('?')[0];
 
-export const matcherFactory = (
+export const matchPathFactory = (
   matchingHistory: string[],
   pathToMatch: string,
   suffix?: string
