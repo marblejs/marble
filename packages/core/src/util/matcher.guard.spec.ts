@@ -3,7 +3,7 @@ import { isRequestNotMatched, matchGuard } from './matcher.guard';
 
 describe('Matcher guard', () => {
 
-  test('#isRequestNotMatched checks if request was matched', () => {
+  test('#isRequestNotMatched checks if request is not fully matched', () => {
     // given
     const notMatchedReq = { matchType: true, matchPath: false } as HttpRequest;
 
