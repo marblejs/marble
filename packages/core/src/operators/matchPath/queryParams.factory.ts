@@ -1,5 +1,10 @@
 import * as querystring from 'querystring';
 import { QueryParameters } from '../../http.interface';
+import { compose } from '../../util/compose.util';
+
+const getQueryString = (path: string) => path.split('?').pop() || '';
+
+const parseQueryString = (query: string) => querystring.parse(query);
 
 const getNestedQueryParam = (
   key: string,
@@ -37,8 +42,9 @@ export const queryParamsFactory = (path: string): QueryParameters => {
     return {};
   }
 
-  const queryParamsString = path.split('?').pop();
-  const extractedQueryParams = querystring.parse(queryParamsString!);
-
-  return queryParamsArrayToObject(extractedQueryParams);
+  return compose(
+    queryParamsArrayToObject,
+    parseQueryString,
+    getQueryString,
+  )(path);
 };
