@@ -1,6 +1,6 @@
 import { delay, map, tap } from 'rxjs/operators';
 import * as request from 'supertest';
-import { Effect, combineRoutes, httpListener, matchPath, matchType } from '../core/src';
+import { combineRoutes, Effect, httpListener, matchPath, matchType } from '../core/src';
 
 describe('Routing integration', async () => {
 
@@ -69,7 +69,10 @@ describe('Routing integration', async () => {
     const app = httpListener({ effects: [p1$, p2$, p3$ ] });
 
     // when
-    return request(app).get('/p1').expect(200, [1]);
+    const response = request(app).get('/p1');
+
+    // then
+    return response.expect(200, [1]);
   });
 
   test('when paths with params are matched - resolves Effects in array order', () => {
@@ -86,7 +89,6 @@ describe('Routing integration', async () => {
       matchPath('/:name'), matchType('GET'), map(req => ({ body: req.test }))
     );
 
-    // then
     const app1 = httpListener({ effects: [p1$, p2$ ] });
     const app2 = httpListener({ effects: [p2$, p1$ ] });
 
@@ -118,7 +120,56 @@ describe('Routing integration', async () => {
     const app = httpListener({ effects: [p1$, p2$, notFound$ ] });
 
     // when
-    return request(app).get('/test').expect(200, '"not-found"');
+    const response = request(app).get('/test');
+
+    // then
+    return response.expect(200, '"not-found"');
   });
+
+  test(`reordered matchers doesn't produces 404 error`, () => {
+    // given
+    const p1$: Effect = req$ => req$.pipe(
+      matchPath('/p1'),
+      matchType('GET'),
+      map(req => ({ body: 1 }))
+    );
+
+    const p2$: Effect = req$ => req$.pipe(
+      matchType('POST'),
+      matchPath('/p1'),
+      map(req => ({ body: 2 }))
+    );
+
+    const app = httpListener({ effects: [p1$, p2$] });
+
+    // when
+    const response = request(app).post('/p1');
+
+    // then
+    return response.expect(200, '2');
+  });
+
+  test(`single matcher doesn't pass request when routing is resolved`, () => {
+    // given
+    const p1$: Effect = req$ => req$.pipe(
+      matchType('POST'),
+      matchPath('/p1'),
+      map(req => ({ body: 1 }))
+    );
+
+    const p2$: Effect = req$ => req$.pipe(
+      matchType('POST'),
+      map(req => ({ body: 2 }))
+    );
+
+    const app = httpListener({ effects: [p1$, p2$ ] });
+
+    // when
+    const response = request(app).post('/p1');
+
+    // then
+    return response.expect(200, '1');
+  });
+
 
 });

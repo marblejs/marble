@@ -1,6 +1,6 @@
-import { matcherFactory, removeQueryParams, removeTrailingSlash } from './matcher.factory';
+import { matchPathFactory, removeQueryParams, removeTrailingSlash } from './matchPath.factory';
 
-describe('matcher factory', () => {
+describe('matchPath factory', () => {
 
   it('#removeQueryParams removes query parameters from url', () => {
     // given
@@ -32,7 +32,7 @@ describe('matcher factory', () => {
     const pathToMatch = '/foo/';
 
     // when
-    const matcher = matcherFactory(matchingHistory, pathToMatch);
+    const matcher = matchPathFactory(matchingHistory, pathToMatch);
 
     // then
     expect(matcher).toEqual('/api/v1/user/foo');
@@ -44,7 +44,7 @@ describe('matcher factory', () => {
     const pathToMatch = '/foo/';
 
     // when
-    const matcher = matcherFactory(matchingHistory, pathToMatch);
+    const matcher = matchPathFactory(matchingHistory, pathToMatch);
 
     // then
     expect(matcher).toEqual('/api/v1/user/foo');
@@ -57,7 +57,7 @@ describe('matcher factory', () => {
     const suffix = '/:foo*';
 
     // when
-    const matcher = matcherFactory(matchingHistory, pathToMatch, suffix);
+    const matcher = matchPathFactory(matchingHistory, pathToMatch, suffix);
 
     // then
     expect(matcher).toEqual('/api/:version/user/foo/:foo*');

@@ -10,7 +10,7 @@ export const removeTrailingSlash = (url: string) => url.replace(/\/$/, '');
 
 export const constructMatcher = (history: string[]) => history.reduce((prev, cur) => prev + cur, '');
 
-export const matcherFactory = (
+export const matchPathFactory = (
   matchingHistory: string[],
   pathToMatch: string,
   suffix?: string
