@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/example",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Marble.js example playground",
   "main": "src/index.ts",
   "scripts": {
@@ -23,9 +23,9 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "@marblejs/core": "^0.4.1",
-    "@marblejs/middleware-body": "^0.4.1",
-    "@marblejs/middleware-logger": "^0.4.1",
+    "@marblejs/core": "^0.4.2",
+    "@marblejs/middleware-body": "^0.4.2",
+    "@marblejs/middleware-logger": "^0.4.2",
     "@types/node": "^10.1.2",
     "rxjs": "^6.1.0",
     "typescript": "~2.9.1"
