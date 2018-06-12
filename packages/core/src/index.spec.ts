@@ -10,6 +10,7 @@ describe('@marblejs/core public API', () => {
     expect(API.error$).toBeDefined();
     expect(API.combineRoutes).toBeDefined();
     expect(API.ContentType).toBeDefined();
+    expect(API.compose).toBeDefined();
   });
 
 });
