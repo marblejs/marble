@@ -10,6 +10,7 @@ export interface EffectResponse {
 export interface GroupedEffects {
   path: string;
   effects: Effects;
+  middlewares: Effect<HttpRequest>[];
 }
 
 export interface EffectCombiner {
@@ -21,7 +22,12 @@ export interface MiddlewareCombiner {
 }
 
 export interface RouteCombiner {
-  (path: string, effects: Effects): GroupedEffects;
+  (path: string, config: RouteCombinerConfig | Effects): GroupedEffects;
+}
+
+export interface RouteCombinerConfig {
+  middlewares?: Effect<HttpRequest>[];
+  effects: Effects;
 }
 
 export type Effect<T = EffectResponse, U = any> = (
