@@ -1,4 +1,4 @@
-import { TimeFactory } from './time.factory';
+import { formatTime, getTimeDifferenceMs } from './time.factory';
 
 describe('TimeFactory', () => {
 
@@ -8,8 +8,8 @@ describe('TimeFactory', () => {
     const lessThanSecond = 800;
 
     // when
-    const formattedSecond = TimeFactory.formatTime(moreThanSecond);
-    const formattedMilisecond = TimeFactory.formatTime(lessThanSecond);
+    const formattedSecond = formatTime(moreThanSecond);
+    const formattedMilisecond = formatTime(lessThanSecond);
 
     // then
     expect(formattedSecond).toBe('1.2s');
@@ -22,7 +22,7 @@ describe('TimeFactory', () => {
     spyOn(global, 'Date').and.returnValue({ getTime: () => 2000 });
 
     // when
-    const timeDifference = TimeFactory.getTimeDifferenceMs(startTime);
+    const timeDifference = getTimeDifferenceMs(startTime);
 
     // then
     expect(timeDifference).toBe(2000 - 1000);

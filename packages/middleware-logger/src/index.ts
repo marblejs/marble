@@ -1,7 +1,7 @@
-import { Effect, HttpRequest } from '@marblejs/core';
+import { compose, Effect, HttpRequest } from '@marblejs/core';
 import chalk from 'chalk';
 import { tap } from 'rxjs/operators';
-import { TimeFactory } from './time.factory';
+import { formatTime, getTimeDifferenceMs } from './time.factory';
 
 const getStatusCode = (statusCode: number): string =>
   statusCode >= 400
@@ -27,7 +27,7 @@ export const logger$: Effect<HttpRequest> = (request$, response) =>
           request.method!,
           request.url!,
           getStatusCode(response.statusCode),
-          TimeFactory.formatTime(TimeFactory.getTimeDifferenceMs(startTime))
+          compose(formatTime, getTimeDifferenceMs)(startTime)
         )
       );
     })
