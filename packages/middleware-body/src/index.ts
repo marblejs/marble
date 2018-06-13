@@ -29,6 +29,15 @@ const fromReadableStream = (stream: HttpRequest): Observable<any> => {
   });
 };
 
+const serializeToJSON = (formData: string) =>
+  formData
+    .split('&')
+    .map(x => x.split('='))
+    .reduce((data, [key, value]) => ({
+      ...data,
+      [key]: isNaN(+value) ? value : +value,
+    }), {});
+
 const getBody = (req: HttpRequest) =>
   fromReadableStream(req).pipe(
     toArray(),
@@ -38,6 +47,8 @@ const getBody = (req: HttpRequest) =>
       switch (req.headers['content-type']) {
         case ContentType.APPLICATION_JSON:
           return JSON.parse(body);
+        case ContentType.APPLICATION_X_WWW_FORM_URLENCODED:
+          return serializeToJSON(decodeURIComponent(body));
         default:
           return body;
       }

@@ -41,6 +41,29 @@ describe('BodyParser middleware', () => {
     request.end();
   });
 
+  it('bodyParser$ parses "x-www-form-urlencoded" body', done => {
+    const request = new MockReq({
+      method: 'POST',
+      headers: { 'Content-Type': 'x-www-form-urlencoded' },
+    });
+    const req$ = of(request as HttpRequest);
+    const res = {} as HttpResponse;
+    const http$ = bodyParser$(req$, res, {});
+
+    http$.subscribe(data => {
+      expect(data.body).toEqual({
+        test: 'test',
+        'test-2': 'test-2',
+        'test-3': 3,
+      });
+      done();
+    });
+
+    request.write('test=test&test-2=test-2&test-3=3');
+    request.end();
+  });
+
+
   it('bodyParser$ throws exception on "application/json" parse', done => {
     const request = new MockReq({
       method: 'POST',
