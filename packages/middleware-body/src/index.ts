@@ -7,6 +7,7 @@ import {
 } from '@marblejs/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap, toArray } from 'rxjs/operators';
+import { serializeUrlEncoded } from './urlEncoded.serializer';
 
 const fromReadableStream = (stream: HttpRequest): Observable<any> => {
   stream.pause();
@@ -29,15 +30,6 @@ const fromReadableStream = (stream: HttpRequest): Observable<any> => {
   });
 };
 
-const serializeToJSON = (formData: string) =>
-  formData
-    .split('&')
-    .map(x => x.split('='))
-    .reduce((data, [key, value]) => ({
-      ...data,
-      [key]: isNaN(+value) ? value : +value,
-    }), {});
-
 const getBody = (req: HttpRequest) =>
   fromReadableStream(req).pipe(
     toArray(),
@@ -48,7 +40,7 @@ const getBody = (req: HttpRequest) =>
         case ContentType.APPLICATION_JSON:
           return JSON.parse(body);
         case ContentType.APPLICATION_X_WWW_FORM_URLENCODED:
-          return serializeToJSON(decodeURIComponent(body));
+          return serializeUrlEncoded(decodeURIComponent(body));
         default:
           return body;
       }
