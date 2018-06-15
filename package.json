@@ -4,7 +4,7 @@
   "scripts": {
     "postinstall": "npm run build",
     "build": "lerna link && lerna bootstrap --hoist",
-    "benchmark": "npm run build && make -C benchmarks",
+    "benchmark": "make -C benchmarks",
     "lint": "tslint --config tslint.json --project tsconfig.spec.json",
     "test": "jest --expand",
     "test:coverage": "jest --expand --coverage",
