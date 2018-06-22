@@ -6,24 +6,17 @@ const n = parseInt(process.env.MW || '1', 10);
 
 const root$ = request$ => request$
   .pipe(
-    matchPath('/'),
-    matchType('GET'),
-    mapTo({})
-  );
-
-const middleware$ = request$ => request$
-  .pipe(
-    filter(req => 1 + 1 === 2)
+    mapTo({ body: 'Hello World' })
   );
 
 const middlewares = [];
 const effects = [root$];
 
 for (let i = 0; i < n; i++) {
-  middlewares.push(middleware$);
+  middlewares.push(req$ => req$);
 }
 
 const app = httpListener({ middlewares, effects });
 
-console.log(`  ${n} middlewares`);
+console.log(`  ${n} middlewares -- Marble.js`);
 http.createServer(app).listen(1337);
