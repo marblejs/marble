@@ -1,6 +1,6 @@
 import * as querystring from 'querystring';
-import { QueryParameters } from '../../http.interface';
-import { compose } from '../../util/compose.util';
+import { QueryParameters } from '../http.interface';
+import { compose } from '../util/compose.util';
 
 const getQueryString = (path: string) => path.split('?').pop() || '';
 

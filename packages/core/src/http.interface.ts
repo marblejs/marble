@@ -2,6 +2,7 @@ import * as http from 'http';
 
 export interface HttpRequest extends http.IncomingMessage {
   url: string;
+  method: HttpMethod;
   body?: any;
   params?: RouteParameters;
   query?: QueryParameters;
@@ -27,7 +28,8 @@ export type HttpMethod =
   | 'DELETE'
   | 'CONNECT'
   | 'OPTIONS'
-  | 'TRACE';
+  | 'TRACE'
+  | '*';
 
 export type Http = {
   req: HttpRequest;

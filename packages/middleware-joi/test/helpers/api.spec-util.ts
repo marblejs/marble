@@ -1,19 +1,10 @@
 import { validator$, Joi } from '../../src';
-import {
-  Effect,
-  matchPath,
-  matchType,
-  httpListener,
-  use,
-  combineRoutes
-} from '@marblejs/core';
+import { Effect, httpListener, use, effect } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { map } from 'rxjs/operators';
 
-const getPost$: Effect = request$ =>
-  request$.pipe(
-    matchPath('/post'),
-    matchType('GET'),
+const getPost$ = effect('/post')('GET')(req$ => req$
+  .pipe(
     use(
       validator$({
         query: {
@@ -27,10 +18,8 @@ const getPost$: Effect = request$ =>
     map(query => ({ status: 200, body: { ...query } }))
   );
 
-const getUser$: Effect = request$ =>
-  request$.pipe(
-    matchPath('/user/:id'),
-    matchType('GET'),
+const getUser$ = effect('/user/:id')('GET')(req$ => req$
+  .pipe(
     use(
       validator$({
         params: {
