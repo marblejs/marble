@@ -75,15 +75,12 @@ describe('Router', () => {
   describe('#resolveRouting', () => {
     let router;
     let queryFactory;
-    let paramsFactory;
 
     beforeEach(() => {
       jest.unmock('./router.ts');
       jest.unmock('../router/queryParams.factory');
-      jest.unmock('../router/urlParams.factory');
       router = require('./router.ts');
       queryFactory = require('../router/queryParams.factory');
-      paramsFactory = require('../router/urlParams.factory');
     });
 
     test('resolves found effect', done => {
@@ -92,20 +89,17 @@ describe('Router', () => {
       const expectedMachingResult: RouteMatched = { effect: effect$, params: {} };
       const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
       const res = {} as HttpResponse;
-      const mockedQuery = {};
-      const mockedParams = {};
 
       // when
       router.findRoute = jest.fn(() => expectedMachingResult);
-      queryFactory.queryParamsFactory = jest.fn(() => mockedQuery);
-      paramsFactory.urlParamsFactory = jest.fn(() => mockedParams);
+      queryFactory.queryParamsFactory = jest.fn(() => ({}));
       const resolvedRoute = resolveRouting([])(res)(req);
 
       // then
       resolvedRoute.subscribe(effect => {
         expect(effect).toBeDefined();
         expect(effect.body).toEqual('test');
-        expect(req.query).toEqual(mockedQuery);
+        expect(req.query).toEqual({});
         done();
       });
     });

@@ -1,7 +1,0 @@
-describe('urlParamsFactory', () => {
-
-  test('@TODO', () => {
-
-  });
-
-});
