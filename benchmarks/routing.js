@@ -1,7 +1,6 @@
 const http = require('http');
 const { mapTo } = require('rxjs/operators');
 const { httpListener, EffectFactory } = require('../packages/core/dist');
-const { logger$ } = require('../packages/middleware-logger/dist');
 
 const n = parseInt(process.env.MW || '1', 10);
 
@@ -30,6 +29,6 @@ effects.push(
 
 const app = httpListener({ middlewares, effects });
 
-console.log(`  ${n} middlewares -- Marble.js`);
+console.log(`  ${n} endpoints -- Marble.js`);
 
 http.createServer(app).listen(1337);
