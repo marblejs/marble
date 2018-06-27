@@ -22,13 +22,19 @@ export interface RouteGroup {
 
 export interface ParametricRegExp {
   regExp: RegExp;
-  parameters: string[];
+  parameters?: string[] | undefined;
 }
 
-export interface RoutingItem extends ParametricRegExp {
-  method: HttpMethod;
+
+export interface RoutingMethod {
+  parameters?: string[] | undefined;
   middleware?: Middleware | undefined;
   effect: Effect;
+}
+
+export interface RoutingItem {
+  regExp: RegExp;
+  methods: Partial<Record<HttpMethod, RoutingMethod>>;
 }
 
 export interface RouteMatched {
