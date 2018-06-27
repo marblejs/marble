@@ -9,7 +9,7 @@ import {
   RouteGroup,
   RouteMatched,
   Routing,
-  RoutingRoute
+  RoutingItem
 } from './router.interface';
 import { queryParamsFactory } from '../router/queryParams.factory';
 import { combineMiddlewareEffects } from '../effects/effects.combiner';
@@ -44,7 +44,7 @@ export const routingFactory = (
           ? middleware.length > 1 ? combineMiddlewareEffects(middleware) : middleware[0]
           : null,
         effect: route.effect
-      } as RoutingRoute);
+      } as RoutingItem);
     }
   });
   return routing;

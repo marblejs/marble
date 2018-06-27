@@ -25,7 +25,7 @@ export interface ParametricRegExp {
   parameters: string[];
 }
 
-export interface RoutingRoute extends ParametricRegExp {
+export interface RoutingItem extends ParametricRegExp {
   method: HttpMethod;
   middleware?: Middleware | undefined;
   effect: Effect;
@@ -37,4 +37,4 @@ export interface RouteMatched {
   params: Record<string, string>;
 }
 
-export type Routing = RoutingRoute[];
+export type Routing = RoutingItem[];
