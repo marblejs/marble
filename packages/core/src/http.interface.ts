@@ -6,9 +6,6 @@ export interface HttpRequest extends http.IncomingMessage {
   body?: any;
   params: RouteParameters;
   query: QueryParameters;
-  matchers?: string[];
-  matchPath: boolean;
-  matchType: boolean;
   [key: string]: any;
 }
 
