@@ -17,7 +17,7 @@ describe('Router', () => {
     const route1: RouteConfig = { path: '/', method: 'GET', effect: e1$ };
     const route2: RouteConfig = { path: '/', method: 'GET', effect: e2$ };
     const route3: RouteConfig = { path: '/', method: 'GET', effect: e3$ };
-    const route4: RouteConfig = { path: '/', method: 'GET', effect: e4$ };
+    const route4: RouteConfig = { path: '/', method: 'POST', effect: e4$ };
 
     const routeGroupNested: RouteGroup = {
       path: '/nested',
@@ -40,16 +40,14 @@ describe('Router', () => {
 
     // then
     expect(factorizedRouting).toEqual([
-      { regExp: /^\/?$/, parameters: [], middleware: null, method: 'GET', effect: e1$ },
-      { regExp: /^\/group\/?$/, parameters: [], middleware: m$, method: 'GET', effect: e2$ },
+      { regExp: /^\/?$/, methods: { GET: { effect: e1$ }, POST: { effect: e4$ } } },
+      { regExp: /^\/group\/?$/, methods: { GET: { middleware: m$, effect: e2$ } } },
       {
         regExp: /^\/group\/nested\/?$/,
-        parameters: [],
-        middleware: factorizedRouting[2].middleware,
-        method: 'GET',
-        effect: e3$
+        methods: {
+          GET: { middleware: factorizedRouting[2].methods.GET!.middleware, effect: e3$ }
+        },
       },
-      { regExp: /^\/?$/, parameters: [], middleware: null, method: 'GET', effect: e4$ },
     ] as Routing);
   });
 
@@ -60,15 +58,14 @@ describe('Router', () => {
     const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
     const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
     const routing: Routing = [
-      { regExp: /^\/?$/, parameters: [], method: 'GET', effect: e1$ },
-      { regExp: /^\/group\/?$/, parameters: [], method: 'GET', effect: e2$ },
-      { regExp: /^\/group\/nested\/foo\/?$/, parameters: [], method: 'POST', effect: e3$ },
-      { regExp: /^\/foo\/?$/, parameters: [], method: 'GET', effect: e4$ },
+      { regExp: /^\/?$/, methods: { GET: { effect: e1$ }, POST: { effect: e4$ } } },
+      { regExp: /^\/group\/?$/, methods: { GET: { effect: e2$ } } },
+      { regExp: /^\/group\/nested\/foo\/?$/, methods: { POST: { effect: e3$ } } },
     ];
 
     // when
-    const route1 = findRoute(routing, '/group/nested/foo', 'POST', {});
-    const route2 = findRoute(routing, '/group/nested/fo', 'POST', {});
+    const route1 = findRoute(routing, '/group/nested/foo', 'POST');
+    const route2 = findRoute(routing, '/group/nested/fo', 'POST');
 
     // then
     expect(route1).toEqual({ effect: e3$, middleware: undefined, params: {} });

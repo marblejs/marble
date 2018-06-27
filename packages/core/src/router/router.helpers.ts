@@ -1,4 +1,5 @@
-import { ParametricRegExp, RouteGroup, Routing, RouteCombinerConfig } from './router.interface';
+import { ParametricRegExp, RouteCombinerConfig, RouteGroup, Routing } from './router.interface';
+
 export { Routing };
 
 export const isRouteGroup = (item): item is RouteGroup =>
@@ -25,6 +26,6 @@ export const createRegExpWithParams = (path: string): ParametricRegExp => {
     .replace(/([/\\])$/, '$1?'); /* Last slash/backslash is always optional */
   return {
     regExp: new RegExp('^' + pattern + '$'),
-    parameters,
+    parameters: parameters.length > 0 ? parameters : undefined,
   };
 };

@@ -9,6 +9,7 @@ import {
   RouteGroup,
   RouteMatched,
   Routing,
+  RoutingMethod,
   RoutingRoute
 } from './router.interface';
 import { queryParamsFactory } from '../router/queryParams.factory';
@@ -37,14 +38,26 @@ export const routingFactory = (
         [...middleware, ...route.middlewares]
       ));
     } else {
-      routing.push({
-        ...createRegExpWithParams(parentPath + route.path),
-        method: route.method,
+      const { regExp, parameters } = createRegExpWithParams(parentPath + route.path);
+      const foundRoute = routing.find(route => route.regExp.source === regExp.source);
+      const method: RoutingMethod = {
+        effect: route.effect,
         middleware: middleware.length > 0
           ? middleware.length > 1 ? combineMiddlewareEffects(middleware) : middleware[0]
-          : null,
-        effect: route.effect
-      } as RoutingRoute);
+          : undefined,
+        parameters,
+      };
+      if (foundRoute) {
+        if (foundRoute.methods[route.method]) {
+          throw new Error(`Redefinition of route at "${route.method}: ${parentPath + route.path}"`);
+        }
+        foundRoute.methods[route.method] = method;
+      } else {
+        routing.push({
+          regExp,
+          methods: { [route.method]: method },
+        } as RoutingRoute);
+      }
     }
   });
   return routing;
@@ -53,27 +66,29 @@ export const routingFactory = (
 export const findRoute = (
   routing: Routing,
   url: string,
-  method: HttpMethod,
-  params: Record<string, string> = {}
+  method: HttpMethod
 ): RouteMatched | undefined => {
   for (let i = 0; i < routing.length; ++i) {
-    const { regExp, parameters, method: routeMethod, middleware, effect } = routing[i];
-
-    if (routeMethod !== method) {
-      continue;
-    }
+    const { regExp, methods } = routing[i];
 
     const match = url.match(regExp);
     if (!match) {
       continue;
     }
 
-    for (let p = 0; p < parameters.length; p++) {
-      params[parameters[p]] = decodeURIComponent(match[p + 1]);
+    const routingMethod = methods[method];
+    if (!routingMethod) {
+      return undefined;
+    }
+    const { parameters, effect, middleware } = routingMethod;
+    const params = {};
+    if (parameters) {
+      for (let p = 0; p < parameters.length; p++) {
+        params[parameters[p]] = decodeURIComponent(match[p + 1]);
+      }
     }
     return { middleware, effect, params };
   }
-
   return undefined;
 };
 
