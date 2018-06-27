@@ -10,7 +10,7 @@ const root$ = EffectFactory
     map(req => ({
       body: `API root @ ${req.url}`,
     })),
-  );
+  ));
 
 const notFound$ = EffectFactory
   .matchPath('*')
