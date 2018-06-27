@@ -2,15 +2,13 @@ import * as querystring from 'querystring';
 import { QueryParameters } from '../http.interface';
 import { compose } from '../util/compose.util';
 
-const getQueryString = (path: string) => path.split('?').pop() || '';
-
 const parseQueryString = (query: string) => querystring.parse(query);
 
 const getNestedQueryParam = (
   key: string,
   paramValue: string | Object
 ): string | Object => {
-  const nestedKeys = /\[.*\]/.exec(key);
+  const nestedKeys = /\[.*]/.exec(key);
 
   if (!nestedKeys) {
     return { [key]: paramValue };
@@ -37,14 +35,10 @@ const queryParamsArrayToObject = (queryParams: Object): QueryParameters => {
   );
 };
 
-export const queryParamsFactory = (path: string): QueryParameters => {
-  if (!path || !path.includes('?')) {
-    return {};
-  }
-
-  return compose(
+export const queryParamsFactory = (queryParams: string | undefined | null): QueryParameters =>
+  !queryParams
+    ? {}
+    : compose(
     queryParamsArrayToObject,
     parseQueryString,
-    getQueryString,
-  )(path);
-};
+    )(queryParams);

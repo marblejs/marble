@@ -3,7 +3,7 @@ import { queryParamsFactory } from './queryParams.factory';
 describe('queryParamsFactory', () => {
   test('should return empty object when passed URL with no valid params', () => {
     // given
-    const invalidURLS = ['http://test.com', 'http://test.com?', null];
+    const invalidURLS = ['', null, undefined];
 
     invalidURLS.forEach(url => {
       // when
@@ -16,7 +16,7 @@ describe('queryParamsFactory', () => {
 
   test('should return empty string when no value for provided key', () => {
     // given
-    const exampleURL = 'http://test.com?testParam';
+    const exampleURL = 'testParam';
     const expectedParamsObj = { testParam: '' };
 
     // when
@@ -28,7 +28,7 @@ describe('queryParamsFactory', () => {
 
   test('should return object with multiple keys', () => {
     // given
-    const exampleURL = 'http://test.com?testParam=test&testParam2=test2';
+    const exampleURL = 'testParam=test&testParam2=test2';
     const expectedParamsObj = { testParam: 'test', testParam2: 'test2' };
 
     // when
@@ -40,7 +40,7 @@ describe('queryParamsFactory', () => {
 
   test('should return array when passed two times same parameter', () => {
     // given
-    const exampleURL = 'http://test.com?testParam=test&testParam=123';
+    const exampleURL = 'testParam=test&testParam=123';
     const expectedParamsObj = { testParam: ['test', '123'] };
 
     // when
@@ -52,7 +52,7 @@ describe('queryParamsFactory', () => {
 
   test('should return nested object', () => {
     // given
-    const exampleURL = 'http://test.com?testParam[testNested]=test';
+    const exampleURL = 'testParam[testNested]=test';
     const expectedParamsObj = { testParam: { testNested: 'test' } };
 
     // when

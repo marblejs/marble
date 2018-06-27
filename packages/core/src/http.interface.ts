@@ -4,15 +4,15 @@ export interface HttpRequest extends http.IncomingMessage {
   url: string;
   method: HttpMethod;
   body?: any;
-  params?: RouteParameters;
-  query?: QueryParameters;
+  params: RouteParameters;
+  query: QueryParameters;
   matchers?: string[];
   matchPath: boolean;
   matchType: boolean;
   [key: string]: any;
 }
 
-export type RouteParameters = Record<string, string | number>;
+export type RouteParameters = Record<string, string>;
 export type QueryParameters = Record<string, string | number | object>;
 
 export interface HttpResponse extends http.ServerResponse {}

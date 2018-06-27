@@ -1,79 +1,78 @@
 import { mapTo } from 'rxjs/operators';
 import { Effect } from '../effects/effects.interface';
-import { routingFactory, findRoute, resolveRouting } from './router';
+import { findRoute, resolveRouting, routingFactory } from './router';
 import { HttpRequest, HttpResponse } from '../http.interface';
-import { RouteConfig, RouteGroup, Routing } from './router.interface';
+import { RouteConfig, RouteGroup, RouteMatched, Routing } from './router.interface';
 
 describe('Router', () => {
 
   test('#routingFactory factorizes routing with nested groups', () => {
     // given
     const m$: Effect<HttpRequest> = req$ => req$;
-    const e$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'test1' }));
+    const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'test2' }));
+    const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test3' }));
+    const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test4' }));
 
-    const route: RouteConfig = {
-      path: '/',
-      method: 'GET',
-      effect: e$,
-    };
+    const route1: RouteConfig = { path: '/', method: 'GET', effect: e1$ };
+    const route2: RouteConfig = { path: '/', method: 'GET', effect: e2$ };
+    const route3: RouteConfig = { path: '/', method: 'GET', effect: e3$ };
+    const route4: RouteConfig = { path: '/', method: 'GET', effect: e4$ };
 
     const routeGroupNested: RouteGroup = {
       path: '/nested',
-      effects: [route],
+      effects: [route3],
       middlewares: [m$],
     };
 
     const routeGroup: RouteGroup = {
       path: '/group',
-      effects: [route, routeGroupNested],
+      effects: [route2, routeGroupNested],
       middlewares: [m$],
     };
 
     // when
     const factorizedRouting = routingFactory([
-      route,
+      route1,
       routeGroup,
-      route
+      route4
     ]);
 
     // then
     expect(factorizedRouting).toEqual([
-      ['/', 'GET', e$],
-      ['/group', [
-        ['/', 'GET', e$],
-        ['/nested', [
-          ['/', 'GET', e$],
-        ]],
-      ]],
-      ['/', 'GET', e$],
-    ]);
+      { regExp: /^\/?$/, parameters: [], middleware: null, method: 'GET', effect: e1$ },
+      { regExp: /^\/group\/?$/, parameters: [], middleware: m$, method: 'GET', effect: e2$ },
+      {
+        regExp: /^\/group\/nested\/?$/,
+        parameters: [],
+        middleware: factorizedRouting[2].middleware,
+        method: 'GET',
+        effect: e3$
+      },
+      { regExp: /^\/?$/, parameters: [], middleware: null, method: 'GET', effect: e4$ },
+    ] as Routing);
   });
 
   test('#findRoute finds route inside collection', () => {
     // given
-    const e$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
     const routing: Routing = [
-      ['/', 'GET', e$],
-      ['/group', [
-        ['/bar', 'GET', e$],
-        ['/nested', [
-          ['/foo', 'POST', e$],
-        ]],
-      ]],
-      ['/foo', 'GET', e$]
+      { regExp: /^\/?$/, parameters: [], method: 'GET', effect: e1$ },
+      { regExp: /^\/group\/?$/, parameters: [], method: 'GET', effect: e2$ },
+      { regExp: /^\/group\/nested\/foo\/?$/, parameters: [], method: 'POST', effect: e3$ },
+      { regExp: /^\/foo\/?$/, parameters: [], method: 'GET', effect: e4$ },
     ];
 
     // when
-    const route1 = findRoute(routing, '/group/nested/foo?bar=baz', 'POST', '');
-    const route2 = findRoute(routing, '/group/nested/foo?', 'POST', '');
-    const route3 = findRoute(routing, '/group/nested/foo', 'POST', '');
-    const route4 = findRoute(routing, '/group/nested/fo', 'POST', '');
+    const route1 = findRoute(routing, '/group/nested/foo', 'POST', {});
+    const route2 = findRoute(routing, '/group/nested/fo', 'POST', {});
 
     // then
-    expect(route1).toEqual(['/foo', 'POST', e$ ]);
-    expect(route2).toEqual(['/foo', 'POST', e$ ]);
-    expect(route3).toEqual(['/foo', 'POST', e$ ]);
-    expect(route4).toBeUndefined();
+    expect(route1).toEqual({ effect: e3$, middleware: undefined, params: {} });
+    expect(route2).toBeUndefined();
   });
 
   describe('#resolveRouting', () => {
@@ -93,8 +92,8 @@ describe('Router', () => {
     test('resolves found effect', done => {
       // given
       const effect$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
-      const expectedMachingResult = ['/', 'GET', effect$];
-      const req = { url: '/', method: 'GET', query: null, params: null } as HttpRequest;
+      const expectedMachingResult: RouteMatched = { effect: effect$, params: {} };
+      const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
       const res = {} as HttpResponse;
       const mockedQuery = {};
       const mockedParams = {};
@@ -116,7 +115,7 @@ describe('Router', () => {
 
     test('returns empty stream if effect has been not found', done => {
       // given
-      const req = { url: '/', method: 'GET', query: null, params: null } as HttpRequest;
+      const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
       const res = {} as HttpResponse;
 
       // when
