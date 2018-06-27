@@ -1,10 +1,16 @@
+const SCOPE_ALL = 'all';
+const SCOPE_UNIT = 'unit';
+const SCOPE = process.env.SCOPE || SCOPE_ALL;
+
 module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
-  testRegex: '(/__tests__/.*|\\.(test|spec))\\.(ts|tsx)$',
+  testRegex: SCOPE === SCOPE_UNIT
+    ? '^((?!integration).)*\.spec\.ts$'
+    : '.?(spec|integration\.spec)\.ts$',
   coverageDirectory: './coverage/',
-  coveragePathIgnorePatterns: ['spec-util.ts$', '.d.ts$'],
+  coveragePathIgnorePatterns: ['spec-util.ts$', '.d.ts$', '.spec.ts'],
   collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [
     'ts',
