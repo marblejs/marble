@@ -4,7 +4,7 @@ import { filter, map, mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
 import { HttpStatus } from '../core/dist/http.interface';
 import { ContentType } from '../core/dist/util/contentType.util';
-import { Effect, HttpError, HttpRequest, combineRoutes, httpListener, matchPath, matchType, use } from '../core/src';
+import { EffectFactory, Effect, HttpError, HttpRequest, combineRoutes, httpListener, use } from '../core/src';
 import { bodyParser$ } from '../middleware-body/src';
 import { readFile } from '../util/fileReader.helper';
 
@@ -16,56 +16,63 @@ const authorize$: Effect<HttpRequest> = request$ =>
     filter(req => req.headers.authorization === 'Bearer test'),
   );
 
-const root$: Effect = req$ =>
-  req$.pipe(
-    matchPath('/'),
-    matchType('GET'),
-    mapTo({ status: 200, body: 'root' }),
+const root$ = EffectFactory
+  .matchPath('/')
+  .matchType('GET')
+  .use(req$ => req$
+    .pipe(
+      mapTo({ status: 200, body: 'root' }),
+    ));
+
+const getUserList$ = EffectFactory
+  .matchPath('/')
+  .matchType('GET')
+  .use(req$ => req$
+    .pipe(
+      switchMap(() => of(MOCKED_USER_LIST)),
+      map(users => ({ body: users }))
+    ));
+
+const getUserSingle$ = EffectFactory
+  .matchPath('/:id')
+  .matchType('GET')
+  .use(req$ => req$
+    .pipe(
+      map(({ params, query }) => ({ body: { params, query } }))
+    ));
+
+const postUser$ = EffectFactory
+  .matchPath('/')
+  .matchType('POST')
+  .use(req$ => req$
+    .pipe(
+      use(authorize$),
+      map(req => req.body),
+      map(response => ({ body: response }))
+    ));
+
+const error$ = EffectFactory
+  .matchPath('/error')
+  .matchType('GET')
+  .use(req$ => req$
+    .pipe(
+      switchMap(() => throwError(new HttpError('test', HttpStatus.METHOD_NOT_ALLOWED, { test: 'test' }))),
+    )
   );
 
-const getUserList$: Effect = request$ =>
-  request$.pipe(
-    matchPath('/'),
-    matchType('GET'),
-    switchMap(() => of(MOCKED_USER_LIST)),
-    map(users => ({ body: users }))
-  );
-
-const getUserSingle$: Effect = request$ =>
-  request$.pipe(
-    matchPath('/:id'),
-    matchType('GET'),
-    map(({ params, query }) => ({ body: { params, query } }))
-  );
-
-const postUser$: Effect = request$ =>
-  request$.pipe(
-    matchPath('/'),
-    matchType('POST'),
-    use(authorize$),
-    map(req => req.body),
-    map(response => ({ body: response }))
-  );
-
-const error$: Effect = request$ =>
-  request$.pipe(
-    matchPath('/error'),
-    matchType('GET'),
-    switchMap(() => throwError(new HttpError('test', HttpStatus.METHOD_NOT_ALLOWED, { test: 'test' }))),
-  );
-
-const file$: Effect = request$ =>
-  request$.pipe(
-    matchPath('/static/:dir'),
-    matchType('GET'),
-    map(req => req.params!.dir as string),
-    switchMap(readFile(STATIC_PATH)),
-    map(body => ({ body }))
-  );
+const file$ = EffectFactory
+  .matchPath('/static/:dir')
+  .matchType('GET')
+  .use(req$ => req$
+    .pipe(
+      map(req => req.params!.dir as string),
+      switchMap(readFile(STATIC_PATH)),
+      map(body => ({ body }))
+    ));
 
 const user$ = combineRoutes('/user', [getUserList$, getUserSingle$, postUser$]);
 
-const api$ = combineRoutes('/api/:version', [root$, file$, error$, user$]);
+const api$ = combineRoutes('/api/v1', [root$, file$, error$, user$]);
 
 const app = httpListener({
   middlewares: [bodyParser$],

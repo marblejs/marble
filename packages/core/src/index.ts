@@ -1,7 +1,7 @@
-// export { combineRoutes } from './effects/effects.combiner';
-export { effect } from './effects/effects.factory';
+export { EffectFactory } from './effects/effects.factory';
 export { error$ } from './error/error.middleware';
 export { HttpError } from './error/error.model';
+export { combineRoutes } from './router/router';
 export * from './effects/effects.interface';
 export * from './router/router.interface';
 export * from './http.interface';

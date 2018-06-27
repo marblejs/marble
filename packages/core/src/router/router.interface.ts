@@ -3,6 +3,11 @@ import { Effect } from '../effects/effects.interface';
 
 export type RouteEffects = RouteConfig | RouteGroup;
 
+export interface RouteCombinerConfig {
+  middlewares?: Effect<HttpRequest>[];
+  effects: RouteEffects[];
+}
+
 export interface RouteConfig {
   path: string;
   method: HttpMethod;
@@ -13,11 +18,6 @@ export interface RouteGroup {
   path: string;
   effects: RouteEffects[];
   middlewares: Effect<HttpRequest>[];
-}
-
-export interface RouteMatched {
-  route: RoutingRoute;
-  routeMatcher: string;
 }
 
 export type RoutingRoute = [string, HttpMethod, Effect];

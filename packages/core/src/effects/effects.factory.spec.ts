@@ -1,6 +1,6 @@
 import { mapTo } from 'rxjs/operators';
 import { Effect } from './effects.interface';
-import { effect } from './effects.factory';
+import { EffectFactory } from './effects.factory';
 
 describe('Effects factory', () => {
 
@@ -11,7 +11,10 @@ describe('Effects factory', () => {
     const method = 'GET';
 
     // when
-    const factorizedEffect = effect(path)(method)(effect$);
+    const factorizedEffect = EffectFactory
+      .matchPath(path)
+      .matchType(method)
+      .use(effect$);
 
     // then
     expect(factorizedEffect).toEqual({

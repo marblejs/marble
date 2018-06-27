@@ -70,9 +70,9 @@ describe('Router', () => {
     const route4 = findRoute(routing, '/group/nested/fo', 'POST', '');
 
     // then
-    expect(route1).toEqual({ route: ['/foo', 'POST', e$ ], routeMatcher: '/group/nested/foo' });
-    expect(route2).toEqual({ route: ['/foo', 'POST', e$ ], routeMatcher: '/group/nested/foo' });
-    expect(route3).toEqual({ route: ['/foo', 'POST', e$ ], routeMatcher: '/group/nested/foo' });
+    expect(route1).toEqual(['/foo', 'POST', e$ ]);
+    expect(route2).toEqual(['/foo', 'POST', e$ ]);
+    expect(route3).toEqual(['/foo', 'POST', e$ ]);
     expect(route4).toBeUndefined();
   });
 
@@ -93,7 +93,7 @@ describe('Router', () => {
     test('resolves found effect', done => {
       // given
       const effect$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
-      const expectedMachingResult = { route: ['/', 'GET', effect$], routeMatcher: '/' };
+      const expectedMachingResult = ['/', 'GET', effect$];
       const req = { url: '/', method: 'GET', query: null, params: null } as HttpRequest;
       const res = {} as HttpResponse;
       const mockedQuery = {};
@@ -110,7 +110,6 @@ describe('Router', () => {
         expect(effect).toBeDefined();
         expect(effect.body).toEqual('test');
         expect(req.query).toEqual(mockedQuery);
-        expect(req.params).toEqual(mockedParams);
         done();
       });
     });
