@@ -4,7 +4,7 @@ import { filter, map, mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
 import { HttpStatus } from '../core/dist/http.interface';
 import { ContentType } from '../core/dist/util/contentType.util';
-import { EffectFactory, Effect, HttpError, HttpRequest, combineRoutes, httpListener, use } from '../core/src';
+import { combineRoutes, Effect, EffectFactory, HttpError, httpListener, HttpRequest, use } from '../core/src';
 import { bodyParser$ } from '../middleware-body/src';
 import { readFile } from '../util/fileReader.helper';
 
@@ -72,11 +72,11 @@ const file$ = EffectFactory
 
 const user$ = combineRoutes('/user', [getUserList$, getUserSingle$, postUser$]);
 
-const api$ = combineRoutes('/api/v1', [root$, file$, error$, user$]);
+const api$ = combineRoutes('/api/:version', [root$, file$, error$, user$]);
 
 const app = httpListener({
   middlewares: [bodyParser$],
-  effects: [api$]
+  effects: [api$],
 });
 
 describe('API integration', () => {
@@ -93,11 +93,13 @@ describe('API integration', () => {
   it('returns error response: /api/v1/error', async () =>
     request(app)
       .get('/api/v1/error')
-      .expect(HttpStatus.METHOD_NOT_ALLOWED, { error: {
-        status: HttpStatus.METHOD_NOT_ALLOWED,
-        data: { test: 'test' },
-        message: 'test',
-      }}));
+      .expect(HttpStatus.METHOD_NOT_ALLOWED, {
+        error: {
+          status: HttpStatus.METHOD_NOT_ALLOWED,
+          data: { test: 'test' },
+          message: 'test',
+        }
+      }));
 
   it('returns object: /api/v1/user', async () =>
     request(app)

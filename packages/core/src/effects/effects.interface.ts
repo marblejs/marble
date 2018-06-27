@@ -7,8 +7,10 @@ export interface EffectResponse {
   headers?: Record<string, string>;
 }
 
+export type Middleware = Effect<HttpRequest>;
+
 export interface MiddlewareCombiner {
-  (effects: Effect<HttpRequest>[]): (res: HttpResponse) => (req: HttpRequest) => Observable<HttpRequest>;
+  (effects: Middleware[]): Middleware;
 }
 
 export type Effect<T = EffectResponse, U = any> = (

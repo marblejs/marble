@@ -29,7 +29,7 @@ export const httpListener = ({
 
   const effect$ = request$.pipe(
     mergeMap(({ req, res }) =>
-      combinedMiddlewares(res)(req).pipe(
+      combinedMiddlewares(of(req), res, undefined).pipe(
         switchMap(resolveRouting(routerEffects)(res)),
         defaultIfEmpty(defaultResponse),
         tap(handleResponse(res)(req)),

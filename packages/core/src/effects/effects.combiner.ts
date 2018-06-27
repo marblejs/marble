@@ -1,20 +1,22 @@
-import { from, of } from 'rxjs';
+import { from } from 'rxjs';
 import { concatMap, last } from 'rxjs/operators';
-import { HttpRequest } from '../http.interface';
-import { Effect, MiddlewareCombiner } from './effects.interface';
+import { HttpRequest, HttpResponse } from '../http.interface';
+import { Middleware, MiddlewareCombiner } from './effects.interface';
+import { Observable } from 'rxjs/Observable';
 
-export const combineMiddlewareEffects: MiddlewareCombiner = effects => {
-  const middlewares = middlewaresGuard(effects);
-  return res => req => {
-    return from(middlewares).pipe(
-      concatMap(effect => effect(of(req), res, undefined)),
+export const combineMiddlewareEffects: MiddlewareCombiner = (effects: Middleware[]): Middleware => {
+  const middlewaresObservable = from(middlewaresGuard(effects));
+
+  return (req$: Observable<HttpRequest>, res: HttpResponse, metadata: any) => {
+    return middlewaresObservable.pipe(
+      concatMap(effect => effect(req$, res, metadata)),
       last(),
     );
   };
 };
 
-const middlewaresGuard = (middlewares: Effect<HttpRequest>[]) => {
-  const emptyMiddleware: Effect<HttpRequest> = req => req;
+const middlewaresGuard = (middlewares: Middleware[]) => {
+  const emptyMiddleware: Middleware = req => req;
   return middlewares.length
     ? middlewares
     : [emptyMiddleware];
