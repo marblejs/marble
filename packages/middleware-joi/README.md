@@ -9,17 +9,18 @@ Example of using this middleware on a GET route to validate params.
 
 ```javascript
 import { validator$, Joi } from '@marblejs/middleware-joi';
-const foo$: Effect = request$ => request$
-  .pipe(
-    matchPath('/foo/:id'),
-    matchType('GET'),
+
+const foo$ = EffectFactory
+  .matchPath('/foo/:id')
+  .matchType('GET')
+  .use(req$ => req$.pipe(
     use(validator$({
       params: Joi.object({
         id: Joi.number().min(1).max(10),
       })
     }));
     // ...
-  );
+  ));
 ```
 
 Example to validate all incoming requests.
