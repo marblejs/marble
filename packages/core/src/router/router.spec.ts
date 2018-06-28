@@ -1,7 +1,7 @@
 import { mapTo } from 'rxjs/operators';
 import { Effect } from '../effects/effects.interface';
 import { findRoute, resolveRouting } from './router';
-import { HttpRequest, HttpResponse } from '../http.interface';
+import { HttpRequest, HttpResponse, HttpMethod } from '../http.interface';
 import { RouteMatched, Routing } from './router.interface';
 
 describe('Router', () => {
@@ -13,6 +13,7 @@ describe('Router', () => {
       const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
       const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
       const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+
       const routing: Routing = [
         { regExp: /^\/?$/, methods: { GET: { effect: e1$ }, POST: { effect: e4$ } } },
         { regExp: /^\/group\/?$/, methods: { GET: { effect: e2$ } } },
@@ -22,10 +23,31 @@ describe('Router', () => {
       // when
       const route1 = findRoute(routing, '/group/nested/foo', 'POST');
       const route2 = findRoute(routing, '/group/nested/fo', 'POST');
+      const route3 = findRoute(routing, '/group/nested/foo', 'TEST' as HttpMethod);
 
       // then
-      expect(route1).toEqual({ effect: e3$, middleware: undefined, params: {} });
+      expect(route1).toEqual({ effect: e3$, params: {} });
       expect(route2).toBeUndefined();
+      expect(route3).toBeUndefined();
+    });
+
+    test('finds parametrized route inside collection', () => {
+      // given
+      const e$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+
+      const routing: Routing = [{
+        regExp: /^\/group\/([^\/]+)\/foo$/,
+        methods: { GET: { effect: e$, parameters: ['param'] } }
+      }];
+
+      // when
+      const route = findRoute(routing, '/group/nested/foo', 'GET');
+
+      // then
+      expect(route).toEqual({
+        effect: e$,
+        params: { param: 'nested' }
+      });
     });
   });
 
