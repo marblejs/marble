@@ -1,18 +1,8 @@
 import { EMPTY, Observable, of } from 'rxjs';
 import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
 import { EffectResponse } from '../effects/effects.interface';
-import { isRouteCombinerConfig } from './router.helpers';
-import { RouteCombinerConfig, RouteEffect, RouteEffectGroup, RouteMatched, Routing } from './router.interface';
+import { RouteMatched, Routing } from './router.interface';
 import { queryParamsFactory } from '../router/queryParams.factory';
-
-export const combineRoutes = (
-  path: string,
-  configOrEffects: RouteCombinerConfig | (RouteEffect | RouteEffectGroup)[]
-): RouteEffectGroup => ({
-  path,
-  effects: isRouteCombinerConfig(configOrEffects) ? configOrEffects.effects : configOrEffects,
-  middlewares: isRouteCombinerConfig(configOrEffects) ? (configOrEffects.middlewares || []) : [],
-});
 
 export const findRoute = (
   routing: Routing,

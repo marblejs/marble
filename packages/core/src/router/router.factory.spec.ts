@@ -1,7 +1,8 @@
 import { mapTo } from 'rxjs/operators';
+import { EffectFactory } from '../effects/effects.factory';
 import { Effect, Middleware } from '../effects/effects.interface';
 import { RouteEffect, RouteEffectGroup, Routing } from './router.interface';
-import { factorizeRouting } from './router.factory';
+import { factorizeRouting, combineRoutes } from './router.factory';
 
 describe('Router factory', () => {
   let effectsCombiner;
@@ -81,6 +82,67 @@ describe('Router factory', () => {
 
     // then
     expect(error).toThrowError('Redefinition of route at "GET: /test"');
+  });
+
+  describe('#combineRoutes', () => {
+    test('factorizes combined routes for effects only', () => {
+      // given
+      const effect$ = req$ => req$.pipe(mapTo({}));
+      const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
+      const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
+
+      // when
+      const combiner = combineRoutes('/test', [a$, b$]);
+
+      // then
+      expect(combiner).toEqual({
+        path: '/test',
+        middlewares: [],
+        effects: [a$, b$],
+      });
+    });
+
+    test('factorizes combined routes for effects with middlewares', () => {
+      // given
+      const effect$ = req$ => req$.pipe(mapTo({}));
+      const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
+      const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
+
+      const m1$: Middleware = req$ => req$;
+      const m2$: Middleware = req$ => req$;
+
+      // when
+      const combiner = combineRoutes('/test', {
+        middlewares: [m1$, m2$],
+        effects: [a$, b$],
+      });
+
+      // then
+      expect(combiner).toEqual({
+        path: '/test',
+        middlewares: [m1$, m2$],
+        effects: [a$, b$],
+      });
+    });
+
+    test('factorizes combined routes for effects with empty middlewares', () => {
+      // given
+      const effect$ = req$ => req$.pipe(mapTo({}));
+      const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
+      const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
+
+      // when
+      const combiner = combineRoutes('/test', {
+        effects: [a$, b$],
+      });
+
+      // then
+      expect(combiner).toEqual({
+        path: '/test',
+        middlewares: [],
+        effects: [a$, b$],
+      });
+    });
   });
 
 });

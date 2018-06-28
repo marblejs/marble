@@ -1,7 +1,14 @@
 import { Effect } from '../effects/effects.interface';
 import { HttpRequest } from '../http.interface';
-import { isRouteEffectGroup } from './router.helpers';
-import { Routing, RoutingMethod, RoutingItem, RouteEffect, RouteEffectGroup } from './router.interface';
+import { isRouteEffectGroup, isRouteCombinerConfig } from './router.helpers';
+import {
+  Routing,
+  RoutingMethod,
+  RoutingItem,
+  RouteEffect,
+  RouteEffectGroup,
+  RouteCombinerConfig,
+} from './router.interface';
 import { factorizeRegExpWithParams } from './urlParams.factory';
 import { combineMiddlewareEffects } from '../effects/effects.combiner';
 
@@ -47,3 +54,16 @@ export const factorizeRouting = (
 
   return routing;
 };
+
+export const combineRoutes = (
+  path: string,
+  configOrEffects: RouteCombinerConfig | (RouteEffect | RouteEffectGroup)[]
+): RouteEffectGroup => ({
+  path,
+  effects: isRouteCombinerConfig(configOrEffects)
+    ? configOrEffects.effects
+    : configOrEffects,
+  middlewares: isRouteCombinerConfig(configOrEffects)
+    ? (configOrEffects.middlewares || [])
+    : [],
+});
