@@ -1,30 +1,30 @@
 import { HttpMethod } from '../http.interface';
 import { Effect, Middleware } from '../effects/effects.interface';
 
-export type RouteEffects = RouteConfig | RouteGroup;
-
-export interface RouteCombinerConfig {
-  middlewares?: Middleware[];
-  effects: RouteEffects[];
-}
-
-export interface RouteConfig {
+// Route
+export interface RouteEffect {
   path: string;
   method: HttpMethod;
   effect: Effect;
 }
 
-export interface RouteGroup {
+export interface RouteEffectGroup {
   path: string;
-  effects: RouteEffects[];
   middlewares: Middleware[];
+  effects: (RouteEffect | RouteEffectGroup)[];
 }
 
+// Combiner
+export interface RouteCombinerConfig {
+  middlewares?: Middleware[];
+  effects: (RouteEffect | RouteEffectGroup)[];
+}
+
+// Routing
 export interface ParametricRegExp {
   regExp: RegExp;
   parameters?: string[] | undefined;
 }
-
 
 export interface RoutingMethod {
   parameters?: string[] | undefined;

@@ -1,8 +1,8 @@
-import { RouteCombinerConfig, RouteGroup, Routing } from './router.interface';
+import { RouteCombinerConfig, RouteEffectGroup, Routing } from './router.interface';
 
 export { Routing };
 
-export const isRouteGroup = (item): item is RouteGroup =>
+export const isRouteEffectGroup = (item): item is RouteEffectGroup =>
   Array.isArray(item.effects) &&
   Array.isArray(item.middlewares);
 

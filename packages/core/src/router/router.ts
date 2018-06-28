@@ -1,68 +1,18 @@
 import { EMPTY, Observable, of } from 'rxjs';
 import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
-import { Effect, EffectResponse } from '../effects/effects.interface';
-import { isRouteCombinerConfig, isRouteGroup } from './router.helpers';
-import {
-  RouteCombinerConfig,
-  RouteConfig,
-  RouteEffects,
-  RouteGroup,
-  RouteMatched,
-  Routing,
-  RoutingMethod,
-  RoutingItem
-} from './router.interface';
+import { EffectResponse } from '../effects/effects.interface';
+import { isRouteCombinerConfig } from './router.helpers';
+import { RouteCombinerConfig, RouteEffect, RouteEffectGroup, RouteMatched, Routing } from './router.interface';
 import { queryParamsFactory } from '../router/queryParams.factory';
-import { combineMiddlewareEffects } from '../effects/effects.combiner';
-import { factorizeRegExpWithParams } from './urlParams.factory';
 
 export const combineRoutes = (
   path: string,
-  configOrEffects: RouteCombinerConfig | RouteEffects[]
-): RouteGroup => ({
+  configOrEffects: RouteCombinerConfig | (RouteEffect | RouteEffectGroup)[]
+): RouteEffectGroup => ({
   path,
   effects: isRouteCombinerConfig(configOrEffects) ? configOrEffects.effects : configOrEffects,
   middlewares: isRouteCombinerConfig(configOrEffects) ? (configOrEffects.middlewares || []) : [],
 });
-
-export const routingFactory = (
-  routes: (RouteGroup | RouteConfig)[],
-  parentPath = '',
-  middleware: Effect<HttpRequest>[] = []
-): Routing => {
-  const routing: Routing = [];
-  routes.forEach(route => {
-    if (isRouteGroup(route)) {
-      routing.push(...routingFactory(
-        route.effects,
-        parentPath + route.path,
-        [...middleware, ...route.middlewares]
-      ));
-    } else {
-      const { regExp, parameters } = factorizeRegExpWithParams(parentPath + route.path);
-      const foundRoute = routing.find(route => route.regExp.source === regExp.source);
-      const method: RoutingMethod = {
-        effect: route.effect,
-        middleware: middleware.length > 0
-          ? middleware.length > 1 ? combineMiddlewareEffects(middleware) : middleware[0]
-          : undefined,
-        parameters,
-      };
-      if (foundRoute) {
-        if (foundRoute.methods[route.method]) {
-          throw new Error(`Redefinition of route at "${route.method}: ${parentPath + route.path}"`);
-        }
-        foundRoute.methods[route.method] = method;
-      } else {
-        routing.push({
-          regExp,
-          methods: { [route.method]: method },
-        } as RoutingItem);
-      }
-    }
-  });
-  return routing;
-};
 
 export const findRoute = (
   routing: Routing,

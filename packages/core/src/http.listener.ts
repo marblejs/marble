@@ -2,17 +2,18 @@ import { IncomingMessage, OutgoingMessage } from 'http';
 import { of, Subject } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { combineMiddlewareEffects } from './effects/effects.combiner';
-import { Effect, EffectResponse } from './effects/effects.interface';
+import { EffectResponse, Middleware, ErrorMiddleware } from './effects/effects.interface';
 import { getErrorMiddleware } from './error/error.middleware';
 import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
 import { handleResponse } from './response/response.handler';
-import { RouteEffects } from './router/router.interface';
-import { routingFactory, resolveRouting } from './router/router';
+import { RouteEffect, RouteEffectGroup } from './router/router.interface';
+import { resolveRouting } from './router/router';
+import { factorizeRouting } from './router/router.factory';
 
 type HttpListenerConfig = {
-  middlewares?: Effect<HttpRequest>[];
-  effects: RouteEffects[];
-  errorMiddleware?: Effect<EffectResponse, Error>;
+  middlewares?: Middleware[];
+  effects: (RouteEffect | RouteEffectGroup)[];
+  errorMiddleware?: ErrorMiddleware;
 };
 
 export const httpListener = ({
@@ -23,7 +24,7 @@ export const httpListener = ({
   const request$ = new Subject<Http>();
 
   const combinedMiddlewares = combineMiddlewareEffects(middlewares);
-  const routerEffects = routingFactory(effects);
+  const routerEffects = factorizeRouting(effects);
   const providedErrorMiddleware = getErrorMiddleware(errorMiddleware);
   const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectResponse;
 
