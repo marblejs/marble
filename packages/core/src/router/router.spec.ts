@@ -1,5 +1,5 @@
-import { mapTo } from 'rxjs/operators';
-import { Effect } from '../effects/effects.interface';
+import { mapTo, tap, map } from 'rxjs/operators';
+import { Effect, Middleware } from '../effects/effects.interface';
 import { findRoute, resolveRouting } from './router';
 import { HttpRequest, HttpResponse, HttpMethod } from '../http.interface';
 import { RouteMatched, Routing } from './router.interface';
@@ -107,6 +107,27 @@ describe('Router', () => {
           done();
         }
       );
+    });
+
+    test('applies middlewares to found effect', done => {
+      // given
+      const middleware$: Middleware = req$ => req$.pipe(tap(req => req.test = 'test' ));
+      const effect$: Effect = req$ => req$.pipe(map(req => ({ body: req.test }) ));
+
+      const expectedMachingResult: RouteMatched = { middleware: middleware$, effect: effect$, params: {} };
+      const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
+      const res = {} as HttpResponse;
+
+      // when
+      router.findRoute = jest.fn(() => expectedMachingResult);
+      queryFactory.queryParamsFactory = jest.fn(() => ({}));
+      const resolvedRoute = resolveRouting([])(res)(req);
+
+      // then
+      resolvedRoute.subscribe(effect => {
+        expect(effect.body).toEqual('test');
+        done();
+      });
     });
   });
 
