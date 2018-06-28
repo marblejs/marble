@@ -1,7 +1,7 @@
 import { EMPTY, Observable, of } from 'rxjs';
 import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
 import { Effect, EffectResponse } from '../effects/effects.interface';
-import { createRegExpWithParams, isRouteCombinerConfig, isRouteGroup } from './router.helpers';
+import { isRouteCombinerConfig, isRouteGroup } from './router.helpers';
 import {
   RouteCombinerConfig,
   RouteConfig,
@@ -14,6 +14,7 @@ import {
 } from './router.interface';
 import { queryParamsFactory } from '../router/queryParams.factory';
 import { combineMiddlewareEffects } from '../effects/effects.combiner';
+import { factorizeRegExpWithParams } from './urlParams.factory';
 
 export const combineRoutes = (
   path: string,
@@ -38,7 +39,7 @@ export const routingFactory = (
         [...middleware, ...route.middlewares]
       ));
     } else {
-      const { regExp, parameters } = createRegExpWithParams(parentPath + route.path);
+      const { regExp, parameters } = factorizeRegExpWithParams(parentPath + route.path);
       const foundRoute = routing.find(route => route.regExp.source === regExp.source);
       const method: RoutingMethod = {
         effect: route.effect,
