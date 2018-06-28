@@ -49,6 +49,29 @@ describe('Router', () => {
         params: { param: 'nested' }
       });
     });
+
+    test('matches wildcard route if doesn\'t found proper route', () => {
+      // given
+      const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'e1' }));
+      const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'e2' }));
+
+      const routing: Routing = [
+        { regExp: /^\/group\/nested\/?$/, methods: { GET: { effect: e1$ } } },
+        { regExp: /^\/group.*?$/, methods: { '*': { effect: e2$ } } }
+      ];
+
+      // when
+      const route1 = findRoute(routing, '/group/test', 'GET');
+      const route2 = findRoute(routing, '/test', 'GET');
+
+      // then
+      expect(route1).toEqual({
+        effect: e2$,
+        middleware: undefined,
+        params: {},
+      });
+      expect(route2).toBeUndefined();
+    });
   });
 
   describe('#resolveRouting', () => {

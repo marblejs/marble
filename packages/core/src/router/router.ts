@@ -1,8 +1,9 @@
 import { EMPTY, Observable, of } from 'rxjs';
 import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
 import { EffectResponse } from '../effects/effects.interface';
-import { RouteMatched, Routing } from './router.interface';
+import { RouteMatched, Routing, RoutingItem } from './router.interface';
 import { queryParamsFactory } from '../router/queryParams.factory';
+export { RoutingItem };
 
 export const findRoute = (
   routing: Routing,
@@ -17,10 +18,10 @@ export const findRoute = (
       continue;
     }
 
-    const routingMethod = methods[method];
+    const routingMethod = methods[method] || methods['*'];
 
     if (!routingMethod) {
-      return undefined;
+      continue;
     }
 
     const { parameters, effect, middleware } = routingMethod;

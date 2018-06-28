@@ -1,6 +1,8 @@
-import { from } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { concatMap, last } from 'rxjs/operators';
+import { HttpRequest, HttpResponse } from '../http.interface';
 import { Middleware } from './effects.interface';
+export { HttpRequest, HttpResponse, Observable };
 
 export const combineMiddlewareEffects = (effects: Middleware[]): Middleware => {
   const middlewaresObservable = from(middlewaresGuard(effects));
