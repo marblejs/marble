@@ -21,14 +21,16 @@ describe('Router', () => {
       ];
 
       // when
-      const route1 = findRoute(routing, '/group/nested/foo', 'POST');
-      const route2 = findRoute(routing, '/group/nested/fo', 'POST');
-      const route3 = findRoute(routing, '/group/nested/foo', 'TEST' as HttpMethod);
+      const validRoute1 = findRoute(routing, '/group/nested/foo', 'POST');
+      const validRoute2 = findRoute(routing, '/group/nested/foo/', 'POST');
+      const invalidRoute1 = findRoute(routing, '/group/nested/fo', 'POST');
+      const invalidRoute2 = findRoute(routing, '/group/nested/foo', 'TEST' as HttpMethod);
 
       // then
-      expect(route1).toEqual({ effect: e3$, params: {} });
-      expect(route2).toBeUndefined();
-      expect(route3).toBeUndefined();
+      expect(validRoute1).toEqual({ effect: e3$, params: {} });
+      expect(validRoute2).toEqual({ effect: e3$, params: {} });
+      expect(invalidRoute1).toBeUndefined();
+      expect(invalidRoute2).toBeUndefined();
     });
 
     test('finds parametrized route inside collection', () => {
