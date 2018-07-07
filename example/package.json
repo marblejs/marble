@@ -23,9 +23,9 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "@marblejs/core": "^0.5.0",
-    "@marblejs/middleware-body": "^0.5.0",
-    "@marblejs/middleware-logger": "^0.5.0",
+    "@marblejs/core": "^1.0.0-rc.0",
+    "@marblejs/middleware-body": "^1.0.0-rc.0",
+    "@marblejs/middleware-logger": "^1.0.0-rc.0",
     "@types/node": "^10.1.2",
     "rxjs": "^6.1.0",
     "typescript": "~2.9.1"

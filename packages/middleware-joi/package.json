@@ -37,15 +37,15 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "@marblejs/core": "^0.3.1",
+    "@marblejs/core": "^1.0.0-rc.0",
     "rxjs": "~6.1.0"
   },
   "dependencies": {
     "joi": "^13.3.0"
   },
   "devDependencies": {
-    "@marblejs/core": "^0.5.0",
-    "@marblejs/middleware-body": "^0.5.0",
+    "@marblejs/core": "^1.0.0-rc.0",
+    "@marblejs/middleware-body": "^1.0.0-rc.0",
     "@types/joi": "^13.0.8"
   },
   "publishConfig": {
