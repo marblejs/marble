@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/example",
-  "version": "0.5.0",
+  "version": "1.0.0-rc.0",
   "description": "Marble.js example playground",
   "main": "src/index.ts",
   "scripts": {
