@@ -2,16 +2,14 @@ import * as http from 'http';
 
 export interface HttpRequest extends http.IncomingMessage {
   url: string;
+  method: HttpMethod;
   body?: any;
-  params?: RouteParameters;
-  query?: QueryParameters;
-  matchers?: string[];
-  matchPath: boolean;
-  matchType: boolean;
+  params: RouteParameters;
+  query: QueryParameters;
   [key: string]: any;
 }
 
-export type RouteParameters = Record<string, string | number>;
+export type RouteParameters = Record<string, string>;
 export type QueryParameters = Record<string, string | number | object>;
 
 export interface HttpResponse extends http.ServerResponse {}
@@ -27,7 +25,8 @@ export type HttpMethod =
   | 'DELETE'
   | 'CONNECT'
   | 'OPTIONS'
-  | 'TRACE';
+  | 'TRACE'
+  | '*';
 
 export type Http = {
   req: HttpRequest;
