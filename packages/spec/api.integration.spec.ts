@@ -9,7 +9,7 @@ import { bodyParser$ } from '../middleware-body/src';
 import { readFile } from '../util/fileReader.helper';
 
 const MOCKED_USER_LIST = [{ id: 1 }, { id: 2 }];
-const STATIC_PATH = path.resolve(__dirname, '../../docs/assets');
+const STATIC_PATH = path.resolve(__dirname, '../../assets');
 
 const authorize$: Effect<HttpRequest> = request$ =>
   request$.pipe(
