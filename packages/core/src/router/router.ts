@@ -42,6 +42,10 @@ export const resolveRouting =
   (routing: Routing) =>
   (res: HttpResponse) =>
   (req: HttpRequest): Observable<EffectResponse> => {
+    if (res.finished) {
+      return EMPTY;
+    }
+
     const [urlPath, urlQuery] = req.url.split('?');
     const routeMatched = findRoute(routing, urlPath, req.method);
 
