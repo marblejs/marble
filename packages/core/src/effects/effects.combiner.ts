@@ -1,5 +1,5 @@
 import { Observable, from } from 'rxjs';
-import { concatMap, last } from 'rxjs/operators';
+import { concatMap, last, takeWhile } from 'rxjs/operators';
 import { HttpRequest, HttpResponse } from '../http.interface';
 import { Middleware } from './effects.interface';
 export { HttpRequest, HttpResponse, Observable };
@@ -9,6 +9,7 @@ export const combineMiddlewareEffects = (effects: Middleware[]): Middleware => {
 
   return (req$, res, metadata) => {
     return middlewaresObservable.pipe(
+      takeWhile(() => !res.finished),
       concatMap(effect => effect(req$, res, metadata)),
       last(),
     );

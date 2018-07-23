@@ -134,6 +134,31 @@ describe('Router', () => {
       );
     });
 
+    test('returns empty stream if response has been finished', done => {
+      // given
+      const req = {} as HttpRequest;
+      const res = { finished: true } as HttpResponse;
+
+      // when
+      const resolvedRoute = resolveRouting([])(res)(req);
+
+      // then
+      resolvedRoute.subscribe(
+        () => {
+          fail('Stream should be empty');
+          done();
+        },
+        () => {
+          fail('Stream should be empty');
+          done();
+        },
+        () => {
+          expect(true).toEqual(true);
+          done();
+        }
+      );
+    });
+
     test('applies middlewares to found effect', done => {
       // given
       const middleware$: Middleware = req$ => req$.pipe(tap(req => req.test = 'test' ));

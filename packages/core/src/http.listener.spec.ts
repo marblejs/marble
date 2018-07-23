@@ -99,7 +99,7 @@ describe('Http listener', () => {
 
     // then
     setTimeout(() => {
-      expect(responseHandler.handleResponse).toHaveBeenCalledTimes(2);
+      expect(responseHandler.handleResponse).toHaveBeenCalledTimes(1);
       expect(errorHandler).toHaveBeenCalled();
       done();
     });

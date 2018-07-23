@@ -1,4 +1,6 @@
 import * as http from 'http';
+import { Observable } from 'rxjs';
+import { EffectResponse } from './effects/effects.interface';
 
 export interface HttpRequest extends http.IncomingMessage {
   url: string;
@@ -12,7 +14,9 @@ export interface HttpRequest extends http.IncomingMessage {
 export type RouteParameters = Record<string, string>;
 export type QueryParameters = Record<string, string | number | object>;
 
-export interface HttpResponse extends http.ServerResponse {}
+export interface HttpResponse extends http.ServerResponse {
+  send: (effect: EffectResponse) => Observable<never>;
+}
 
 export type HttpHeaders = Record<string, string>;
 
