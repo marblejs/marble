@@ -1,13 +1,13 @@
 import { mapTo } from 'rxjs/operators';
 import { Marbles } from '../../../util/marbles.spec-util';
 import { HttpRequest, HttpResponse } from '../http.interface';
-import { error$, getErrorMiddleware } from './error.middleware';
+import { error$, errorEffectProvider } from './error.effect';
 import { HttpError } from './error.model';
 
 const createMockRes = () => ({} as HttpResponse);
 const createMockReq = (url = '/') => ({ url } as HttpRequest);
 
-describe('Error middleware', () => {
+describe('Error effect', () => {
 
   it('error$ maps HttpError', () => {
     const error = new HttpError('test-message', 400);
@@ -41,15 +41,15 @@ describe('Error middleware', () => {
     ], { response: createMockRes(), error });
   });
 
-  it('#getErrorMiddleware provides middleware implementation', () => {
+  it('#errorEffectProvider provides error handler implementation', () => {
     const customError$ = req$ => req$.pipe(mapTo({ status: 500, body: 'error' }));
-    const middleware = getErrorMiddleware(customError$);
-    expect(middleware).toBe(customError$);
+    const effect = errorEffectProvider(customError$);
+    expect(effect).toBe(customError$);
   });
 
-  it('#getErrorMiddleware provides default middleware implementation if not passed', () => {
-    const middleware = getErrorMiddleware();
-    expect(middleware).toBe(error$);
+  it('#errorEffectProvider provides default error handler implementation if not passed', () => {
+    const effect = errorEffectProvider();
+    expect(effect).toBe(error$);
   });
 
 });

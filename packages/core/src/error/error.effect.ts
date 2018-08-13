@@ -5,7 +5,7 @@ import { HttpError, isHttpError } from './error.model';
 
 export type ThrownError = HttpError & Error;
 
-export const getErrorMiddleware = (customError$?: Effect<EffectResponse, ThrownError>) => !!customError$
+export const errorEffectProvider = (customError$?: Effect<EffectResponse, ThrownError>) => !!customError$
   ? customError$
   : error$;
 
