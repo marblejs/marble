@@ -5,12 +5,12 @@
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "start": "npm run watch",
+    "start": "yarn watch",
     "watch": "tsc -w",
     "build": "tsc",
     "test": "jest --config ../../jest.config.js",
-    "prepack": "npm run build",
-    "prepare": "npm run build"
+    "prepack": "yarn build",
+    "prepare": "yarn build"
   },
   "files": [
     "dist/"
@@ -28,6 +28,7 @@
   },
   "engines": {
     "node": ">= 8.0.0",
+    "yarn": ">= 1.7.0",
     "npm": ">= 5.0.0"
   },
   "author": "Lúcio Rubens <luciorubeens@gmail.com>",

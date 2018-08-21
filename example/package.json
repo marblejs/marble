@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node --project tsconfig.json src/index.ts",
-    "watch": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec npm run start"
+    "watch": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec yarn start"
   },
   "private": true,
   "repository": {

@@ -2,20 +2,20 @@
   "name": "marblejs",
   "description": "Reactive Node APIs made easy",
   "scripts": {
-    "postinstall": "npm run build",
+    "postinstall": "yarn build",
     "build": "lerna link && lerna bootstrap --hoist",
     "benchmark": "make -C benchmarks",
     "lint": "tslint --config tslint.json --project tsconfig.spec.json",
     "test": "jest --expand",
     "test:coverage": "SCOPE=unit jest --expand --coverage",
     "test:watch": "jest --expand --onlyChanged --watch",
-    "prepare": "npm run test",
+    "prepare": "yarn test",
     "publish": "lerna publish",
     "precommit": "lint-staged"
   },
   "lint-staged": {
     "*.ts": [
-      "npm run lint",
+      "yarn lint",
       "git add",
       "jest --bail --findRelatedTests --passWithNoTests"
     ]
@@ -26,6 +26,7 @@
   },
   "engines": {
     "node": ">= 8.0.0",
+    "yarn": ">= 1.7.0",
     "npm": ">= 5.0.0"
   },
   "keywords": [
