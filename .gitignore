@@ -25,6 +25,7 @@ build
 dist
 doc
 coverage
+package-lock.json
 *.tgz
 
 # --------------------------------------------------

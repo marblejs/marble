@@ -31,25 +31,25 @@ We are using [GitHub Issues][issues] for bugs. We keep a close eye on this and t
 1. Create an issue for the bug you want to fix or the feature that you want to add.
 2. Create your own fork on github, then checkout your fork.
 3. Write your code in your local copy. It's good practice to create a branch for each new issue you work on, although not compulsory.
-4. To run the test suite, first install the dependencies by running `npm install`, then run `npm test` or `npm run test:watch`.
-5. Ensure your code is linted by running `npm run lint` -- fix any issue you see listed.
+4. To run the test suite, first install the dependencies by running `yarn`, then run `yarn test` or `yarn test:watch`.
+5. Ensure your code is linted by running `yarn lint` -- fix any issue you see listed.
 6. If the tests pass, you can commit your changes to your fork and then create a pull request from there. Make sure to reference your issue from the pull request comments by including the issue number e.g. *#123*.
 
 ## <a name="workflow"></a> Development Workflow
 
 After cloning, run `npm install` to fetch all project related dependencies. Then, you can run several commands:
 
-- `npm run build` - installs + builds internal packages
-- `npm run benchmark` - runs benchmarking scripts
-- `npm run lint` - checks the code style
-- `npm run test` - runs complete test suite
-- `npm run test:coverage` - runs complete test suite with coverage report
-- `npm run test:watch` - runs an interactive test watcher
+- `yarn build` - installs + builds internal packages
+- `yarn benchmark` - runs benchmarking scripts
+- `yarn lint` - checks the code style
+- `yarn test` - runs complete test suite
+- `yarn test:coverage` - runs complete test suite with coverage report
+- `yarn test:watch` - runs an interactive test watcher
 
 You can also check built in examples by visiting `./example/` folder. Then, run `npm install` to fetch all example related dependencies. There are two commands available for you:
 
-- `npm run start` - run example
-- `npm run watch` - run example in watch mode (development)
+- `yarn start` - run example
+- `yarn watch` - run example in watch mode (development)
 
 ## <a name="commit"></a> Commit Message Guidelines
 

@@ -51,7 +51,7 @@ $ cd example
 To run example just execute following command inside root repository folder:
 
 ```bash
-$ npm run start
+$ yarn start
 ```
 
 ## <a name="roadmap"></a> Roadmap
