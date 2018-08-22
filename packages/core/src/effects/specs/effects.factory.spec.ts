@@ -1,6 +1,6 @@
 import { mapTo } from 'rxjs/operators';
-import { Effect } from './effects.interface';
-import { EffectFactory } from './effects.factory';
+import { Effect } from '../effects.interface';
+import { EffectFactory } from '../effects.factory';
 
 describe('Effects factory', () => {
 

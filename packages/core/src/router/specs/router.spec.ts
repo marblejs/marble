@@ -1,8 +1,8 @@
 import { mapTo, tap, map } from 'rxjs/operators';
-import { Effect, Middleware } from '../effects/effects.interface';
-import { findRoute, resolveRouting } from './router';
-import { HttpRequest, HttpResponse, HttpMethod } from '../http.interface';
-import { RouteMatched, Routing } from './router.interface';
+import { Effect, Middleware } from '../../effects/effects.interface';
+import { findRoute, resolveRouting } from '../router';
+import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
+import { RouteMatched, Routing } from '../router.interface';
 
 describe('Router', () => {
 
@@ -81,10 +81,10 @@ describe('Router', () => {
     let queryFactory;
 
     beforeEach(() => {
-      jest.unmock('./router.ts');
-      jest.unmock('../router/queryParams.factory');
-      router = require('./router.ts');
-      queryFactory = require('../router/queryParams.factory');
+      jest.unmock('../router.ts');
+      jest.unmock('../queryParams.factory');
+      router = require('../router.ts');
+      queryFactory = require('../queryParams.factory');
     });
 
     test('resolves found effect', done => {

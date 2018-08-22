@@ -1,5 +1,5 @@
-import { ContentType } from '../util/contentType.util';
-import { bodyFactory } from './responseBody.factory';
+import { ContentType } from '../../util/contentType.util';
+import { bodyFactory } from '../responseBody.factory';
 
 describe('Response body factory', () => {
 

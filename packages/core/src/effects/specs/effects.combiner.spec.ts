@@ -1,9 +1,9 @@
 import { of } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Middleware } from './effects.interface';
-import { combineMiddlewareEffects } from './effects.combiner';
-import { HttpResponse, HttpRequest } from '../http.interface';
-import { Marbles } from '../../../util/marbles.spec-util';
+import { Middleware } from '../effects.interface';
+import { combineMiddlewareEffects } from '../effects.combiner';
+import { HttpResponse, HttpRequest } from '../../http.interface';
+import { Marbles } from '../../../../util/marbles.spec-util';
 
 const createMockRes = () => ({} as HttpResponse);
 const createMockReq = (url = '/') => ({ url } as HttpRequest);
