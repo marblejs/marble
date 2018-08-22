@@ -8,15 +8,9 @@ const getPost$ = EffectFactory
   .matchType('GET')
   .use(req$ => req$
     .pipe(
-      use(
-        validator$({
-          query: {
-            page: Joi.number()
-              .integer()
-              .greater(1)
-          }
-        })
-      ),
+      use(validator$({
+        query: { page: Joi.number().integer().greater(1) }
+      })),
       map(req => req.query),
       map(query => ({ status: 200, body: { ...query } }))
     ));
@@ -26,17 +20,9 @@ const getUser$ = EffectFactory
   .matchType('GET')
   .use(req$ => req$
     .pipe(
-      use(
-        validator$({
-          params: {
-            id: Joi.number()
-              .integer()
-              .min(1)
-              .max(10)
-              .required()
-          }
-        })
-      ),
+      use(validator$({
+        params: { id: Joi.number().integer().min(1).max(10).required() }
+      })),
       map(req => req.params),
       map(params => ({ status: 200, body: { id: params!.id } }))
     ));
@@ -46,16 +32,10 @@ const storePost$ = EffectFactory
   .matchType('POST')
   .use(req$ => req$
     .pipe(
-      use(
-        validator$({
-          query: {
-            timestamp: Joi.date().required()
-          },
-          body: {
-            title: Joi.string().required()
-          }
-        })
-      ),
+      use(validator$({
+        query: { timestamp: Joi.date().required() },
+        body: { title: Joi.string().required() },
+      })),
       map(resp => ({ body: { ...resp.body, ...resp.query } }))
     ));
 
@@ -64,14 +44,12 @@ const postUser$ = EffectFactory
   .matchType('POST')
   .use(req$ => req$
     .pipe(
-      use(
-        validator$({
-          body: {
-            name: Joi.string().required(),
-            passport: Joi.string().default('marble.js')
-          }
-        })
-      ),
+      use(validator$({
+        body: {
+          name: Joi.string().required(),
+          passport: Joi.string().default('marble.js')
+        }
+      })),
       map(req => req.body),
       map(response => ({ body: response }))
     ));
@@ -81,13 +59,7 @@ const api$ = combineRoutes('/api', [getPost$, getUser$, postUser$, storePost$]);
 const middlewares = [
   bodyParser$,
   validator$(
-    {
-      headers: {
-        token: Joi.string()
-          .token()
-          .required()
-      }
-    },
+    { headers: { token: Joi.string().token().required() } },
     { stripUnknown: true }
   )
 ];

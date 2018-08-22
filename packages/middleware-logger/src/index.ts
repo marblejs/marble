@@ -1,4 +1,4 @@
-import { compose, Effect, HttpRequest } from '@marblejs/core';
+import { compose, Middleware } from '@marblejs/core';
 import chalk from 'chalk';
 import { tap } from 'rxjs/operators';
 import { formatTime, getTimeDifferenceMs } from './time.factory';
@@ -17,16 +17,16 @@ const printLog = (
   console.info(`%s %s %s %s`, method, url, statusCode, formattedTime);
 };
 
-export const logger$: Effect<HttpRequest> = (request$, response) =>
-  request$.pipe(
-    tap(request => {
+export const logger$: Middleware = (req$, res) =>
+  req$.pipe(
+    tap(req => {
       const startTime = new Date();
 
-      response.on('finish', () =>
+      res.on('finish', () =>
         printLog(
-          request.method!,
-          request.url!,
-          getStatusCode(response.statusCode),
+          req.method,
+          req.url,
+          getStatusCode(res.statusCode),
           compose(formatTime, getTimeDifferenceMs)(startTime)
         )
       );
