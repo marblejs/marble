@@ -1,4 +1,4 @@
-import { DEFAULT_HEADERS, headersFactory } from './responseHeaders.factory';
+import { DEFAULT_HEADERS, headersFactory } from '../responseHeaders.factory';
 
 describe('Response headers factory', () => {
 

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import { ContentType } from '../util/contentType.util';
-import { DEFAULT_CONTENT_TYPE, contentTypeFactory, getMimeType } from './responseContentType.factory';
+import { ContentType } from '../../util/contentType.util';
+import { DEFAULT_CONTENT_TYPE, contentTypeFactory, getMimeType } from '../responseContentType.factory';
 
 describe('Response content-type factory', () => {
 
@@ -18,7 +18,7 @@ describe('Response content-type factory', () => {
 
   it('#getMimeType detects mime-type from buffer', () => {
     // given
-    const body = fs.readFileSync(__dirname + '/../../../../assets/logo.png');
+    const body = fs.readFileSync(__dirname + '/../../../../../assets/logo.png');
     const path = '/test/index.html';
 
     // when

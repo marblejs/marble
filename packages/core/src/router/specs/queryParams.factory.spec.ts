@@ -1,4 +1,4 @@
-import { queryParamsFactory } from './queryParams.factory';
+import { queryParamsFactory } from '../queryParams.factory';
 
 describe('queryParamsFactory', () => {
   test('should return empty object when passed URL with no valid params', () => {

@@ -1,15 +1,15 @@
 import { mapTo } from 'rxjs/operators';
-import { EffectFactory } from '../effects/effects.factory';
-import { Effect, Middleware } from '../effects/effects.interface';
-import { RouteEffect, RouteEffectGroup, Routing } from './router.interface';
-import { factorizeRouting, combineRoutes } from './router.factory';
+import { EffectFactory } from '../../effects/effects.factory';
+import { Effect, Middleware } from '../../effects/effects.interface';
+import { RouteEffect, RouteEffectGroup, Routing } from '../router.interface';
+import { factorizeRouting, combineRoutes } from '../router.factory';
 
 describe('Router factory', () => {
   let effectsCombiner;
 
   beforeEach(() => {
-    jest.unmock('../effects/effects.combiner.ts');
-    effectsCombiner = require('../effects/effects.combiner');
+    jest.unmock('../../effects/effects.combiner.ts');
+    effectsCombiner = require('../../effects/effects.combiner');
   });
 
   test('#factorizeRouting factorizes routing with nested groups', () => {

@@ -1,4 +1,4 @@
-import { factorizeRegExpWithParams } from './urlParams.factory';
+import { factorizeRegExpWithParams } from '../urlParams.factory';
 
 describe('Url parameters factory', () => {
 

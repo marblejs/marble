@@ -1,4 +1,4 @@
-import { isRouteEffectGroup, isRouteCombinerConfig } from './router.helpers';
+import { isRouteEffectGroup, isRouteCombinerConfig } from '../router.helpers';
 
 describe('Router helper', () => {
 

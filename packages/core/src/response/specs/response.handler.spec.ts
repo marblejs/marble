@@ -1,6 +1,6 @@
-import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
-import { handleResponse } from './response.handler';
-import { DEFAULT_HEADERS } from './responseHeaders.factory';
+import { HttpRequest, HttpResponse, HttpStatus } from '../../http.interface';
+import { handleResponse } from '../response.handler';
+import { DEFAULT_HEADERS } from '../responseHeaders.factory';
 
 const createMockResponse = () => ({
   writeHead: jest.fn(),

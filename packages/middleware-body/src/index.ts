@@ -1,13 +1,9 @@
-import {
-  ContentType,
-  Effect,
-  HttpError,
-  HttpRequest,
-  HttpStatus
-} from '@marblejs/core';
+import { ContentType, HttpError, HttpRequest, HttpStatus, Middleware } from '@marblejs/core';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap, toArray } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, toArray, mapTo } from 'rxjs/operators';
 import { serializeUrlEncoded } from './urlEncoded.serializer';
+
+const PARSEABLE_METHODS = ['POST', 'PUT', 'PATCH'];
 
 const fromReadableStream = (stream: HttpRequest): Observable<any> => {
   stream.pause();
@@ -47,24 +43,16 @@ const getBody = (req: HttpRequest) =>
     })
   );
 
-export const bodyParser$: Effect<HttpRequest> = (request$, response) =>
-  request$.pipe(
-    switchMap(
-      req =>
-        ['POST', 'PUT', 'PATCH'].includes(req.method!)
-          ? of(req).pipe(
-              switchMap(getBody),
-              tap(body => (req.body = body)),
-              map(() => req),
-              catchError(() =>
-                throwError(
-                  new HttpError(
-                    'Request body parse error',
-                    HttpStatus.BAD_REQUEST
-                  )
-                )
-              )
-            )
-          : of(req)
+export const bodyParser$: Middleware = req$ =>
+  req$.pipe(
+    switchMap(req =>
+      PARSEABLE_METHODS.includes(req.method)
+        ? of(req).pipe(
+            switchMap(getBody),
+            tap(body => (req.body = body)),
+            mapTo(req),
+            catchError(() => throwError(new HttpError('Request body parse error', HttpStatus.BAD_REQUEST)))
+          )
+        : of(req)
     )
   );

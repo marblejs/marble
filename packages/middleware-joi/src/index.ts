@@ -1,18 +1,10 @@
 import * as Joi from 'joi';
 import { Schema, SchemaValidator } from './schema';
-import { Effect, HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
+import { HttpRequest, HttpError, HttpStatus, Middleware } from '@marblejs/core';
 import { from, of, throwError } from 'rxjs';
-import {
-  mergeMap,
-  flatMap,
-  catchError,
-  mapTo,
-  switchMap,
-  toArray,
-  map
-} from 'rxjs/operators';
+import { mergeMap, flatMap, catchError, mapTo, switchMap, toArray, map } from 'rxjs/operators';
 
-const validateSource = (req: HttpRequest, rules: Map<string, any>, options) =>
+const validateSource = (rules: Map<string, any>, options: Joi.ValidationOptions) => (req: HttpRequest) =>
   from(rules.keys()).pipe(
     mergeMap(rule =>
       of(req[rule]).pipe(
@@ -31,10 +23,7 @@ const validateSource = (req: HttpRequest, rules: Map<string, any>, options) =>
     mapTo(req)
   );
 
-const validator$ = (
-  schema: Schema,
-  options: Joi.ValidationOptions = {}
-): Effect<HttpRequest> => request$ => {
+const validator$ = (schema: Schema, options: Joi.ValidationOptions = {}): Middleware => req$ => {
   const result = Joi.validate(schema, SchemaValidator);
   const rules = Object.keys(schema).reduce(
     (acc, value) => acc.set(value, Joi.compile(schema[value])),
@@ -45,7 +34,9 @@ const validator$ = (
     return throwError(result.error);
   }
 
-  return request$.pipe(switchMap(req => validateSource(req, rules, options)));
+  return req$.pipe(
+    switchMap(validateSource(rules, options))
+  );
 };
 
 export { Joi, validator$ };
