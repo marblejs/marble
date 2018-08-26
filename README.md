@@ -66,7 +66,7 @@ We strongly believe that open source is all about the people. Thats why we are l
 - Read the [CONTRIBUTING](https://github.com/marblejs/marble/blob/master/.github/CONTRIBUTING.md) guideance first!
 - We use monorepo architecture for entire framework-related packages - each middleware resides in main Marble.js repository
 - For reference code structure just look at [example](https://github.com/marblejs/marble/tree/master/packages/middleware-joi) middleware implementation.
-- Each middleware package should follow the defined name convention: `@marblejs/middleware-{example_name}`
+- Each middleware package should follow the naming convention: `@marblejs/middleware-{example_name}`
 - If you have an idea and would like to contribute, just open an [issue](https://github.com/marblejs/marble/issues/new?template=feature_request.md) and describe the middelware idea that you would like to work on. We'll discuss the internals and proposed features there.
 - Open a Pull Request and... 🚀
 
