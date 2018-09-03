@@ -11,10 +11,6 @@
     ]
   },
 
-  "inputs": [
-    "src"
-  ],
-
   "include": [
     "node_modules/@types",
     "src/**/*.ts"
