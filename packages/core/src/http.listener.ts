@@ -1,5 +1,5 @@
 import { IncomingMessage, OutgoingMessage } from 'http';
-import { Observable, of, Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, switchMap, tap, takeWhile } from 'rxjs/operators';
 import { combineMiddlewareEffects } from './effects/effects.combiner';
 import { EffectResponse, Middleware, ErrorEffect } from './effects/effects.interface';
@@ -9,7 +9,6 @@ import { handleResponse } from './response/response.handler';
 import { RouteEffect, RouteEffectGroup } from './router/router.interface';
 import { resolveRouting } from './router/router';
 import { factorizeRouting } from './router/router.factory';
-export { Observable };
 
 type HttpListenerConfig = {
   middlewares?: Middleware[];
