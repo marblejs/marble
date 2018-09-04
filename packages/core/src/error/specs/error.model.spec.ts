@@ -34,7 +34,7 @@ describe('Error model', () => {
     });
 
     // when
-    Error.prepareStackTrace(error, []);
+    Error.prepareStackTrace!(error, []);
 
     // then
     expect(error.name).toBe('CoreError');

@@ -43,7 +43,7 @@ describe('EffectFactory', () => {
     expectedError = new Error('Path cannot be empty');
 
     // when
-    const effectFactoryFn = () => EffectFactory.matchPath(undefined);
+    const effectFactoryFn = () => EffectFactory.matchPath(undefined as any);
 
     // then
     expect(effectFactoryFn).toThrowError(expectedError);
@@ -56,7 +56,7 @@ describe('EffectFactory', () => {
     // when
     const effectFactoryFn = () => EffectFactory
       .matchPath('/')
-      .matchType(undefined);
+      .matchType(undefined as any);
 
     // then
     expect(effectFactoryFn).toThrowError(expectedError);
@@ -85,7 +85,7 @@ describe('EffectFactory', () => {
     const effectFactoryFn = () => EffectFactory
       .matchPath('/')
       .matchType('GET')
-      .use(undefined);
+      .use(undefined as any);
 
     // then
     expect(effectFactoryFn).toThrowError(expectedError);

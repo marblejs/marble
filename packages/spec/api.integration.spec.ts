@@ -2,9 +2,17 @@ import * as path from 'path';
 import { of, throwError } from 'rxjs';
 import { filter, map, mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
-import { HttpStatus } from '../core/dist/http.interface';
-import { ContentType } from '../core/dist/util/contentType.util';
-import { combineRoutes, Effect, EffectFactory, HttpError, httpListener, HttpRequest, use } from '../core/src';
+import {
+  use,
+  combineRoutes,
+  Effect,
+  EffectFactory,
+  HttpError,
+  HttpStatus,
+  ContentType,
+  httpListener,
+  HttpRequest,
+} from '../core/src';
 import { bodyParser$ } from '../middleware-body/src';
 import { readFile } from '../util/fileReader.helper';
 
