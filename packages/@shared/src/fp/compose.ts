@@ -1,4 +1,4 @@
-export type Arity<A, B> = (a: A) => B;
+type Arity<A, B> = (a: A) => B;
 
 export function compose<A, B>(
   f: Arity<A, B>

@@ -1,6 +1,6 @@
 import { HttpRequest, HttpResponse } from '@marblejs/core';
 import { EventEmitter } from 'events';
-import { Marbles } from '../../util/marbles.spec-util';
+import { Marbles } from '@shared';
 import { logger$ } from './index';
 
 const createMockReq = (url: string, method: string) => ({ url, method } as HttpRequest);

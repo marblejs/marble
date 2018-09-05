@@ -9,15 +9,14 @@ import {
   EffectFactory,
   HttpError,
   HttpStatus,
-  ContentType,
   httpListener,
   HttpRequest,
-} from '../core/src';
-import { bodyParser$ } from '../middleware-body/src';
-import { readFile } from '../util/fileReader.helper';
+} from '@marblejs/core';
+import { bodyParser$ } from '@marblejs/middleware-body';
+import { readFile, ContentType } from '@shared';
 
 const MOCKED_USER_LIST = [{ id: 1 }, { id: 2 }];
-const STATIC_PATH = path.resolve(__dirname, '../../assets');
+const STATIC_PATH = path.resolve(__dirname, '../../../assets');
 
 const authorize$: Effect<HttpRequest> = request$ =>
   request$.pipe(

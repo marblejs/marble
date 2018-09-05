@@ -16,9 +16,10 @@
     "lib": [
       "dom",
       "es7"
-    ]
-  },
-  "exclude": [
-    "**/*.spec.ts"
-  ]
+    ],
+    "baseUrl": "./packages",
+    "paths": {
+      "@shared": ["@shared/src"]
+    }
+  }
 }

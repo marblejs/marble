@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { ContentType } from '../../util/contentType.util';
+import { ContentType } from '@shared';
 import { DEFAULT_CONTENT_TYPE, contentTypeFactory, getMimeType } from '../responseContentType.factory';
 
 describe('Response content-type factory', () => {

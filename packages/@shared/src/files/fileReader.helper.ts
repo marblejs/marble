@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Observable } from 'rxjs';
-import { HttpError, HttpStatus } from '../core/src';
+import { HttpError, HttpStatus } from '@marblejs/core';
 
 export const readFile = (basePath: string) => (dir: string) =>
   new Observable<Buffer>(subscriber => {

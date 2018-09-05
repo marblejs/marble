@@ -2,7 +2,7 @@ import { HttpMethod, HttpMethodType } from '../http.interface';
 import { Effect, EffectResponse } from './effects.interface';
 import { RouteEffect } from '../router/router.interface';
 import { coreErrorFactory, CoreErrorOptions } from '../error/error.factory';
-import { getArrayFromEnum } from '../util/array.util';
+import { getArrayFromEnum } from '@shared';
 
 export namespace EffectFactory {
 

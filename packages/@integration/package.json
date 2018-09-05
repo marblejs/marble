@@ -1,0 +1,25 @@
+{
+  "name": "@marblejs/integration",
+  "version": "1.0.0-rc.1",
+  "description": "Marble.js shared utils and helpers",
+  "main": "index.ts",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "author": "Józef Flakus",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "homepage": "https://github.com/marblejs/marble#readme",
+  "peerDependencies": {
+    "@marblejs/core": "^1.0.0-rc.1",
+    "@marblejs/middleware-body": "^1.0.0-rc.1"
+  },
+  "devDependencies": {
+    "@marblejs/core": "^1.0.0-rc.1",
+    "@marblejs/middleware-body": "^1.0.0-rc.1"
+  }
+}

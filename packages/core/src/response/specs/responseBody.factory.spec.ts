@@ -1,4 +1,4 @@
-import { ContentType } from '../../util/contentType.util';
+import { ContentType } from '@shared';
 import { bodyFactory } from '../responseBody.factory';
 
 describe('Response body factory', () => {

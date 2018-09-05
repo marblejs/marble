@@ -1,5 +1,5 @@
 import { HttpHeaders } from '../http.interface';
-import { ContentType } from '../util/contentType.util';
+import { ContentType } from '@shared';
 
 export const bodyFactory = (headers: HttpHeaders) => (body: any) => {
   switch (headers['Content-Type']) {

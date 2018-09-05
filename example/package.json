@@ -28,7 +28,7 @@
     "@marblejs/middleware-logger": "^1.0.0-rc.1",
     "@types/node": "^10.1.2",
     "rxjs": "~6.2.2",
-    "typescript": "~3.0.1"
+    "typescript": "~3.0.3"
   },
   "devDependencies": {
     "nodemon": "^1.17.3",

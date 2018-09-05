@@ -7,5 +7,4 @@ export * from './router/router.interface';
 export * from './http.interface';
 export * from './http.listener';
 export * from './operators';
-export { compose } from './util/compose.util';
-export { ContentType } from './util/contentType.util';
+export { compose, Maybe, ContentType } from '@shared';
