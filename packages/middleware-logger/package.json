@@ -6,8 +6,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "start": "yarn watch",
-    "watch": "tsc -w",
-    "build": "tsc",
+    "watch": "webpack -w",
+    "build": "webpack",
     "prepack": "yarn build",
     "prepare": "yarn build"
   },
