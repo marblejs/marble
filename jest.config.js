@@ -10,7 +10,15 @@ module.exports = {
     ? '^((?!integration).)*\.spec\.ts$'
     : '.?(spec|integration\.spec)\.ts$',
   coverageDirectory: './coverage/',
-  coveragePathIgnorePatterns: ['spec-util.ts$', '.d.ts$', '.spec.ts'],
+  coveragePathIgnorePatterns: [
+    'spec-util.ts$',
+    '.d.ts$',
+    '.spec.ts',
+    'webpack.config.ts',
+    '@example',
+    '@integration',
+    '@shared/src/fp',
+  ],
   collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [
     'ts',
