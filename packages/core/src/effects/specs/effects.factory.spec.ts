@@ -1,10 +1,24 @@
 import { mapTo } from 'rxjs/operators';
 import { Effect } from '../effects.interface';
 import { EffectFactory } from '../effects.factory';
+import { HttpMethod } from '../../http.interface';
 
-describe('Effects factory', () => {
+describe('EffectFactory', () => {
 
-  test('#effect factorizes RouteConfig', () => {
+  let expectedError: Error;
+  let coreError;
+
+  beforeEach(() => {
+    jest.unmock('../../error/error.factory.ts');
+    coreError = require('../../error/error.factory.ts');
+    coreError.coreErrorFactory = jest.fn(() => expectedError);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('factorizes RouteConfig', () => {
     // given
     const effect$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
     const path = '/foo';
@@ -22,6 +36,59 @@ describe('Effects factory', () => {
       method: 'GET',
       effect: effect$,
     });
+  });
+
+  test('throws an error if "path" is not provided', () => {
+    // given
+    expectedError = new Error('Path cannot be empty');
+
+    // when
+    const effectFactoryFn = () => EffectFactory.matchPath(undefined);
+
+    // then
+    expect(effectFactoryFn).toThrowError(expectedError);
+  });
+
+  test('throws an error if "method" is not provided', () => {
+    // given
+    expectedError = new Error('HttpMethod needs to be defined');
+
+    // when
+    const effectFactoryFn = () => EffectFactory
+      .matchPath('/')
+      .matchType(undefined);
+
+    // then
+    expect(effectFactoryFn).toThrowError(expectedError);
+  });
+
+  test('throws an error if provided "method" is not included in the list', () => {
+    // given
+    expectedError = new Error(
+      'HttpMethod needs to be one of the following: POST,PUT,PATCH,GET,HEAD,DELETE,CONNECT,OPTIONS,TRACE,*'
+    );
+
+    // when
+    const effectFactoryFn = () => EffectFactory
+      .matchPath('/')
+      .matchType('TEST' as HttpMethod);
+
+    // then
+    expect(effectFactoryFn).toThrowError(expectedError);
+  });
+
+  test('throws an error if "effect" is not provided', () => {
+    // given
+    expectedError = new Error('Effect needs to be provided');
+
+    // when
+    const effectFactoryFn = () => EffectFactory
+      .matchPath('/')
+      .matchType('GET')
+      .use(undefined);
+
+    // then
+    expect(effectFactoryFn).toThrowError(expectedError);
   });
 
 });

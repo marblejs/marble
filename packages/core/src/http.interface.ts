@@ -20,17 +20,20 @@ export interface HttpResponse extends http.ServerResponse {
 
 export type HttpHeaders = Record<string, string>;
 
-export type HttpMethod =
-  | 'POST'
-  | 'PUT'
-  | 'PATCH'
-  | 'GET'
-  | 'HEAD'
-  | 'DELETE'
-  | 'CONNECT'
-  | 'OPTIONS'
-  | 'TRACE'
-  | '*';
+export enum HttpMethodType {
+  POST,
+  PUT,
+  PATCH,
+  GET,
+  HEAD,
+  DELETE,
+  CONNECT,
+  OPTIONS,
+  TRACE,
+  '*',
+}
+
+export type HttpMethod = keyof typeof HttpMethodType;
 
 export type Http = {
   req: HttpRequest;
