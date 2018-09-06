@@ -58,6 +58,18 @@ $ yarn start
 
 **Marble.js** is not yet a final and production ready product. Its APIs can improve over time when reaching stable version `1.0.0`. But in the meantime you can play easily and contribute to the growing community of functional reactive programming freaks.
 
+## Contributing
+
+We strongly believe that open source is all about the people. Thats why we are looking for brave passionates of RxJS and Node.js who can help us with creating new middlewares for Marble.js. There are many things that you can help us with! We've got a [list](https://github.com/marblejs/marble/projects/2) of middlewares that we would like to see in future releases, but we are open for new cool ideas!
+
+**So, how can I contribute to Marble.js middlewares?** 🤔
+- Read the [CONTRIBUTING](https://github.com/marblejs/marble/blob/master/.github/CONTRIBUTING.md) guideance first!
+- We use monorepo architecture for entire framework-related packages - each middleware resides in main Marble.js repository
+- For reference code structure just look at [example](https://github.com/marblejs/marble/tree/master/packages/middleware-joi) middleware implementation.
+- Each middleware package should follow the naming convention: `@marblejs/middleware-{example_name}`
+- If you have an idea and would like to contribute, just open an [issue](https://github.com/marblejs/marble/issues/new?template=feature_request.md) and describe the middelware idea that you would like to work on. We'll discuss the internals and proposed features there.
+- Open a Pull Request and... 🚀
+
 ## Authors
 
 <table border="0">
