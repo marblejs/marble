@@ -1,5 +1,5 @@
 import { mapTo } from 'rxjs/operators';
-import { Marbles } from '@shared';
+import { Marbles } from '../../+internal';
 import { HttpRequest, HttpResponse } from '../../http.interface';
 import { error$, errorEffectProvider } from '../error.effect';
 import { HttpError } from '../error.model';

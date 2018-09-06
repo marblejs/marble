@@ -1,7 +1,8 @@
-import { compose, Middleware } from '@marblejs/core';
+import { Middleware, internal } from '@marblejs/core';
 import chalk from 'chalk';
 import { tap } from 'rxjs/operators';
 import { formatTime, getTimeDifferenceMs } from './time.factory';
+const { compose } = internal;
 
 const getStatusCode = (statusCode: number): string =>
   statusCode >= 400

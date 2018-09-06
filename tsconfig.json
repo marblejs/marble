@@ -16,10 +16,6 @@
     "lib": [
       "dom",
       "es7"
-    ],
-    "baseUrl": "./packages",
-    "paths": {
-      "@shared": ["@shared/src"]
-    }
+    ]
   }
 }

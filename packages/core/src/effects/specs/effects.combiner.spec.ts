@@ -3,7 +3,7 @@ import { tap } from 'rxjs/operators';
 import { Middleware } from '../effects.interface';
 import { combineMiddlewareEffects } from '../effects.combiner';
 import { HttpResponse, HttpRequest } from '../../http.interface';
-import { Marbles } from '@shared';
+import { Marbles } from '../../+internal';
 
 const createMockRes = () => ({} as HttpResponse);
 const createMockReq = (url = '/') => ({ url } as HttpRequest);

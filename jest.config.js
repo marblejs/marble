@@ -17,7 +17,6 @@ module.exports = {
     'webpack.config.ts',
     '@example',
     '@integration',
-    '@shared/src/fp',
   ],
   collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [
@@ -29,8 +28,5 @@ module.exports = {
     'ts-jest': {
       tsConfigFile: './tsconfig.json',
     }
-  },
-  moduleNameMapper: {
-    "@shared": "<rootDir>/packages/@shared/src",
   },
 };

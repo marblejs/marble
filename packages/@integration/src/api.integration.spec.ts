@@ -4,6 +4,7 @@ import { filter, map, mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
 import {
   use,
+  internal,
   combineRoutes,
   Effect,
   EffectFactory,
@@ -13,7 +14,7 @@ import {
   HttpRequest,
 } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
-import { readFile, ContentType } from '@shared';
+const { readFile, ContentType } = internal;
 
 const MOCKED_USER_LIST = [{ id: 1 }, { id: 2 }];
 const STATIC_PATH = path.resolve(__dirname, '../../../assets');

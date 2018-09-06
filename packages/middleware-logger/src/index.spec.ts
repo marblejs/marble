@@ -1,7 +1,7 @@
-import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { HttpRequest, HttpResponse, internal } from '@marblejs/core';
 import { EventEmitter } from 'events';
-import { Marbles } from '@shared';
 import { logger$ } from './index';
+const { Marbles } = internal;
 
 const createMockReq = (url: string, method: string) => ({ url, method } as HttpRequest);
 const createMockRes = (status: number) => new class extends EventEmitter {
