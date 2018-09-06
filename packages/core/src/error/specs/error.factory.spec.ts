@@ -1,4 +1,4 @@
-import { CoreErrorOptions, coreErrorFactory, coreErrorStackTraceFactory } from '../error.factory';
+import { CoreErrorOptions, coreErrorFactory, coreErrorStackTraceFactory, stringifyStackTrace } from '../error.factory';
 
 const getMockedStackTrace = (opts: any = {}) => [
   { getMethodName: jest.fn(() => opts.methodName) },
@@ -10,6 +10,23 @@ const getMockedStackTrace = (opts: any = {}) => [
 ] as any as NodeJS.CallSite[];
 
 describe('Error factory', () => {
+
+  describe('#stringifyStackTrace', () => {
+    test('stringifies stack trace', () => {
+      // given
+      const stackTrace = ['1', '2', '3'] as any as NodeJS.CallSite[];
+
+      // when
+      // jest.spyOn(chalk, 'gray');
+      const stringifiedStackTrace = stringifyStackTrace(stackTrace);
+
+      // then
+      expect(stringifiedStackTrace).toBeDefined();
+      expect(stringifiedStackTrace).toContain('@ 1');
+      expect(stringifiedStackTrace).toContain('@ 2');
+      expect(stringifiedStackTrace).toContain('@ 3');
+    });
+  });
 
   describe('#coreErrorStackTraceFactory', () => {
     test('factorizes stack trace', () => {

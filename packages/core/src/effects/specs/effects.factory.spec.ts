@@ -49,7 +49,7 @@ describe('EffectFactory', () => {
     expect(effectFactoryFn).toThrowError(expectedError);
   });
 
-  test('throws an error if "mathod" is not provided', () => {
+  test('throws an error if "method" is not provided', () => {
     // given
     expectedError = new Error('HttpMethod needs to be defined');
 
@@ -62,7 +62,7 @@ describe('EffectFactory', () => {
     expect(effectFactoryFn).toThrowError(expectedError);
   });
 
-  test('throws an error if provided "mathod" is not included in the list', () => {
+  test('throws an error if provided "method" is not included in the list', () => {
     // given
     expectedError = new Error(
       'HttpMethod needs to be one of the following: POST,PUT,PATCH,GET,HEAD,DELETE,CONNECT,OPTIONS,TRACE,*'
