@@ -13,11 +13,5 @@
   "bugs": {
     "url": "https://github.com/marblejs/marble/issues"
   },
-  "homepage": "https://github.com/marblejs/marble#readme",
-  "peerDependencies": {
-    "@marblejs/core": "^1.0.0-rc.1"
-  },
-  "devDependencies": {
-    "@marblejs/core": "^1.0.0-rc.1"
-  }
+  "homepage": "https://github.com/marblejs/marble#readme"
 }

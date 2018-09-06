@@ -22,9 +22,9 @@ describe('File reader', () => {
         fail('Exceptions should be thrown');
         done();
       },
-      error => {
+      (error: Error) => {
         expect(error).toBeDefined();
-        expect(error.message).toBe('File not found');
+        expect(error.message.includes('ENOENT, no such file or directory')).toBe(true);
         done();
       }
     );

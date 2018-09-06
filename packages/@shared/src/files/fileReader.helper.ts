@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Observable } from 'rxjs';
-import { HttpError, HttpStatus } from '@marblejs/core';
 
 export const readFile = (basePath: string) => (dir: string) =>
   new Observable<Buffer>(subscriber => {
@@ -9,8 +8,7 @@ export const readFile = (basePath: string) => (dir: string) =>
 
     fs.readFile(pathname, (err, file) => {
       if (err && err.code === 'ENOENT') {
-        const error = new HttpError('File not found', HttpStatus.NOT_FOUND);
-        subscriber.error(error);
+        subscriber.error(err);
       }
       subscriber.next(file);
       subscriber.complete();
