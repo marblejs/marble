@@ -4,7 +4,6 @@
   "compilerOptions": {
     "outDir": "./dist/",
     "declaration": true,
-    "strictNullChecks": false,
     "typeRoots": [
       "./node_modules/@types",
       "../../node_modules/@types"
@@ -15,8 +14,4 @@
     "node_modules/@types",
     "src/**/*.ts"
   ],
-
-  "exclude": [
-    "test/"
-  ]
 }

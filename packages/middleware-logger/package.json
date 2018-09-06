@@ -3,7 +3,7 @@
   "version": "1.0.0-rc.1",
   "description": "Logger middleware for Marble.js",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/middleware-logger/src/index.d.ts",
   "scripts": {
     "start": "yarn watch",
     "watch": "webpack -w",
