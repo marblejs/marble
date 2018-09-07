@@ -18,7 +18,6 @@ module.exports = {
     '@example',
     '@integration',
     '\\+internal/testing',
-    '\\+internal/fp'
   ],
   collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [
