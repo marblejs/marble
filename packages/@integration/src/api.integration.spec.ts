@@ -118,7 +118,7 @@ describe('API integration', () => {
     request(app)
       .get('/api/v1/user/123?filter=all')
       .expect(200, {
-        params: { id: 123, version: 'v1' },
+        params: { id: '123', version: 'v1' },
         query: { filter: 'all' },
       }));
 
