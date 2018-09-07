@@ -15,6 +15,7 @@ export const factorizeRegExpWithParams = (path: string): ParametricRegExp => {
     .replace(/([?./\\()[\]{}^$])/g, '\\$1') /* Escape all regex characters */
     .replace(pathParameters, `([^\\/]+)`) /* Translate all path parameters to regex groups */
     .replace(/\*/g, '.*?')  /* Translate all stars to a wildcard */
+    .replace(/\/{2,}/g, '/') /* Remove duplicated backslashes */
     .replace(/([/\\])$/, '$1?'); /* Last slash/backslash is always optional */
 
   return {

@@ -20,8 +20,7 @@ describe('API integration', () => {
       .get('/api/v2')
       .expect(200, '"API version: v2"'));
 
-  // @TODO: fix an error with `*` after placeholder path
-  xtest('GET: /api/v1/foo triggers 404 effect', async () =>
+  test('GET: /api/v1/foo triggers 404 effect', async () =>
     request(app)
       .get('/api/v1/foo')
       .expect(404, {
