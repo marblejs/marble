@@ -1,8 +1,12 @@
 {
   "name": "@marblejs/integration",
   "version": "1.0.0-rc.1",
-  "description": "Marble.js shared utils and helpers",
-  "main": "index.ts",
+  "description": "Marble.js integration tests",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node --project tsconfig.json src/index.ts",
+    "watch:dev": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec yarn start"
+  },
   "private": true,
   "repository": {
     "type": "git",
@@ -14,12 +18,16 @@
     "url": "https://github.com/marblejs/marble/issues"
   },
   "homepage": "https://github.com/marblejs/marble#readme",
-  "peerDependencies": {
+  "dependencies": {
     "@marblejs/core": "^1.0.0-rc.1",
-    "@marblejs/middleware-body": "^1.0.0-rc.1"
+    "@marblejs/middleware-body": "^1.0.0-rc.1",
+    "@marblejs/middleware-logger": "^1.0.0-rc.1",
+    "@types/node": "^10.1.2",
+    "rxjs": "~6.2.2",
+    "typescript": "~3.0.3"
   },
   "devDependencies": {
-    "@marblejs/core": "^1.0.0-rc.1",
-    "@marblejs/middleware-body": "^1.0.0-rc.1"
+    "nodemon": "^1.17.3",
+    "ts-node": "^7.0.1"
   }
 }
