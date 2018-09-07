@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node --project tsconfig.json src/index.ts",
-    "watch:dev": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec yarn start"
+    "watch:dev": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec yarn start",
+    "clean": "rimraf dist"
   },
   "private": true,
   "repository": {

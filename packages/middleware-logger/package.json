@@ -8,6 +8,7 @@
     "start": "yarn watch",
     "watch": "webpack -w",
     "build": "webpack",
+    "clean": "rimraf dist",
     "prepack": "yarn build",
     "prepare": "yarn build"
   },

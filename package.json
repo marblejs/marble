@@ -10,6 +10,7 @@
     "test": "jest --expand",
     "test:coverage": "SCOPE=unit jest --expand --coverage",
     "test:watch": "jest --expand --onlyChanged --watch",
+    "clean": "lerna run clean",
     "prepare": "yarn test",
     "publish": "lerna publish",
     "precommit": "lint-staged"
