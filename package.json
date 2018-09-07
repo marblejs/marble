@@ -14,6 +14,7 @@
     "publish": "lerna publish",
     "precommit": "lint-staged"
   },
+  "private": true,
   "lint-staged": {
     "*.ts": [
       "yarn lint",
@@ -57,7 +58,7 @@
     "@types/webpack-node-externals": "^1.6.3",
     "husky": "^0.14.0",
     "jest": "^23.5.0",
-    "lerna": "^2.11.0",
+    "lerna": "^3.3.0",
     "lint-staged": "^7.2.2",
     "mock-fs": "^4.5.0",
     "mock-req": "^0.2.0",
