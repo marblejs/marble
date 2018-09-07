@@ -17,6 +17,8 @@ module.exports = {
     'webpack.config.ts',
     '@example',
     '@integration',
+    '\\+internal/testing',
+    '\\+internal/fp'
   ],
   collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [
