@@ -10,7 +10,16 @@ module.exports = {
     ? '^((?!integration).)*\.spec\.ts$'
     : '.?(spec|integration\.spec)\.ts$',
   coverageDirectory: './coverage/',
-  coveragePathIgnorePatterns: ['spec-util.ts$', '.d.ts$', '.spec.ts'],
+  coveragePathIgnorePatterns: [
+    'spec-util.ts$',
+    '.d.ts$',
+    '.spec.ts',
+    'webpack.config.ts',
+    '@example',
+    '@integration',
+    '\\+internal/testing',
+    '\\+internal/fp'
+  ],
   collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [
     'ts',
@@ -19,7 +28,7 @@ module.exports = {
   ],
   globals: {
     'ts-jest': {
-      tsConfigFile: './tsconfig.spec.json',
+      tsConfigFile: './tsconfig.json',
     }
-  }
+  },
 };

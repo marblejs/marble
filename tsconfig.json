@@ -16,9 +16,7 @@
     "lib": [
       "dom",
       "es7"
-    ]
-  },
-  "exclude": [
-    "**/*.spec.ts"
-  ]
+    ],
+    "baseUrl": "."
+  }
 }

@@ -2,14 +2,22 @@ import * as path from 'path';
 import { of, throwError } from 'rxjs';
 import { filter, map, mapTo, switchMap } from 'rxjs/operators';
 import * as request from 'supertest';
-import { HttpStatus } from '../core/dist/http.interface';
-import { ContentType } from '../core/dist/util/contentType.util';
-import { combineRoutes, Effect, EffectFactory, HttpError, httpListener, HttpRequest, use } from '../core/src';
-import { bodyParser$ } from '../middleware-body/src';
-import { readFile } from '../util/fileReader.helper';
+import {
+  use,
+  internal,
+  combineRoutes,
+  Effect,
+  EffectFactory,
+  HttpError,
+  HttpStatus,
+  httpListener,
+  HttpRequest,
+} from '@marblejs/core';
+import { bodyParser$ } from '@marblejs/middleware-body';
+const { readFile, ContentType } = internal;
 
 const MOCKED_USER_LIST = [{ id: 1 }, { id: 2 }];
-const STATIC_PATH = path.resolve(__dirname, '../../assets');
+const STATIC_PATH = path.resolve(__dirname, '../../../assets');
 
 const authorize$: Effect<HttpRequest> = request$ =>
   request$.pipe(
@@ -110,7 +118,7 @@ describe('API integration', () => {
     request(app)
       .get('/api/v1/user/123?filter=all')
       .expect(200, {
-        params: { id: 123, version: 'v1' },
+        params: { id: '123', version: 'v1' },
         query: { filter: 'all' },
       }));
 

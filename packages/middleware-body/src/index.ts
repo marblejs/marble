@@ -1,7 +1,8 @@
-import { ContentType, HttpError, HttpRequest, HttpStatus, Middleware } from '@marblejs/core';
+import { HttpError, HttpRequest, HttpStatus, Middleware, internal } from '@marblejs/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap, toArray, mapTo } from 'rxjs/operators';
 import { serializeUrlEncoded } from './urlEncoded.serializer';
+const { ContentType } = internal;
 
 const PARSEABLE_METHODS = ['POST', 'PUT', 'PATCH'];
 

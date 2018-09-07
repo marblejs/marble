@@ -1,6 +1,6 @@
 import * as querystring from 'querystring';
+import { compose } from '../+internal';
 import { QueryParameters } from '../http.interface';
-import { compose } from '../util/compose.util';
 
 const parseQueryString = (query: string) => querystring.parse(query);
 

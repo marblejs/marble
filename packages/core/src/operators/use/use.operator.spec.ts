@@ -1,5 +1,5 @@
 import { tap } from 'rxjs/operators';
-import { Marbles } from '../../../../util/marbles.spec-util';
+import { Marbles } from '../../+internal';
 import { Effect } from '../../effects/effects.interface';
 import { HttpRequest } from '../../http.interface';
 import { use } from './use.operator';

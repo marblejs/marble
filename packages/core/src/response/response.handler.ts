@@ -1,9 +1,8 @@
-import { Observable, EMPTY } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { EffectResponse } from '../effects/effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { bodyFactory } from './responseBody.factory';
 import { headersFactory } from './responseHeaders.factory';
-export { Observable };
 
 export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effect: EffectResponse) => {
   if (res.finished) { return EMPTY; }

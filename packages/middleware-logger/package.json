@@ -6,8 +6,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "start": "yarn watch",
-    "watch": "tsc -w",
-    "build": "tsc",
+    "watch": "webpack -w",
+    "build": "webpack",
     "prepack": "yarn build",
     "prepare": "yarn build"
   },
@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "@marblejs/core": "^1",
+    "@marblejs/core": "^1.0.0-rc.1",
     "rxjs": "~6.1.0"
   },
   "dependencies": {
