@@ -35,7 +35,8 @@
     "rxjs": "~6.1.0"
   },
   "devDependencies": {
-    "@marblejs/core": "^1.0.0-rc.1"
+    "@marblejs/core": "^1.0.0-rc.1",
+    "webpack": "^4.17.2"
   },
   "publishConfig": {
     "access": "public"
