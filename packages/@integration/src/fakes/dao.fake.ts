@@ -8,6 +8,10 @@ export namespace Dao {
     { id: '3', firstName: 'Adam', lastName: 'Wayne' },
   ]);
 
+  export const getUserById = (id: number | string) => of({
+    id, firstName: 'Bob', lastName: 'Collins'
+  });
+
   export const postUser = (data: any) => of({
     data,
   });

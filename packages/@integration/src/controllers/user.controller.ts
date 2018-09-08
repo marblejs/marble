@@ -11,6 +11,15 @@ const getUsers$ = EffectFactory
     map(users => ({ body: users })),
   ));
 
+const getUser$ = EffectFactory
+  .matchPath('/:id')
+  .matchType('GET')
+  .use(req$ => req$.pipe(
+    map(req => req.params.id),
+    switchMap(Dao.getUserById),
+    map(user => ({ body: user })),
+  ));
+
 const postUser$ = EffectFactory
   .matchPath('/')
   .matchType('POST')
@@ -22,5 +31,5 @@ const postUser$ = EffectFactory
 
 export const user$ = combineRoutes('/user', {
   middlewares: [authorize$],
-  effects: [getUsers$, postUser$],
+  effects: [getUsers$, getUser$, postUser$],
 });

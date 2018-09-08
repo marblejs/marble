@@ -9,6 +9,7 @@
     "watch": "webpack -w",
     "build": "webpack",
     "prepare": "yarn build",
+    "clean": "rimraf dist",
     "prepack": "cp ../../README.md ./ && yarn build"
   },
   "files": [
