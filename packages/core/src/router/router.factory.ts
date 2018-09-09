@@ -20,15 +20,17 @@ export const factorizeRouting = (
   const routing: Routing = [];
 
   routes.forEach(route => {
+    const concatenatedPath = parentPath + '/' + route.path;
+
     if (isRouteEffectGroup(route)) {
       return routing.push(...factorizeRouting(
         route.effects,
         [...middleware, ...route.middlewares],
-        parentPath + route.path,
+        concatenatedPath,
       ));
     }
 
-    const { regExp, parameters } = factorizeRegExpWithParams(parentPath + route.path);
+    const { regExp, parameters } = factorizeRegExpWithParams(concatenatedPath);
     const foundRoute = routing.find(route => route.regExp.source === regExp.source);
     const method: RoutingMethod = {
       effect: route.effect,

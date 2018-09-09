@@ -39,20 +39,7 @@ For the latest updates, documentation, change log, and release information visit
 
 ## <a name="examples"></a> Examples
 
-To view the example project structure, clone the **Marble.js** repository and install the dependencies:
-
-```bash
-$ git clone git://github.com/marblejs/marble.git
-$ cd marble
-$ npm i
-$ cd example
-```
-
-To run example just execute following command inside root repository folder:
-
-```bash
-$ yarn start
-```
+To view the example project structure, visit the [example](https://github.com/marblejs/example) repository.
 
 ## <a name="roadmap"></a> Roadmap
 

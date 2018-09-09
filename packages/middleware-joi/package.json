@@ -48,7 +48,8 @@
   "devDependencies": {
     "@marblejs/core": "^1.0.0-rc.1",
     "@marblejs/middleware-body": "^1.0.0-rc.1",
-    "@types/joi": "^13.0.8"
+    "@types/joi": "^13.0.8",
+    "webpack": "^4.17.2"
   },
   "publishConfig": {
     "access": "public"

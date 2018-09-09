@@ -14,64 +14,70 @@ describe('Router factory', () => {
 
   test('#factorizeRouting factorizes routing with nested groups', () => {
     // given
-    const m$:  Middleware = req$ => req$;
+    const m$: Middleware = req$ => req$;
     const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'test1' }));
     const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'test2' }));
     const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test3' }));
     const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test4' }));
-
-    const route1: RouteEffect = { path: '/', method: 'GET', effect: e1$ };
-    const route2: RouteEffect = { path: '/', method: 'GET', effect: e2$ };
-    const route3: RouteEffect = { path: '/', method: 'GET', effect: e3$ };
-    const route4: RouteEffect = { path: '/', method: 'POST', effect: e4$ };
+    const e5$: Effect = req$ => req$.pipe(mapTo({ body: 'test5' }));
 
     const routeGroupNested: RouteEffectGroup = {
       path: '/nested',
-      effects: [route3],
+      effects: [{ path: '/', method: 'GET', effect: e5$ }],
       middlewares: [m$],
     };
 
     const routeGroup: RouteEffectGroup = {
-      path: '/group',
-      effects: [route2, routeGroupNested],
+      path: '/:id',
+      effects: [
+        { path: '/', method: 'GET', effect: e2$ },
+        { path: '/', method: 'POST', effect: e3$ },
+        routeGroupNested,
+        { path: '*', method: '*', effect: e4$ },
+      ],
       middlewares: [m$],
     };
 
+    const routing: (RouteEffect | RouteEffectGroup)[] = [
+      { path: '/', method: 'GET', effect: e1$ },
+      routeGroup,
+    ];
+
     // when
     effectsCombiner.combineMiddlewareEffects = jest.fn(() => m$);
-
-    const factorizedRouting = factorizeRouting([
-      route1,
-      routeGroup,
-      route4
-    ]);
+    const factorizedRouting = factorizeRouting(routing);
 
     // then
     expect(factorizedRouting).toEqual([
       {
         regExp: /^\/?$/,
-        methods: { GET: { effect: e1$ }, POST: { effect: e4$ } },
+        methods: { GET: { effect: e1$, middleware: undefined, parameters: undefined } },
       },
       {
-        regExp: /^\/group\/?$/,
-        methods: { GET: { middleware: m$, effect: e2$ } },
+        regExp: /^\/([^\/]+)\/?$/,
+        methods: {
+          GET: { middleware: m$, effect: e2$, parameters: ['id'] },
+          POST: { middleware: m$, effect: e3$, parameters: ['id'] },
+        },
       },
       {
-        regExp: /^\/group\/nested\/?$/,
-        methods: { GET: { middleware: m$, effect: e3$ } },
+        regExp: /^\/([^\/]+)\/nested\/?$/,
+        methods: { GET: { middleware: m$, effect: e5$, parameters: ['id'] } },
+      },
+      {
+        regExp: /^\/([^\/]+)\/.*?$/,
+        methods: { '*': { middleware: m$, effect: e4$, parameters: ['id'] } },
       },
     ] as Routing);
   });
 
   test('#factorizeRouting throws error if route is redefined', () => {
     // given
-    const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'test1' }));
-    const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'test2' }));
-    const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test3' }));
+    const e$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
 
-    const route1: RouteEffect = { path: '/test', method: 'GET', effect: e1$ };
-    const route2: RouteEffect = { path: '/test', method: 'GET', effect: e2$ };
-    const route3: RouteEffect = { path: '/test/foo', method: 'GET', effect: e3$ };
+    const route1: RouteEffect = { path: '/test', method: 'GET', effect: e$ };
+    const route2: RouteEffect = { path: '/test', method: 'GET', effect: e$ };
+    const route3: RouteEffect = { path: '/test/foo', method: 'GET', effect: e$ };
 
     // when
     const error = () => factorizeRouting([

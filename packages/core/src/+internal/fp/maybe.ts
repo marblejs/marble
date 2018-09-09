@@ -1,18 +1,20 @@
 import { Functor } from './functor';
 
+export type Nullable<T> = T | null | undefined;
+
 export interface MaybeCases<T, U> {
   some: (t: T) => U;
   none: () => U;
 }
 
 export class Maybe<T> implements Functor<T> {
-  private constructor(private value: T | null | undefined) {}
+  private constructor(private value: Nullable<T>) {}
 
   private static some = <T>(value: T) => new Maybe(value);
 
   private static none = <T>() => new Maybe<T>(null);
 
-  static of = <T>(value: T) =>
+  static of = <T>(value: Nullable<T>) =>
     value
       ? Maybe.some(value)
       : Maybe.none<T>()

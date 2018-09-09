@@ -39,7 +39,8 @@
   },
   "devDependencies": {
     "@marblejs/core": "^1.0.0-rc.1",
-    "@types/chalk": "^2.2.0"
+    "@types/chalk": "^2.2.0",
+    "webpack": "^4.17.2"
   },
   "publishConfig": {
     "access": "public"
