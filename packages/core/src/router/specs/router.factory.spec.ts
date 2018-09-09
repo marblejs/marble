@@ -15,27 +15,31 @@ describe('Router factory', () => {
   test('#factorizeRouting factorizes routing with nested groups', () => {
     // given
     const m$: Middleware = req$ => req$;
-    const e$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'test1' }));
+    const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'test2' }));
+    const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test3' }));
+    const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test4' }));
+    const e5$: Effect = req$ => req$.pipe(mapTo({ body: 'test5' }));
 
     const routeGroupNested: RouteEffectGroup = {
       path: '/nested',
-      effects: [{ path: '/', method: 'GET', effect: e$ }],
+      effects: [{ path: '/', method: 'GET', effect: e5$ }],
       middlewares: [m$],
     };
 
     const routeGroup: RouteEffectGroup = {
       path: '/:id',
       effects: [
-        { path: '/', method: 'GET', effect: e$ },
-        { path: '/', method: 'POST', effect: e$ },
+        { path: '/', method: 'GET', effect: e2$ },
+        { path: '/', method: 'POST', effect: e3$ },
         routeGroupNested,
-        { path: '*', method: '*', effect: e$ },
+        { path: '*', method: '*', effect: e4$ },
       ],
       middlewares: [m$],
     };
 
     const routing: (RouteEffect | RouteEffectGroup)[] = [
-      { path: '/', method: 'GET', effect: e$ },
+      { path: '/', method: 'GET', effect: e1$ },
       routeGroup,
     ];
 
@@ -47,22 +51,22 @@ describe('Router factory', () => {
     expect(factorizedRouting).toEqual([
       {
         regExp: /^\/?$/,
-        methods: { GET: { effect: e$, middleware: undefined, parameters: undefined } },
+        methods: { GET: { effect: e1$, middleware: undefined, parameters: undefined } },
       },
       {
         regExp: /^\/([^\/]+)\/?$/,
         methods: {
-          GET: { middleware: m$, effect: e$, parameters: ['id'] },
-          POST: { middleware: m$, effect: e$, parameters: ['id'] },
+          GET: { middleware: m$, effect: e2$, parameters: ['id'] },
+          POST: { middleware: m$, effect: e3$, parameters: ['id'] },
         },
       },
       {
         regExp: /^\/([^\/]+)\/nested\/?$/,
-        methods: { GET: { middleware: m$, effect: e$, parameters: ['id'] } },
+        methods: { GET: { middleware: m$, effect: e5$, parameters: ['id'] } },
       },
       {
         regExp: /^\/([^\/]+)\/.*?$/,
-        methods: { '*': { middleware: m$, effect: e$, parameters: ['id'] } },
+        methods: { '*': { middleware: m$, effect: e4$, parameters: ['id'] } },
       },
     ] as Routing);
   });
