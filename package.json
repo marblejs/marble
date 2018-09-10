@@ -22,6 +22,7 @@
       "jest --bail --findRelatedTests --passWithNoTests"
     ]
   },
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marblejs/marble.git"
