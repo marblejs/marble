@@ -2,7 +2,7 @@
   "name": "marblejs",
   "description": "Reactive Node APIs made easy",
   "scripts": {
-    "postinstall": "yarn build",
+    "postinstall": "yarn build && yarn test",
     "build": "lerna link && lerna bootstrap --hoist",
     "benchmark": "make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
@@ -11,7 +11,7 @@
     "test:coverage": "SCOPE=unit jest --expand --coverage",
     "test:watch": "jest --expand --onlyChanged --watch",
     "clean": "lerna run clean",
-    "prepare": "yarn test",
+    "prepublishOnly": "yarn build && yarn test",
     "publish": "lerna publish",
     "precommit": "lint-staged"
   },
