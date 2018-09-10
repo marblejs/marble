@@ -11,7 +11,7 @@
     "test:coverage": "SCOPE=unit jest --expand --coverage",
     "test:watch": "jest --expand --onlyChanged --watch",
     "clean": "lerna run clean",
-    "prepublishOnly": "yarn build && yarn test",
+    "prepublishOnly": "yarn clean && yarn build && yarn test",
     "publish": "lerna publish",
     "precommit": "lint-staged"
   },
