@@ -15,7 +15,6 @@
     "publish": "lerna publish",
     "precommit": "lint-staged"
   },
-  "private": true,
   "lint-staged": {
     "*.ts": [
       "yarn lint",
@@ -76,5 +75,6 @@
     "webpack-cli": "^3.1.0",
     "webpack-merge": "^4.1.4",
     "webpack-node-externals": "^1.7.2"
-  }
+  },
+  "version": "1.0.0-rc.2"
 }
