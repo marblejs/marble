@@ -1,9 +1,10 @@
 {
   "name": "marblejs",
+  "version": "1.0.0-rc.2",
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "postinstall": "yarn build && yarn test",
-    "build": "lerna link && lerna bootstrap --hoist",
+    "build": "lerna run build",
     "benchmark": "make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
     "lint": "tslint --config tslint.json",
@@ -77,5 +78,7 @@
     "webpack-merge": "^4.1.4",
     "webpack-node-externals": "^1.7.2"
   },
-  "version": "1.0.0-rc.2"
+  "workspaces": [
+    "packages/*"
+  ]
 }

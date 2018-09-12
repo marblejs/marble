@@ -14,11 +14,12 @@ git:
   submodules: false
 
 install:
-  - npm install -g codecov
-  - npm install
+  - npm i -g yarn
+  - npm i -g codecov
+  - yarn
 
 script:
-  - npm run test:coverage
+  - yarn test:coverage
   - codecov
 
 branches:
