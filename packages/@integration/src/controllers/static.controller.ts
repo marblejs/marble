@@ -6,7 +6,7 @@ const { readFile } = internal;
 const STATIC_PATH = path.resolve(__dirname, '../../../../assets');
 
 const getFile$ = EffectFactory
-  .matchPath('/:dir')
+  .matchPath('/:dir*')
   .matchType('GET')
   .use(req$ => req$
     .pipe(

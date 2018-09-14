@@ -18,7 +18,7 @@ describe('Response content-type factory', () => {
 
   it('#getMimeType detects mime-type from buffer', () => {
     // given
-    const body = fs.readFileSync(__dirname + '/../../../../../assets/logo.png');
+    const body = fs.readFileSync(__dirname + '/../../../../../assets/img/logo.png');
     const path = '/test/index.html';
 
     // when
