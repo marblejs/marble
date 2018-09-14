@@ -50,22 +50,26 @@ describe('Router factory', () => {
     // then
     expect(factorizedRouting).toEqual([
       {
-        regExp: /^\/?$/,
+        regExp: /^(?:\/)?$/i,
+        path: '',
         methods: { GET: { effect: e1$, middleware: undefined, parameters: undefined } },
       },
       {
-        regExp: /^\/([^\/]+)\/?$/,
+        regExp: /^\/([^\/]+?)(?:\/)?$/i,
+        path: '/:id',
         methods: {
           GET: { middleware: m$, effect: e2$, parameters: ['id'] },
           POST: { middleware: m$, effect: e3$, parameters: ['id'] },
         },
       },
       {
-        regExp: /^\/([^\/]+)\/nested\/?$/,
+        regExp: /^\/([^\/]+?)\/nested(?:\/)?$/i,
+        path: '/:id/nested',
         methods: { GET: { middleware: m$, effect: e5$, parameters: ['id'] } },
       },
       {
-        regExp: /^\/([^\/]+)\/.*?$/,
+        regExp: /^\/([^\/]+?)\/(.*)(?:\/)?$/i,
+        path: '/:id/(.*)',
         methods: { '*': { middleware: m$, effect: e4$, parameters: ['id'] } },
       },
     ] as Routing);

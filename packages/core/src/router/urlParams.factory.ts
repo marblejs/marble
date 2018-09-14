@@ -1,25 +1,21 @@
 import { ParametricRegExp } from './router.interface';
+import * as pathToRegexp from 'path-to-regexp';
 
 export const factorizeRegExpWithParams = (path: string): ParametricRegExp => {
-  const pathParameters = /:([^\/]+)/g;
-  const parameters: string[] = [];
+  const keys: pathToRegexp.Key[] = [];
+  const preparedPath = path
+    .replace(/\/\*/g, '/(.*)') /* Transfer wildcards */
+    .replace(/\/\/+/g, '/') /* Remove repeated backslashes */
+    .replace(/\/$/, ''); /* Remove trailing backslash */
 
-  let pathParameterMatch;
-  while ((pathParameterMatch = pathParameters.exec(path)) !== null) {
-    parameters.push(pathParameterMatch[1]);
-  }
-
-  const pattern = path
-    .replace(/\/\//g, '/') /* Remove duplicate backslashes */
-    .replace(/\\\\/g, '\\') /* Remove duplicate slashes */
-    .replace(/([?./\\()[\]{}^$])/g, '\\$1') /* Escape all regex characters */
-    .replace(pathParameters, `([^\\/]+)`) /* Translate all path parameters to regex groups */
-    .replace(/\*/g, '.*?')  /* Translate all stars to a wildcard */
-    .replace(/\/{2,}/g, '/') /* Remove duplicated backslashes */
-    .replace(/([/\\])$/, '$1?'); /* Last slash/backslash is always optional */
+  const regExp = pathToRegexp(preparedPath, keys, { strict: false });
+  const regExpParameters = keys
+    .filter(key => key.name !== 0) /* Filter wildcard groups */
+    .map(key => String(key.name));
 
   return {
-    regExp: new RegExp('^' + pattern + '$'),
-    parameters: parameters.length > 0 ? parameters : undefined,
+    regExp,
+    parameters: regExpParameters.length > 0 ? regExpParameters : undefined,
+    path: preparedPath,
   };
 };

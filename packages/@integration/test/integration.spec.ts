@@ -72,4 +72,8 @@ describe('API integration', () => {
       .expect('Content-Type', ContentType.TEXT_HTML)
       .then(res => expect(res.text).toContain('<h1>Test</h1>')));
 
+  test(`returns static file as ${ContentType.IMAGE_PNG}: /api/v1/static/img/flow.png`, async () =>
+    request(app)
+      .get('/api/v1/static/img/flow.png')
+      .expect('Content-Type', ContentType.IMAGE_PNG));
 });

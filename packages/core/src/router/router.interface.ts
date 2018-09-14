@@ -24,6 +24,7 @@ export interface RouteCombinerConfig {
 export interface ParametricRegExp {
   regExp: RegExp;
   parameters?: string[] | undefined;
+  path: string;
 }
 
 export interface RoutingMethod {
@@ -34,6 +35,7 @@ export interface RoutingMethod {
 
 export interface RoutingItem {
   regExp: RegExp;
+  path: string;
   methods: Partial<Record<HttpMethod, RoutingMethod>>;
 }
 
