@@ -15,9 +15,21 @@ describe('Router', () => {
       const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
 
       const routing: Routing = [
-        { regExp: /^\/?$/, methods: { GET: { effect: e1$ }, POST: { effect: e4$ } } },
-        { regExp: /^\/group\/?$/, methods: { GET: { effect: e2$ } } },
-        { regExp: /^\/group\/nested\/foo\/?$/, methods: { POST: { effect: e3$ } } },
+        {
+          regExp: /^\/?$/,
+          path: '',
+          methods: { GET: { effect: e1$ }, POST: { effect: e4$ } },
+        },
+        {
+          regExp: /^\/group\/?$/,
+          path: '/group',
+          methods: { GET: { effect: e2$ } },
+        },
+        {
+          regExp: /^\/group\/nested\/foo\/?$/,
+          path: '/group/nested/foo',
+          methods: { POST: { effect: e3$ } },
+        },
       ];
 
       // when
@@ -39,6 +51,7 @@ describe('Router', () => {
 
       const routing: Routing = [{
         regExp: /^\/group\/([^\/]+)\/foo$/,
+        path: '/group/:param/foo',
         methods: { GET: { effect: e$, parameters: ['param'] } }
       }];
 
@@ -58,8 +71,16 @@ describe('Router', () => {
       const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'e2' }));
 
       const routing: Routing = [
-        { regExp: /^\/group\/nested\/?$/, methods: { GET: { effect: e1$ } } },
-        { regExp: /^\/group.*?$/, methods: { '*': { effect: e2$ } } }
+        {
+          regExp: /^\/group\/nested\/?$/,
+          path: '/group/nested',
+          methods: { GET: { effect: e1$ } },
+        },
+        {
+          regExp: /^\/group.*?$/,
+          path: '/group',
+          methods: { '*': { effect: e2$ } },
+        }
       ];
 
       // when
