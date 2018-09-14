@@ -90,7 +90,7 @@ describe('Url parameters factory', () => {
       expect(regExp.test('/foo/test/bar')).toEqual(true);
     });
 
-    test('matched RegExpt wildcard at the end of the path', () => {
+    test('matches RegExpt wildcard at the end of the path', () => {
       // given
       const path = '/foo/*';
 
@@ -102,6 +102,60 @@ describe('Url parameters factory', () => {
       expect(regExp.test('/foo/test1/test2')).toEqual(true);
       expect(regExp.test('/foo/test1')).toEqual(true);
       expect(regExp.test('/foo/')).toEqual(true);
+    });
+
+    test('matches parameter at the end of the path', () => {
+      // given
+      const path = '/foo/:param';
+      const testUrl = '/foo/test';
+
+      // when
+      const { regExp } = factorizeRegExpWithParams(path);
+      const match = testUrl.match(regExp);
+
+      // then
+      expect(regExp).toEqual(/^\/foo\/([^\/]+)$/);
+
+      if (match) {
+        expect(match[1]).toEqual('test');
+      } else {
+        return fail(`${testUrl} -> Regexp should be matched`);
+      }
+    });
+
+    xtest('matches wildcard parameter at the end of the path', () => {
+      // given
+      const path = '/foo/:param*';
+      const testUrl1 = '/foo/test1/test2';
+      const testUrl2 = '/foo/test1';
+      const testUrl3 = '/foo/';
+
+      // when
+      const { regExp } = factorizeRegExpWithParams(path);
+      const match1 = testUrl1.match(regExp);
+      const match2 = testUrl2.match(regExp);
+      const match3 = testUrl3.match(regExp);
+
+      // then
+      expect(regExp).toEqual(/^\/foo\/([^\/]+)$/);
+
+      if (match1) {
+        expect(match1[1]).toEqual('/test1/test2');
+      } else {
+        return fail(`${testUrl1} -> Regexp should be matched`);
+      }
+
+      if (match2) {
+        expect(match2[1]).toEqual('/test1');
+      } else {
+        return fail(`${testUrl2} -> Regexp should be matched`);
+      }
+
+      if (match3) {
+        expect(match3[1]).toEqual('/');
+      } else {
+        return fail(`${testUrl3} -> Regexp should be matched`);
+      }
     });
   });
 
