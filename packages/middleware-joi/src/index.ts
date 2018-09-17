@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 import { Schema, SchemaValidator } from './schema';
-import { HttpRequest, HttpError, HttpStatus, Middleware } from '@marblejs/core';
+import { HttpRequest, HttpError, HttpStatus, Effect } from '@marblejs/core';
 import { from, of, throwError } from 'rxjs';
 import { mergeMap, flatMap, catchError, mapTo, switchMap, toArray, map } from 'rxjs/operators';
 
@@ -23,7 +23,7 @@ const validateSource = (rules: Map<string, any>, options: Joi.ValidationOptions)
     mapTo(req)
   );
 
-const validator$ = (schema: Schema, options: Joi.ValidationOptions = {}): Middleware => req$ => {
+const validator$ = (schema: Schema, options: Joi.ValidationOptions = {}): Effect<HttpRequest> => req$ => {
   const result = Joi.validate(schema, SchemaValidator);
   const rules = Object.keys(schema).reduce(
     (acc, value) => acc.set(value, Joi.compile(schema[value])),
