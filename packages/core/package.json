@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/core",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "description": "Reactive Node APIs made easy",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -39,9 +39,9 @@
     "path-to-regexp": "^2.4.0"
   },
   "devDependencies": {
-    "@types/path-to-regexp": "^1.7.0",
     "@types/file-type": "^5.2.1",
     "@types/mime": "^2.0.0",
+    "@types/path-to-regexp": "^1.7.0",
     "webpack": "^4.17.2"
   },
   "publishConfig": {
