@@ -41,10 +41,6 @@ For the latest updates, documentation, change log, and release information visit
 
 To view the example project structure, visit the [example](https://github.com/marblejs/example) repository.
 
-## <a name="roadmap"></a> Roadmap
-
-**Marble.js** is not yet a final and production ready product. Its APIs can improve over time when reaching stable version `1.0.0`. But in the meantime you can play easily and contribute to the growing community of functional reactive programming freaks.
-
 ## Contributing
 
 We strongly believe that open source is all about the people. Thats why we are looking for brave passionates of RxJS and Node.js who can help us with creating new middlewares for Marble.js. There are many things that you can help us with! We've got a [list](https://github.com/marblejs/marble/projects/2) of middlewares that we would like to see in future releases, but we are open for new cool ideas!
