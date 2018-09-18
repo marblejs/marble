@@ -39,7 +39,7 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "@marblejs/core": "^1.0.0-rc.1",
+    "@marblejs/core": "^1.0.0",
     "rxjs": "~6.2.2"
   },
   "dependencies": {
