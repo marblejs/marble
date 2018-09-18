@@ -1,44 +1,36 @@
 import * as querystring from 'querystring';
-import { compose } from '../+internal';
+import { Nullable, Maybe, getHead } from '../+internal';
 import { QueryParameters } from '../http.interface';
 
-const parseQueryString = (query: string) => querystring.parse(query);
-
-const getNestedQueryParam = (
-  key: string,
-  paramValue: string | Object
-): string | Object => {
+const getNestedQueryParam = (params: Object) => (key: string): QueryParameters => {
+  const paramValue = params[key];
   const nestedKeys = /\[.*]/.exec(key);
 
-  if (!nestedKeys) {
-    return { [key]: paramValue };
-  }
-
-  const extractedKeys = nestedKeys[0]
-    .replace(/\[/g, '')
-    .split(']')
-    .filter(v => v.length > 0);
-
-  const nestedQueryObject = extractedKeys.reduceRight(
-    (value, key) => ({ [key]: value }),
-    paramValue
-  );
-
-  return { [key.replace(nestedKeys[0], '')]: nestedQueryObject };
+  return Maybe.of(nestedKeys)
+    .flatMap(getHead)
+    .map(_ => _.replace(/\[/g, ''))
+    .map(_ => _.split(']'))
+    .map(_ => _.filter(v => v.length > 0))
+    .map(_ => _.reduceRight(
+      (value, key) => ({ [key]: value }),
+      paramValue,
+    ))
+    .flatMap(nestedQueryObject => Maybe.of(nestedKeys)
+      .flatMap(getHead)
+      .map(head => key.replace(head, ''))
+      .map(key => ({ [key]: nestedQueryObject }))
+    )
+    .valueOr({ [key]: paramValue });
 };
 
-const queryParamsArrayToObject = (queryParams: Object): QueryParameters => {
-  const queryParamsKey = Object.keys(queryParams);
-  return Object.assign(
+const extractNestedQueryParams = (queryParams: Object): QueryParameters =>
+  Object.assign(
     {},
-    ...queryParamsKey.map(key => getNestedQueryParam(key, queryParams[key]))
+    ...Object.keys(queryParams).map(getNestedQueryParam(queryParams))
   );
-};
 
-export const queryParamsFactory = (queryParams: string | undefined | null): QueryParameters =>
-  !queryParams
-    ? {}
-    : compose(
-    queryParamsArrayToObject,
-    parseQueryString,
-    )(queryParams);
+export const queryParamsFactory = (queryParams: Nullable<string>): QueryParameters =>
+  Maybe.of(queryParams)
+    .map(querystring.parse)
+    .map(extractNestedQueryParams)
+    .valueOr({});
