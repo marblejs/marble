@@ -9,9 +9,7 @@
     "watch": "webpack -w",
     "build": "webpack",
     "test": "jest --config ../../jest.config.js",
-    "clean": "rimraf dist",
-    "prepack": "yarn build",
-    "prepare": "yarn build"
+    "clean": "rimraf dist"
   },
   "files": [
     "dist/"
