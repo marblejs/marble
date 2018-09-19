@@ -8,9 +8,9 @@
     "start": "yarn watch",
     "watch": "webpack -w",
     "build": "webpack",
-    "prepare": "yarn build",
     "clean": "rimraf dist",
-    "prepack": "cp ../../README.md ./ && yarn build"
+    "test": "jest --config ../../jest.config.js",
+    "prepack": "cp ../../README.md ./"
   },
   "files": [
     "dist/"
