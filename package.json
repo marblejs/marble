@@ -3,7 +3,7 @@
   "version": "1.0.0-rc.2",
   "description": "Reactive Node APIs made easy",
   "scripts": {
-    "postinstall": "yarn build && sleep 5s && yarn test",
+    "postinstall": "yarn clean && yarn build && sleep 5s && yarn test",
     "build": "lerna run build",
     "benchmark": "make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
