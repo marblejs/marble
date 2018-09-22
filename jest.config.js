@@ -12,6 +12,7 @@ module.exports = {
   coverageDirectory: './coverage/',
   coveragePathIgnorePatterns: [
     'spec-util.ts$',
+    'integration.ts$',
     '.d.ts$',
     '.spec.ts',
     'webpack.config.ts',

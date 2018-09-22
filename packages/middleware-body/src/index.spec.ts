@@ -1,7 +1,7 @@
-import { HttpRequest, HttpResponse, internal } from '@marblejs/core';
+import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { Marbles } from '@marblejs/core/dist/+internal';
 import { of } from 'rxjs';
 import { bodyParser$ } from '.';
-const { Marbles } = internal;
 
 const MockReq = require('mock-req');
 

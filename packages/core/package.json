@@ -6,8 +6,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "start": "yarn watch",
-    "watch": "webpack -w",
-    "build": "webpack",
+    "watch": "tsc -w",
+    "build": "tsc",
     "clean": "rimraf dist",
     "test": "jest --config ../../jest.config.js",
     "prepack": "cp ../../README.md ./"
@@ -41,8 +41,7 @@
   "devDependencies": {
     "@types/file-type": "^5.2.1",
     "@types/mime": "^2.0.0",
-    "@types/path-to-regexp": "^1.7.0",
-    "webpack": "^4.17.2"
+    "@types/path-to-regexp": "^1.7.0"
   },
   "publishConfig": {
     "access": "public"

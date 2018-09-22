@@ -1,8 +1,7 @@
-import { HttpStatus, internal } from '@marblejs/core';
+import { HttpStatus } from '@marblejs/core';
+import { ContentType } from '@marblejs/core/dist/+internal';
 import * as request from 'supertest';
 import { app } from '../src/app';
-
-const { ContentType } = internal;
 
 describe('API integration', () => {
   test('POST returns 404 when route not found: /', async () =>
