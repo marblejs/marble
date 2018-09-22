@@ -4,14 +4,8 @@
   "compilerOptions": {
     "outDir": "./dist/",
     "declaration": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "../../node_modules/@types"
-    ]
+    "typeRoots": ["../../node_modules/@types"]
   },
 
-  "include": [
-    "node_modules/@types",
-    "src/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
 }
