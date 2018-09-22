@@ -7,7 +7,3 @@ export * from './router/router.interface';
 export * from './http.interface';
 export * from './http.listener';
 export * from './operators';
-
-// internal stuff
-import * as internal from './+internal';
-export { internal };
