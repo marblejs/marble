@@ -10,9 +10,9 @@ export interface MaybeCases<T, U> {
 export class Maybe<T> implements Functor<T> {
   private constructor(private value: Nullable<T>) {}
 
-  private static some = <T>(value: T) => new Maybe(value);
+  static some = <T>(value: T) => new Maybe(value);
 
-  private static none = <T>() => new Maybe<T>(null);
+  static none = <T>() => new Maybe<T>(null);
 
   static of = <T>(value: Nullable<T>) =>
     value

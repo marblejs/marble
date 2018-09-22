@@ -6,8 +6,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "start": "yarn watch",
-    "watch": "webpack -w",
-    "build": "webpack",
+    "watch": "tsc -w",
+    "build": "tsc",
     "test": "jest --config ../../jest.config.js",
     "clean": "rimraf dist"
   },
@@ -34,8 +34,7 @@
     "rxjs": "~6.2.2"
   },
   "devDependencies": {
-    "@marblejs/core": "^1.0.0",
-    "webpack": "^4.17.2"
+    "@marblejs/core": "^1.0.0"
   },
   "publishConfig": {
     "access": "public"
