@@ -8,9 +8,10 @@ export type AuthorizeMiddlewareConfig = VerifyOptions;
 
 const assignPayloadToRequest = (req: HttpRequest) => (payload: object) => req.user = payload;
 
-export const authorize$ =
-  (config: AuthorizeMiddlewareConfig) =>
-  (verifyPayload$: (payload: any) => Observable<object>): Middleware => req$ =>
+export const authorize$ = (
+  config: AuthorizeMiddlewareConfig,
+  verifyPayload$: (payload: any) => Observable<object>,
+): Middleware => req$ =>
   req$.pipe(
     flatMap(req => of(req).pipe(
       map(parseAuthorizationHeader),

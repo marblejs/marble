@@ -9,7 +9,7 @@ type Payload = { id: string, email: string};
 
 export const SECRET_KEY = 'SOME_SSH_KEY';
 
-const verifyPayload$ = (payload: { id: string, email: string}) =>
+const verifyPayload$ = (payload: Payload) =>
   of(payload).pipe(
     flatMap(payload => iif(
       () => payload.id !== 'test_id' || payload.email !== 'admin@admin.com',
@@ -19,7 +19,7 @@ const verifyPayload$ = (payload: { id: string, email: string}) =>
   );
 
 const authOptions = { secret: SECRET_KEY };
-const authorize$ = authorizeMiddleware$(authOptions)(verifyPayload$);
+const authorize$ = authorizeMiddleware$(authOptions, verifyPayload$);
 const generateFakeJWTPayload = ({ email }: LoginCredentials): Payload => ({ id: 'test_id', email });
 
 const login$ = EffectFactory

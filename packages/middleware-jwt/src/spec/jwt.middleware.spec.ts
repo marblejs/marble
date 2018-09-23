@@ -42,7 +42,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret })(verifyPayload$)(req$, res, undefined);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, undefined);
 
     // then
     middleware$.subscribe(
@@ -73,7 +73,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => throwError(expectedError));
 
-    const middleware$ = authorize$({ secret: mockedSecret })(verifyPayload$)(req$, res, undefined);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, undefined);
 
     // then
     middleware$.subscribe(
@@ -105,7 +105,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret })(verifyPayload$)(req$, res, undefined);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, undefined);
 
     // then
     middleware$.subscribe(
