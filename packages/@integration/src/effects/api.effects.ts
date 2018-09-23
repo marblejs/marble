@@ -1,8 +1,8 @@
 import { EffectFactory, HttpError, HttpStatus, combineRoutes } from '@marblejs/core';
 import { throwError } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { user$ } from './user.controller';
-import { static$ } from './static.controller';
+import { user$ } from './user.effects';
+import { static$ } from './static.effects';
 
 const root$ = EffectFactory
   .matchPath('/')
