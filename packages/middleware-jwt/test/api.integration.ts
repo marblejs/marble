@@ -1,13 +1,26 @@
-import { authorize$, generateToken } from '../src';
+import { authorize$ as authorizeMiddleware$, generateToken } from '../src';
 import { httpListener, EffectFactory, combineRoutes } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
-import { map, mapTo } from 'rxjs/operators';
+import { map, flatMap } from 'rxjs/operators';
+import { of, iif, throwError } from 'rxjs';
 
 type LoginCredentials = { email: string, password: string };
+type Payload = { id: string, email: string};
 
 export const SECRET_KEY = 'SOME_SSH_KEY';
 
-const generateFakeJWTPayload = ({ email }: LoginCredentials) => ({ id: 'test_id', email });
+const verifyPayload$ = (payload: Payload) =>
+  of(payload).pipe(
+    flatMap(payload => iif(
+      () => payload.id !== 'test_id' || payload.email !== 'admin@admin.com',
+      throwError(new Error()),
+      of(payload)
+    )),
+  );
+
+const authOptions = { secret: SECRET_KEY };
+const authorize$ = authorizeMiddleware$(authOptions, verifyPayload$);
+const generateFakeJWTPayload = ({ email }: LoginCredentials): Payload => ({ id: 'test_id', email });
 
 const login$ = EffectFactory
   .matchPath('/login')
@@ -28,7 +41,7 @@ const securedRoot$ = EffectFactory
 
 const secured$ = combineRoutes('/secured', {
   effects: [securedRoot$],
-  middlewares: [authorize$({ secret: SECRET_KEY })],
+  middlewares: [authorize$],
 });
 
 const api$ = combineRoutes('/api', [login$, secured$]);

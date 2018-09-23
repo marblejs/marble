@@ -1,4 +1,4 @@
-import { throwError, of } from 'rxjs';
+import { throwError, of, Observable } from 'rxjs';
 import { map, flatMap, catchError, tap } from 'rxjs/operators';
 import { HttpError, HttpStatus, Middleware, HttpRequest } from '@marblejs/core';
 import { parseAuthorizationHeader } from './jwt.util';
@@ -8,11 +8,15 @@ export type AuthorizeMiddlewareConfig = VerifyOptions;
 
 const assignPayloadToRequest = (req: HttpRequest) => (payload: object) => req.user = payload;
 
-export const authorize$ = (config: AuthorizeMiddlewareConfig): Middleware => req$ =>
+export const authorize$ = (
+  config: AuthorizeMiddlewareConfig,
+  verifyPayload$: (payload: any) => Observable<object>,
+): Middleware => req$ =>
   req$.pipe(
     flatMap(req => of(req).pipe(
       map(parseAuthorizationHeader),
-      flatMap(verifyToken$(config)),
+      flatMap(verifyToken$<object>(config)),
+      flatMap(verifyPayload$),
       tap(assignPayloadToRequest(req)),
       flatMap(() => req$),
     )),

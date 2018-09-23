@@ -1,6 +1,16 @@
 import { HttpRequest, HttpResponse, HttpError, HttpStatus } from '@marblejs/core';
-import { of, throwError } from 'rxjs';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
+import { of, throwError, iif } from 'rxjs';
+import { flatMap } from 'rxjs/operators';
+
+const verifyPayload$ = (payload: { id: string }) =>
+  of(payload).pipe(
+    flatMap(payload => iif(
+      () => payload.id !== 'test_id',
+      throwError(new Error()),
+      of(payload)
+    )),
+  );
 
 describe('JWT middleware', () => {
   let utilModule;
@@ -21,7 +31,7 @@ describe('JWT middleware', () => {
     // given
     const mockedSecret = 'test_secret';
     const mockedToken = 'TEST_TOKEN';
-    const mockedTokenPayload = { id: 'tes_id' };
+    const mockedTokenPayload = { id: 'test_id' };
     const mockedRequest = { headers: { authorization: `Bearer ${mockedToken}`} } as HttpRequest;
     const expectedRequest = { ...mockedRequest, user: mockedTokenPayload };
 
@@ -32,7 +42,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret })(req$, res, undefined);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, undefined);
 
     // then
     middleware$.subscribe(
@@ -63,7 +73,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => throwError(expectedError));
 
-    const middleware$ = authorize$({ secret: mockedSecret })(req$, res, undefined);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, undefined);
 
     // then
     middleware$.subscribe(
@@ -75,6 +85,36 @@ describe('JWT middleware', () => {
         expect(err).toEqual(expectedError);
         expect(utilModule.parseAuthorizationHeader).toHaveBeenCalledTimes(1);
         expect(factoryModule.verifyToken$).toHaveBeenCalledTimes(1);
+        done();
+      }
+    );
+  });
+
+  test('authorize$ throws error if verifyPayload$ handler doesn\'t pass', done => {
+    // given
+    const mockedSecret = 'test_secret';
+    const mockedToken = 'TEST_TOKEN';
+    const mockedTokenPayload = { id: 'test_id_wrong' };
+    const mockedRequest = { headers: { authorization: `Bearer ${mockedToken}`} } as HttpRequest;
+    const expectedError = new HttpError('Unauthorized', HttpStatus.UNAUTHORIZED);
+
+    const req$ = of(mockedRequest);
+    const res = {} as HttpResponse;
+
+    // when
+    utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
+    factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
+
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, undefined);
+
+    // then
+    middleware$.subscribe(
+      () => {
+        fail(`Stream should throw an error`);
+        done();
+      },
+      err => {
+        expect(err).toEqual(expectedError);
         done();
       }
     );
