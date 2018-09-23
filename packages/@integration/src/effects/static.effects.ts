@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { EffectFactory, combineRoutes, internal } from '@marblejs/core';
+import { EffectFactory, combineRoutes } from '@marblejs/core';
 import { readFile } from '@marblejs/core/dist/+internal';
 import { map, switchMap } from 'rxjs/operators';
 

@@ -8,6 +8,7 @@
     "start": "yarn watch",
     "watch": "tsc -w",
     "build": "tsc",
+    "lint": "tslint --config ../../tslint.json --project ./",
     "test": "jest --config ../../jest.config.js",
     "clean": "rimraf dist"
   },
