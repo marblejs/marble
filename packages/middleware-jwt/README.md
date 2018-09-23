@@ -27,6 +27,16 @@ const login$ = EffectFactory
   ));
 ```
 
+**Validate payload:**
+```typescript
+const verifyPayload$ = (payload: { id: string }) =>
+  of(payload).pipe(
+    map(payload => payload.id),
+    flatMap(UserRepository.findById),  // the repository can throw an error if not found or...
+    catchError(/* ... */)              // the `verifyPayload$` can throw it explicitly
+  );
+```
+
 **Validate routes:**
 ```typescript
 import { EffectFactory } from '@marblejs/core';
@@ -45,7 +55,7 @@ const user$ = combineRoutes('/user', {
     getUsers$
   ],
   middlewares: [
-    authorize$({ secret: SECRET_KEY }) 👈
+    authorize$({ secret: SECRET_KEY }, validatePayload$) 👈
   ],
 });
 ```
