@@ -16,7 +16,7 @@
     "clean": "lerna run clean",
     "prepublishOnly": "yarn clean && yarn build && yarn test",
     "publish": "lerna publish --no-push",
-    "publish:canary": "lerna publish --no-push --npm-tag next --canary minor --preid dev",
+    "publish:canary": "lerna publish --no-push --npm-tag next --canary minor --preid dev --force-publish=* --npm-client npm",
     "precommit": "lint-staged"
   },
   "lint-staged": {
@@ -61,7 +61,7 @@
     "husky": "^0.14.0",
     "if-env": "^1.0.4",
     "jest": "^23.5.0",
-    "lerna": "^3.3.0",
+    "lerna": "~3.3.0",
     "lint-staged": "^7.2.2",
     "mock-fs": "^4.5.0",
     "mock-req": "^0.2.0",
