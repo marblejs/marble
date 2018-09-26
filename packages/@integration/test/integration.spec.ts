@@ -58,6 +58,17 @@ describe('API integration', () => {
         expect(body.id).toEqual('10');
       }));
 
+  test('GET returns 404 not found: /api/v1/user/0', async () =>
+    request(app)
+      .get('/api/v1/user/0')
+      .set('Authorization', 'Bearer FAKE')
+      .expect(404, { error: { status: 404, message: 'User does not exist' } }));
+
+  test('GET returns 401 if not authorized: /api/v1/user/10', async () =>
+    request(app)
+      .get('/api/v1/user/10')
+      .expect(401, { error: { status: 401, message: 'Unauthorized' } }));
+
   test('parses POST body and returns echo for secured route: /api/v1/user', async () =>
     request(app)
       .post('/api/v1/user')

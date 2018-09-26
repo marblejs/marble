@@ -1,4 +1,4 @@
-import { of } from 'rxjs';
+import { of, iif, throwError } from 'rxjs';
 
 export namespace Dao {
 
@@ -8,9 +8,10 @@ export namespace Dao {
     { id: '3', firstName: 'Adam', lastName: 'Wayne' },
   ]);
 
-  export const getUserById = (id: number | string) => of({
-    id, firstName: 'Bob', lastName: 'Collins'
-  });
+  export const getUserById = (id: number | string) =>
+    String(id) !== String(0)
+      ? of({ id, firstName: 'Bob', lastName: 'Collins' })
+      : throwError(new Error());
 
   export const postUser = (data: any) => of({
     data,
