@@ -1,4 +1,4 @@
-import { formatTime, getTimeDifferenceMs } from './time.factory';
+import { formatTime, getTimeDifferenceMs } from '../time.factory';
 
 describe('TimeFactory', () => {
 

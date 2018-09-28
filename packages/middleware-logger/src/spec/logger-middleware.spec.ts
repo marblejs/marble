@@ -1,7 +1,7 @@
 import { HttpRequest, HttpResponse } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { EventEmitter } from 'events';
-import { logger$ } from './index';
+import { logger$ } from '../logger.middleware';
 
 const createMockReq = (url: string, method: string) => ({ url, method } as HttpRequest);
 const createMockRes = (status: number) => new class extends EventEmitter {
@@ -16,7 +16,7 @@ describe('Logger middleware', () => {
     spyOn(console, 'error').and.stub();
   });
 
-  it('reacts to 200 status on the console', () => {
+  test('reacts to 200 status on the console', () => {
     const request = createMockReq('/', 'GET');
     const response = createMockRes(200);
 
@@ -29,7 +29,7 @@ describe('Logger middleware', () => {
     expect(console.info).toHaveBeenCalled();
   });
 
-  it('reacts to 400 status on the console', () => {
+  test('reacts to 400 status on the console', () => {
     const request = createMockReq('/test', 'POST');
     const response = createMockRes(403);
 
