@@ -1,5 +1,6 @@
-import { EffectFactory, combineRoutes } from '@marblejs/core';
-import { map, switchMap } from 'rxjs/operators';
+import { EffectFactory, combineRoutes, HttpError, HttpStatus } from '@marblejs/core';
+import { throwError } from 'rxjs';
+import { map, switchMap, catchError } from 'rxjs/operators';
 import { Dao } from '../fakes/dao.fake';
 import { authorize$ } from '../middlewares/auth.middleware';
 
@@ -18,6 +19,9 @@ const getUser$ = EffectFactory
     map(req => req.params.id),
     switchMap(Dao.getUserById),
     map(user => ({ body: user })),
+    catchError(() =>
+      throwError(new HttpError('User does not exist', HttpStatus.NOT_FOUND))
+    )
   ));
 
 const postUser$ = EffectFactory
