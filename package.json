@@ -5,6 +5,7 @@
   "scripts": {
     "postinstall": "yarn clean && yarn build && sleep 5s && yarn test",
     "build": "lerna run build",
+    "postbuild": "rimraf packages/**/*.spec.js packages/**/*.spec.d.ts",
     "benchmark": "make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
     "lint": "lerna run lint",
