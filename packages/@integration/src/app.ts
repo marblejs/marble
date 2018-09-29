@@ -1,10 +1,10 @@
 import { httpListener } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
-import { loggerWithOpts$ } from '@marblejs/middleware-logger';
+import { logger$ } from './middlewares/logger.middleware';
 import { api$ } from './effects/api.effects';
 
 const middlewares = [
-  loggerWithOpts$({ silent: false }),
+  logger$,
   bodyParser$,
 ];
 
