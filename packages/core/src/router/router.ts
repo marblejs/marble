@@ -42,7 +42,8 @@ export const resolveRouting =
     if (res.finished) { return EMPTY; }
 
     const [urlPath, urlQuery] = req.url.split('?');
-    const routeMatched = findRoute(routing, urlPath, req.method);
+    const preparedUrlPath = (urlPath + '/').replace(/\/\/+/g, '/');
+    const routeMatched = findRoute(routing, preparedUrlPath, req.method);
 
     if (!routeMatched) { return EMPTY; }
 
