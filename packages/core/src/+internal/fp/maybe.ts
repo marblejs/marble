@@ -2,6 +2,9 @@ import { Functor } from './functor';
 
 export type Nullable<T> = T | null | undefined;
 
+export const isNullable = value =>
+  value === undefined || value === null;
+
 export interface MaybeCases<T, U> {
   some: (t: T) => U;
   none: () => U;
@@ -14,41 +17,41 @@ export class Maybe<T> implements Functor<T> {
 
   static none = <T>() => new Maybe<T>(null);
 
-  static of = <T>(value: Nullable<T>) =>
-    value
-      ? Maybe.some(value)
+  static of = <T>(value: Nullable<T>): Maybe<T> =>
+    !isNullable(value)
+      ? Maybe.some(value as T)
       : Maybe.none<T>()
 
   map = <R>(f: (value: T) => R): Maybe<R> =>
-    this.value
-      ? Maybe.some(f(this.value))
+    !isNullable(this.value)
+      ? Maybe.some(f(this.value as T))
       : Maybe.none<R>()
 
   flatMap = <R>(f: (value: T) => Maybe<R>): Maybe<R> =>
-    this.value
-      ? f(this.value)
+    !isNullable(this.value)
+      ? f(this.value as T)
       : Maybe.none<R>()
 
   caseOf = <U>(cases: MaybeCases<T, U>) =>
-    this.value
-      ? cases.some(this.value)
+    !isNullable(this.value)
+      ? cases.some(this.value as T)
       : cases.none()
 
   valueOr = (defaultValue: T): T =>
-    this.value
-      ? this.value
+    !isNullable(this.value)
+      ? this.value as T
       : defaultValue
 
-  valueOrCompute = <R extends T>(f: () => R): T|R =>
-    this.value
-      ? this.value
+  valueOrCompute = <R extends T>(f: () => R): T | R =>
+    !isNullable(this.value)
+      ? this.value as T | R
       : f()
 
   valueOrThrow(error?: Error): T {
-    if (!this.value) {
+    if (isNullable(this.value)) {
       throw (error || new Error('No value is available'));
     }
 
-    return this.value;
+    return this.value as T;
   }
 }

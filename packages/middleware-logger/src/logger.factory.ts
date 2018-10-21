@@ -1,7 +1,8 @@
-import { HttpRequest, HttpResponse } from '@marblejs/core';
-import { Timestamp } from 'rxjs';
 import chalk from 'chalk';
-import { factorizeTime } from './time.factory';
+import { Timestamp } from 'rxjs';
+import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { factorizeTime } from './logger.util';
+import { LogParams } from './logger.model';
 
 type LogFactorizerOptions = {
   colorize?: boolean;
@@ -17,9 +18,10 @@ export const factorizeLog =
   (res: HttpResponse, stamp: Timestamp<HttpRequest>) =>
   (opts: LogFactorizerOptions = {}) => {
     const { method, url } = stamp.value;
+    const now = Date.now();
 
     const timestamp = opts.timestamp
-      ? new Date().toISOString()
+      ? new Date(now).toISOString()
       : '';
 
     const statusCode = opts.colorize
@@ -31,13 +33,7 @@ export const factorizeLog =
     return prepareLogString({ timestamp, method, url, statusCode, time });
   };
 
-export const prepareLogString = (opts: {
-  timestamp?: string;
-  method: string;
-  url: string;
-  statusCode: string;
-  time: string;
-}) =>
+export const prepareLogString = (opts: LogParams) =>
   !!opts.timestamp
     ? `${opts.timestamp} ${opts.method} ${opts.url} ${opts.statusCode} ${opts.time}`
     : `${opts.method} ${opts.url} ${opts.statusCode} ${opts.time}`;

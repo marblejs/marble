@@ -6,4 +6,5 @@ const writePath = join(__dirname, '../../', 'access.log');
 const stream = createWriteStream(writePath, { flags: 'a' });
 const options = { silent: false, stream };
 
-export const logger$ = loggerWithOpts$(options);
+export const loggerDev$ = loggerWithOpts$();
+export const loggerFile$ = loggerWithOpts$(options);
