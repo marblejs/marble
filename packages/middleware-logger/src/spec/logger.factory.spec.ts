@@ -69,4 +69,25 @@ describe('Logger factory', () => {
       timestamp: '2018-10-21T18:17:33.000Z',
     });
   });
+
+  test('#factorizeLog factorizes logger message without timestamp', () => {
+    // given
+    const res = { statusCode: 200 } as HttpResponse;
+    const req = { method: 'GET', url: '/api/v1' } as HttpRequest;
+    const stamp = { value: req, timestamp: 1539031930521 };
+
+    // when
+    loggerFactoryModule.prepareLogString = jest.fn();
+    loggerUtilModule.factorizeTime = jest.fn(() => '300ms');
+    factorizeLog(res, stamp)();
+
+    // then
+    expect(loggerFactoryModule.prepareLogString).toHaveBeenCalledWith({
+      method: 'GET',
+      url: '/api/v1',
+      statusCode: '200',
+      time: '300ms',
+      timestamp: '',
+    });
+  });
 });
