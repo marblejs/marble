@@ -1,6 +1,6 @@
 {
   "name": "marblejs",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "postinstall": "yarn clean && yarn build && sleep 5s && yarn test",
@@ -57,14 +57,12 @@
   },
   "devDependencies": {
     "@types/jest": "^23.3.1",
-    "@types/mock-fs": "^3.6.30",
     "@types/supertest": "^2.0.4",
     "husky": "^0.14.0",
     "if-env": "^1.0.4",
     "jest": "^23.5.0",
     "lerna": "~3.3.0",
     "lint-staged": "^7.2.2",
-    "mock-fs": "^4.5.0",
     "mock-req": "^0.2.0",
     "rimraf": "^2.6.2",
     "rxjs-compat": "^6.1.0",

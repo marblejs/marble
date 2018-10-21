@@ -1,4 +1,4 @@
-import * as mockFs from 'mock-fs';
+import * as fs from 'fs';
 import { readFile } from './fileReader.helper';
 
 describe('File reader', () => {
@@ -11,10 +11,12 @@ describe('File reader', () => {
 
   it('#readFile returns error when not found', done => {
     // given
-    mockFs();
+    const expectedError = { code: 'ENOENT', message: 'ENOENT, no such file or directory' };
 
     // when
+    const readFileStub = (_, callback) => callback(expectedError);
     const subscription = readFile('test/url')('index.html');
+    spyOn(fs, 'readFile').and.callFake(readFileStub);
 
     // then
     subscription.subscribe(
@@ -32,26 +34,26 @@ describe('File reader', () => {
 
   it('#readFile returns Buffer when found', done => {
     // given
-    mockFs({ 'test/url': { 'index.html': 'test' } });
+    const mockedData = 'test_data';
+    const mockedBuffer = new Buffer(mockedData);
 
     // when
+    const readFileStub = (_, callback) => callback(undefined, mockedBuffer);
     const subscription = readFile('test/url')('index.html');
+    spyOn(fs, 'readFile').and.callFake(readFileStub);
 
     // then
     subscription.subscribe(
       data => {
         expect(data).toBeDefined();
         expect(Buffer.isBuffer(data)).toEqual(true);
-        expect(data.toString()).toEqual('test');
+        expect(data.toString()).toEqual(mockedData);
         done();
       },
       error => {
-        fail(`Exceptions shouldn't be thrown`);
+        fail(`Exceptions shouldn't be thrown: ${error}`);
         done();
       }
     );
   });
-
-  afterEach(() => mockFs.restore());
-
 });
