@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { createWriteStream } from 'fs';
 import { HttpResponse } from '@marblejs/core';
-import { formatTime, getTimeDifferencIneMs, filterResponse, isNotSilent, writeToStream } from '../logger.util';
+import { formatTime, getTimeDifferenceInMs, filterResponse, isNotSilent, writeToStream } from '../logger.util';
 
 describe('Logger util', () => {
   test('#formatTime formats time to miliseconds or seconds', () => {
@@ -18,13 +18,13 @@ describe('Logger util', () => {
     expect(formattedMilisecond).toBe('800ms');
   });
 
-  test('#getTimeDifferenceMs returns time difference in miliseconds', () => {
+  test('#getTimeDifferenceInMs returns time difference in miliseconds', () => {
     // given
     const startTime = new Date(1000);
     spyOn(global, 'Date').and.returnValue({ getTime: () => 2000 });
 
     // when
-    const timeDifference = getTimeDifferencIneMs(startTime);
+    const timeDifference = getTimeDifferenceInMs(startTime);
 
     // then
     expect(timeDifference).toBe(2000 - 1000);
