@@ -7,7 +7,11 @@ export interface EffectResponse {
   headers?: Record<string, string>;
 }
 
-export type Middleware = Effect<HttpRequest>;
+export type Middleware<
+  TBody = any,
+  TParams = any,
+  TQuery = any,
+> = Effect<HttpRequest<TBody, TParams, TQuery>>;
 
 export type ErrorEffect = Effect<EffectResponse, Error>;
 
