@@ -2,17 +2,26 @@ import * as http from 'http';
 import { Observable } from 'rxjs';
 import { EffectResponse } from './effects/effects.interface';
 
-export interface HttpRequest extends http.IncomingMessage {
+export interface HttpRequest<
+  TBody = any,
+  TParams = any,
+  TQuery = any,
+> extends http.IncomingMessage {
   url: string;
   method: HttpMethod;
-  body?: any;
-  params: RouteParameters;
-  query: QueryParameters;
+  body?: TBody;
+  params: TParams;
+  query: TQuery;
   [key: string]: any;
 }
 
-export type RouteParameters = Record<string, string>;
-export type QueryParameters = Record<string, string | number | object>;
+export interface RouteParameters {
+  [key: string]: any;
+}
+
+export interface QueryParameters {
+  [key: string]: any;
+}
 
 export interface HttpResponse extends http.ServerResponse {
   send: (effect: EffectResponse) => Observable<never>;
