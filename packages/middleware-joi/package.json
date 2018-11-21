@@ -42,12 +42,12 @@
     "rxjs": "~6.2.2"
   },
   "dependencies": {
-    "joi": "^14.0.6"
+    "joi": "14.0.6",
+    "@types/joi": "^14.0.0"
   },
   "devDependencies": {
     "@marblejs/core": "^1.2.1",
-    "@marblejs/middleware-body": "^1.2.1",
-    "@types/joi": "^14.0.0"
+    "@marblejs/middleware-body": "^1.2.1"
   },
   "publishConfig": {
     "access": "public"

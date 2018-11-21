@@ -1,8 +1,9 @@
 import * as Joi from 'joi';
-import { Schema, SchemaValidator, ExtractType } from './schema';
+import './joi.types';
 import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
 import { from, of, throwError, Observable } from 'rxjs';
 import { mergeMap, flatMap, catchError, mapTo, switchMap, toArray, map } from 'rxjs/operators';
+import { Schema, SchemaValidator } from './validator.schema';
 
 const validateSource = (rules: Map<string, any>, options: Joi.ValidationOptions) => (req: HttpRequest) =>
   from(rules.keys()).pipe(
@@ -34,10 +35,9 @@ export const validator$ = <TBody = any, TParams = any, TQuery = any>
       return throwError(result.error);
     }
 
-    type ValidatorSchema = Schema<TBody, TParams, TQuery>;
     type ExtractedSchema = {
-      [K1 in keyof ValidatorSchema]: {
-        [K2 in keyof ValidatorSchema[K1]]: ExtractType<ValidatorSchema[K1][K2]>;
+      [K1 in keyof typeof schema]: {
+        [K2 in keyof typeof schema[K1]]: Joi.ExtractType<typeof schema[K1][K2]>;
       }
     };
 

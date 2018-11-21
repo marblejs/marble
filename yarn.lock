@@ -3339,7 +3339,7 @@ jest@^23.5.0:
     import-local "^1.0.0"
     jest-cli "^23.5.0"
 
-joi@^14.0.6:
+joi@14.0.6:
   version "14.0.6"
   resolved "https://registry.yarnpkg.com/joi/-/joi-14.0.6.tgz#8c72314af6dba13ca48028a4f0af992ddc5a7472"
   dependencies:

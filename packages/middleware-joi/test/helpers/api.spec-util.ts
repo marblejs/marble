@@ -21,10 +21,12 @@ const getUser$ = EffectFactory
   .use(req$ => req$
     .pipe(
       use(validator$({
-        params: { id: Joi.number().integer().min(1).max(10).required() }
+        params: {
+          id: Joi.number().integer().min(1).max(10).required(),
+        }
       })),
       map(req => req.params),
-      map(params => ({ status: 200, body: { id: params!.id } }))
+      map(params => ({ status: 200, body: { id: params.id } }))
     ));
 
 const storePost$ = EffectFactory
