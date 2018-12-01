@@ -36,9 +36,10 @@ export const validator$ = <TBody = any, TParams = any, TQuery = any>
     }
 
     type ExtractedSchema = {
-      [K1 in keyof typeof schema]: {
-        [K2 in keyof typeof schema[K1]]: Joi.ExtractType<typeof schema[K1][K2]>;
-      }
+      [K1 in keyof typeof schema]:
+        typeof schema[K1] extends undefined
+          ? any
+          : { [K2 in keyof typeof schema[K1]]: Joi.ExtractType<typeof schema[K1][K2]> }
     };
 
     type ExtractedBody = ExtractedSchema['body'];
