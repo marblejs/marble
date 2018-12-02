@@ -44,7 +44,7 @@ describe('Router factory', () => {
     ];
 
     // when
-    effectsCombiner.combineMiddlewareEffects = jest.fn(() => m$);
+    effectsCombiner.combineMiddlewares = jest.fn(() => m$);
     const factorizedRouting = factorizeRouting(routing);
 
     // then

@@ -1,7 +1,7 @@
 import { IncomingMessage, OutgoingMessage } from 'http';
 import { of, Subject } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, switchMap, tap, takeWhile } from 'rxjs/operators';
-import { combineMiddlewareEffects } from './effects/effects.combiner';
+import { combineMiddlewares } from './effects/effects.combiner';
 import { EffectResponse, Middleware, ErrorEffect } from './effects/effects.interface';
 import { errorEffectProvider } from './error/error.effect';
 import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
@@ -23,7 +23,7 @@ export const httpListener = ({
 }: HttpListenerConfig) => {
   const request$ = new Subject<Http>();
 
-  const combinedMiddlewares = combineMiddlewareEffects(middlewares);
+  const combinedMiddlewares = combineMiddlewares(middlewares);
   const routerEffects = factorizeRouting(effects);
   const providedErrorEffect = errorEffectProvider(errorEffect);
   const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectResponse;

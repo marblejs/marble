@@ -4,21 +4,11 @@ import { HttpRequest, HttpResponse } from '../http.interface';
 import { Middleware } from './effects.interface';
 export { HttpRequest, HttpResponse, Observable };
 
-export const combineMiddlewareEffects = (effects: Middleware[]): Middleware => {
-  const middlewaresObservable = from(middlewaresGuard(effects));
-
-  return (req$, res, metadata) => {
-    return middlewaresObservable.pipe(
-      takeWhile(() => !res.finished),
-      concatMap(effect => effect(req$, res, metadata)),
-      last(),
-    );
-  };
-};
-
-const middlewaresGuard = (middlewares: Middleware[]) => {
-  const emptyMiddleware: Middleware = req$ => req$;
-  return middlewares.length
-    ? middlewares
-    : [emptyMiddleware];
-};
+export const combineMiddlewares = (middlewares: Middleware[] = []): Middleware => (req$, res, metadata) =>
+  middlewares.length
+    ? from(middlewares).pipe(
+        takeWhile(() => !res.finished),
+        concatMap(middleware => middleware(req$, res, metadata)),
+        last(),
+      )
+    : req$;

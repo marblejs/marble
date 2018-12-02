@@ -1,16 +1,15 @@
 import { of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Middleware } from '../effects.interface';
-import { combineMiddlewareEffects } from '../effects.combiner';
+import { combineMiddlewares } from '../effects.combiner';
 import { HttpResponse, HttpRequest } from '../../http.interface';
 import { Marbles } from '../../+internal';
 
 const createMockRes = () => ({} as HttpResponse);
 const createMockReq = (url = '/') => ({ url } as HttpRequest);
 
-describe('Effects combiner', () => {
-
-  test('#combineMiddlewareEffects combines middlewares into one stream', () => {
+describe('#combineMiddlewares', () => {
+  test('combines middlewares into one stream', () => {
     // given
     const a$: Middleware = req$ => req$.pipe(tap(req => { req.test = 1; }));
     const b$: Middleware = req$ => req$.pipe(tap(req => { req.test = req.test + 1; }));
@@ -19,8 +18,8 @@ describe('Effects combiner', () => {
     // when
     const req = createMockReq();
     const res = createMockRes();
-    const combinedEffect = combineMiddlewareEffects([ a$, b$, c$ ]);
-    const http$ = combinedEffect(of(req), res, undefined);
+    const combinedMiddlewares = combineMiddlewares([ a$, b$, c$ ]);
+    const http$ = combinedMiddlewares(of(req), res, undefined);
 
     // then
     Marbles.assertCombinedEffects(http$, [
@@ -30,15 +29,12 @@ describe('Effects combiner', () => {
     ]);
   });
 
-  test('#combineMiddlewareEffects returns stream even if middlewares are not provided', () => {
-    // given
-    const emptyMiddlewaresCollection = [];
-
+  test('returns stream even if middlewares are not provided', () => {
     // when
     const req = createMockReq();
     const res = createMockRes();
-    const combinedEffect = combineMiddlewareEffects(emptyMiddlewaresCollection);
-    const http$ = combinedEffect(of(req), res, undefined);
+    const combinedMiddlewares = combineMiddlewares();
+    const http$ = combinedMiddlewares(of(req), res, undefined);
 
     // then
     Marbles.assertCombinedEffects(http$, [
@@ -47,5 +43,4 @@ describe('Effects combiner', () => {
       }
     ]);
   });
-
 });

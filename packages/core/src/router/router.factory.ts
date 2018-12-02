@@ -10,7 +10,7 @@ import {
   RouteCombinerConfig,
 } from './router.interface';
 import { factorizeRegExpWithParams } from './urlParams.factory';
-import { combineMiddlewareEffects } from '../effects/effects.combiner';
+import { combineMiddlewares } from '../effects/effects.combiner';
 
 export const factorizeRouting = (
   routes: (RouteEffect | RouteEffectGroup)[],
@@ -35,7 +35,7 @@ export const factorizeRouting = (
     const method: RoutingMethod = {
       effect: route.effect,
       middleware: middleware.length > 0
-        ? middleware.length > 1 ? combineMiddlewareEffects(middleware) : middleware[0]
+        ? middleware.length > 1 ? combineMiddlewares(middleware) : middleware[0]
         : undefined,
       parameters,
     };
@@ -58,15 +58,20 @@ export const factorizeRouting = (
   return routing;
 };
 
-export const combineRoutes = (
+export function combineRoutes(path: string, config: RouteCombinerConfig): RouteEffectGroup;
+export function combineRoutes(path: string, effects: (RouteEffect | RouteEffectGroup)[]): RouteEffectGroup;
+export function combineRoutes(
   path: string,
   configOrEffects: RouteCombinerConfig | (RouteEffect | RouteEffectGroup)[]
-): RouteEffectGroup => ({
-  path,
-  effects: isRouteCombinerConfig(configOrEffects)
-    ? configOrEffects.effects
-    : configOrEffects,
-  middlewares: isRouteCombinerConfig(configOrEffects)
-    ? (configOrEffects.middlewares || [])
-    : [],
-});
+): RouteEffectGroup {
+  return {
+    path,
+    effects: isRouteCombinerConfig(configOrEffects)
+      ? configOrEffects.effects
+      : configOrEffects,
+    middlewares: isRouteCombinerConfig(configOrEffects)
+      ? (configOrEffects.middlewares || [])
+      : [],
+  };
+}
+

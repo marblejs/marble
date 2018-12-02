@@ -40,7 +40,7 @@ describe('Http listener', () => {
     const res = {} as OutgoingMessage;
 
     // when
-    effectsCombiner.combineMiddlewareEffects = jest.fn(() => () => of(req));
+    effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
     routerFactory.factorizeRouting = jest.fn(() => []);
     router.resolveRouting = jest.fn(() => () => () => of({ body: 'test' }));
     responseHandler.handleResponse = jest.fn(() => () => () => undefined);
@@ -53,7 +53,7 @@ describe('Http listener', () => {
 
     // then
     setTimeout(() => {
-      expect(effectsCombiner.combineMiddlewareEffects).toHaveBeenCalledWith([middleware$]);
+      expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith([middleware$]);
       expect(routerFactory.factorizeRouting).toHaveBeenCalledWith([effect$]);
       expect(router.resolveRouting).toHaveBeenCalled();
       expect(responseHandler.handleResponse).toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('Http listener', () => {
     const req = {} as IncomingMessage;
 
     // when
-    effectsCombiner.combineMiddlewareEffects = jest.fn(() => () => of(req));
+    effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
     routerFactory.factorizeRouting = jest.fn(() => []);
     errorEffect.errorEffectProvider = jest.fn(() => errorMiddleware$);
 
@@ -75,7 +75,7 @@ describe('Http listener', () => {
     });
 
     // then
-    expect(effectsCombiner.combineMiddlewareEffects).toHaveBeenCalledWith([]);
+    expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith([]);
   });
 
   test('#httpListener catches error', done => {
@@ -86,7 +86,7 @@ describe('Http listener', () => {
     const errorHandler = jest.fn(() => of({ body: 'error' }));
 
     // when
-    effectsCombiner.combineMiddlewareEffects = jest.fn(() => () => of(req));
+    effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
     routerFactory.factorizeRouting = jest.fn(() => []);
     router.resolveRouting = jest.fn(() => () => () => of({ body: 'test' }).pipe(switchMap(() => throwError(error))));
     responseHandler.handleResponse = jest.fn(() => () => () => undefined);
