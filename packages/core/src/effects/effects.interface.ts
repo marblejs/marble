@@ -7,16 +7,18 @@ export interface EffectResponse {
   headers?: Record<string, string>;
 }
 
-export type Middleware<
+export interface Middleware<
   TBody = any,
   TParams = any,
   TQuery = any,
-> = Effect<HttpRequest<TBody, TParams, TQuery>>;
+> extends Effect<
+  HttpRequest<TBody, TParams, TQuery>,
+  HttpRequest<TBody, TParams, TQuery>
+> {}
 
-export type ErrorEffect = Effect<EffectResponse, Error>;
+export interface ErrorEffect<T extends Error = Error>
+  extends Effect<HttpRequest, EffectResponse, T> {}
 
-export type Effect<T = EffectResponse, U = any> = (
-  request$: Observable<HttpRequest>,
-  response: HttpResponse,
-  metadata: U
-) => Observable<T>;
+export interface Effect<T extends HttpRequest = HttpRequest, U = EffectResponse, V = any> {
+  (req$: Observable<T>, res: HttpResponse, meta: V): Observable<U>;
+}

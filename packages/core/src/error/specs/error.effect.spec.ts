@@ -7,9 +7,8 @@ import { HttpError } from '../error.model';
 const createMockRes = () => ({} as HttpResponse);
 const createMockReq = (url = '/') => ({ url } as HttpRequest);
 
-describe('Error effect', () => {
-
-  it('error$ maps HttpError', () => {
+describe('error$', () => {
+  test('maps HttpError', () => {
     const error = new HttpError('test-message', 400);
     const expectedResponse = {
       status: 400,
@@ -25,7 +24,7 @@ describe('Error effect', () => {
     ], { response: createMockRes(), error });
   });
 
-  it('error$ maps other errors', () => {
+  test('maps other errors', () => {
     const error = new Error('test-message');
     const expectedResponse = {
       status: 500,
@@ -40,16 +39,17 @@ describe('Error effect', () => {
       ['-a-', { a: expectedResponse }],
     ], { response: createMockRes(), error });
   });
+});
 
-  it('#errorEffectProvider provides error handler implementation', () => {
+describe('#errorEffectProvider', () => {
+  test('provides error handler implementation', () => {
     const customError$ = req$ => req$.pipe(mapTo({ status: 500, body: 'error' }));
     const effect = errorEffectProvider(customError$);
     expect(effect).toBe(customError$);
   });
 
-  it('#errorEffectProvider provides default error handler implementation if not passed', () => {
+  test('provides default error handler implementation if not passed', () => {
     const effect = errorEffectProvider();
     expect(effect).toBe(error$);
   });
-
 });
