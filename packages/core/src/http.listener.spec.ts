@@ -10,7 +10,7 @@ describe('Http listener', () => {
   let effectsCombiner;
   let responseHandler;
   let routerFactory;
-  let router;
+  let routerResolver;
 
   const effect$ = EffectFactory
     .matchPath('/')
@@ -25,13 +25,13 @@ describe('Http listener', () => {
     jest.unmock('./effects/effects.combiner.ts');
     jest.unmock('./response/response.handler.ts');
     jest.unmock('./router/router.factory.ts');
-    jest.unmock('./router/router.ts');
+    jest.unmock('./router/router.resolver.ts');
 
     errorEffect = require('./error/error.effect.ts');
     effectsCombiner = require('./effects/effects.combiner.ts');
     responseHandler = require('./response/response.handler.ts');
     routerFactory = require('./router/router.factory.ts');
-    router = require('./router/router.ts');
+    routerResolver = require('./router/router.resolver.ts');
   });
 
   test('#httpListener handles received HttpRequest', done => {
@@ -42,7 +42,7 @@ describe('Http listener', () => {
     // when
     effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
     routerFactory.factorizeRouting = jest.fn(() => []);
-    router.resolveRouting = jest.fn(() => () => () => of({ body: 'test' }));
+    routerResolver.resolveRouting = jest.fn(() => () => () => of({ body: 'test' }));
     responseHandler.handleResponse = jest.fn(() => () => () => undefined);
     errorEffect.errorEffectProvider = jest.fn(() => errorMiddleware$);
 
@@ -55,7 +55,7 @@ describe('Http listener', () => {
     setTimeout(() => {
       expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith([middleware$]);
       expect(routerFactory.factorizeRouting).toHaveBeenCalledWith([effect$]);
-      expect(router.resolveRouting).toHaveBeenCalled();
+      expect(routerResolver.resolveRouting).toHaveBeenCalled();
       expect(responseHandler.handleResponse).toHaveBeenCalled();
       done();
     });
@@ -88,7 +88,9 @@ describe('Http listener', () => {
     // when
     effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
     routerFactory.factorizeRouting = jest.fn(() => []);
-    router.resolveRouting = jest.fn(() => () => () => of({ body: 'test' }).pipe(switchMap(() => throwError(error))));
+    routerResolver.resolveRouting = jest.fn(() => () => () =>
+      of({ body: 'test' }).pipe(switchMap(() => throwError(error)))
+    );
     responseHandler.handleResponse = jest.fn(() => () => () => undefined);
     errorEffect.errorEffectProvider = jest.fn(() => errorHandler);
 
