@@ -23,7 +23,7 @@ describe('Joi middleware - Body', () => {
     };
 
     const http$ = bodyParser$(req$, res, {});
-    const valid$ = validator$(schema)(http$);
+    const valid$ = validator$(schema)(http$, undefined as unknown as HttpResponse, {});
 
     valid$.subscribe(
       () => {
@@ -59,7 +59,7 @@ describe('Joi middleware - Body', () => {
     };
 
     const http$ = bodyParser$(req$, res, {});
-    const valid$ = validator$(schema)(http$);
+    const valid$ = validator$(schema)(http$, undefined as unknown as HttpResponse, {});
 
     valid$.subscribe(
       () => {
@@ -95,7 +95,7 @@ describe('Joi middleware - Body', () => {
     };
 
     const http$ = bodyParser$(req$, res, {});
-    const valid$ = validator$(schema, { allowUnknown: true })(http$);
+    const valid$ = validator$(schema, { allowUnknown: true })(http$, undefined as unknown as HttpResponse, {});
 
     valid$.subscribe(data => {
       expect(data).toBeTruthy();
