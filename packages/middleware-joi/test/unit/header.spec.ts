@@ -1,6 +1,6 @@
 import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
-import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { HttpRequest } from '@marblejs/core';
 const MockReq = require('mock-req');
 
 describe('Joi middleware - Header', () => {
@@ -13,7 +13,6 @@ describe('Joi middleware - Header', () => {
     });
 
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
     const schema = {
       headers: Joi.object({
         token: Joi.string()
@@ -21,7 +20,7 @@ describe('Joi middleware - Header', () => {
           .required()
       })
     };
-    const http$ = validator$(schema)(req$, res, {});
+    const http$ = validator$(schema)(req$);
 
     http$.subscribe(
       () => {
@@ -47,13 +46,12 @@ describe('Joi middleware - Header', () => {
     });
 
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
     const schema = {
       headers: Joi.object({
         start: Joi.date()
       })
     };
-    const http$ = validator$(schema)(req$, res, {});
+    const http$ = validator$(schema)(req$);
 
     http$.subscribe(
       () => {
@@ -80,13 +78,12 @@ describe('Joi middleware - Header', () => {
     });
 
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
     const schema = {
       headers: Joi.object({
         start: Joi.number().integer()
       })
     };
-    const http$ = validator$(schema, { stripUnknown: true })(req$, res, {});
+    const http$ = validator$(schema, { stripUnknown: true })(req$);
 
     http$.subscribe(data => {
       expect(data).toBeTruthy();
@@ -107,7 +104,6 @@ describe('Joi middleware - Header', () => {
     });
 
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
     const schema = {
       headers: Joi.object({
         token: Joi.string()
@@ -118,7 +114,7 @@ describe('Joi middleware - Header', () => {
           .min(1)
       })
     };
-    const http$ = validator$(schema)(req$, res, {});
+    const http$ = validator$(schema)(req$);
 
     http$.subscribe(data => {
       expect(data).toBeTruthy();

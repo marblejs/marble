@@ -1,6 +1,6 @@
 import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
-import { HttpRequest, HttpResponse, RouteParameters } from '@marblejs/core';
+import { HttpRequest, RouteParameters } from '@marblejs/core';
 
 const reqMatched = (
   url: string,
@@ -18,8 +18,7 @@ describe('Joi middleware - Params', () => {
   it('should throws an error if dont pass a required field', done => {
     expect.assertions(2);
 
-    const req$ = of(reqMatched('/test', null, [], {}));
-    const res = {} as HttpResponse;
+    const req$ = of(reqMatched('/test', undefined, [], {}));
     const schema = {
       params: Joi.object({
         id: Joi.string()
@@ -27,7 +26,7 @@ describe('Joi middleware - Params', () => {
           .required()
       })
     };
-    const http$ = validator$(schema)(req$, res, {});
+    const http$ = validator$(schema)(req$);
 
     http$.subscribe(
       () => {
@@ -45,14 +44,13 @@ describe('Joi middleware - Params', () => {
   it('should throws an error if pass a invalid field', done => {
     expect.assertions(2);
 
-    const req$ = of(reqMatched('/test/@@@', null, [], { id: '@@@' }));
-    const res = {} as HttpResponse;
+    const req$ = of(reqMatched('/test/@@@', undefined, [], { id: '@@@' }));
     const schema = {
       params: Joi.object({
         id: Joi.string().token()
       })
     };
-    const http$ = validator$(schema)(req$, res, {});
+    const http$ = validator$(schema)(req$);
 
     http$.subscribe(
       () => {
@@ -72,8 +70,7 @@ describe('Joi middleware - Params', () => {
   it('should validates params with a default value', done => {
     expect.assertions(2);
 
-    const req$ = of(reqMatched('/test', null, [], {}));
-    const res = {} as HttpResponse;
+    const req$ = of(reqMatched('/test', undefined, [], {}));
     const schema = {
       params: Joi.object({
         id: Joi.string()
@@ -81,7 +78,7 @@ describe('Joi middleware - Params', () => {
           .default('181782881DB38D84')
       })
     };
-    const http$ = validator$(schema)(req$, res, {});
+    const http$ = validator$(schema)(req$);
 
     http$.subscribe(data => {
       expect(data).toBeDefined();
