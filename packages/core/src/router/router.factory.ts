@@ -1,15 +1,14 @@
 import { Middleware } from '../effects/effects.interface';
-import { isRouteEffectGroup, isRouteCombinerConfig } from './router.helpers';
+import { combineMiddlewares } from '../effects/effects.combiner';
+import { isRouteEffectGroup } from './router.helpers';
 import {
   Routing,
   RoutingMethod,
   RoutingItem,
   RouteEffect,
   RouteEffectGroup,
-  RouteCombinerConfig,
 } from './router.interface';
-import { factorizeRegExpWithParams } from './urlParams.factory';
-import { combineMiddlewares } from '../effects/effects.combiner';
+import { factorizeRegExpWithParams } from './router.params.factory';
 
 export const factorizeRouting = (
   routes: (RouteEffect | RouteEffectGroup)[],
@@ -57,19 +56,3 @@ export const factorizeRouting = (
   return routing;
 };
 
-export function combineRoutes(path: string, config: RouteCombinerConfig): RouteEffectGroup;
-export function combineRoutes(path: string, effects: (RouteEffect | RouteEffectGroup)[]): RouteEffectGroup;
-export function combineRoutes(
-  path: string,
-  configOrEffects: RouteCombinerConfig | (RouteEffect | RouteEffectGroup)[]
-): RouteEffectGroup {
-  return {
-    path,
-    effects: isRouteCombinerConfig(configOrEffects)
-      ? configOrEffects.effects
-      : configOrEffects,
-    middlewares: isRouteCombinerConfig(configOrEffects)
-      ? (configOrEffects.middlewares || [])
-      : [],
-  };
-}

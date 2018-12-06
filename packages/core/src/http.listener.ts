@@ -7,7 +7,7 @@ import { errorEffectProvider } from './error/error.effect';
 import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
 import { handleResponse } from './response/response.handler';
 import { RouteEffect, RouteEffectGroup } from './router/router.interface';
-import { resolveRouting } from './router/router';
+import { resolveRouting } from './router/router.resolver';
 import { factorizeRouting } from './router/router.factory';
 
 type HttpListenerConfig = {

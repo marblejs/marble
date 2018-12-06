@@ -42,8 +42,7 @@
   },
   "devDependencies": {
     "@types/file-type": "^5.2.1",
-    "@types/mime": "^2.0.0",
-    "@types/path-to-regexp": "^1.7.0"
+    "@types/mime": "^2.0.0"
   },
   "publishConfig": {
     "access": "public"

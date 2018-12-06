@@ -3,7 +3,7 @@ import { mergeMap } from 'rxjs/operators';
 import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
 import { EffectResponse } from '../effects/effects.interface';
 import { RouteMatched, Routing, RoutingItem } from './router.interface';
-import { queryParamsFactory } from './queryParams.factory';
+import { queryParamsFactory } from './router.query.factory';
 export { RoutingItem };
 
 export const findRoute = (
