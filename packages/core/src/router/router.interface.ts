@@ -1,11 +1,12 @@
-import { HttpMethod } from '../http.interface';
-import { Effect, Middleware } from '../effects/effects.interface';
+import { HttpMethod, HttpRequest } from '../http.interface';
+import { Effect, Middleware, EffectResponse } from '../effects/effects.interface';
 
 // Route
-export interface RouteEffect {
+export interface RouteEffect<T extends HttpRequest = HttpRequest> {
   path: string;
   method: HttpMethod;
-  effect: Effect;
+  effect: Effect<T, EffectResponse>;
+  middleware?: Middleware;
 }
 
 export interface RouteEffectGroup {

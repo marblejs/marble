@@ -1,13 +1,13 @@
 import { tap } from 'rxjs/operators';
 import { Marbles } from '../../+internal';
-import { Effect } from '../../effects/effects.interface';
+import { Middleware } from '../../effects/effects.interface';
 import { HttpRequest } from '../../http.interface';
 import { use } from './use.operator';
 
 const createMockReq = (test = 0) => ({ test } as any as HttpRequest);
 
-const middleware$: Effect<HttpRequest> = request$ => request$
-  .pipe(tap(req => req.test++));
+const middleware$: Middleware = req$ =>
+  req$.pipe(tap(req => req.test++));
 
 describe('Use operator', () => {
 
