@@ -1,10 +1,10 @@
 import { EMPTY } from 'rxjs';
-import { EffectResponse } from '../effects/effects.interface';
+import { EffectHttpResponse } from '../effects/effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { bodyFactory } from './responseBody.factory';
 import { headersFactory } from './responseHeaders.factory';
 
-export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effect: EffectResponse) => {
+export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effect: EffectHttpResponse) => {
   if (res.finished) { return EMPTY; }
 
   const status = effect.status || HttpStatus.OK;
