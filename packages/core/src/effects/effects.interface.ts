@@ -16,12 +16,13 @@ export interface Middleware<
 > extends Effect<I, O> {}
 
 export interface ErrorEffect<T extends Error = Error>
-  extends Effect<HttpRequest, EffectHttpResponse, T> {}
+  extends Effect<HttpRequest, EffectHttpResponse, HttpResponse, T> {}
 
 export interface Effect<
-  T extends HttpRequest = HttpRequest,
-  U extends EffectResponse | HttpRequest = EffectHttpResponse,
-  V = any
+  T = HttpRequest,
+  U = EffectHttpResponse,
+  V = HttpResponse,
+  W = any,
 > {
-  (req$: Observable<T>, res: HttpResponse, meta: V): Observable<U>;
+  (req$: Observable<T>, res: V, meta: W): Observable<U>;
 }
