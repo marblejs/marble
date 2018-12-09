@@ -2,7 +2,7 @@ import { IncomingMessage, OutgoingMessage } from 'http';
 import { of, Subject } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, switchMap, tap, takeWhile } from 'rxjs/operators';
 import { combineMiddlewares } from './effects/effects.combiner';
-import { EffectResponse, Middleware, ErrorEffect } from './effects/effects.interface';
+import { EffectHttpResponse, Middleware, ErrorEffect } from './effects/effects.interface';
 import { errorEffectProvider } from './error/error.effect';
 import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
 import { handleResponse } from './response/response.handler';
@@ -26,7 +26,7 @@ export const httpListener = ({
   const combinedMiddlewares = combineMiddlewares(middlewares);
   const routerEffects = factorizeRouting(effects);
   const providedErrorEffect = errorEffectProvider(errorEffect);
-  const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectResponse;
+  const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectHttpResponse;
 
   const effect$ = request$.pipe(
     mergeMap(({ req, res }) => {

@@ -1,10 +1,13 @@
 import { Observable } from 'rxjs';
-import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
+import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders } from '../http.interface';
 
-export interface EffectResponse {
+export interface EffectResponse<T = any> {
+  body?: T;
+}
+
+export interface EffectHttpResponse<T = any> extends EffectResponse<T> {
   status?: HttpStatus;
-  body?: any;
-  headers?: Record<string, string>;
+  headers?: HttpHeaders;
 }
 
 export interface Middleware<
@@ -13,8 +16,13 @@ export interface Middleware<
 > extends Effect<I, O> {}
 
 export interface ErrorEffect<T extends Error = Error>
-  extends Effect<HttpRequest, EffectResponse, T> {}
+  extends Effect<HttpRequest, EffectHttpResponse, HttpResponse, T> {}
 
-export interface Effect<T extends HttpRequest = HttpRequest, U = EffectResponse, V = any> {
-  (req$: Observable<T>, res: HttpResponse, meta: V): Observable<U>;
+export interface Effect<
+  T = HttpRequest,
+  U = EffectHttpResponse,
+  V = HttpResponse,
+  W = any,
+> {
+  (req$: Observable<T>, res: V, meta: W): Observable<U>;
 }
