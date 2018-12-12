@@ -9,7 +9,7 @@ export interface HttpRequest<
 > extends http.IncomingMessage {
   url: string;
   method: HttpMethod;
-  body?: TBody;
+  body: TBody;
   params: TParams;
   query: TQuery;
   [key: string]: any;

@@ -10,7 +10,7 @@ const createMockReq = (obj: Record<string, any>) => (obj as any as HttpRequest);
 describe('use.operator', () => {
   test('applies middlewares to the request pipeline', () => {
     const middleware$: Middleware<HttpRequest<number>> = req$ =>
-      req$.pipe(tap(req => req.body!++ ));
+      req$.pipe(tap(req => req.body++ ));
 
     const operators = [
       use(middleware$),
@@ -57,7 +57,7 @@ describe('use.operator', () => {
       use(m2$),
       use(m3$),
       use(m4$),
-      tap(req => req.body!.test as string),
+      tap(req => req.body.test as string),
       tap(req => req.params.test as boolean),
       tap(req => req.query.test as number),
       tap(req => req.user.id as string),
