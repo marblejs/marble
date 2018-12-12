@@ -5,7 +5,7 @@ import { HttpRequest, HttpResponse } from '../../http.interface';
 
 export const use = <I extends HttpRequest, O extends HttpRequest>
   (middleware: Middleware<I, O>, res?: HttpResponse) =>
-  (source$: Observable<I>): Observable<O> =>
+  (source$: Observable<I>) =>
     source$.pipe(
-      switchMap(req => middleware(of(req), res!, {}))
+      switchMap(req => middleware(of(req), res!, {}) as Observable<I & O>)
     );

@@ -19,7 +19,9 @@
     ],
     "baseUrl": "."
   },
-  "exclude": [
-    "**/*.d.ts"
+  "include": [
+    "./packages/**/*.ts",
+    "./packages/**/*.d.ts",
+    "./packages/**/*.json"
   ]
 }

@@ -28,7 +28,10 @@ module.exports = {
   ],
   globals: {
     'ts-jest': {
-      tsConfigFile: './tsconfig.json',
-    }
+      tsConfig: './tsconfig.test.json',
+      diagnostics: {
+        ignoreCodes: [2300],
+      },
+    },
   },
 };

@@ -1,4 +1,16 @@
-import 'joi';
+import * as Joi from 'joi';
+import { Schema } from './validator.schema';
+
+export type ExtractedSchema<SchemaToExtract extends Schema> = {
+  [K1 in keyof SchemaToExtract]:
+    SchemaToExtract[K1] extends undefined
+      ? unknown
+      : { [K2 in keyof SchemaToExtract[K1]]: Joi.ExtractType<SchemaToExtract[K1][K2]> }
+};
+
+export type ExtractedBody<T extends Schema> = ExtractedSchema<T>['body'];
+export type ExtractedParams<T extends Schema> = ExtractedSchema<T>['params'];
+export type ExtractedQuery<T extends Schema> = ExtractedSchema<T>['query'];
 
 declare module 'joi' {
   // Object Schema
@@ -23,5 +35,5 @@ declare module 'joi' {
       U extends null ? Record<string, any> : { [K in keyof U]: ExtractType<U[K]> } :
     T extends ArraySchema<infer U> ?
       U extends null ? any[] : U[] :
-    any;
+    unknown;
 }

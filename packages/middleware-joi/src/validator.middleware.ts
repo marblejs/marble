@@ -1,9 +1,10 @@
 import * as Joi from 'joi';
-import './joi.types';
+import './validator.interface';
 import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
 import { from, of, throwError, Observable } from 'rxjs';
 import { mergeMap, flatMap, catchError, mapTo, switchMap, toArray, map } from 'rxjs/operators';
 import { Schema, SchemaValidator } from './validator.schema';
+import { ExtractedBody, ExtractedParams, ExtractedQuery } from './validator.interface';
 
 const validateSource = (rules: Map<string, any>, options: Joi.ValidationOptions) => (req: HttpRequest) =>
   from(rules.keys()).pipe(
@@ -35,19 +36,12 @@ export const validator$ = <TBody = any, TParams = any, TQuery = any>
       return throwError(result.error);
     }
 
-    type ExtractedSchema = {
-      [K1 in keyof typeof schema]:
-        typeof schema[K1] extends undefined
-          ? any
-          : { [K2 in keyof typeof schema[K1]]: Joi.ExtractType<typeof schema[K1][K2]> }
-    };
-
-    type ExtractedBody = ExtractedSchema['body'];
-    type ExtractedParams = ExtractedSchema['params'];
-    type ExtractedQuery = ExtractedSchema['query'];
-
     return req$.pipe(
       switchMap(validateSource(rules, options)),
-      map(req => req as HttpRequest<ExtractedBody, ExtractedParams, ExtractedQuery>),
+      map(req => req as HttpRequest<
+        ExtractedBody<Required<typeof schema>>,
+        ExtractedParams<Required<typeof schema>>,
+        ExtractedQuery<Required<typeof schema>>
+      >),
     );
   };
