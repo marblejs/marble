@@ -11,6 +11,14 @@ const getUserValidator$ = validator$({
   },
 }, { allowUnknown: true });
 
+const postUserValidator$ = validator$({
+  body: {
+    user: Joi.object({
+      id: Joi.string().required(),
+    })
+  },
+});
+
 const getUserList$ = EffectFactory
   .matchPath('/')
   .matchType('GET')
@@ -38,9 +46,10 @@ const postUser$ = EffectFactory
   .matchPath('/')
   .matchType('POST')
   .use(req$ => req$.pipe(
+    use(postUserValidator$),
     map(req => req.body),
     mergeMap(Dao.postUser),
-    map(response => ({ body: response })),
+    map(body => ({ body })),
   ));
 
 export const user$ = combineRoutes('/user', {
