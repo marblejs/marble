@@ -1,26 +1,83 @@
-import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
 import { Marbles } from '../../+internal';
-import { Middleware } from '../../effects/effects.interface';
+import { Middleware, Effect } from '../../effects/effects.interface';
 import { HttpRequest } from '../../http.interface';
 import { use } from './use.operator';
 
-const createMockReq = (test = 0) => ({ test } as any as HttpRequest);
+const createMockReq = (req: Partial<HttpRequest>) => req;
 
-const middleware$: Middleware = req$ =>
-  req$.pipe(tap(req => req.test++));
+describe('use.operator', () => {
+  test('applies middlewares to the request pipeline', () => {
+    const middleware$: Middleware<HttpRequest<number>> = req$ =>
+      req$.pipe(tap(req => req.body++ ));
 
-describe('Use operator', () => {
-
-  it('applies middlewares to the request pipeline', () => {
     const operators = [
       use(middleware$),
       use(middleware$)
     ];
 
     Marbles.assert(operators, [
-      ['-a---', { a: createMockReq() }],
-      ['-a---', { a: createMockReq(2) }],
+      ['-a---', { a: createMockReq({ body: 0 }) }],
+      ['-a---', { a: createMockReq({ body: 2 }) }],
     ]);
   });
 
+  test('infers types from composed middlewares', () => {
+    interface AuthorizedHttpRequest extends HttpRequest {
+      user: { id: string };
+    }
+
+    const m1$ = <T extends HttpRequest>(req$: Observable<T>) =>
+      req$.pipe(
+        tap(req => req.body = { test: 'test' }),
+      ) as Observable<HttpRequest<{ test: string }, T['params'], T['query']>>;
+
+    const m2$ = <T extends HttpRequest>(req$: Observable<T>) =>
+      req$.pipe(
+        tap(req => req.params = { test: true }),
+      ) as Observable<HttpRequest<T['body'], { test: boolean }, T['query']>>;
+
+    const m3$ = <T extends HttpRequest>(req$: Observable<T>) =>
+      req$.pipe(
+        tap(req => req.query = { test: 3 }),
+      ) as Observable<HttpRequest<{ test: boolean }, T['params'], { test: number }>>;
+
+    const m4$ = <T extends HttpRequest>(req$: Observable<T>) =>
+      req$.pipe(
+        tap(req => req.user = { id: 'test_id' }),
+      ) as Observable<AuthorizedHttpRequest & T>;
+
+    const effect$: Effect = req$ =>
+      req$.pipe(
+        use(m1$),
+        use(m2$),
+        use(m3$),
+        use(m4$),
+        tap(req => req.body.test as boolean),
+        tap(req => req.params.test as boolean),
+        tap(req => req.query.test as number),
+        tap(req => req.user.id as string),
+        map(req => ({ body: {
+          body: req.body,
+          params: req.params,
+          query: req.query,
+          user: req.user,
+        }})),
+      );
+
+    const expectedResult = {
+      body: {
+        body:   { test: 'test' },
+        params: { test: true },
+        query:  { test: 3 },
+        user:   { id: 'test_id' },
+      }
+    };
+
+    Marbles.assertEffect(effect$, [
+      ['-a---', { a: createMockReq({ params: {}, query: {} }) }],
+      ['-a---', { a: expectedResult }],
+    ]);
+  });
 });

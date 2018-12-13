@@ -32,7 +32,6 @@ package-lock.json
 # remove from npm package
 # --------------------------------------------------
 packages/**/*.spec.js
-packages/**/*.d.ts
 
 # --------------------------------------------------
 # Dependency directories

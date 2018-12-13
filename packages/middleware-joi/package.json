@@ -42,7 +42,7 @@
     "rxjs": "~6.2.2"
   },
   "dependencies": {
-    "joi": "14.0.6",
+    "joi": "~14.3.0",
     "@types/joi": "^14.0.0"
   },
   "devDependencies": {

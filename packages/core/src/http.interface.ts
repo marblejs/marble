@@ -3,13 +3,13 @@ import { Observable } from 'rxjs';
 import { EffectHttpResponse } from './effects/effects.interface';
 
 export interface HttpRequest<
-  TBody = any,
-  TParams = any,
-  TQuery = any,
+  TBody = unknown,
+  TParams = unknown,
+  TQuery = unknown,
 > extends http.IncomingMessage {
   url: string;
   method: HttpMethod;
-  body?: TBody;
+  body: TBody;
   params: TParams;
   query: TQuery;
   [key: string]: any;

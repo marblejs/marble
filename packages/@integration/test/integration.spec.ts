@@ -73,8 +73,8 @@ describe('API integration', () => {
     request(app)
       .post('/api/v1/user')
       .set('Authorization', 'Bearer FAKE')
-      .send({ test: 'test' })
-      .expect(200, { data: {test: 'test' } }));
+      .send({ user: { id: 'test_id' } })
+      .expect(200, { data: { user: { id: 'test_id' } } }));
 
   test(`returns static file as ${ContentType.TEXT_HTML}: /api/v1/static/index.html`, async () =>
     request(app)
