@@ -5,7 +5,7 @@ import { Middleware, Effect } from '../../effects/effects.interface';
 import { HttpRequest } from '../../http.interface';
 import { use } from './use.operator';
 
-const createMockReq = (obj: Record<string, any>) => (obj as any as HttpRequest);
+const createMockReq = (req: Partial<HttpRequest>) => req;
 
 describe('use.operator', () => {
   test('applies middlewares to the request pipeline', () => {
@@ -28,46 +28,43 @@ describe('use.operator', () => {
       user: { id: string };
     }
 
-    const m1$ = <_ extends HttpRequest>(req$: Observable<HttpRequest>):
-      Observable<HttpRequest<{ test: string }, unknown, unknown>> =>
-        req$.pipe(
-          tap(req => req.body = { test: 'test' }),
-        );
+    const m1$ = <T extends HttpRequest>(req$: Observable<T>) =>
+      req$.pipe(
+        tap(req => req.body = { test: 'test' }),
+      ) as Observable<HttpRequest<{ test: string }, T['params'], T['query']>>;
 
-    const m2$ = <_ extends HttpRequest>(req$: Observable<HttpRequest>):
-      Observable<HttpRequest<unknown, { test: boolean }, unknown>> =>
-        req$.pipe(
-          tap(req => req.params.test = true),
-        );
+    const m2$ = <T extends HttpRequest>(req$: Observable<T>) =>
+      req$.pipe(
+        tap(req => req.params = { test: true }),
+      ) as Observable<HttpRequest<T['body'], { test: boolean }, T['query']>>;
 
-    const m3$ = <_ extends HttpRequest>(req$: Observable<HttpRequest>):
-      Observable<HttpRequest<unknown, unknown, { test: number }>> =>
-        req$.pipe(
-          tap(req => req.query.test = 3),
-        );
+    const m3$ = <T extends HttpRequest>(req$: Observable<T>) =>
+      req$.pipe(
+        tap(req => req.query = { test: 3 }),
+      ) as Observable<HttpRequest<{ test: boolean }, T['params'], { test: number }>>;
 
-    const m4$ = <_ extends HttpRequest>(req$: Observable<HttpRequest>):
-      Observable<AuthorizedHttpRequest> =>
-        req$.pipe(
-          tap(req => req.user = { id: 'test_id' }),
-        );
+    const m4$ = <T extends HttpRequest>(req$: Observable<T>) =>
+      req$.pipe(
+        tap(req => req.user = { id: 'test_id' }),
+      ) as Observable<AuthorizedHttpRequest & T>;
 
-    const effect$: Effect = req$ => req$.pipe(
-      use(m1$),
-      use(m2$),
-      use(m3$),
-      use(m4$),
-      tap(req => req.body.test as string),
-      tap(req => req.params.test as boolean),
-      tap(req => req.query.test as number),
-      tap(req => req.user.id as string),
-      map(req => ({ body: {
-        body: req.body,
-        params: req.params,
-        query: req.query,
-        user: req.user,
-      }})),
-    );
+    const effect$: Effect = req$ =>
+      req$.pipe(
+        use(m1$),
+        use(m2$),
+        use(m3$),
+        use(m4$),
+        tap(req => req.body.test as boolean),
+        tap(req => req.params.test as boolean),
+        tap(req => req.query.test as number),
+        tap(req => req.user.id as string),
+        map(req => ({ body: {
+          body: req.body,
+          params: req.params,
+          query: req.query,
+          user: req.user,
+        }})),
+      );
 
     const expectedResult = {
       body: {
