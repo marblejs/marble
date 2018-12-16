@@ -1,5 +1,6 @@
 export { EffectFactory } from './effects/effects.factory';
 export { error$ } from './error/error.effect';
+export { coreErrorFactory, CoreErrorOptions } from './error/error.factory';
 export { HttpError } from './error/error.model';
 export { combineRoutes } from './router/router.combiner';
 export * from './effects/effects.interface';
