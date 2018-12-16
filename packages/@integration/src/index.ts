@@ -1,5 +1,5 @@
 import * as http from 'http';
-import { app } from './app';
+import { app, ws } from './app';
 
 const HOSTNAME = '127.0.0.1';
 const PORT = 1337;
@@ -10,6 +10,9 @@ const httpServer = http
     console.log(`Server running @ http://${HOSTNAME}:${PORT}/`);
   });
 
-  httpServer.on('close', () => {
-    console.log(`Connection closed`);
-  });
+httpServer.on('close', () => {
+  console.log(`Connection closed`);
+});
+
+
+ws(httpServer);
