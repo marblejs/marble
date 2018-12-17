@@ -1,8 +1,8 @@
-import { from } from 'rxjs';
+import { from, merge } from 'rxjs';
 import { concatMap, last } from 'rxjs/operators';
-import { WebSocketMiddleware } from './ws-effects.interface';
+import { WebSocketMiddleware, WebSocketEffect } from './ws-effects.interface';
 
-export const combineWebSocketMiddlewares =
+export const combineMiddlewares =
   (middlewares: WebSocketMiddleware[] = []): WebSocketMiddleware =>
   (event$, client, meta) =>
     middlewares.length
@@ -11,3 +11,8 @@ export const combineWebSocketMiddlewares =
           last(),
         )
       : event$;
+
+export const combineWebSocketEffects =
+  (effects: WebSocketEffect[] = []): WebSocketEffect =>
+  (event$, client, meta) =>
+    merge(...effects.map(effect => effect(event$, client, meta)));
