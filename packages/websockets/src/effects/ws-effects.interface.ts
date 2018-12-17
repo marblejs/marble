@@ -1,9 +1,9 @@
-import { EffectResponse } from '@marblejs/core';
 import { Observable } from 'rxjs';
-import { WebSocketEvent, WebSocketType, WebSocketClient } from '../websocket.interface';
+import { WebSocketEvent, WebSocketType, ExtendedWebSocketClient } from '../websocket.interface';
 
-export interface WebSocketEffectResponse<T = any> extends EffectResponse<T> {
+export interface WebSocketEffectResponse<T = any> {
   type: WebSocketType;
+  payload: T;
 }
 
 export interface WebSocketMiddleware<
@@ -12,13 +12,13 @@ export interface WebSocketMiddleware<
 > extends WebSocketEffect<I, O> {}
 
 export interface WebSocketErrorEffect<T extends Error = Error>
-  extends WebSocketEffect<WebSocketEvent, WebSocketEffectResponse, WebSocketClient, T> {}
+  extends WebSocketEffect<WebSocketEvent, WebSocketEffectResponse, ExtendedWebSocketClient, T> {}
 
 export interface WebSocketEffect<
   T = WebSocketEvent,
   U = WebSocketEffectResponse,
-  V = WebSocketClient,
+  V = ExtendedWebSocketClient,
   W = any,
 > {
-  (event$: Observable<T>, client: V, meta: W): Observable<U>;
+  (input$: Observable<T>, client?: V, meta?: W): Observable<U>;
 }

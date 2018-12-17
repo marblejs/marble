@@ -1,57 +1,75 @@
 import * as http from 'http';
 import * as WebSocket from 'ws';
-import { Subject, of, NEVER } from 'rxjs';
-import { tap, mergeMap, catchError, map } from 'rxjs/operators';
-import { Socket } from './websocket.interface';
-import { WebSocketMiddleware, WebSocketErrorEffect } from './effects/ws-effects.interface';
-// import { combineWebSocketMiddlewares } from './effects/ws-effects.combiner';
-// import { factorizeRouting } from './router/ws-router.factory';
-import { WebSocketRoute } from './router/ws-router.interface';
-import { socketJsonParser } from './parsers/json.parser';
+import { Subject } from 'rxjs';
+import { tap, catchError, map } from 'rxjs/operators';
+import { combineMiddlewares, combineEffects } from '@marblejs/core';
+import { WebSocketMiddleware, WebSocketErrorEffect, WebSocketEffect } from './effects/ws-effects.interface';
+import { jsonTransformer } from './transformer/json.transformer';
+import { EventTransformer } from './transformer/transformer.inteface';
+import { handleResponse } from './response/ws-response.handler';
+import { defaultError$ } from './error/ws-error.effect';
+import { extendClientWith, handleBrokenConnections } from './websocket.helper';
+import { ExtendedWebSocketClient } from './websocket.interface';
 
 type WebSocketListenerConfig = {
-  effects: WebSocketRoute[];
+  effects?: WebSocketEffect[];
   middlewares?: WebSocketMiddleware[];
   errorEffect?: WebSocketErrorEffect;
+  eventTransformer?: EventTransformer;
 };
 
-export const webSocketListener = ({ middlewares = [], effects, errorEffect }: WebSocketListenerConfig) => {
-  const event$ = new Subject<Socket>();
-  // const combinedMiddlewares = combineWebSocketMiddlewares(middlewares);
-  // const factorizedRouting = factorizeRouting(effects, middlewares);
-  const effect$ = event$.pipe(
-    map(socketJsonParser),
-    mergeMap(socket => of(socket).pipe(
-      tap(socket => {
+export const webSocketListener = ({
+  middlewares = [],
+  effects = [],
+  eventTransformer = jsonTransformer,
+  errorEffect = defaultError$,
+}: WebSocketListenerConfig = {}) => {
+  const heartbeatInterval = 10 * 1000;
+  const combinedEffects = combineEffects(effects);
+  const combinedMiddlewares = combineMiddlewares(middlewares);
 
-        // @TODO
-        socket.server.clients.forEach(c => {
+  return (httpServer: http.Server) => {
+    const server = new WebSocket.Server({ server: httpServer });
 
-          // @TODO
-          console.log(socket.event);
-          c.send(JSON.stringify(socket.event));
-        });
-      }),
-    )),
-    catchError(error => {
+    server.on('connection', client => {
+      let pingTimeout;
 
-      // @TODO
-      console.log(error);
-      return NEVER;
-    })
-  );
+      const extendedClient = extendClientWith({
+        sendResponse: handleResponse(server, eventTransformer),
+        isAlive: true,
+      })(client);
+      const eventSubject$ = new Subject<any>();
+      const event$ = eventSubject$.pipe(map(eventTransformer.decode));
+      const middlewares$ = combinedMiddlewares(event$, extendedClient);
+      const effects$ = combinedEffects(middlewares$, extendedClient).pipe(
+        tap(extendedClient.sendResponse),
+        catchError(error =>
+          errorEffect(event$, extendedClient, error).pipe(
+            tap(extendedClient.sendResponse)
+          ),
+        ),
+      );
 
-  effect$.subscribe();
+      const eventSub = effects$.subscribe();
 
-  return (server: http.Server) => {
-    const wsServer = new WebSocket.Server({ server });
+      const heartbeat = (client: ExtendedWebSocketClient) => () => {
+        client.isAlive = true;
+        clearTimeout(pingTimeout);
+        pingTimeout = setTimeout(() => client.terminate(), heartbeatInterval + 1000);
+      };
 
-    wsServer.on('connection', client =>
-      client.on('message', event =>
-        event$.next({ event, client, server: wsServer }),
-      ),
-    );
+      const onClose = () => {
+        eventSub.unsubscribe();
+        clearTimeout(pingTimeout);
+      };
 
-    return wsServer;
+      client.on('open', heartbeat(extendedClient));
+      client.on('ping', heartbeat(extendedClient));
+      client.on('pong', heartbeat(extendedClient));
+      client.on('message', event => eventSubject$.next(event));
+      client.on('close', onClose);
+    });
+
+    return handleBrokenConnections(heartbeatInterval)(server);
   };
 };

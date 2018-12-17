@@ -1,5 +1,5 @@
 import { EMPTY, Observable, of } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap, takeWhile } from 'rxjs/operators';
 import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
 import { EffectHttpResponse } from '../effects/effects.interface';
 import { RouteMatched, Routing, RoutingItem } from './router.interface';
@@ -54,6 +54,7 @@ export const resolveRouting =
 
     return middleware
       ? middleware(of(req), res, null).pipe(
+          takeWhile(() => !res.finished),
           mergeMap(req => routeMatched.effect(of(req), res, null))
         )
       : routeMatched.effect(of(req), res, null);

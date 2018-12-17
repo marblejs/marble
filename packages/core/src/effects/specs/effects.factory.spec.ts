@@ -31,11 +31,9 @@ describe('EffectFactory', () => {
       .use(effect$);
 
     // then
-    expect(factorizedEffect).toEqual({
-      path: '/foo',
-      method: 'GET',
-      effect: effect$,
-    });
+    expect(factorizedEffect.path).toEqual('/foo');
+    expect(factorizedEffect.method).toEqual('GET');
+    expect(factorizedEffect.effect).toBeDefined();
   });
 
   test('throws an error if "path" is not provided', () => {

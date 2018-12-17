@@ -10,9 +10,9 @@ const httpServer = http
     console.log(`Server running @ http://${HOSTNAME}:${PORT}/`);
   });
 
-  httpServer.on('close', () => {
-    console.log(`Connection closed`);
-  });
+httpServer.on('close', () => {
+  console.log(`Connection closed`);
+});
 
 
 ws(httpServer);
