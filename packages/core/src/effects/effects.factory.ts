@@ -39,7 +39,8 @@ export namespace EffectFactory {
     }
 
     return { path, method, effect: (req$, res, meta) => effect(req$, res, meta).pipe(
-      tap(req => console.log(req)),
+      // @TODO
+      tap(req => null),
     )};
   };
 
