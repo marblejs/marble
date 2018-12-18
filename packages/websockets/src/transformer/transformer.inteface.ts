@@ -1,7 +1,6 @@
-import { WebSocketEvent } from '../websocket.interface';
-import { WebSocketEffectResponse } from '../effects/ws-effects.interface';
+import { WebSocketIncomingData } from '../websocket.interface';
 
-export interface EventTransformer<T extends any = any> {
-  decode: (incomingEvent: T) => WebSocketEvent;
-  encode: (outgoingEvent: WebSocketEffectResponse) => T;
+export interface EventTransformer<T extends WebSocketIncomingData, U> {
+  decode: (incomingEvent: T) => U;
+  encode: (outgoingEvent: U) => T;
 }

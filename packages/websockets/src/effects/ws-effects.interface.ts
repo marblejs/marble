@@ -1,22 +1,20 @@
 import { Observable } from 'rxjs';
-import { WebSocketEvent, WebSocketType, ExtendedWebSocketClient } from '../websocket.interface';
-
-export interface WebSocketEffectResponse<T = any> {
-  type: WebSocketType;
-  payload: T;
-}
+import { WebSocketEvent, ExtendedWebSocketClient } from '../websocket.interface';
 
 export interface WebSocketMiddleware<
-  I extends WebSocketEvent = WebSocketEvent,
-  O extends WebSocketEvent = WebSocketEvent,
+  I = WebSocketEvent,
+  O = WebSocketEvent,
 > extends WebSocketEffect<I, O> {}
 
-export interface WebSocketErrorEffect<T extends Error = Error>
-  extends WebSocketEffect<WebSocketEvent, WebSocketEffectResponse, ExtendedWebSocketClient, T> {}
+export interface WebSocketErrorEffect<
+  T extends Error = Error,
+  U = WebSocketEvent,
+  V = WebSocketEvent
+> extends WebSocketEffect<U, V, ExtendedWebSocketClient, T> {}
 
 export interface WebSocketEffect<
   T = WebSocketEvent,
-  U = WebSocketEffectResponse,
+  U = WebSocketEvent,
   V = ExtendedWebSocketClient,
   W = any,
 > {

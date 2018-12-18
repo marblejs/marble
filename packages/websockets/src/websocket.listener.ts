@@ -1,29 +1,32 @@
 import * as http from 'http';
 import * as WebSocket from 'ws';
-import { Subject } from 'rxjs';
+import { Subject, EMPTY } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { combineMiddlewares, combineEffects } from '@marblejs/core';
 import { WebSocketMiddleware, WebSocketErrorEffect, WebSocketEffect } from './effects/ws-effects.interface';
 import { jsonTransformer } from './transformer/json.transformer';
 import { EventTransformer } from './transformer/transformer.inteface';
 import { handleResponse } from './response/ws-response.handler';
-import { defaultError$ } from './error/ws-error.effect';
 import { extendClientWith, handleBrokenConnections } from './websocket.helper';
-import { ExtendedWebSocketClient } from './websocket.interface';
+import { ExtendedWebSocketClient, WebSocketIncomingData } from './websocket.interface';
 
-type WebSocketListenerConfig = {
-  effects?: WebSocketEffect[];
-  middlewares?: WebSocketMiddleware[];
-  errorEffect?: WebSocketErrorEffect;
-  eventTransformer?: EventTransformer;
+type WebSocketListenerConfig<
+  Event extends any,
+  OutgoingEvent extends any,
+  IncomingError extends Error = Error
+> = {
+  effects?: WebSocketEffect<Event, OutgoingEvent>[];
+  middlewares?: WebSocketMiddleware<Event, Event>[];
+  error?: WebSocketErrorEffect<IncomingError, Event, OutgoingEvent>;
+  eventTransformer?: EventTransformer<WebSocketIncomingData, Event>;
 };
 
-export const webSocketListener = ({
+export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Error>({
   middlewares = [],
   effects = [],
-  eventTransformer = jsonTransformer,
-  errorEffect = defaultError$,
-}: WebSocketListenerConfig = {}) => {
+  error: errorEffect,
+  eventTransformer = jsonTransformer as EventTransformer<any, any>,
+}: WebSocketListenerConfig<Event, OutgoingEvent, IncomingError> = {}) => {
   const heartbeatInterval = 10 * 1000;
   const combinedEffects = combineEffects(effects);
   const combinedMiddlewares = combineMiddlewares(middlewares);
@@ -45,9 +48,9 @@ export const webSocketListener = ({
       const effects$ = combinedEffects(middlewares$, extendedClient).pipe(
         tap(extendedClient.sendResponse),
         catchError(error =>
-          errorEffect(event$, extendedClient, error).pipe(
+          errorEffect ? errorEffect(event$, extendedClient, error).pipe(
             tap(extendedClient.sendResponse)
-          ),
+          ) : EMPTY
         ),
       );
 

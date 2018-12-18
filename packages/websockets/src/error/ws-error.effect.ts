@@ -7,8 +7,8 @@ const errorFactory = (eventType: WebSocketType, message: string, data: any | und
   error: { eventType, message, data },
 });
 
-export const defaultError$: WebSocketErrorEffect<WebSocketError> = (event$, _, error) => event$
-  .pipe(
+export const error$: WebSocketErrorEffect<WebSocketError> = (event$, _, error) =>
+  event$.pipe(
     map(({ type }) => ({
       type,
       payload: errorFactory(

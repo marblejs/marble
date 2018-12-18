@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { WebSocketEffectResponse } from '../../effects/ws-effects.interface';
+import { WebSocketEvent } from '../../websocket.interface';
 
 interface ActionCreator<Payload> {
   type: (type: string) => {
@@ -18,8 +18,8 @@ export const actionCreator = <Payload>(): ActionCreator<Payload> => {
 };
 
 export const mapToAction = <Input, Payload = any>
-  (fn: (input: Input, creator: ActionCreator<Payload>) => WebSocketEffectResponse) =>
-  (input$: Observable<Input>): Observable<WebSocketEffectResponse> =>
+  (fn: (input: Input, creator: ActionCreator<Payload>) => WebSocketEvent) =>
+  (input$: Observable<Input>): Observable<WebSocketEvent> =>
     input$.pipe(
       map(input => fn(input, actionCreator())),
     );
