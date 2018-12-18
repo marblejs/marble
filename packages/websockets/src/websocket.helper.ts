@@ -6,6 +6,8 @@ type ExtendableFields = {
   sendResponse: Function;
 };
 
+const HEART_BEAT_INTERVAL = 10 * 1000;
+
 export const extendClientWith = (extendableFields: ExtendableFields) => (client: WebSocket) => {
   const extendedClient = client as ExtendedWebSocketClient;
 
@@ -16,7 +18,7 @@ export const extendClientWith = (extendableFields: ExtendableFields) => (client:
   return extendedClient;
 };
 
-export const handleBrokenConnections = (heartbeatInterval: number) => (server: WebSocket.Server) => {
+export const handleServerBrokenConnections = (server: WebSocket.Server) => {
   setInterval(() => {
     server.clients.forEach((client: WebSocketClient) => {
       const extendedClient = client as ExtendedWebSocketClient;
@@ -26,7 +28,24 @@ export const handleBrokenConnections = (heartbeatInterval: number) => (server: W
       extendedClient.isAlive = false;
       extendedClient.ping(() => null);
     });
-  }, heartbeatInterval);
+  }, HEART_BEAT_INTERVAL);
 
   return server;
+};
+
+export const handleClientBrokenConnection = (client: ExtendedWebSocketClient) => {
+  let pingTimeout;
+
+  const heartbeat = (client: ExtendedWebSocketClient) => () => {
+    client.isAlive = true;
+    clearTimeout(pingTimeout);
+    pingTimeout = setTimeout(() => client.terminate(), HEART_BEAT_INTERVAL + 1000);
+  };
+
+  client.on('open', heartbeat(client));
+  client.on('ping', heartbeat(client));
+  client.on('pong', heartbeat(client));
+  client.on('close', () => clearTimeout(pingTimeout));
+
+  return client;
 };
