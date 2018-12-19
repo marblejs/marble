@@ -24,7 +24,7 @@ const add$: WebSocketEffect = (event$, client) =>
     map(events => events as WebSocketEvent<number>[]),
     map(events => events.reduce((a, e) => e.payload + a, 0)),
     broadcast(client)(event => ({
-      type: 'SUM',
+      type: 'SUM_RESULT',
       payload: event,
     })),
     mapToAction((sum, c) => c

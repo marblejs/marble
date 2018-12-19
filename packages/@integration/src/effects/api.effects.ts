@@ -1,4 +1,4 @@
-import { EffectFactory, HttpError, HttpStatus, combineRoutes, use } from '@marblejs/core';
+import { EffectFactory, HttpError, HttpStatus, combineRoutes, use, switchToProtocol } from '@marblejs/core';
 import { validator$, Joi } from '@marblejs/middleware-joi';
 import { throwError } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
@@ -29,6 +29,14 @@ const notImplemented$ = EffectFactory
     )),
   ));
 
+
+const webSockets$ = EffectFactory
+  .matchPath('/ws')
+  .matchType('GET')
+  .use(req$ => req$.pipe(
+    switchToProtocol('websocket')
+  ));
+
 const notFound$ = EffectFactory
   .matchPath('*')
   .matchType('*')
@@ -40,5 +48,5 @@ const notFound$ = EffectFactory
 
 export const api$ = combineRoutes(
   '/api/:version',
-  [ root$, user$, static$, notImplemented$, notFound$ ],
+  [ root$, user$, static$, notImplemented$, webSockets$, notFound$ ],
 );

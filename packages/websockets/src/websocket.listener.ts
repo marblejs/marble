@@ -54,8 +54,12 @@ export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Er
     return handleClientBrokenConnection(extendedClient);
   };
 
-  return (httpServer: http.Server) => {
-    const server = new WebSocket.Server({ server: httpServer });
+  return (httpServer?: http.Server) => {
+    const serverOptions: WebSocket.ServerOptions = httpServer
+      ? { server: httpServer }
+      : { noServer: true };
+
+    const server = new WebSocket.Server(serverOptions);
     server.on('connection', onConnection(server));
     return handleServerBrokenConnections(server);
   };
