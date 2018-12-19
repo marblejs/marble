@@ -6,7 +6,7 @@ import { combineMiddlewares, combineEffects } from '@marblejs/core';
 import { WebSocketMiddleware, WebSocketErrorEffect, WebSocketEffect } from './effects/ws-effects.interface';
 import { jsonTransformer } from './transformer/json.transformer';
 import { EventTransformer } from './transformer/transformer.inteface';
-import { handleResponse } from './response/ws-response.handler';
+import { handleResponse, handleBroadcastResponse } from './response/ws-response.handler';
 import { extendClientWith, handleServerBrokenConnections, handleClientBrokenConnection } from './websocket.helper';
 import { WebSocketIncomingData, WebSocketClient } from './websocket.interface';
 import { errorHandler } from './error/ws-error.handler';
@@ -33,7 +33,8 @@ export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Er
 
   const onConnection = (server: WebSocket.Server) => (client: WebSocketClient) => {
     const extendedClient = extendClientWith({
-      sendResponse: handleResponse(server, eventTransformer),
+      sendResponse: handleResponse(client, server, eventTransformer),
+      sendBroadcastResponse: handleBroadcastResponse(client, server, eventTransformer),
       isAlive: true,
     })(client);
 

@@ -1,21 +1,22 @@
 import * as WebSocket from 'ws';
-import { EMPTY } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { EventTransformer } from '../transformer/transformer.inteface';
-import { WebSocketIncomingData } from '../websocket.interface';
+import { WebSocketIncomingData, WebSocketClient } from '../websocket.interface';
 
-export { WebSocket };
+type ResponseHandler =
+  (client: WebSocketClient, server: WebSocket.Server, eventTransformer: EventTransformer<WebSocketIncomingData, any>) =>
+  <T>(response: T) => Observable<never>;
 
-export const handleResponse =
-  (server: WebSocket.Server, eventTransformer: EventTransformer<WebSocketIncomingData, any>) =>
-  <T>(response: T) => {
+export const handleResponse: ResponseHandler = (client, server, eventTransformer) => (response) => {
+  const encodedResponse = eventTransformer.encode(response);
+  client.send(encodedResponse);
+  return EMPTY;
+};
 
-    // @TODO
-    server.clients.forEach(c => {
-
-      // @TODO
-      const encodedResponse = eventTransformer.encode(response);
-      c.send(encodedResponse);
-    });
-
-    return EMPTY;
-  };
+export const handleBroadcastResponse: ResponseHandler = (client, server, eventTransformer) => <T>(response: T) => {
+  server.clients.forEach(c => {
+    const encodedResponse = eventTransformer.encode(response);
+    c.send(encodedResponse);
+  });
+  return EMPTY;
+};

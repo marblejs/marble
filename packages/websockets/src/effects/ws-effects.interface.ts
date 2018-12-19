@@ -18,5 +18,5 @@ export interface WebSocketEffect<
   V = ExtendedWebSocketClient,
   W = any,
 > {
-  (input$: Observable<T>, client?: V, meta?: W): Observable<U>;
+  (input$: Observable<T>, client: V, meta?: W): Observable<U>;
 }

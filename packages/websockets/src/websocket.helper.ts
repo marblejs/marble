@@ -3,7 +3,8 @@ import { ExtendedWebSocketClient, WebSocketClient } from './websocket.interface'
 
 type ExtendableFields = {
   isAlive: boolean;
-  sendResponse: Function;
+  sendResponse: ExtendedWebSocketClient['sendResponse'];
+  sendBroadcastResponse: ExtendedWebSocketClient['sendBroadcastResponse'];
 };
 
 const HEART_BEAT_INTERVAL = 10 * 1000;
