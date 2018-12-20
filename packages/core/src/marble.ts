@@ -1,9 +1,9 @@
 import * as http from 'http';
 import { Observable, Subject } from 'rxjs';
 import { httpListener } from './http.listener';
-import { HttpEvent, HttpEventType, HttpAllEvents } from './http.interface';
+import { EventTypeBase, EventType } from './http.interface';
 
-type HttpEventsHandler = (serverEvents$: Observable<HttpEvent<HttpEventType, any>>) => Observable<any>;
+type HttpEventsHandler = (serverEvents$: Observable<EventTypeBase<EventType>>) => Observable<any>;
 
 export interface MarbleConfig {
   port?: number;
@@ -13,8 +13,8 @@ export interface MarbleConfig {
 }
 
 const eventsSubscriber =
-  (httpServer: http.Server, event$: Subject<HttpAllEvents>) =>
-  (...eventTypes: HttpEventType[]) =>
+  (httpServer: http.Server, event$: Subject<EventTypeBase>) =>
+  (...eventTypes: EventType[]) =>
     eventTypes.forEach((type: any) =>
       httpServer.on(type, (...args) =>
         event$.next({ type, data: [...args]}),
@@ -22,20 +22,20 @@ const eventsSubscriber =
     );
 
 export const marble = ({ httpListener, httpEventsHandler, port, hostname }: MarbleConfig) => {
-  const httpEvents$ = new Subject<HttpAllEvents>();
+  const httpEvents$ = new Subject<EventTypeBase>();
   const httpServer = http.createServer(httpListener);
   const subscribeForEvents = eventsSubscriber(httpServer, httpEvents$);
 
   subscribeForEvents(
-    HttpEventType.CONNECT,
-    HttpEventType.CONNECTION,
-    HttpEventType.CLIENT_ERROR,
-    HttpEventType.CLOSE,
-    HttpEventType.CHECK_CONTINUE,
-    HttpEventType.CHECK_EXPECTATION,
-    HttpEventType.ERROR,
-    HttpEventType.REQUEST,
-    HttpEventType.UPGRADE,
+    EventType.CONNECT,
+    EventType.CONNECTION,
+    EventType.CLIENT_ERROR,
+    EventType.CLOSE,
+    EventType.CHECK_CONTINUE,
+    EventType.CHECK_EXPECTATION,
+    EventType.ERROR,
+    EventType.REQUEST,
+    EventType.UPGRADE,
   );
 
   if (httpEventsHandler) {
@@ -43,6 +43,9 @@ export const marble = ({ httpListener, httpEventsHandler, port, hostname }: Marb
   }
 
   return httpServer.listen(port, hostname, () =>
-    httpEvents$.next({ type: HttpEventType.LISTEN, data: [port!, hostname!]})
+    httpEvents$.next({
+      type: EventType.LISTEN,
+      data: [port!, hostname!],
+    })
   );
 };

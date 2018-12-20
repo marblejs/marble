@@ -76,7 +76,7 @@ export enum HttpStatus {
   HTTP_VERSION_NOT_SUPPORTED = 505,
 }
 
-export enum HttpEventType {
+export enum EventType {
   CONNECT = 'connect',
   CONNECTION = 'connection',
   CLIENT_ERROR = 'clientError',
@@ -89,31 +89,31 @@ export enum HttpEventType {
   LISTEN = 'listen',
 }
 
-export type HttpEvent<T extends HttpEventType, U> = {
+export type EventTypeBase<T extends EventType = EventType, U = any> = {
   type: T;
-  data: U;
+  data?: U;
 };
 
-export type HttpEventListen = HttpEvent<HttpEventType.LISTEN, [number, string]>;
-export type HttpEventUpgrade = HttpEvent<HttpEventType.UPGRADE, [http.IncomingMessage, any, any]>;
-export type HttpEventRequest = HttpEvent<HttpEventType.REQUEST, any>;
-export type HttpEventError = HttpEvent<HttpEventType.ERROR, any>;
-export type HttpEventCheckExpectation = HttpEvent<HttpEventType.CHECK_EXPECTATION, any>;
-export type HttpEventCheckContinue = HttpEvent<HttpEventType.CHECK_CONTINUE, any>;
-export type HttpEventClose = HttpEvent<HttpEventType.CLOSE, any>;
-export type HttpEventConnection = HttpEvent<HttpEventType.CONNECTION, any>;
-export type HttpEventConnect = HttpEvent<HttpEventType.CONNECT, any>;
-export type HttpEventClientError = HttpEvent<HttpEventType.CLIENT_ERROR, any>;
+type EventListen = EventTypeBase<EventType.LISTEN, [number, string]>;
+type EventUpgrade = EventTypeBase<EventType.UPGRADE, [http.IncomingMessage, any, any]>;
+type EventRequest = EventTypeBase<EventType.REQUEST, any>;
+type EventError = EventTypeBase<EventType.ERROR, any>;
+type EventClose = EventTypeBase<EventType.CLOSE, any>;
+type EventConnect = EventTypeBase<EventType.CONNECT, any>;
+type EventConnection = EventTypeBase<EventType.CONNECTION, any>;
+type EventClientError = EventTypeBase<EventType.CLIENT_ERROR, any>;
+type EventCheckContinue = EventTypeBase<EventType.CHECK_CONTINUE, any>;
+type EventCheckExpectation = EventTypeBase<EventType.CHECK_EXPECTATION, any>;
 
-export type HttpAllEvents =
-  | HttpEventListen
-  | HttpEventUpgrade
-  | HttpEventRequest
-  | HttpEventError
-  | HttpEventCheckExpectation
-  | HttpEventCheckContinue
-  | HttpEventClose
-  | HttpEventConnection
-  | HttpEventConnect
-  | HttpEventClientError
-  ;
+export const Event = {
+  CONNECT: { type: EventType.CONNECT } as EventConnect,
+  CONNECTION: { type: EventType.CONNECTION } as EventConnection,
+  CLIENT_ERROR: { type: EventType.CLIENT_ERROR } as EventClientError,
+  CLOSE: { type: EventType.CLOSE } as EventClose,
+  CHECK_CONTINUE: { type: EventType.CHECK_CONTINUE } as EventCheckContinue,
+  CHECK_EXPECTATION: { type: EventType.CHECK_EXPECTATION } as EventCheckExpectation,
+  ERROR: { type: EventType.ERROR } as EventError,
+  REQUEST: { type: EventType.REQUEST } as EventRequest,
+  UPGRADE:  { type: EventType.UPGRADE } as EventUpgrade,
+  LISTEN: { type: EventType.LISTEN } as EventListen,
+};
