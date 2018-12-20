@@ -8,7 +8,6 @@ import {
   WebSocketEvent,
   matchType,
   mapToAction,
-  broadcast
 } from '../../websockets/src';
 import { map, buffer } from 'rxjs/operators';
 
@@ -23,10 +22,6 @@ const add$: WebSocketEffect = (event$, client) =>
     buffer(sum$(event$, client)),
     map(events => events as WebSocketEvent<number>[]),
     map(events => events.reduce((a, e) => e.payload + a, 0)),
-    broadcast(client)(event => ({
-      type: 'SUM_RESULT',
-      payload: event,
-    })),
     mapToAction((sum, c) => c
       .type('SUM_RESULT')
       .payload(sum)

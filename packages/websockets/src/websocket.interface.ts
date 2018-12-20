@@ -3,6 +3,8 @@ import { Observable } from 'rxjs';
 
 export type WebSocketType = string;
 
+export type WebSocketServer = WebSocket.Server;
+
 export type WebSocketClient = WebSocket;
 
 export type WebSocketIncomingData = string | Buffer | ArrayBuffer | Buffer[];
@@ -17,3 +19,8 @@ export interface WebSocketEvent<T = unknown> extends Record<string, any> {
   payload: T;
   type: WebSocketType;
 }
+
+export type WebSocketServerCollection = Array<{
+  pathToMatch: string,
+  server: WebSocketServer,
+}>;

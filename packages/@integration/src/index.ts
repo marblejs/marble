@@ -1,28 +1,40 @@
-import * as http from 'http';
+import { marble, HttpEvent } from '@marblejs/core';
 import { app, ws } from './app';
+import { mergeMap, filter, tap, map } from 'rxjs/operators';
+import { Observable, of, concat } from 'rxjs';
 
-const HOSTNAME = '127.0.0.1';
-const PORT = 1337;
-
-const httpServer = http.createServer(app);
 const wsServer = ws();
 
-httpServer.on('upgrade', (req: http.IncomingMessage, socket, head) => {
-  const pathname = req.url!;
+const upgrade$ = (event$: Observable<HttpEvent>) => event$.pipe(
+  filter(event => event.type === 'upgrade'),
+  map(event => event.data),
+  tap(([req, socket, head]) => {
+    const pathname = req.url!;
 
-  if (pathname.includes('/ws')) {
-    wsServer.handleUpgrade(req, socket, head, function done(ws) {
-      wsServer.emit('connection', ws, req);
-    });
-  } else {
-    socket.destroy();
-  }
-});
+    if (pathname.includes('/ws')) {
+      wsServer.handleUpgrade(req, socket, head, function done(ws) {
+        wsServer.emit('connection', ws, req);
+      });
+    } else {
+      socket.destroy();
+    }
+  })
+);
 
-httpServer.on('close', () => {
-  console.log(`Connection closed`);
-});
+const listen$ = (event$: Observable<HttpEvent>) => event$.pipe(
+  filter(event => event.type === 'listen'),
+  map(event => event.data),
+  tap(([ port, hostname ]) => console.log(`Server running @ http://${hostname}:${port}/`)),
+);
 
-httpServer.listen(PORT, HOSTNAME, () => {
-  console.log(`Server running @ http://${HOSTNAME}:${PORT}/`);
+marble({
+  hostname: '127.0.0.1',
+  port: 1337,
+  httpListener: app,
+  httpEventsHandler: events$ => events$.pipe(
+    mergeMap(event => concat(
+      listen$(of(event)),
+      upgrade$(of(event)),
+    ),
+  )),
 });

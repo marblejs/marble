@@ -1,4 +1,4 @@
-export { webSocketListener } from './websocket.listener';
+export { webSocketListener, WebSocketListenerConfig } from './websocket.listener';
 export { WebSocketEvent } from './websocket.interface';
 export { jsonTransformer } from './transformer/json.transformer';
 export { EventTransformer } from './transformer/transformer.inteface';

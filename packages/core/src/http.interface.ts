@@ -75,3 +75,45 @@ export enum HttpStatus {
   GATEWAY_TIMEOUT = 504,
   HTTP_VERSION_NOT_SUPPORTED = 505,
 }
+
+export enum HttpEventType {
+  CONNECT = 'connect',
+  CONNECTION = 'connection',
+  CLIENT_ERROR = 'clientError',
+  CLOSE = 'close',
+  CHECK_CONTINUE = 'checkContinue',
+  CHECK_EXPECTATION = 'checkExpectation',
+  ERROR = 'error',
+  REQUEST = 'request',
+  UPGRADE = 'upgrade',
+  LISTEN = 'listen',
+}
+
+export type HttpEvent<T extends HttpEventType, U> = {
+  type: T;
+  data: U;
+};
+
+export type HttpEventListen = HttpEvent<HttpEventType.LISTEN, [number, string]>;
+export type HttpEventUpgrade = HttpEvent<HttpEventType.UPGRADE, [http.IncomingMessage, any, any]>;
+export type HttpEventRequest = HttpEvent<HttpEventType.REQUEST, any>;
+export type HttpEventError = HttpEvent<HttpEventType.ERROR, any>;
+export type HttpEventCheckExpectation = HttpEvent<HttpEventType.CHECK_EXPECTATION, any>;
+export type HttpEventCheckContinue = HttpEvent<HttpEventType.CHECK_CONTINUE, any>;
+export type HttpEventClose = HttpEvent<HttpEventType.CLOSE, any>;
+export type HttpEventConnection = HttpEvent<HttpEventType.CONNECTION, any>;
+export type HttpEventConnect = HttpEvent<HttpEventType.CONNECT, any>;
+export type HttpEventClientError = HttpEvent<HttpEventType.CLIENT_ERROR, any>;
+
+export type HttpAllEvents =
+  | HttpEventListen
+  | HttpEventUpgrade
+  | HttpEventRequest
+  | HttpEventError
+  | HttpEventCheckExpectation
+  | HttpEventCheckContinue
+  | HttpEventClose
+  | HttpEventConnection
+  | HttpEventConnect
+  | HttpEventClientError
+  ;

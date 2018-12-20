@@ -10,11 +10,11 @@ import { resolveRouting } from './router/router.resolver';
 import { factorizeRouting } from './router/router.factory';
 import { defaultError$ } from './error/error.effect';
 
-type HttpListenerConfig = {
+export interface HttpListenerConfig {
   middlewares?: Middleware[];
   effects: (RouteEffect | RouteEffectGroup)[];
   errorEffect?: ErrorEffect;
-};
+}
 
 export const httpListener = ({
   middlewares = [],

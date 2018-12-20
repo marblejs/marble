@@ -11,16 +11,16 @@ import { extendClientWith, handleServerBrokenConnections, handleClientBrokenConn
 import { WebSocketIncomingData, WebSocketClient } from './websocket.interface';
 import { errorHandler } from './error/ws-error.handler';
 
-type WebSocketListenerConfig<
+export interface WebSocketListenerConfig<
   Event extends any,
   OutgoingEvent extends any,
   IncomingError extends Error = Error
-> = {
+> {
   effects?: WebSocketEffect<Event, OutgoingEvent>[];
   middlewares?: WebSocketMiddleware<Event, Event>[];
   error?: WebSocketErrorEffect<IncomingError, Event, OutgoingEvent>;
   eventTransformer?: EventTransformer<WebSocketIncomingData, Event>;
-};
+}
 
 export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Error>({
   error,
