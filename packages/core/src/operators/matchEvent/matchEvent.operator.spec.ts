@@ -1,4 +1,4 @@
-describe('matchHttpEvent.operator', () => {
+describe('matchEvent.operator', () => {
   test('@TODO', () => {
     // @TODO
   });

@@ -1,9 +1,9 @@
 import * as http from 'http';
 import { Observable, Subject } from 'rxjs';
 import { httpListener } from './http.listener';
-import { EventTypeBase, EventType } from './http.interface';
+import { MarbleEvent, EventType } from './http.interface';
 
-type HttpEventsHandler = (serverEvents$: Observable<EventTypeBase<EventType>>) => Observable<any>;
+type HttpEventsHandler = (serverEvents$: Observable<MarbleEvent<EventType>>) => Observable<any>;
 
 export interface MarbleConfig {
   port?: number;
@@ -13,7 +13,7 @@ export interface MarbleConfig {
 }
 
 const eventsSubscriber =
-  (httpServer: http.Server, event$: Subject<EventTypeBase>) =>
+  (httpServer: http.Server, event$: Subject<MarbleEvent>) =>
   (...eventTypes: EventType[]) =>
     eventTypes.forEach((type: any) =>
       httpServer.on(type, (...args) =>
@@ -22,9 +22,9 @@ const eventsSubscriber =
     );
 
 export const marble = ({ httpListener, httpEventsHandler, port, hostname }: MarbleConfig) => {
-  const httpEvents$ = new Subject<EventTypeBase>();
+  const httpEventsSubject$ = new Subject<MarbleEvent>();
   const httpServer = http.createServer(httpListener);
-  const subscribeForEvents = eventsSubscriber(httpServer, httpEvents$);
+  const subscribeForEvents = eventsSubscriber(httpServer, httpEventsSubject$);
 
   subscribeForEvents(
     EventType.CONNECT,
@@ -39,11 +39,11 @@ export const marble = ({ httpListener, httpEventsHandler, port, hostname }: Marb
   );
 
   if (httpEventsHandler) {
-    httpEventsHandler(httpEvents$).subscribe();
+    httpEventsHandler(httpEventsSubject$).subscribe();
   }
 
   return httpServer.listen(port, hostname, () =>
-    httpEvents$.next({
+    httpEventsSubject$.next({
       type: EventType.LISTEN,
       data: [port!, hostname!],
     })

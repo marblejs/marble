@@ -89,21 +89,21 @@ export enum EventType {
   LISTEN = 'listen',
 }
 
-export type EventTypeBase<T extends EventType = EventType, U = any> = {
+export type MarbleEvent<T extends EventType = EventType, U = any> = {
   type: T;
   data?: U;
 };
 
-type EventListen = EventTypeBase<EventType.LISTEN, [number, string]>;
-type EventUpgrade = EventTypeBase<EventType.UPGRADE, [http.IncomingMessage, any, any]>;
-type EventRequest = EventTypeBase<EventType.REQUEST, any>;
-type EventError = EventTypeBase<EventType.ERROR, any>;
-type EventClose = EventTypeBase<EventType.CLOSE, any>;
-type EventConnect = EventTypeBase<EventType.CONNECT, any>;
-type EventConnection = EventTypeBase<EventType.CONNECTION, any>;
-type EventClientError = EventTypeBase<EventType.CLIENT_ERROR, any>;
-type EventCheckContinue = EventTypeBase<EventType.CHECK_CONTINUE, any>;
-type EventCheckExpectation = EventTypeBase<EventType.CHECK_EXPECTATION, any>;
+type EventListen = MarbleEvent<EventType.LISTEN, [number, string]>;
+type EventUpgrade = MarbleEvent<EventType.UPGRADE, [http.IncomingMessage, any, any]>;
+type EventRequest = MarbleEvent<EventType.REQUEST, any>;
+type EventError = MarbleEvent<EventType.ERROR, any>;
+type EventClose = MarbleEvent<EventType.CLOSE, any>;
+type EventConnect = MarbleEvent<EventType.CONNECT, any>;
+type EventConnection = MarbleEvent<EventType.CONNECTION, any>;
+type EventClientError = MarbleEvent<EventType.CLIENT_ERROR, any>;
+type EventCheckContinue = MarbleEvent<EventType.CHECK_CONTINUE, any>;
+type EventCheckExpectation = MarbleEvent<EventType.CHECK_EXPECTATION, any>;
 
 export const Event = {
   CONNECT: { type: EventType.CONNECT } as EventConnect,
