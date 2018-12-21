@@ -21,6 +21,6 @@ export interface WebSocketEvent<T = unknown> extends Record<string, any> {
 }
 
 export type WebSocketServerCollection = Array<{
-  pathToMatch: string,
+  path: string,
   server: WebSocketServer,
 }>;

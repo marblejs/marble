@@ -28,7 +28,7 @@ const add$: WebSocketEffect = (event$, client) =>
     ),
   );
 
-export const app = httpListener({
+export const httpServer = httpListener({
   middlewares: [
     loggerDev$,
     loggerFile$,
@@ -37,7 +37,7 @@ export const app = httpListener({
   effects: [api$]
 });
 
-export const ws = webSocketListener({
+export const webSocketServer = webSocketListener({
   middlewares: [],
   effects: [add$],
 });

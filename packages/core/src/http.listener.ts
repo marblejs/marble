@@ -21,19 +21,18 @@ export const httpListener = ({
   effects = [],
   errorEffect = defaultError$,
 }: HttpListenerConfig) => {
-  const request$ = new Subject<Http>();
-
+  const requestSubject$ = new Subject<Http>();
   const combinedMiddlewares = combineMiddlewares(middlewares);
-  const routerEffects = factorizeRouting(effects);
+  const routing = factorizeRouting(effects);
   const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectHttpResponse;
 
-  const effect$ = request$.pipe(
+  const effect$ = requestSubject$.pipe(
     mergeMap(({ req, res }) => {
       res.send = handleResponse(res)(req);
 
       return combinedMiddlewares(of(req), res, undefined).pipe(
         takeWhile(() => !res.finished),
-        switchMap(resolveRouting(routerEffects)(res)),
+        switchMap(resolveRouting(routing)(res)),
         defaultIfEmpty(defaultResponse),
         tap(res.send),
         catchError(error =>
@@ -47,8 +46,11 @@ export const httpListener = ({
 
   effect$.subscribe();
 
-  return (req: IncomingMessage, res: OutgoingMessage) => request$.next({
-    req: req as HttpRequest,
-    res: res as HttpResponse,
-  });
+  return {
+    routing,
+    server: (req: IncomingMessage, res: OutgoingMessage) => requestSubject$.next({
+      req: req as HttpRequest,
+      res: res as HttpResponse,
+    }),
+  };
 };

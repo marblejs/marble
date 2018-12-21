@@ -1,15 +1,15 @@
 import { marble, matchEvent, Event, MarbleEvent } from '@marblejs/core';
 import { Observable, of, concat } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { app, ws } from './app';
+import { httpServer, webSocketServer } from './app';
 import { mapToServer } from '../../websockets/src';
 
 const upgrade$ = (event$: Observable<MarbleEvent>) =>
   event$.pipe(
     matchEvent(Event.UPGRADE),
     mapToServer({
-      pathToMatch: '/ws',
-      server: ws(),
+      path: '/api/:version/ws',
+      server: webSocketServer(),
     }),
   );
 
@@ -32,6 +32,6 @@ const events$ = (event$: Observable<MarbleEvent>) =>
 marble({
   hostname: '127.0.0.1',
   port: 1337,
-  httpListener: app,
+  httpListener: httpServer,
   httpEventsHandler: events$,
 });
