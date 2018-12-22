@@ -8,18 +8,24 @@ describe('#switchToProtocol operator', () => {
     // given
     const incomingWebsocketReq = createHttpRequest({
       url: '/',
-      headers: { upgrade: 'websocket' },
+      headers: {
+        upgrade: 'websocket',
+        connection: 'upgrade',
+      },
     });
     const outgoingWebsocketReq = {
       status: HttpStatus.SWITCHING_PROTOCOLS,
     };
     const incomingHttpReq = createHttpRequest({
       url: '/',
-      headers: { upgrade: 'http2' },
+      headers: {
+        upgrade: 'http2',
+        connection: 'upgrade',
+      },
     });
     const outgoingHttpReq = {
       status: HttpStatus.UPGRADE_REQUIRED,
-      headers: { upgrade: 'websocket' },
+      headers: { 'Upgrade': 'websocket' },
     };
 
     // when

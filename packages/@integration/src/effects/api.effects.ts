@@ -29,7 +29,6 @@ const notImplemented$ = EffectFactory
     )),
   ));
 
-
 const webSockets$ = EffectFactory
   .matchPath('/ws')
   .matchType('GET')

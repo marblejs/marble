@@ -8,6 +8,7 @@ const upgrade$: ServerEffect = event$ =>
   event$.pipe(
     matchEvent(Event.UPGRADE),
     mapToServer({
+      protocol: 'websocket',
       path: '/api/:version/ws',
       server: webSocketServer(),
     }),

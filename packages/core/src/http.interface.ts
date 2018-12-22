@@ -1,4 +1,5 @@
 import * as http from 'http';
+import * as net from 'net';
 import { Observable } from 'rxjs';
 import { EffectHttpResponse } from './effects/effects.interface';
 
@@ -95,7 +96,7 @@ export type ServerEvent<T extends EventType = EventType, U = any> = {
 };
 
 type EventListen = ServerEvent<EventType.LISTEN, [number, string]>;
-type EventUpgrade = ServerEvent<EventType.UPGRADE, [http.IncomingMessage, any, any]>;
+type EventUpgrade = ServerEvent<EventType.UPGRADE, [http.IncomingMessage, net.Socket, Buffer]>;
 type EventRequest = ServerEvent<EventType.REQUEST, any>;
 type EventError = ServerEvent<EventType.ERROR, any>;
 type EventClose = ServerEvent<EventType.CLOSE, any>;

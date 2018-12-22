@@ -7,8 +7,9 @@ import { WebSocketServerCollection } from '../../websocket.interface';
 type UpgradeEventData = NonNullable<(typeof Event.UPGRADE)['data']>;
 
 export const mapToServer = (...servers: WebSocketServerCollection) => {
-  const mappedCollection = servers.map(({ path, server }) => ({
+  const mappedCollection = servers.map(({ path, server, protocol }) => ({
     pathToMatch: pathToRegexp(path),
+    protocol,
     server,
   }));
 
@@ -17,10 +18,10 @@ export const mapToServer = (...servers: WebSocketServerCollection) => {
       tap(([ req, socket, head ]) => {
         let found = false;
 
-        mappedCollection.forEach(({ pathToMatch, server }) => {
+        mappedCollection.forEach(({ pathToMatch, server, protocol }) => {
           const pathname = req.url!;
 
-          if (pathToMatch.test(pathname)) {
+          if (pathToMatch.test(pathname) && req.headers.upgrade === protocol) {
             found = true;
             server.handleUpgrade(req, socket, head, function done(ws) {
               server.emit(EventType.CONNECTION, ws, req);
