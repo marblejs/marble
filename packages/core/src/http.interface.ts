@@ -89,21 +89,21 @@ export enum EventType {
   LISTEN = 'listen',
 }
 
-export type MarbleEvent<T extends EventType = EventType, U = any> = {
+export type ServerEvent<T extends EventType = EventType, U = any> = {
   type: T;
   data?: U;
 };
 
-type EventListen = MarbleEvent<EventType.LISTEN, [number, string]>;
-type EventUpgrade = MarbleEvent<EventType.UPGRADE, [http.IncomingMessage, any, any]>;
-type EventRequest = MarbleEvent<EventType.REQUEST, any>;
-type EventError = MarbleEvent<EventType.ERROR, any>;
-type EventClose = MarbleEvent<EventType.CLOSE, any>;
-type EventConnect = MarbleEvent<EventType.CONNECT, any>;
-type EventConnection = MarbleEvent<EventType.CONNECTION, any>;
-type EventClientError = MarbleEvent<EventType.CLIENT_ERROR, any>;
-type EventCheckContinue = MarbleEvent<EventType.CHECK_CONTINUE, any>;
-type EventCheckExpectation = MarbleEvent<EventType.CHECK_EXPECTATION, any>;
+type EventListen = ServerEvent<EventType.LISTEN, [number, string]>;
+type EventUpgrade = ServerEvent<EventType.UPGRADE, [http.IncomingMessage, any, any]>;
+type EventRequest = ServerEvent<EventType.REQUEST, any>;
+type EventError = ServerEvent<EventType.ERROR, any>;
+type EventClose = ServerEvent<EventType.CLOSE, any>;
+type EventConnect = ServerEvent<EventType.CONNECT, any>;
+type EventConnection = ServerEvent<EventType.CONNECTION, any>;
+type EventClientError = ServerEvent<EventType.CLIENT_ERROR, any>;
+type EventCheckContinue = ServerEvent<EventType.CHECK_CONTINUE, any>;
+type EventCheckExpectation = ServerEvent<EventType.CHECK_EXPECTATION, any>;
 
 export const Event = {
   CONNECT: { type: EventType.CONNECT } as EventConnect,

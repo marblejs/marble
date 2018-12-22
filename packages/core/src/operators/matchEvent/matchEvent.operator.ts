@@ -1,10 +1,10 @@
 import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
-import { MarbleEvent } from '../../http.interface';
+import { ServerEvent } from '../../http.interface';
 
-export const matchEvent = <T extends MarbleEvent>
+export const matchEvent = <T extends ServerEvent>
   (eventToMatch: T) =>
-  (source$: Observable<MarbleEvent>) =>
+  (source$: Observable<ServerEvent>) =>
     source$.pipe(
       filter(event => event.type === eventToMatch.type),
       map(event => event.data as NonNullable<T['data']>),

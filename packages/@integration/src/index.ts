@@ -1,10 +1,10 @@
-import { marble, matchEvent, Event, MarbleEvent } from '@marblejs/core';
+import { marble, matchEvent, Event, ServerEvent } from '@marblejs/core';
 import { Observable, of, concat } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { httpServer, webSocketServer } from './app';
 import { mapToServer } from '../../websockets/src';
 
-const upgrade$ = (event$: Observable<MarbleEvent>) =>
+const upgrade$ = (event$: Observable<ServerEvent>) =>
   event$.pipe(
     matchEvent(Event.UPGRADE),
     mapToServer({
@@ -13,7 +13,7 @@ const upgrade$ = (event$: Observable<MarbleEvent>) =>
     }),
   );
 
-const listen$ = (event$: Observable<MarbleEvent>) =>
+const listen$ = (event$: Observable<ServerEvent>) =>
   event$.pipe(
     matchEvent(Event.LISTEN),
     tap(([ port, hostname ]) =>
@@ -21,7 +21,7 @@ const listen$ = (event$: Observable<MarbleEvent>) =>
     ),
   );
 
-const events$ = (event$: Observable<MarbleEvent>) =>
+const events$ = (event$: Observable<ServerEvent>) =>
   event$.pipe(
     mergeMap(event => concat(
       listen$(of(event)),

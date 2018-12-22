@@ -2,7 +2,7 @@ import { Observable, OperatorFunction, from } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
 type MarbleFlow = [string, object];
-type MarbleDependencies = { response: any; error?: Error };
+type MarbleDependencies = { client: any; meta?: Error };
 
 export namespace Marbles {
   const deepEquals = (actual, expected) => expect(actual).toEqual(expected);
@@ -31,7 +31,7 @@ export namespace Marbles {
   export const assertEffect = (
     effect: (...args: any[]) => Observable<any>,
     marbleflow: [MarbleFlow, MarbleFlow],
-    depts: MarbleDependencies = { response: {} },
+    depts: MarbleDependencies = { client: {} },
   ) => {
     const [initStream, initValues] = marbleflow[0];
     const [expectedStream, expectedValues] = marbleflow[1];
@@ -41,7 +41,7 @@ export namespace Marbles {
     const effectStream = from(observable) as Observable<any>;
 
     scheduler
-      .expectObservable(effect(effectStream, depts.response, depts.error))
+      .expectObservable(effect(effectStream, depts.client, depts.meta))
       .toBe(expectedStream, expectedValues);
 
     scheduler.flush();
@@ -53,9 +53,7 @@ export namespace Marbles {
   ) => {
     const [expectedStream, expectedValues] = marbleflow;
     const scheduler = createTestScheduler();
-
     scheduler.expectObservable(effects$).toBe(expectedStream, expectedValues);
-
     scheduler.flush();
   };
 }

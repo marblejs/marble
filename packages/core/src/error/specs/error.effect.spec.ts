@@ -20,7 +20,7 @@ describe('defaultError$', () => {
     Marbles.assertEffect(defaultError$, [
       ['-a-', { a: createMockReq('/') }],
       ['-a-', { a: expectedResponse }],
-    ], { response: createMockRes(), error });
+    ], { client: createMockRes(), meta: error });
   });
 
   test('maps other errors', () => {
@@ -36,6 +36,6 @@ describe('defaultError$', () => {
     Marbles.assertEffect(defaultError$, [
       ['-a-', { a: createMockReq('/') }],
       ['-a-', { a: expectedResponse }],
-    ], { response: createMockRes(), error });
+    ], { client: createMockRes(), meta: error });
   });
 });

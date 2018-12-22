@@ -1,9 +1,9 @@
 import * as http from 'http';
 import { Observable, Subject } from 'rxjs';
 import { httpListener } from './http.listener';
-import { MarbleEvent, EventType } from './http.interface';
+import { ServerEvent, EventType } from './http.interface';
 
-type HttpEventsHandler = (serverEvents$: Observable<MarbleEvent<EventType>>) => Observable<any>;
+type HttpEventsHandler = (serverEvents$: Observable<ServerEvent>) => Observable<any>;
 
 export interface MarbleConfig {
   port?: number;
@@ -13,7 +13,7 @@ export interface MarbleConfig {
 }
 
 const eventsSubscriber =
-  (httpServer: http.Server, event$: Subject<MarbleEvent>) =>
+  (httpServer: http.Server, event$: Subject<ServerEvent>) =>
   (...eventTypes: EventType[]) =>
     eventTypes.forEach((type: any) =>
       httpServer.on(type, (...args) =>
@@ -22,7 +22,7 @@ const eventsSubscriber =
     );
 
 export const marble = ({ httpListener, httpEventsHandler, port, hostname }: MarbleConfig) => {
-  const httpEventsSubject$ = new Subject<MarbleEvent>();
+  const httpEventsSubject$ = new Subject<ServerEvent>();
   const httpServer = http.createServer(httpListener.server);
   const subscribeForEvents = eventsSubscriber(httpServer, httpEventsSubject$);
 
