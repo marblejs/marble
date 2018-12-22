@@ -1,15 +1,14 @@
 import * as http from 'http';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { httpListener } from './http.listener';
 import { ServerEvent, EventType } from './http.interface';
-
-type HttpEventsHandler = (serverEvents$: Observable<ServerEvent>) => Observable<any>;
+import { ServerEffect } from './effects/effects.interface';
 
 export interface MarbleConfig {
   port?: number;
   hostname?: string;
   httpListener: ReturnType<typeof httpListener>;
-  httpEventsHandler?: HttpEventsHandler;
+  httpEventsHandler?: ServerEffect;
 }
 
 const eventsSubscriber =
@@ -39,7 +38,7 @@ export const marble = ({ httpListener, httpEventsHandler, port, hostname }: Marb
   );
 
   if (httpEventsHandler) {
-    httpEventsHandler(httpEventsSubject$).subscribe();
+    httpEventsHandler(httpEventsSubject$, httpServer).subscribe();
   }
 
   httpServer.listen(port, hostname, () =>

@@ -1,8 +1,8 @@
-import { Observable } from 'rxjs';
-import { Marbles } from '../../+internal/testing';
-import { ServerEvent, Event, EventType } from '../../http.interface';
-import { matchEvent } from './matchEvent.operator';
 import { tap } from 'rxjs/operators';
+import { Marbles } from '../../+internal/testing';
+import { Event, EventType } from '../../http.interface';
+import { ServerEffect } from '../../effects/effects.interface';
+import { matchEvent } from './matchEvent.operator';
 
 describe('#matchEvent', () => {
   test(`matches incoming '${EventType.LISTEN}' event`, () => {
@@ -12,7 +12,7 @@ describe('#matchEvent', () => {
     const errorEvent = { type: EventType.ERROR, data: [] };
 
     // when
-    const listen$ = (event$: Observable<ServerEvent>) =>
+    const listen$: ServerEffect = event$ =>
       event$.pipe(
         matchEvent(Event.LISTEN),
         tap(data => data[0] as number),

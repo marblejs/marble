@@ -1,5 +1,6 @@
+import * as http from 'http';
 import { Observable } from 'rxjs';
-import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders } from '../http.interface';
+import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders, ServerEvent } from '../http.interface';
 import { HttpError } from '../error/error.model';
 
 export interface EffectHttpResponse<T = any> {
@@ -15,6 +16,9 @@ export interface Middleware<
 
 export interface ErrorEffect<T extends HttpError = HttpError>
   extends Effect<HttpRequest, EffectHttpResponse, HttpResponse, T> {}
+
+export interface ServerEffect<T extends ServerEvent = ServerEvent>
+  extends Effect<T, any, http.Server> {}
 
 export interface Effect<
   T = HttpRequest,
