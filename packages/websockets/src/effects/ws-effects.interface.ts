@@ -1,3 +1,4 @@
+import * as http from 'http';
 import { Observable } from 'rxjs';
 import { WebSocketEvent, ExtendedWebSocketClient } from '../websocket.interface';
 
@@ -11,6 +12,10 @@ export interface WebSocketErrorEffect<
   U = WebSocketEvent,
   V = WebSocketEvent
 > extends WebSocketEffect<U, V, ExtendedWebSocketClient, T> {}
+
+export interface WebSocketConnectionEffect<
+  T extends http.IncomingMessage = http.IncomingMessage
+> extends WebSocketEffect<T, T, ExtendedWebSocketClient> {}
 
 export interface WebSocketEffect<
   T = WebSocketEvent,

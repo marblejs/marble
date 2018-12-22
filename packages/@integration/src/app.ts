@@ -8,8 +8,11 @@ import {
   WebSocketEvent,
   matchType,
   mapToAction,
+  WebSocketConnectionError,
+  WebSocketConnectionEffect,
 } from '../../websockets/src';
-import { map, buffer } from 'rxjs/operators';
+import { iif, throwError, of } from 'rxjs';
+import { map, buffer, mergeMap } from 'rxjs/operators';
 
 const sum$: WebSocketEffect = event$ =>
   event$.pipe(
@@ -28,6 +31,15 @@ const add$: WebSocketEffect = (event$, client) =>
     ),
   );
 
+const connection$: WebSocketConnectionEffect = req$ =>
+  req$.pipe(
+    mergeMap(req => iif(
+      () => req.headers.upgrade !== 'websocket',
+      throwError(new WebSocketConnectionError('Unauthorized', 4000)),
+      of(req),
+    )),
+  );
+
 export const httpServer = httpListener({
   middlewares: [
     loggerDev$,
@@ -40,4 +52,5 @@ export const httpServer = httpListener({
 export const webSocketServer = webSocketListener({
   middlewares: [],
   effects: [add$],
+  connection: connection$,
 });

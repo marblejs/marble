@@ -1,5 +1,7 @@
 import * as WebSocket from 'ws';
-import { ExtendedWebSocketClient, WebSocketClient } from './websocket.interface';
+import { EMPTY } from 'rxjs';
+import { ExtendedWebSocketClient, WebSocketClient, WebSocketStatus } from './websocket.interface';
+import { WebSocketConnectionError } from './error/ws-error.model';
 
 type ExtendableFields = {
   isAlive: boolean;
@@ -49,4 +51,10 @@ export const handleClientBrokenConnection = (client: ExtendedWebSocketClient) =>
   client.on('close', () => clearTimeout(pingTimeout));
 
   return client;
+};
+
+export const handleClientValidationError = (client: ExtendedWebSocketClient) => (error: WebSocketConnectionError) => {
+  client.isAlive = false;
+  client.close(error.status || WebSocketStatus.INTERNAL_ERROR, error.message);
+  return EMPTY;
 };
