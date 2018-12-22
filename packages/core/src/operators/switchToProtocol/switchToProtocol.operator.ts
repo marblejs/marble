@@ -12,7 +12,7 @@ export const switchToProtocol = <I extends HttpRequest>
         of(req).pipe(
           mapTo({
             status: HttpStatus.UPGRADE_REQUIRED,
-            headers: { Upgrade: protocol },
+            headers: { upgrade: protocol },
           })
         ),
         of(req).pipe(

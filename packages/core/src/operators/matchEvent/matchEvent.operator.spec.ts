@@ -4,7 +4,7 @@ import { Event, EventType } from '../../http.interface';
 import { ServerEffect } from '../../effects/effects.interface';
 import { matchEvent } from './matchEvent.operator';
 
-describe('#matchEvent', () => {
+describe('#matchEvent operator', () => {
   test(`matches incoming '${EventType.LISTEN}' event`, () => {
     // given
     const listenEvent = { type: EventType.LISTEN, data: [80, 'localhost'] };

@@ -7,7 +7,7 @@ import { use } from './use.operator';
 
 const createMockReq = (req: Partial<HttpRequest>) => req;
 
-describe('use.operator', () => {
+describe('#use operator', () => {
   test('applies middlewares to the request pipeline', () => {
     const middleware$: Middleware<HttpRequest<number>> = req$ =>
       req$.pipe(tap(req => req.body++ ));
