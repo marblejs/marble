@@ -1,4 +1,4 @@
-import { HttpRequest, HttpHeaders, RouteParameters, QueryParameters } from '../../http.interface';
+import { HttpRequest, HttpHeaders, RouteParameters, QueryParameters, HttpResponse } from '../../http.interface';
 
 interface HttpRequestMockParams {
   url: string;
@@ -9,7 +9,12 @@ interface HttpRequestMockParams {
   [key: string]: any;
 }
 
-export const createHttpRequest = (data: HttpRequestMockParams) => ({
+interface HttpResponseMockParams {
+  statusCode?: number;
+  [key: string]: any;
+}
+
+export const createHttpRequest = (data: HttpRequestMockParams = { url: '/' }) => ({
   ...data,
   url: data.url,
   body: data.body,
@@ -17,3 +22,8 @@ export const createHttpRequest = (data: HttpRequestMockParams) => ({
   query: data.query || {},
   headers: data.headers || {},
 }) as HttpRequest;
+
+export const createHttpResponse = (data: HttpResponseMockParams = {}) => ({
+  ...data,
+  statusCode: data.statusCode,
+}) as HttpResponse;

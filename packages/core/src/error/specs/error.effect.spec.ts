@@ -1,15 +1,14 @@
-import { Marbles } from '../../+internal';
-import { HttpRequest, HttpResponse } from '../../http.interface';
+import { Marbles, createHttpResponse, createHttpRequest } from '../../+internal';
 import { defaultError$ } from '../error.effect';
 import { HttpError } from '../error.model';
 
-const createMockRes = () => ({} as HttpResponse);
-const createMockReq = (url = '/') => ({ url } as HttpRequest);
-
 describe('defaultError$', () => {
+  const incomingRequest = createHttpRequest({ url: '/' });
+  const client = createHttpResponse();
+
   test('maps HttpError', () => {
-    const error = new HttpError('test-message', 400);
-    const expectedResponse = {
+    const incomingError = new HttpError('test-message', 400);
+    const outgoingResponse = {
       status: 400,
       body: { error: {
         message: 'test-message',
@@ -18,14 +17,14 @@ describe('defaultError$', () => {
     };
 
     Marbles.assertEffect(defaultError$, [
-      ['-a-', { a: createMockReq('/') }],
-      ['-a-', { a: expectedResponse }],
-    ], { client: createMockRes(), meta: error });
+      ['-a-', { a: incomingRequest }],
+      ['-a-', { a: outgoingResponse }],
+    ], { client, meta: incomingError });
   });
 
   test('maps other errors', () => {
-    const error = new Error('test-message');
-    const expectedResponse = {
+    const incomingError = new Error('test-message');
+    const outgoingResponse = {
       status: 500,
       body: { error: {
         message: 'test-message',
@@ -34,8 +33,23 @@ describe('defaultError$', () => {
     };
 
     Marbles.assertEffect(defaultError$, [
-      ['-a-', { a: createMockReq('/') }],
-      ['-a-', { a: expectedResponse }],
-    ], { client: createMockRes(), meta: error });
+      ['-a-', { a: incomingRequest }],
+      ['-a-', { a: outgoingResponse }],
+    ], { client, meta: incomingError });
+  });
+
+  test('maps to "Internal server error" if "error" is not provided', () => {
+    const outgoingResponse = {
+      status: 500,
+      body: { error: {
+        message: 'Internal server error',
+        status: 500,
+      }}
+    };
+
+    Marbles.assertEffect(defaultError$, [
+      ['-a-', { a: incomingRequest }],
+      ['-a-', { a: outgoingResponse }],
+    ], { client });
   });
 });
