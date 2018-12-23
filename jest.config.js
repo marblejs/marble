@@ -1,18 +1,18 @@
-module.exports = {
+const SCOPE = process.env.SCOPE;
+
+const config = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
-  testRegex: '.?(spec|integration\.spec)\.ts$',
+  testRegex: 'spec\.ts$',
   coverageDirectory: './coverage/',
   coveragePathIgnorePatterns: [
-    'spec-util.ts$',
-    'integration.ts$',
-    '.d.ts$',
-    '.spec.ts',
-    'webpack.config.ts',
-    '@example',
+    'dist',
+    'testing',
     '@integration',
-    '\\+internal/testing',
+    'spec-util.ts$',
+    'integration.spec.ts$',
+    'integration.ts$'
   ],
   collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [
@@ -29,3 +29,15 @@ module.exports = {
     },
   },
 };
+
+if (SCOPE === 'integration') {
+  config.testRegex = 'integration\.spec\.ts$';
+  console.info('RUNNING INTEGRATION TESTS');
+}
+
+if (SCOPE === 'unit') {
+  config.testRegex = '^((?!integration).)*\.spec\.ts$';
+  console.info('RUNNING UNIT TESTS');
+}
+
+module.exports = config;
