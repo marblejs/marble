@@ -46,11 +46,14 @@ export const httpListener = ({
 
   effect$.subscribe();
 
-  return {
+  const httpServer = (req: IncomingMessage, res: OutgoingMessage) => requestSubject$.next({
+    req: req as HttpRequest,
+    res: res as HttpResponse,
+  });
+
+  httpServer.info = {
     routing,
-    server: (req: IncomingMessage, res: OutgoingMessage) => requestSubject$.next({
-      req: req as HttpRequest,
-      res: res as HttpResponse,
-    }),
   };
+
+  return httpServer;
 };

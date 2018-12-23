@@ -22,7 +22,7 @@ const eventsSubscriber =
 
 export const marble = ({ httpListener, httpEventsHandler, port, hostname }: MarbleConfig) => {
   const httpEventsSubject$ = new Subject<ServerEvent>();
-  const httpServer = http.createServer(httpListener.server);
+  const httpServer = http.createServer(httpListener);
   const subscribeForEvents = eventsSubscriber(httpServer, httpEventsSubject$);
 
   subscribeForEvents(
@@ -50,8 +50,6 @@ export const marble = ({ httpListener, httpEventsHandler, port, hostname }: Marb
 
   return {
     server: httpServer,
-    info: {
-      routing: httpListener.routing,
-    },
+    info: httpListener.info,
   };
 };

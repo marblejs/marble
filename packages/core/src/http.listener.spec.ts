@@ -45,7 +45,7 @@ describe('Http listener', () => {
     httpListener({
       middlewares: [middleware$],
       effects: [effect$],
-    }).server(req, res);
+    })(req, res);
 
     // then
     setTimeout(() => {
@@ -92,7 +92,7 @@ describe('Http listener', () => {
       middlewares: [middleware$],
       effects: [effect$],
       errorEffect: errorEffect$,
-    }).server(req, res);
+    })(req, res);
 
     // then
     setTimeout(() => {
