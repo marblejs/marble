@@ -12,7 +12,7 @@
     "pretest": "yarn lint",
     "test": "if [[ ${IS_TRAVIS_CI} == \"true\" ]]; then yarn test:ci; else yarn test:dev; fi",
     "test:ci": "jest --expand --coverage --runInBand",
-    "test:dev": "SCOPE=unit jest --expand --coverage",
+    "test:dev": "jest --expand --coverage",
     "test:watch": "jest --expand --onlyChanged --watch",
     "clean": "lerna run clean",
     "prepublishOnly": "yarn clean && yarn build && yarn test",

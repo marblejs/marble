@@ -6,6 +6,7 @@
   "scripts": {
     "start": "ts-node --project tsconfig.json src/index.ts",
     "watch:dev": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec yarn start",
+    "test": "jest --config ../../jest.config.js",
     "clean": "rimraf dist"
   },
   "private": true,
