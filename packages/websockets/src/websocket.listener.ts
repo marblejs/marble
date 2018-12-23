@@ -40,8 +40,8 @@ export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Er
   eventTransformer = jsonTransformer as EventTransformer<any, any>,
   connection = req$ => req$,
 }: WebSocketListenerConfig<Event, OutgoingEvent, IncomingError> = {}) => {
-  const combinedEffects = combineEffects(effects);
-  const combinedMiddlewares = combineMiddlewares(middlewares);
+  const combinedEffects = combineEffects(...effects);
+  const combinedMiddlewares = combineMiddlewares(...middlewares);
 
   const onConnection = (server: WebSocket.Server) => (client: WebSocketClient, req: http.IncomingMessage) => {
     const extendedClient = extendClientWith({

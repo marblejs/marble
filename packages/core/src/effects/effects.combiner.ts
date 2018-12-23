@@ -1,11 +1,9 @@
 import { Observable, from, merge } from 'rxjs';
 import { concatMap, last } from 'rxjs/operators';
-import { HttpRequest, HttpResponse } from '../http.interface';
 import { Effect } from './effects.interface';
-export { HttpRequest, HttpResponse, Observable };
 
 export const combineMiddlewares = <T, U>
-  (effects: Effect<T, T, U>[] = []) =>
+  (...effects: Effect<T, T, U>[]) =>
   (input$: Observable<T>, client: U, meta?: any): Observable<T> =>
     effects.length
       ? from(effects).pipe(
@@ -15,6 +13,6 @@ export const combineMiddlewares = <T, U>
       : input$;
 
 export const combineEffects = <T, U, V>
-  (effects: Effect<T, U, V>[] = []) =>
+  (...effects: Effect<T, U, V>[]) =>
   (input$: Observable<T>, client: V, meta?: any): Observable<U> =>
     merge(...effects.map(effect => effect(input$, client, meta)));

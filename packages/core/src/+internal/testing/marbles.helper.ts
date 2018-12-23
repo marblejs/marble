@@ -2,10 +2,10 @@ import { Observable, OperatorFunction, from } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
 type MarbleFlow = [string, object];
-type MarbleDependencies = { client: any; meta?: Error };
+type MarbleDependencies = { client?: any; meta?: any };
 
 export namespace Marbles {
-  const deepEquals = (actual, expected) => expect(actual).toEqual(expected);
+  const deepEquals = (actual: any, expected: any) => expect(actual).toEqual(expected);
 
   const createTestScheduler = () => new TestScheduler(deepEquals);
 
@@ -18,11 +18,11 @@ export namespace Marbles {
 
     const scheduler = createTestScheduler();
     const observable = scheduler.createColdObservable(initStream, initValues);
-    const stream = from(observable) as Observable<T>;
-    const pipedStream = stream.pipe(...operators);
+    const stream$ = from(observable) as Observable<T>;
+    const pipedStream$ = stream$.pipe(...operators);
 
     scheduler
-      .expectObservable(pipedStream)
+      .expectObservable(pipedStream$)
       .toBe(expectedStream, expectedValues);
 
     scheduler.flush();
@@ -31,29 +31,18 @@ export namespace Marbles {
   export const assertEffect = (
     effect: (...args: any[]) => Observable<any>,
     marbleflow: [MarbleFlow, MarbleFlow],
-    depts: MarbleDependencies = { client: {} },
+    depts: MarbleDependencies = {},
   ) => {
     const [initStream, initValues] = marbleflow[0];
     const [expectedStream, expectedValues] = marbleflow[1];
 
     const scheduler = createTestScheduler();
-    const observable = scheduler.createColdObservable(initStream, initValues);
-    const effectStream = from(observable) as Observable<any>;
+    const stream$ = scheduler.createColdObservable(initStream, initValues);
 
     scheduler
-      .expectObservable(effect(effectStream, depts.client, depts.meta))
+      .expectObservable(effect(stream$, depts.client, depts.meta))
       .toBe(expectedStream, expectedValues);
 
-    scheduler.flush();
-  };
-
-  export const assertCombinedEffects = <T>(
-    effects$: Observable<T>,
-    marbleflow: MarbleFlow,
-  ) => {
-    const [expectedStream, expectedValues] = marbleflow;
-    const scheduler = createTestScheduler();
-    scheduler.expectObservable(effects$).toBe(expectedStream, expectedValues);
     scheduler.flush();
   };
 }

@@ -49,7 +49,7 @@ describe('Http listener', () => {
 
     // then
     setTimeout(() => {
-      expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith([middleware$]);
+      expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith(middleware$);
       expect(routerFactory.factorizeRouting).toHaveBeenCalledWith([effect$]);
       expect(routerResolver.resolveRouting).toHaveBeenCalled();
       expect(responseHandler.handleResponse).toHaveBeenCalled();
@@ -70,7 +70,7 @@ describe('Http listener', () => {
     });
 
     // then
-    expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith([]);
+    expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith(...[]);
   });
 
   test('#httpListener catches error', done => {

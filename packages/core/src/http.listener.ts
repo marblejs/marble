@@ -22,7 +22,7 @@ export const httpListener = ({
   errorEffect = defaultError$,
 }: HttpListenerConfig) => {
   const requestSubject$ = new Subject<Http>();
-  const combinedMiddlewares = combineMiddlewares(middlewares);
+  const combinedMiddlewares = combineMiddlewares(...middlewares);
   const routing = factorizeRouting(effects);
   const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectHttpResponse;
 
@@ -30,7 +30,7 @@ export const httpListener = ({
     mergeMap(({ req, res }) => {
       res.send = handleResponse(res)(req);
 
-      return combinedMiddlewares(of(req), res, undefined).pipe(
+      return combinedMiddlewares(of(req), res).pipe(
         takeWhile(() => !res.finished),
         switchMap(resolveRouting(routing)(res)),
         defaultIfEmpty(defaultResponse),
