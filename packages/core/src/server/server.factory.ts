@@ -1,8 +1,8 @@
 import * as http from 'http';
 import { Subject } from 'rxjs';
-import { httpListener } from './http.listener';
-import { ServerEvent, EventType } from './http.interface';
-import { ServerEffect } from './effects/effects.interface';
+import { httpListener } from '../http.listener';
+import { ServerEvent, EventType } from '../http.interface';
+import { ServerEffect } from '../effects/effects.interface';
 
 export interface MarbleConfig {
   port?: number;

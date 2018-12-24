@@ -8,5 +8,5 @@ export * from './effects/effects.interface';
 export * from './router/router.interface';
 export * from './operators';
 export * from './http.interface';
-export { marble, MarbleConfig } from './marble';
+export { marble, MarbleConfig } from './server/server.factory';
 export { HttpListenerConfig, httpListener } from './http.listener';

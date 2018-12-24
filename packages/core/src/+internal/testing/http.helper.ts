@@ -1,3 +1,4 @@
+import * as http from 'http';
 import { HttpRequest, HttpHeaders, RouteParameters, QueryParameters, HttpResponse } from '../../http.interface';
 
 interface HttpRequestMockParams {
@@ -14,6 +15,11 @@ interface HttpResponseMockParams {
   [key: string]: any;
 }
 
+export interface HttpServerMocks {
+  listen?: jest.Mock;
+  on?: jest.Mock;
+}
+
 export const createHttpRequest = (data: HttpRequestMockParams = { url: '/' }) => ({
   ...data,
   url: data.url,
@@ -27,3 +33,9 @@ export const createHttpResponse = (data: HttpResponseMockParams = {}) => ({
   ...data,
   statusCode: data.statusCode,
 }) as HttpResponse;
+
+export const mockHttpServer = (mocks: HttpServerMocks = {}) =>
+  jest.spyOn(http, 'createServer').mockImplementation(jest.fn(() => ({
+    listen: mocks.listen || jest.fn(),
+    on: mocks.on || jest.fn(),
+  })));
