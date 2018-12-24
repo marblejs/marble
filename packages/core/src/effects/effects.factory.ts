@@ -3,7 +3,6 @@ import { Effect } from './effects.interface';
 import { RouteEffect } from '../router/router.interface';
 import { coreErrorFactory, CoreErrorOptions } from '../error/error.factory';
 import { getArrayFromEnum } from '../+internal';
-import { tap } from 'rxjs/operators';
 
 export namespace EffectFactory {
 
@@ -38,10 +37,7 @@ export namespace EffectFactory {
       throw coreErrorFactory('Effect needs to be provided', coreErrorOptions);
     }
 
-    return { path, method, effect: (req$, res, meta) => effect(req$, res, meta).pipe(
-      // @TODO
-      tap(req => null),
-    )};
+    return { path, method, effect };
   };
 
 }
