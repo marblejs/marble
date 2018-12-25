@@ -2,7 +2,7 @@ import * as http from 'http';
 import { Subject } from 'rxjs';
 import { httpListener } from '../http.listener';
 import { ServerEvent, EventType } from '../http.interface';
-import { Injector, InjectorDependencies } from './server.injector';
+import { InjectorDependencies } from './server.injector';
 import { ServerEffect } from '../effects/effects.interface';
 
 export interface MarbleConfig {
@@ -23,6 +23,7 @@ const eventsSubscriber =
     );
 
 export const marble = ({ httpListener, httpEventsHandler, port, hostname, dependencies }: MarbleConfig) => {
+  const { injector, routing } = httpListener.config;
   const httpEventsSubject$ = new Subject<ServerEvent>();
   const httpServer = http.createServer(httpListener);
   const subscribeForEvents = eventsSubscriber(httpServer, httpEventsSubject$);
@@ -40,11 +41,11 @@ export const marble = ({ httpListener, httpEventsHandler, port, hostname, depend
   );
 
   if (dependencies) {
-    Injector.registerAll(dependencies)(httpServer);
+    injector.registerAll(dependencies)(httpServer);
   }
 
   if (httpEventsHandler) {
-    httpEventsHandler(httpEventsSubject$, httpServer, Injector.get).subscribe();
+    httpEventsHandler(httpEventsSubject$, httpServer, injector.get).subscribe();
   }
 
   httpServer.listen(port, hostname, () =>
@@ -56,6 +57,6 @@ export const marble = ({ httpListener, httpEventsHandler, port, hostname, depend
 
   return {
     server: httpServer,
-    info: httpListener.info,
+    info: { routing },
   };
 };

@@ -5,13 +5,13 @@ import { httpServer, webSocketServer } from './app';
 import { mapToServer } from '../../websockets/src';
 import { AppDependencies } from './app.dependencies';
 
-const upgrade$: ServerEffect = event$ =>
+const upgrade$: ServerEffect = (event$, _, injector) =>
   event$.pipe(
     matchEvent(Event.UPGRADE),
     mapToServer({
       path: '/api/:version/ws',
       server: AppDependencies.WS_SERVER,
-    }),
+    })(injector),
   );
 
 const listen$: ServerEffect = event$ =>

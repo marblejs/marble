@@ -9,7 +9,7 @@ import { RouteEffect, RouteEffectGroup } from './router/router.interface';
 import { resolveRouting } from './router/router.resolver';
 import { factorizeRouting } from './router/router.factory';
 import { defaultError$ } from './error/error.effect';
-import { Injector } from './server/server.injector';
+import { createStaticInjectorContainer } from './server/server.injector';
 
 export interface HttpListenerConfig {
   middlewares?: Middleware[];
@@ -25,15 +25,16 @@ export const httpListener = ({
   const requestSubject$ = new Subject<Http>();
   const combinedMiddlewares = combineMiddlewares(...middlewares);
   const routing = factorizeRouting(effects);
+  const injector = createStaticInjectorContainer();
   const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectHttpResponse;
 
   const effect$ = requestSubject$.pipe(
     mergeMap(({ req, res }) => {
       res.send = handleResponse(res)(req);
 
-      return combinedMiddlewares(of(req), res, Injector.get).pipe(
+      return combinedMiddlewares(of(req), res, injector.get).pipe(
         takeWhile(() => !res.finished),
-        switchMap(resolveRouting(routing, Injector.get)(res)),
+        switchMap(resolveRouting(routing, injector.get)(res)),
         defaultIfEmpty(defaultResponse),
         tap(res.send),
         catchError(error =>
@@ -52,8 +53,9 @@ export const httpListener = ({
     res: res as HttpResponse,
   });
 
-  httpServer.info = {
+  httpServer.config = {
     routing,
+    injector,
   };
 
   return httpServer;

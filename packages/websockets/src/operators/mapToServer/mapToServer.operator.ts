@@ -1,4 +1,4 @@
-import { Event, EventType, Injector, InjectorKey } from '@marblejs/core';
+import { Event, EventType, InjectorKey, InjectorGetter } from '@marblejs/core';
 import * as pathToRegexp from 'path-to-regexp';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -11,7 +11,7 @@ type WebSocketServerCollection = Array<{
   server: InjectorKey,
 }>;
 
-export const mapToServer = (...servers: WebSocketServerCollection) => {
+export const mapToServer = (...servers: WebSocketServerCollection) => (inject: InjectorGetter) => {
   const mappedCollection = servers.map(({ path, server: serverKey }) => ({
     pathToMatch: pathToRegexp(path),
     serverKey,
@@ -26,10 +26,10 @@ export const mapToServer = (...servers: WebSocketServerCollection) => {
           const pathname = req.url!;
 
           if (pathToMatch.test(pathname) && req.headers.upgrade === 'websocket') {
-            found = true;
-            const server = Injector.get<MarbleWebSocketServer>(serverKey);
+            const server = inject<MarbleWebSocketServer>(serverKey);
 
             if (server) {
+              found = true;
               server.handleUpgrade(req, socket, head, function done(ws) {
                 server.emit(EventType.CONNECTION, ws, req);
               });

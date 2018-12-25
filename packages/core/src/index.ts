@@ -8,6 +8,6 @@ export * from './effects/effects.interface';
 export * from './router/router.interface';
 export * from './operators';
 export * from './http.interface';
-export { Injector, InjectorKey } from './server/server.injector';
+export * from './server/server.injector';
 export { marble, MarbleConfig } from './server/server.factory';
 export { HttpListenerConfig, httpListener } from './http.listener';

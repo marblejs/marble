@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse, Injector } from '@marblejs/core';
+import { HttpRequest, HttpResponse, createStaticInjectorContainer } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { of } from 'rxjs';
 import { bodyParser$ } from '.';
@@ -6,6 +6,7 @@ import { bodyParser$ } from '.';
 const MockReq = require('mock-req');
 
 describe('BodyParser middleware', () => {
+  const injector = createStaticInjectorContainer();
 
   beforeEach(() => {
     spyOn(console, 'log').and.stub();
@@ -30,7 +31,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, Injector.get);
+    const http$ = bodyParser$(req$, res, injector.get);
 
     http$.subscribe(data => {
       expect(data.body).toEqual({ test: 'test' });
@@ -48,7 +49,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, Injector.get);
+    const http$ = bodyParser$(req$, res, injector.get);
 
     http$.subscribe(data => {
       expect(data.body).toEqual({
@@ -71,7 +72,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, Injector.get);
+    const http$ = bodyParser$(req$, res, injector.get);
 
     http$.subscribe(
       () => {
@@ -96,7 +97,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, Injector.get);
+    const http$ = bodyParser$(req$, res, injector.get);
 
     http$.subscribe(data => {
       expect(data.body).toEqual('test');
@@ -114,7 +115,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, Injector.get);
+    const http$ = bodyParser$(req$, res, injector.get);
 
     http$.subscribe(
       () => {
