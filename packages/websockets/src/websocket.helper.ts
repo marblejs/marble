@@ -1,18 +1,39 @@
 import * as WebSocket from 'ws';
 import { EMPTY } from 'rxjs';
-import { ExtendedWebSocketClient, WebSocketClient, WebSocketStatus } from './websocket.interface';
+import {
+  MarbleWebSocketClient,
+  MarbleWebSocketServer,
+  WebSocketClient,
+  WebSocketStatus,
+  WebSocketServer,
+} from './websocket.interface';
 import { WebSocketConnectionError } from './error/ws-error.model';
+export { WebSocket };
 
-type ExtendableFields = {
+type ExtendableServerFields = {
+  sendBroadcastResponse: MarbleWebSocketServer['sendBroadcastResponse'];
+};
+
+type ExtendableClientFields = {
   isAlive: boolean;
-  sendResponse: ExtendedWebSocketClient['sendResponse'];
-  sendBroadcastResponse: ExtendedWebSocketClient['sendBroadcastResponse'];
+  sendResponse: MarbleWebSocketClient['sendResponse'];
+  sendBroadcastResponse: MarbleWebSocketClient['sendBroadcastResponse'];
 };
 
 const HEART_BEAT_INTERVAL = 10 * 1000;
 
-export const extendClientWith = (extendableFields: ExtendableFields) => (client: WebSocket) => {
-  const extendedClient = client as ExtendedWebSocketClient;
+export const extendServerWith = (extendableFields: ExtendableServerFields) => (server: WebSocketServer) => {
+  const extendedServer = server as MarbleWebSocketServer;
+
+  Object
+    .entries(extendableFields)
+    .forEach(([key, value]) => extendedServer[key] = value);
+
+  return extendedServer;
+};
+
+export const extendClientWith = (extendableFields: ExtendableClientFields) => (client: WebSocketClient) => {
+  const extendedClient = client as MarbleWebSocketClient;
 
   Object
     .entries(extendableFields)
@@ -21,10 +42,10 @@ export const extendClientWith = (extendableFields: ExtendableFields) => (client:
   return extendedClient;
 };
 
-export const handleServerBrokenConnections = (server: WebSocket.Server) => {
+export const handleServerBrokenConnections = (server: WebSocketServer) => {
   setInterval(() => {
     server.clients.forEach((client: WebSocketClient) => {
-      const extendedClient = client as ExtendedWebSocketClient;
+      const extendedClient = client as MarbleWebSocketClient;
 
       if (extendedClient.isAlive === false) { return client.terminate(); }
 
@@ -36,10 +57,10 @@ export const handleServerBrokenConnections = (server: WebSocket.Server) => {
   return server;
 };
 
-export const handleClientBrokenConnection = (client: ExtendedWebSocketClient) => {
+export const handleClientBrokenConnection = (client: MarbleWebSocketClient) => {
   let pingTimeout;
 
-  const heartbeat = (client: ExtendedWebSocketClient) => () => {
+  const heartbeat = (client: MarbleWebSocketClient) => () => {
     client.isAlive = true;
     clearTimeout(pingTimeout);
     pingTimeout = setTimeout(() => client.terminate(), HEART_BEAT_INTERVAL + 1000);
@@ -53,7 +74,7 @@ export const handleClientBrokenConnection = (client: ExtendedWebSocketClient) =>
   return client;
 };
 
-export const handleClientValidationError = (client: ExtendedWebSocketClient) => (error: WebSocketConnectionError) => {
+export const handleClientValidationError = (client: MarbleWebSocketClient) => (error: WebSocketConnectionError) => {
   client.isAlive = false;
   client.close(error.status || WebSocketStatus.INTERNAL_ERROR, error.message);
   return EMPTY;

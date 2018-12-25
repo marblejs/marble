@@ -2,6 +2,7 @@ import * as http from 'http';
 import { Observable } from 'rxjs';
 import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders, ServerEvent } from '../http.interface';
 import { HttpError } from '../error/error.model';
+import { Injector } from '../server/server.injector';
 
 export interface EffectHttpResponse<T = any> {
   status?: HttpStatus;
@@ -24,7 +25,7 @@ export interface Effect<
   T = HttpRequest,
   U = EffectHttpResponse,
   V = HttpResponse,
-  W = any,
+  W = typeof Injector.get,
 > {
-  (input$: Observable<T>, client: V, meta?: W): Observable<U>;
+  (input$: Observable<T>, client: V, meta: W): Observable<U>;
 }

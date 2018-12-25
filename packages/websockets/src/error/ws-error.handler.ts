@@ -1,11 +1,11 @@
 import { Observable, EMPTY } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { ExtendedWebSocketClient } from '../websocket.interface';
+import { MarbleWebSocketClient } from '../websocket.interface';
 import { WebSocketErrorEffect } from '../effects/ws-effects.interface';
 
 export const errorHandler = <T, IncomingError extends Error>(
   event$: Observable<T>,
-  extendedClient: ExtendedWebSocketClient,
+  extendedClient: MarbleWebSocketClient,
   errorEffect: WebSocketErrorEffect<IncomingError, any, any> | undefined,
 ) => (error: IncomingError) =>
   errorEffect

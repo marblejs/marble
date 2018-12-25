@@ -3,6 +3,7 @@ import { Effect, Middleware } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
+import { Injector } from '../../server/server.injector';
 
 describe('#findRoute', () => {
   test('finds route inside collection', () => {
@@ -116,7 +117,7 @@ describe('#resolveRouting', () => {
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);
     queryFactory.queryParamsFactory = jest.fn(() => ({}));
-    const resolvedRoute = resolveRouting([])(res)(req);
+    const resolvedRoute = resolveRouting([], Injector.get)(res)(req);
 
     // then
     resolvedRoute.subscribe(effect => {
@@ -134,7 +135,7 @@ describe('#resolveRouting', () => {
 
     // when
     router.findRoute = jest.fn(() => undefined);
-    const resolvedRoute = resolveRouting([])(res)(req);
+    const resolvedRoute = resolveRouting([], Injector.get)(res)(req);
 
     // then
     resolvedRoute.subscribe(
@@ -159,7 +160,7 @@ describe('#resolveRouting', () => {
     const res = { finished: true } as HttpResponse;
 
     // when
-    const resolvedRoute = resolveRouting([])(res)(req);
+    const resolvedRoute = resolveRouting([], Injector.get)(res)(req);
 
     // then
     resolvedRoute.subscribe(
@@ -190,7 +191,7 @@ describe('#resolveRouting', () => {
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);
     queryFactory.queryParamsFactory = jest.fn(() => ({}));
-    const resolvedRoute = resolveRouting([])(res)(req);
+    const resolvedRoute = resolveRouting([], Injector.get)(res)(req);
 
     // then
     resolvedRoute.subscribe(effect => {

@@ -1,6 +1,6 @@
 import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
-import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { HttpRequest, HttpResponse, Injector } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
 const MockReq = require('mock-req');
 
@@ -22,7 +22,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, Injector.get);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -58,7 +58,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, Injector.get);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -94,7 +94,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, Injector.get);
     const valid$ = validator$(schema, { allowUnknown: true })(http$);
 
     valid$.subscribe(data => {

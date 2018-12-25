@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
-import { ExtendedWebSocketClient } from '../../websocket.interface';
+import { MarbleWebSocketClient } from '../../websocket.interface';
 
 export const broadcast = <Input>
-  (client: ExtendedWebSocketClient) =>
+  (client: MarbleWebSocketClient) =>
   (fn: (input: Input) => any) =>
   (input$: Observable<Input>): Observable<never> =>
     input$.pipe(

@@ -9,6 +9,7 @@ import { RouteEffect, RouteEffectGroup } from './router/router.interface';
 import { resolveRouting } from './router/router.resolver';
 import { factorizeRouting } from './router/router.factory';
 import { defaultError$ } from './error/error.effect';
+import { Injector } from './server/server.injector';
 
 export interface HttpListenerConfig {
   middlewares?: Middleware[];
@@ -30,9 +31,9 @@ export const httpListener = ({
     mergeMap(({ req, res }) => {
       res.send = handleResponse(res)(req);
 
-      return combinedMiddlewares(of(req), res).pipe(
+      return combinedMiddlewares(of(req), res, Injector.get).pipe(
         takeWhile(() => !res.finished),
-        switchMap(resolveRouting(routing)(res)),
+        switchMap(resolveRouting(routing, Injector.get)(res)),
         defaultIfEmpty(defaultResponse),
         tap(res.send),
         catchError(error =>

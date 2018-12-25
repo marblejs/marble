@@ -1,9 +1,11 @@
 import { EffectFactory, HttpError, HttpStatus, combineRoutes, use, switchToProtocol } from '@marblejs/core';
 import { validator$, Joi } from '@marblejs/middleware-joi';
+import { MarbleWebSocketServer } from '../../../websockets/src/websocket.interface';
 import { throwError } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap, tap } from 'rxjs/operators';
 import { user$ } from './user.effects';
 import { static$ } from './static.effects';
+import { AppDependencies } from '../app.dependencies';
 
 const rootValidator$ = validator$({
   params: {
@@ -14,10 +16,17 @@ const rootValidator$ = validator$({
 const root$ = EffectFactory
   .matchPath('/')
   .matchType('GET')
-  .use(req$ => req$.pipe(
+  .use((req$, _, inject) => req$.pipe(
     use(rootValidator$),
     map(req => req.params.version),
-    map(version => ({ body: `API version: ${version}` })),
+    map(version => `API version: ${version}`),
+    tap(message => {
+      const wsServer = inject<MarbleWebSocketServer>(AppDependencies.WS_SERVER);
+      if (wsServer) {
+        wsServer.sendBroadcastResponse({ type: 'ROOT', payload: message });
+      }
+    }),
+    map(message => ({ body: message })),
   ));
 
 const notImplemented$ = EffectFactory

@@ -1,16 +1,20 @@
-import { Event, EventType } from '@marblejs/core';
+import { Event, EventType, Injector, InjectorKey } from '@marblejs/core';
 import * as pathToRegexp from 'path-to-regexp';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { WebSocketServerCollection } from '../../websocket.interface';
+import { MarbleWebSocketServer } from '../../websocket.interface';
 
 type UpgradeEventData = NonNullable<(typeof Event.UPGRADE)['data']>;
 
+type WebSocketServerCollection = Array<{
+  path: string,
+  server: InjectorKey,
+}>;
+
 export const mapToServer = (...servers: WebSocketServerCollection) => {
-  const mappedCollection = servers.map(({ path, server, protocol }) => ({
+  const mappedCollection = servers.map(({ path, server: serverKey }) => ({
     pathToMatch: pathToRegexp(path),
-    protocol,
-    server,
+    serverKey,
   }));
 
   return (input$: Observable<UpgradeEventData>): Observable<any> =>
@@ -18,14 +22,18 @@ export const mapToServer = (...servers: WebSocketServerCollection) => {
       tap(([ req, socket, head ]) => {
         let found = false;
 
-        mappedCollection.forEach(({ pathToMatch, server, protocol }) => {
+        mappedCollection.forEach(({ pathToMatch, serverKey }) => {
           const pathname = req.url!;
 
-          if (pathToMatch.test(pathname) && req.headers.upgrade === protocol) {
+          if (pathToMatch.test(pathname) && req.headers.upgrade === 'websocket') {
             found = true;
-            server.handleUpgrade(req, socket, head, function done(ws) {
-              server.emit(EventType.CONNECTION, ws, req);
-            });
+            const server = Injector.get<MarbleWebSocketServer>(serverKey);
+
+            if (server) {
+              server.handleUpgrade(req, socket, head, function done(ws) {
+                server.emit(EventType.CONNECTION, ws, req);
+              });
+            }
           }
         });
 

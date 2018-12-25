@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { HttpRequest, HttpResponse, Injector } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { of } from 'rxjs';
 import { bodyParser$ } from '.';
@@ -30,7 +30,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, Injector.get);
 
     http$.subscribe(data => {
       expect(data.body).toEqual({ test: 'test' });
@@ -48,7 +48,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, Injector.get);
 
     http$.subscribe(data => {
       expect(data.body).toEqual({
@@ -71,7 +71,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, Injector.get);
 
     http$.subscribe(
       () => {
@@ -96,7 +96,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, Injector.get);
 
     http$.subscribe(data => {
       expect(data.body).toEqual('test');
@@ -114,7 +114,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, Injector.get);
 
     http$.subscribe(
       () => {

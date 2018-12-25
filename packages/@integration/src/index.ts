@@ -3,14 +3,14 @@ import { of, concat } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { httpServer, webSocketServer } from './app';
 import { mapToServer } from '../../websockets/src';
+import { AppDependencies } from './app.dependencies';
 
 const upgrade$: ServerEffect = event$ =>
   event$.pipe(
     matchEvent(Event.UPGRADE),
     mapToServer({
-      protocol: 'websocket',
       path: '/api/:version/ws',
-      server: webSocketServer(),
+      server: AppDependencies.WS_SERVER,
     }),
   );
 
@@ -22,11 +22,11 @@ const listen$: ServerEffect = event$ =>
     ),
   );
 
-const events$: ServerEffect = (event$, server) =>
+const events$: ServerEffect = (event$, ...args) =>
   event$.pipe(
     mergeMap(event => concat(
-      listen$(of(event), server),
-      upgrade$(of(event), server),
+      listen$(of(event), ...args),
+      upgrade$(of(event), ...args),
     ),
   ));
 
@@ -35,4 +35,7 @@ marble({
   port: 1337,
   httpListener: httpServer,
   httpEventsHandler: events$,
+  dependencies: {
+    [AppDependencies.WS_SERVER]: () => webSocketServer(),
+  },
 });

@@ -17,8 +17,9 @@ import {
   handleServerBrokenConnections,
   handleClientBrokenConnection,
   handleClientValidationError,
+  extendServerWith,
 } from './websocket.helper';
-import { WebSocketIncomingData, WebSocketClient } from './websocket.interface';
+import { WebSocketIncomingData, WebSocketClient, MarbleWebSocketServer } from './websocket.interface';
 import { errorHandler } from './error/ws-error.handler';
 
 export interface WebSocketListenerConfig<
@@ -43,10 +44,10 @@ export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Er
   const combinedEffects = combineEffects(...effects);
   const combinedMiddlewares = combineMiddlewares(...middlewares);
 
-  const onConnection = (server: WebSocket.Server) => (client: WebSocketClient, req: http.IncomingMessage) => {
+  const onConnection = (server: MarbleWebSocketServer) => (client: WebSocketClient, req: http.IncomingMessage) => {
     const extendedClient = extendClientWith({
-      sendResponse: handleResponse(client, server, eventTransformer),
-      sendBroadcastResponse: handleBroadcastResponse(client, server, eventTransformer),
+      sendResponse: handleResponse(client, eventTransformer),
+      sendBroadcastResponse: handleBroadcastResponse(server, eventTransformer),
       isAlive: true,
     })(client);
 
@@ -72,11 +73,14 @@ export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Er
 
   return (httpServer?: http.Server) => {
     const serverOptions: WebSocket.ServerOptions = httpServer
-      ? { server: httpServer }
+      ? { server: httpServer, }
       : { noServer: true };
-
     const server = new WebSocket.Server(serverOptions);
-    server.on('connection', onConnection(server));
-    return handleServerBrokenConnections(server);
+    const extendedServer = extendServerWith({
+      sendBroadcastResponse: handleBroadcastResponse(server, eventTransformer)
+    })(server);
+
+    extendedServer.on('connection', onConnection(extendedServer));
+    return handleServerBrokenConnections(extendedServer);
   };
 };

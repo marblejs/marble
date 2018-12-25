@@ -9,7 +9,11 @@ export type WebSocketClient = WebSocket;
 
 export type WebSocketIncomingData = string | Buffer | ArrayBuffer | Buffer[];
 
-export interface ExtendedWebSocketClient extends WebSocketClient {
+export interface MarbleWebSocketServer extends WebSocketServer {
+  sendBroadcastResponse: <T>(response: T) => Observable<never>;
+}
+
+export interface MarbleWebSocketClient extends WebSocketClient {
   isAlive: boolean;
   sendResponse: <T>(response: T) => Observable<never>;
   sendBroadcastResponse: <T>(response: T) => Observable<never>;
@@ -19,12 +23,6 @@ export interface WebSocketEvent<T = unknown> extends Record<string, any> {
   payload: T;
   type: WebSocketType;
 }
-
-export type WebSocketServerCollection = Array<{
-  path: string,
-  server: WebSocketServer,
-  protocol: string,
-}>;
 
 export enum WebSocketStatus {
   NORMAL_CLOSUE = 1000,

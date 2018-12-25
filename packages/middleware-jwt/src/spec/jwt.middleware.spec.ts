@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse, HttpError, HttpStatus } from '@marblejs/core';
+import { HttpRequest, HttpResponse, HttpError, HttpStatus, Injector } from '@marblejs/core';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
 import { of, throwError, iif } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
@@ -42,7 +42,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, undefined);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, Injector.get);
 
     // then
     middleware$.subscribe(
@@ -73,7 +73,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => throwError(expectedError));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, undefined);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, Injector.get);
 
     // then
     middleware$.subscribe(
@@ -105,7 +105,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, undefined);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, Injector.get);
 
     // then
     middleware$.subscribe(
