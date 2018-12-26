@@ -2,7 +2,7 @@ import * as http from 'http';
 import { Subject } from 'rxjs';
 import { httpListener } from '../http.listener';
 import { ServerEvent, EventType } from '../http.interface';
-import { InjectorDependencies } from './server.injector';
+import { InjectionDependencies } from './server.injector';
 import { ServerEffect } from '../effects/effects.interface';
 
 export interface MarbleConfig {
@@ -10,7 +10,7 @@ export interface MarbleConfig {
   hostname?: string;
   httpListener: ReturnType<typeof httpListener>;
   httpEventsHandler?: ServerEffect;
-  dependencies?: InjectorDependencies;
+  dependencies?: InjectionDependencies;
 }
 
 const eventsSubscriber =

@@ -3,7 +3,7 @@ import { Effect, Middleware } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
-import { createStaticInjectorContainer } from '../../server/server.injector';
+import { createStaticInjectionContainer } from '../../server/server.injector';
 
 describe('#findRoute', () => {
   test('finds route inside collection', () => {
@@ -99,7 +99,7 @@ describe('#findRoute', () => {
 describe('#resolveRouting', () => {
   let router;
   let queryFactory;
-  const injector = createStaticInjectorContainer();
+  const injector = createStaticInjectionContainer();
 
   beforeEach(() => {
     jest.unmock('../router.resolver.ts');

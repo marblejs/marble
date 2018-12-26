@@ -1,32 +1,43 @@
 import * as http from 'http';
 
 export type Injectable = (httpServer: http.Server) => any;
-export type Injector = typeof createStaticInjectorContainer;
-export type InjectorKey = string | symbol;
-export type InjectorDependencies = Record<InjectorKey, Injectable>;
+export type Injector = typeof createStaticInjectionContainer;
+export type InjectionDependencies = { token: InjectionToken, factory: Injectable }[];
+export type InjectionToken<T = any> = new() => Token<T>;
 
-export interface InjectorGetter {
-  <T>(key: InjectorKey): T | undefined;
+export interface InjectionGetter {
+  <T>(key: InjectionToken<T>): T;
 }
 
-export const createStaticInjectorContainer = () => {
-  const dependencies = new Map<InjectorKey, any>();
+export class Token<T = any> {
+  surrogate!: T;
+}
 
-  const register = (key: InjectorKey, depencency: any) =>
-    dependencies.set(key, depencency);
+export const createInjectionToken = <T>() =>
+  class InlineToken extends Token<T> {};
 
-  const deregister = (key: InjectorKey) =>
-    dependencies.delete(key);
+export const createStaticInjectionContainer = () => {
+  const dependencies = new Map<InjectionToken, any>();
 
-  const get = <T>(key: InjectorKey): T | undefined =>
-    dependencies.get(key);
+  const register = <T>(token: InjectionToken<T>, factory: Injectable) => (httpServer: http.Server) =>
+    dependencies.set(token, factory(httpServer));
 
-  const registerAll = (dependenciesToRegister: InjectorDependencies) => (httpServer: http.Server) => Object
-    .entries(dependenciesToRegister)
-    .forEach(([key, dependencyFactory]) => register(key, dependencyFactory(httpServer)));
+  const deregister = <T>(token: InjectionToken<T>) =>
+    dependencies.delete(token);
+
+  const get = <T>(token: InjectionToken<T>): T =>
+    dependencies.get(token);
+
+  const registerAll = (dependenciesToRegister: InjectionDependencies) => (httpServer: http.Server) =>
+    dependenciesToRegister.forEach(({ token, factory }) =>
+      register(token, factory)(httpServer)
+    );
 
   const deregisterAll = () =>
     dependencies.clear();
+
+  const listTokens = () =>
+    dependencies.keys();
 
   return {
     get,
@@ -34,5 +45,10 @@ export const createStaticInjectorContainer = () => {
     registerAll,
     deregister,
     deregisterAll,
+    listTokens,
   };
 };
+
+export const bind = <T>(token: InjectionToken<T>) => ({
+  to: (factory: Injectable) => ({ token, factory })
+});

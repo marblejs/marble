@@ -1,5 +1,12 @@
 export { webSocketListener, WebSocketListenerConfig } from './websocket.listener';
-export { WebSocketEvent } from './websocket.interface';
+export {
+  WebSocketEvent,
+  WebSocketServer,
+  WebSocketClient,
+  MarbleWebSocketClient,
+  MarbleWebSocketServer,
+  WebSocketStatus,
+} from './websocket.interface';
 export { jsonTransformer } from './transformer/json.transformer';
 export { EventTransformer } from './transformer/transformer.inteface';
 export { error$ } from './error/ws-error.effect';

@@ -10,7 +10,7 @@ import {
   mapToAction,
   WebSocketConnectionError,
   WebSocketConnectionEffect,
-} from '../../websockets/src';
+} from '@marblejs/websockets';
 import { iif, throwError, of } from 'rxjs';
 import { map, buffer, mergeMap } from 'rxjs/operators';
 

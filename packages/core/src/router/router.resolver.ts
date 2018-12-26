@@ -4,7 +4,7 @@ import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
 import { EffectHttpResponse } from '../effects/effects.interface';
 import { RouteMatched, Routing, RoutingItem } from './router.interface';
 import { queryParamsFactory } from './router.query.factory';
-import { InjectorGetter } from '../server/server.injector';
+import { InjectionGetter } from '../server/server.injector';
 export { RoutingItem };
 
 export const findRoute = (
@@ -37,7 +37,7 @@ export const findRoute = (
 };
 
 export const resolveRouting =
-  (routing: Routing, injector: InjectorGetter) =>
+  (routing: Routing, inject: InjectionGetter) =>
   (res: HttpResponse) =>
   (req: HttpRequest): Observable<EffectHttpResponse> => {
     if (res.finished) { return EMPTY; }
@@ -54,9 +54,9 @@ export const resolveRouting =
     const middleware = routeMatched.middleware;
 
     return middleware
-      ? middleware(of(req), res, injector).pipe(
+      ? middleware(of(req), res, inject).pipe(
           takeWhile(() => !res.finished),
-          mergeMap(req => routeMatched.effect(of(req), res, injector))
+          mergeMap(req => routeMatched.effect(of(req), res, inject))
         )
-      : routeMatched.effect(of(req), res, injector);
+      : routeMatched.effect(of(req), res, inject);
   };
