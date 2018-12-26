@@ -1,9 +1,9 @@
 import { mapTo, tap, filter } from 'rxjs/operators';
-import { marble } from './server.factory';
-import { httpListener } from '../http.listener';
-import { EventType } from '../http.interface';
-import { EffectFactory } from '../effects/effects.factory';
-import { mockHttpServer } from '../+internal/testing';
+import { marble } from '../server.factory';
+import { httpListener } from '../../http.listener';
+import { EventType } from '../../http.interface';
+import { EffectFactory } from '../../effects/effects.factory';
+import { mockHttpServer } from '../../+internal/testing';
 
 describe('#marble', () => {
   beforeEach(() => jest.restoreAllMocks());
@@ -59,6 +59,23 @@ describe('#marble', () => {
     expect(marbleServer.info.routing).toBeInstanceOf(Array);
     expect(marbleServer.info.routing[0].path).toEqual('');
     expect(marbleServer.info.routing[0].methods.GET!.effect).toBeDefined();
+  });
+
+  test('registers dependencies if defined', () => {
+    // given
+    const app = httpListener({ effects: [] });
+    const { injector } = app.config;
+
+    // when
+    jest.spyOn(injector, 'registerAll')
+      .mockImplementation(jest.fn(() => jest.fn()));
+
+    // then
+    marble({ httpListener: app });
+    expect(injector.registerAll).not.toHaveBeenCalled();
+
+    marble({ httpListener: app, dependencies: [] });
+    expect(injector.registerAll).toHaveBeenCalledWith([]);
   });
 
   test(`emits ${EventType.LISTEN} EventType on start`, (done) => {
