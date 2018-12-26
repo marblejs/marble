@@ -1,7 +1,8 @@
 import { Event, EventType, InjectionToken, InjectionGetter } from '@marblejs/core';
+import * as http from 'http';
 import * as pathToRegexp from 'path-to-regexp';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, from, EMPTY } from 'rxjs';
+import { filter, mergeMap, map, tap, mapTo, toArray, mergeMapTo } from 'rxjs/operators';
 import { MarbleWebSocketServer } from '../../websocket.interface';
 
 type UpgradeEventData = NonNullable<(typeof Event.UPGRADE)['data']>;
@@ -11,35 +12,30 @@ type WebSocketServerCollection = Array<{
   server: InjectionToken,
 }>;
 
+const isWebSocketUpgrade = ([ req ]: [http.IncomingMessage, ...any[]]) =>
+  req.headers.upgrade === 'websocket';
+
 export const mapToServer = (...servers: WebSocketServerCollection) => (inject: InjectionGetter) => {
-  const mappedCollection = servers.map(({ path, server: serverKey }) => ({
+  const mappedCollection = servers.map(({ path, server: serverToken }) => ({
     pathToMatch: pathToRegexp(path),
-    serverKey,
+    serverToken,
   }));
 
   return (input$: Observable<UpgradeEventData>): Observable<any> =>
     input$.pipe(
-      tap(([ req, socket, head ]) => {
-        let found = false;
-
-        mappedCollection.forEach(({ pathToMatch, serverKey }) => {
-          const pathname = req.url!;
-
-          if (pathToMatch.test(pathname) && req.headers.upgrade === 'websocket') {
-            const server = inject<MarbleWebSocketServer>(serverKey);
-
-            if (server) {
-              found = true;
-              server.handleUpgrade(req, socket, head, function done(ws) {
-                server.emit(EventType.CONNECTION, ws, req);
-              });
-            }
-          }
-        });
-
-        if (!found) {
-          socket.destroy();
-        }
-      }),
+      filter(isWebSocketUpgrade),
+      mergeMap(([ req, socket, head ]) => from(mappedCollection).pipe(
+        filter(({ pathToMatch }) => pathToMatch.test(req.url!)),
+        map(({ serverToken }) => inject<MarbleWebSocketServer>(serverToken)),
+        filter(Boolean),
+        tap(server => server.handleUpgrade(req, socket, head, (ws) =>
+          server.emit(EventType.CONNECTION, ws, req),
+        )),
+        mapTo(true),
+        toArray(),
+        filter(matchedResults => !matchedResults.includes(true)),
+        tap(socket.destroy),
+      )),
+      mergeMapTo(EMPTY),
     );
 };
