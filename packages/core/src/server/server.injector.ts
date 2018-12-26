@@ -36,16 +36,12 @@ export const createStaticInjectionContainer = () => {
   const deregisterAll = () =>
     dependencies.clear();
 
-  const listTokens = () =>
-    dependencies.keys();
-
   return {
     get,
     register,
     registerAll,
     deregister,
     deregisterAll,
-    listTokens,
   };
 };
 
