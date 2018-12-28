@@ -11,7 +11,7 @@
     "lint": "lerna run lint",
     "pretest": "yarn lint",
     "test": "yarn test:unit && yarn test:integration",
-    "test:unit": "SCOPE=unit jest --expand --coverage",
+    "test:unit": "SCOPE=unit jest --expand --coverage --detectOpenHandles",
     "test:integration": "SCOPE=integration jest --expand",
     "test:watch": "jest --expand --onlyChanged --watch",
     "clean": "lerna run clean",

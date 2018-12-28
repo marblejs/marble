@@ -6,7 +6,19 @@ import { EffectFactory } from '../../effects/effects.factory';
 import { mockHttpServer } from '../../+internal/testing';
 
 describe('#marble', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  let marbleServer: ReturnType<typeof marble>;
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  afterEach(done => {
+    if (marbleServer) {
+      marbleServer.server.close(() => done());
+    } else {
+      done();
+    }
+  });
 
   test('creates http server and starts listening to given port', () => {
     // given
@@ -17,7 +29,7 @@ describe('#marble', () => {
 
     // when
     mockHttpServer(mocks);
-    marble({
+    marbleServer = marble({
       port,
       hostname,
       httpListener: app,
@@ -35,7 +47,7 @@ describe('#marble', () => {
 
     // when
     mockHttpServer(mocks);
-    marble({ httpListener: app });
+    marbleServer = marble({ httpListener: app });
 
     // then
     expect(mocks.listen.mock.calls[0][0]).toBe(undefined);
@@ -51,7 +63,7 @@ describe('#marble', () => {
     const app = httpListener({ effects: [effect$] });
 
     // when
-    const marbleServer = marble({ httpListener: app });
+    marbleServer = marble({ httpListener: app });
 
     // then
     expect(marbleServer.server).toBeDefined();
@@ -67,15 +79,24 @@ describe('#marble', () => {
     const { injector } = app.config;
 
     // when
-    jest.spyOn(injector, 'registerAll')
-      .mockImplementation(jest.fn(() => jest.fn()));
+    jest.spyOn(injector, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
+    marbleServer = marble({ httpListener: app, dependencies: [] });
 
     // then
-    marble({ httpListener: app });
-    expect(injector.registerAll).not.toHaveBeenCalled();
-
-    marble({ httpListener: app, dependencies: [] });
     expect(injector.registerAll).toHaveBeenCalledWith([]);
+  });
+
+  test('doesn\'t register dependencies if not defined', () => {
+    // given
+    const app = httpListener({ effects: [] });
+    const { injector } = app.config;
+
+    // when
+    jest.spyOn(injector, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
+    marbleServer = marble({ httpListener: app });
+
+    // then
+    expect(injector.registerAll).not.toHaveBeenCalled();
   });
 
   test(`emits ${EventType.LISTEN} EventType on start`, (done) => {
@@ -84,7 +105,7 @@ describe('#marble', () => {
     const expectedEvent = EventType.LISTEN;
 
     // then
-    marble({
+    marbleServer = marble({
       httpListener: app,
       httpEventsHandler: event$ => event$.pipe(
         filter(event => event.type === expectedEvent),
@@ -99,7 +120,7 @@ describe('#marble', () => {
     const expectedEvent = EventType.UPGRADE;
 
     // then
-    const marbleServer = marble({
+    marbleServer = marble({
       httpListener: app,
       httpEventsHandler: event$ => event$.pipe(
         filter(event => event.type === expectedEvent),
