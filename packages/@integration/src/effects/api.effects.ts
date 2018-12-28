@@ -4,7 +4,7 @@ import { throwError } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 import { user$ } from './user.effects';
 import { static$ } from './static.effects';
-import { WebSocketsToken } from '../app.tokens';
+import { WebSocketsToken } from '../tokens';
 
 const rootValidator$ = validator$({
   params: {

@@ -2,8 +2,9 @@ import { marble, matchEvent, Event, ServerEffect, bind } from '@marblejs/core';
 import { mapToServer } from '@marblejs/websockets';
 import { of, concat } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { httpServer, webSocketServer } from './app';
-import { WebSocketsToken } from './app.tokens';
+import { httpServer } from './http.listener';
+import { webSocketServer } from './webSockets.listener';
+import { WebSocketsToken } from './tokens';
 
 const upgrade$: ServerEffect = (event$, _, injector) =>
   event$.pipe(
