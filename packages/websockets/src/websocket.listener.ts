@@ -21,6 +21,7 @@ import {
 } from './websocket.helper';
 import { WebSocketIncomingData, WebSocketClient, MarbleWebSocketServer } from './websocket.interface';
 import { errorHandler } from './error/ws-error.handler';
+import { provideErrorEffect } from './error/ws-error.provider';
 
 export interface WebSocketListenerConfig<
   Event extends any,
@@ -38,25 +39,27 @@ export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Er
   error,
   effects = [],
   middlewares = [],
-  eventTransformer = jsonTransformer as EventTransformer<any, any>,
+  eventTransformer,
   connection = req$ => req$,
 }: WebSocketListenerConfig<Event, OutgoingEvent, IncomingError> = {}) => {
   const combinedEffects = combineEffects(...effects);
   const combinedMiddlewares = combineMiddlewares(...middlewares);
+  const error$ = provideErrorEffect(error, eventTransformer);
+  const providedTransformer = eventTransformer || jsonTransformer as EventTransformer<any, any>;
 
   const onConnection = (server: MarbleWebSocketServer) => (client: WebSocketClient, req: http.IncomingMessage) => {
     const extendedClient = extendClientWith({
-      sendResponse: handleResponse(client, eventTransformer),
-      sendBroadcastResponse: handleBroadcastResponse(server, eventTransformer),
+      sendResponse: handleResponse(client, providedTransformer),
+      sendBroadcastResponse: handleBroadcastResponse(server, providedTransformer),
       isAlive: true,
     })(client);
 
     const eventSubject$ = new Subject<WebSocketIncomingData>();
-    const event$ = eventSubject$.pipe(map(eventTransformer.decode));
+    const event$ = eventSubject$.pipe(map(providedTransformer.decode));
     const middlewares$ = combinedMiddlewares(event$, extendedClient);
     const effects$ = combinedEffects(middlewares$, extendedClient).pipe(
       tap(extendedClient.sendResponse),
-      catchError(errorHandler(event$, extendedClient, error)),
+      catchError(errorHandler(event$, extendedClient, error$)),
     );
 
     const streamSubscription = connection(of(req), extendedClient).pipe(
@@ -77,7 +80,7 @@ export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Er
       : { noServer: true };
     const server = new WebSocket.Server(serverOptions);
     const extendedServer = extendServerWith({
-      sendBroadcastResponse: handleBroadcastResponse(server, eventTransformer)
+      sendBroadcastResponse: handleBroadcastResponse(server, providedTransformer)
     })(server);
 
     extendedServer.on('connection', onConnection(extendedServer));
