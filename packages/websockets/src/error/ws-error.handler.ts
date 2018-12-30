@@ -1,15 +1,15 @@
-import { Observable, EMPTY } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { EMPTY, of } from 'rxjs';
 import { MarbleWebSocketClient } from '../websocket.interface';
 import { WebSocketErrorEffect } from '../effects/ws-effects.interface';
+import { WebSocketError } from './ws-error.model';
 
-export const errorHandler = <T, IncomingError extends Error>(
-  event$: Observable<T>,
+export const handleEffectsError = <IncomingError extends WebSocketError>(
   extendedClient: MarbleWebSocketClient,
   errorEffect: WebSocketErrorEffect<IncomingError, any, any> | undefined,
-) => (error: IncomingError) =>
-  errorEffect
-    ? errorEffect(event$, extendedClient, error).pipe(
-        tap(extendedClient.sendResponse)
-      )
-    : EMPTY;
+) => (error: IncomingError) => {
+  if (errorEffect) {
+    errorEffect(of(error.event), extendedClient, error).subscribe(extendedClient.sendResponse);
+  }
+
+  return EMPTY;
+};
