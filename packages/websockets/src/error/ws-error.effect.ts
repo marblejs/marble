@@ -1,19 +1,19 @@
 import { map } from 'rxjs/operators';
 import { WebSocketError } from './ws-error.model';
 import { WebSocketErrorEffect } from '../effects/ws-effects.interface';
-import { WebSocketType } from '../websocket.interface';
 
-const errorFactory = (eventType: WebSocketType, message: string, data: any | undefined) => ({
-  error: { eventType, message, data },
+const DEFAULT_ERROR_CHANNEL = 'ERROR';
+
+const errorFactory = (message: string | undefined, data: any | undefined) => ({
+  message, data,
 });
 
 export const error$: WebSocketErrorEffect<WebSocketError> = (event$, _, error) =>
   event$.pipe(
-    map(({ type }) => ({
-      type,
-      payload: errorFactory(
-        type,
-        error ? error.message : '',
+    map(event => ({
+      type: event ? event.type : DEFAULT_ERROR_CHANNEL,
+      error: errorFactory(
+        error ? error.message : undefined,
         error ? error.data : undefined,
       )
     })),

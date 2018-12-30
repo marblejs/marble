@@ -19,9 +19,10 @@ export interface MarbleWebSocketClient extends WebSocketClient {
   sendBroadcastResponse: <T>(response: T) => Observable<never>;
 }
 
-export interface WebSocketEvent<T = unknown> extends Record<string, any> {
-  payload: T;
+export interface WebSocketEvent<T = unknown, U = any> extends Record<string, any> {
   type: WebSocketType;
+  payload?: T;
+  error?: U;
 }
 
 export enum WebSocketStatus {
