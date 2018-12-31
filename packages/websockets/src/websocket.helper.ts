@@ -1,11 +1,12 @@
 import * as WebSocket from 'ws';
-import { EMPTY } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import {
   MarbleWebSocketClient,
   MarbleWebSocketServer,
   WebSocketClient,
   WebSocketStatus,
   WebSocketServer,
+  WebSocketIncomingData,
 } from './websocket.interface';
 import { WebSocketConnectionError } from './error/ws-error.model';
 export { WebSocket };
@@ -79,3 +80,8 @@ export const handleClientValidationError = (client: MarbleWebSocketClient) => (e
   client.close(error.status || WebSocketStatus.INTERNAL_ERROR, error.message);
   return EMPTY;
 };
+
+export const fromWebSocketEvent =  (client: MarbleWebSocketClient, event: string) =>
+  new Observable<WebSocketIncomingData>(subscriber => {
+    client.on(event, message => subscriber.next(message));
+  });

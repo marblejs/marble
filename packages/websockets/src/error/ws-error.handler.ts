@@ -1,4 +1,4 @@
-import { EMPTY, of } from 'rxjs';
+import { of } from 'rxjs';
 import { MarbleWebSocketClient } from '../websocket.interface';
 import { WebSocketErrorEffect } from '../effects/ws-effects.interface';
 import { WebSocketError } from './ws-error.model';
@@ -10,6 +10,4 @@ export const handleEffectsError = <IncomingError extends WebSocketError>(
   if (errorEffect) {
     errorEffect(of(error.event), extendedClient, error).subscribe(extendedClient.sendResponse);
   }
-
-  return EMPTY;
 };
