@@ -1,4 +1,4 @@
-export * from './broadcast/broadcast.operator';
-export * from './matchType/matchType.operator';
-export * from './mapToAction/mapToAction.operator';
-export * from './mapToServer/mapToServer.operator';
+export { broadcast } from './broadcast/broadcast.operator';
+export { matchType } from './matchType/matchType.operator';
+export { mapToAction } from './mapToAction/mapToAction.operator';
+export { mapToServer } from './mapToServer/mapToServer.operator';

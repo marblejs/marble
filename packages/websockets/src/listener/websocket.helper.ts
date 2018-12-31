@@ -1,14 +1,13 @@
 import * as WebSocket from 'ws';
-import { EMPTY, Observable } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import {
   MarbleWebSocketClient,
   MarbleWebSocketServer,
   WebSocketClient,
   WebSocketStatus,
   WebSocketServer,
-  WebSocketData,
-} from './websocket.interface';
-import { WebSocketConnectionError } from './error/ws-error.model';
+} from '../websocket.interface';
+import { WebSocketConnectionError } from '../error/ws-error.model';
 export { WebSocket };
 
 type ExtendableServerFields = {
@@ -21,7 +20,7 @@ type ExtendableClientFields = {
   sendBroadcastResponse: MarbleWebSocketClient['sendBroadcastResponse'];
 };
 
-const HEART_BEAT_INTERVAL = 10 * 1000;
+export const HEART_BEAT_INTERVAL = 10 * 1000;
 
 export const createWebSocketServer = (options: WebSocket.ServerOptions) =>
   new WebSocket.Server(options);
@@ -84,8 +83,3 @@ export const handleClientValidationError = (client: MarbleWebSocketClient) => (e
   client.close(error.status || WebSocketStatus.INTERNAL_ERROR, error.message);
   return EMPTY;
 };
-
-export const fromWebSocketEvent =  (client: MarbleWebSocketClient, event: string) =>
-  new Observable<WebSocketData>(subscriber => {
-    client.on(event, message => subscriber.next(message));
-  });

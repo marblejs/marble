@@ -11,7 +11,7 @@ type ServerResponseHandler =
   (server: WebSocket.Server, eventTransformer: EventTransformer<any>) =>
   <T>(response: T) => Observable<never>;
 
-export const handleResponse: ClientResponseHandler = (client, eventTransformer) => (response) => {
+export const handleResponse: ClientResponseHandler = (client, eventTransformer) => <T>(response: T) => {
   const encodedResponse = eventTransformer.encode(response);
   client.send(encodedResponse);
   return EMPTY;

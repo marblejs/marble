@@ -34,4 +34,17 @@ describe('error$', () => {
       ['--b--', { b: outgoingEvent }],
     ], { meta: error });
   });
+
+  test('returns stream of error events for undefined event object', () => {
+    // given
+    const incomingEvent = undefined;
+    const error = undefined;
+    const outgoingEvent = { type: 'ERROR', error: {} };
+
+    // then
+    Marbles.assertEffect(error$, [
+      ['--a--', { a: incomingEvent }],
+      ['--b--', { b: outgoingEvent }],
+    ], { meta: error });
+  });
 });

@@ -3,14 +3,14 @@ import * as WebSocket from 'ws';
 import { Subject, of, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { combineEffects, combineMiddlewares } from '@marblejs/core';
-import * as WS from './websocket.interface';
+import * as WS from '../websocket.interface';
 import * as WSHelper from './websocket.helper';
-import * as WSEffect from './effects/ws-effects.interface';
-import { jsonTransformer } from './transformer/json.transformer';
-import { EventTransformer } from './transformer/transformer.inteface';
-import { handleResponse, handleBroadcastResponse } from './response/ws-response.handler';
-import { handleEffectsError } from './error/ws-error.handler';
-import { provideErrorEffect } from './error/ws-error.provider';
+import * as WSEffect from '../effects/ws-effects.interface';
+import { jsonTransformer } from '../transformer/json.transformer';
+import { EventTransformer } from '../transformer/transformer.inteface';
+import { handleResponse, handleBroadcastResponse } from '../response/ws-response.handler';
+import { handleEffectsError } from '../error/ws-error.handler';
+import { provideErrorEffect } from '../error/ws-error.provider';
 
 type HandleIncomingMessage =
   (client: WS.MarbleWebSocketClient) =>
@@ -24,7 +24,7 @@ export interface WebSocketListenerConfig<IncomingEvent, OutgoingEvent, IncomingE
   effects?: WSEffect.WebSocketEffect<IncomingEvent, OutgoingEvent>[];
   middlewares?: WSEffect.WebSocketMiddleware<IncomingEvent, IncomingEvent>[];
   error?: WSEffect.WebSocketErrorEffect<IncomingError, IncomingEvent, OutgoingEvent>;
-  eventTransformer?: EventTransformer<IncomingEvent>;
+  eventTransformer?: EventTransformer<IncomingEvent, any>;
   connection?: WSEffect.WebSocketConnectionEffect;
 }
 

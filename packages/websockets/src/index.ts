@@ -1,4 +1,4 @@
-export { webSocketListener, WebSocketListenerConfig } from './websocket.listener';
+export { webSocketListener, WebSocketListenerConfig } from './listener/websocket.listener';
 export {
   WebSocketEvent,
   WebSocketServer,
