@@ -2,7 +2,7 @@ import * as http from 'http';
 import * as WebSocket from 'ws';
 import { Subject, of, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { combineEffects } from '@marblejs/core';
+import { combineEffects, combineMiddlewares } from '@marblejs/core';
 import {
   WebSocketMiddleware,
   WebSocketErrorEffect,
@@ -42,6 +42,7 @@ export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Er
   eventTransformer,
   connection = req$ => req$,
 }: WebSocketListenerConfig<Event, OutgoingEvent, IncomingError> = {}) => {
+  const combinedMiddlewares = combineMiddlewares(...middlewares);
   const combinedEffects = combineEffects(...effects);
   const error$ = provideErrorEffect(error, eventTransformer);
   const providedTransformer = eventTransformer || jsonTransformer as EventTransformer<any, any>;
@@ -60,10 +61,10 @@ export const webSocketListener = <Event, OutgoingEvent, IncomingError extends Er
         const eventSubject$ = new Subject<Event>();
 
         const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
-        const middlewares$ = middlewares.reduce((e$, middleware) => middleware(e$, extendedClient), decodedEvent$);
+        const middlewares$ = combinedMiddlewares(decodedEvent$, extendedClient);
         const effects$ = combinedEffects(eventSubject$, extendedClient);
 
-        const subscribeMiddlewares = (input$: Observable<any>) => input$.pipe()
+        const subscribeMiddlewares = (input$: Observable<any>) => input$
           .subscribe(
             event => eventSubject$.next(event),
             error => handleEffectsError(extendedClient, error$)(error),
