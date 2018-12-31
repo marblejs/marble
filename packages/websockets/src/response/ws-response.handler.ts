@@ -1,14 +1,14 @@
 import * as WebSocket from 'ws';
 import { EMPTY, Observable } from 'rxjs';
 import { EventTransformer } from '../transformer/transformer.inteface';
-import { WebSocketIncomingData, WebSocketClient } from '../websocket.interface';
+import { WebSocketClient } from '../websocket.interface';
 
 type ClientResponseHandler =
-  (client: WebSocketClient, eventTransformer: EventTransformer<WebSocketIncomingData, any>) =>
+  (client: WebSocketClient, eventTransformer: EventTransformer<any>) =>
   <T>(response: T) => Observable<never>;
 
 type ServerResponseHandler =
-  (server: WebSocket.Server, eventTransformer: EventTransformer<WebSocketIncomingData, any>) =>
+  (server: WebSocket.Server, eventTransformer: EventTransformer<any>) =>
   <T>(response: T) => Observable<never>;
 
 export const handleResponse: ClientResponseHandler = (client, eventTransformer) => (response) => {

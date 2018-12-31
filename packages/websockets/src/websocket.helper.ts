@@ -6,7 +6,7 @@ import {
   WebSocketClient,
   WebSocketStatus,
   WebSocketServer,
-  WebSocketIncomingData,
+  WebSocketData,
 } from './websocket.interface';
 import { WebSocketConnectionError } from './error/ws-error.model';
 export { WebSocket };
@@ -22,6 +22,9 @@ type ExtendableClientFields = {
 };
 
 const HEART_BEAT_INTERVAL = 10 * 1000;
+
+export const createWebSocketServer = (options: WebSocket.ServerOptions) =>
+  new WebSocket.Server(options);
 
 export const extendServerWith = (extendableFields: ExtendableServerFields) => (server: WebSocketServer) => {
   const extendedServer = server as MarbleWebSocketServer;
@@ -77,11 +80,12 @@ export const handleClientBrokenConnection = (client: MarbleWebSocketClient) => {
 
 export const handleClientValidationError = (client: MarbleWebSocketClient) => (error: WebSocketConnectionError) => {
   client.isAlive = false;
+  client.ping(() => null);
   client.close(error.status || WebSocketStatus.INTERNAL_ERROR, error.message);
   return EMPTY;
 };
 
 export const fromWebSocketEvent =  (client: MarbleWebSocketClient, event: string) =>
-  new Observable<WebSocketIncomingData>(subscriber => {
+  new Observable<WebSocketData>(subscriber => {
     client.on(event, message => subscriber.next(message));
   });

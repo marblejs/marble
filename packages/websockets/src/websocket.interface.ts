@@ -1,13 +1,13 @@
 import * as WebSocket from 'ws';
 import { Observable } from 'rxjs';
 
-export type WebSocketType = string;
+export type WebSocketEventType = string;
 
 export type WebSocketServer = WebSocket.Server;
 
 export type WebSocketClient = WebSocket;
 
-export type WebSocketIncomingData = string | Buffer | ArrayBuffer | Buffer[];
+export type WebSocketData = WebSocket.Data;
 
 export interface MarbleWebSocketServer extends WebSocketServer {
   sendBroadcastResponse: <T>(response: T) => Observable<never>;
@@ -20,7 +20,7 @@ export interface MarbleWebSocketClient extends WebSocketClient {
 }
 
 export interface WebSocketEvent<T = unknown, U = any> extends Record<string, any> {
-  type: WebSocketType;
+  type: WebSocketEventType;
   payload?: T;
   error?: U;
 }

@@ -1,6 +1,6 @@
-import { WebSocketIncomingData } from '../websocket.interface';
+import { WebSocketData } from '../websocket.interface';
 
-export interface EventTransformer<T extends WebSocketIncomingData, U> {
-  decode: (incomingEvent: T) => U;
-  encode: (outgoingEvent: U) => T;
+export interface EventTransformer<T, U extends WebSocketData = WebSocketData> {
+  decode: (incomingEvent: U) => T;
+  encode: (outgoingEvent: T) => U;
 }
