@@ -26,7 +26,7 @@ export interface WebSocketEvent<T = unknown, U = any> extends Record<string, any
 }
 
 export enum WebSocketStatus {
-  NORMAL_CLOSUE = 1000,
+  NORMAL_CLOSURE = 1000,
   GOING_AWAY = 1001,
   PROTOCOL_ERROR = 1002,
   UNSUPPORTED_DATA = 1003,

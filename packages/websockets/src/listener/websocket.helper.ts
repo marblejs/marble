@@ -53,7 +53,7 @@ export const handleServerBrokenConnections = (server: WebSocketServer) => {
       if (extendedClient.isAlive === false) { return client.terminate(); }
 
       extendedClient.isAlive = false;
-      extendedClient.ping(() => null);
+      extendedClient.ping();
     });
   }, HEART_BEAT_INTERVAL);
 
@@ -79,7 +79,6 @@ export const handleClientBrokenConnection = (client: MarbleWebSocketClient) => {
 
 export const handleClientValidationError = (client: MarbleWebSocketClient) => (error: WebSocketConnectionError) => {
   client.isAlive = false;
-  client.ping(() => null);
   client.close(error.status || WebSocketStatus.INTERNAL_ERROR, error.message);
   return EMPTY;
 };

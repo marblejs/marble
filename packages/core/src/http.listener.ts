@@ -19,7 +19,7 @@ export interface HttpListenerConfig {
 
 export const httpListener = ({
   middlewares = [],
-  effects = [],
+  effects,
   errorEffect = defaultError$,
 }: HttpListenerConfig) => {
   const requestSubject$ = new Subject<Http>();
