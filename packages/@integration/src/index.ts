@@ -3,7 +3,7 @@ import { mapToServer } from '@marblejs/websockets';
 import { of, concat } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { httpServer } from './http.listener';
-import { webSocketServer } from './webSockets.listener';
+import { webSocketServer } from './ws.listener';
 import { WebSocketsToken } from './tokens';
 
 const upgrade$: ServerEffect = (event$, _, injector) =>
