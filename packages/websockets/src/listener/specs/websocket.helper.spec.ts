@@ -1,14 +1,17 @@
 import { EventEmitter } from 'events';
+import { TimeoutError } from 'rxjs';
+import { Marbles } from '@marblejs/core/dist/+internal';
 import { MarbleWebSocketClient, WebSocketStatus, WebSocketServer } from '../../websocket.interface';
 import { WebSocketConnectionError } from '../../error/ws-error.model';
 import {
   handleClientValidationError,
   handleClientBrokenConnection,
   handleServerBrokenConnections,
+  HEART_BEAT_TERMINATE_INTERVAL,
 } from '../websocket.helper';
 
 class WebSocketClientMock extends EventEmitter {
-  isAlive: boolean | undefined;
+  isAlive = false;
   ping = jest.fn();
   close = jest.fn();
   terminate = jest.fn();
@@ -51,45 +54,53 @@ describe('#handleServerBrokenConnections', () => {
 });
 
 describe('#handleClientBrokenConnection', () => {
-  test('heartbeats', () => {
+  test('heartbeats and closes stream', () => {
     // given
+    const scheduler = Marbles.createTestScheduler();
     const client = new WebSocketClientMock() as any as MarbleWebSocketClient;
+    const isAlive = true;
 
     // when
-    client.isAlive = false;
-    jest.spyOn(global, 'clearTimeout');
-    handleClientBrokenConnection(client);
+    const brokenConnection$ = handleClientBrokenConnection(client, scheduler);
+    scheduler.schedule(() => client.emit('open'),    100);
+    scheduler.schedule(() => client.isAlive = false, 150);
+    scheduler.schedule(() => client.emit('ping'),    200);
+    scheduler.schedule(() => client.isAlive = false, 250);
+    scheduler.schedule(() => client.emit('pong'),    300);
+    scheduler.schedule(() => client.emit('close'),   400);
 
     // then
-    client.emit('open');
-    expect(client.isAlive).toEqual(true);
-    client.isAlive = false;
-
-    client.emit('ping');
-    expect(client.isAlive).toEqual(true);
-    client.isAlive = false;
-
-    client.emit('pong');
-    expect(client.isAlive).toEqual(true);
-    client.isAlive = false;
-
-    client.emit('close');
-    expect(client.isAlive).toEqual(false);
-
-    expect(global.clearTimeout).toHaveBeenCalledTimes(4);
+    scheduler.run(({ expectObservable, flush }) => {
+      expectObservable(brokenConnection$).toBe(
+        '100ms a 99ms b 99ms c 99ms |',
+        { a: isAlive, b: isAlive, c: isAlive },
+      );
+      flush();
+      expect(client.terminate).not.toHaveBeenCalled();
+    });
   });
 
   test('terminates if heartbeat is timed out', () => {
     // given
+    const scheduler = Marbles.createTestScheduler();
     const client = new WebSocketClientMock() as any as MarbleWebSocketClient;
+    const timeoutError = new TimeoutError();
+    const isAlive = true;
 
     // when
-    jest.spyOn(global, 'setTimeout').mockImplementation(jest.fn(cb => cb()));
-    handleClientBrokenConnection(client);
+    const brokenConnection$ = handleClientBrokenConnection(client, scheduler);
+    scheduler.schedule(() => client.emit('open'), 100);
 
     // then
-    client.emit('ping');
-    expect(client.terminate).toHaveBeenCalled();
+    scheduler.run(({ expectObservable, flush }) => {
+      expectObservable(brokenConnection$).toBe(
+        `100ms a ${HEART_BEAT_TERMINATE_INTERVAL - 1}ms #`,
+        { a: isAlive },
+        timeoutError,
+      );
+      flush();
+      expect(client.terminate).toHaveBeenCalled();
+    });
   });
 });
 

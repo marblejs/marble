@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "rxjs": "~6.2.2"
+    "rxjs": "~6.3.3"
   },
   "dependencies": {
     "chalk": "~2.4.1",

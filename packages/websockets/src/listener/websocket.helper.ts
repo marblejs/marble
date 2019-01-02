@@ -1,5 +1,5 @@
 import * as WebSocket from 'ws';
-import { EMPTY } from 'rxjs';
+import { EMPTY, fromEvent, merge, SchedulerLike, throwError } from 'rxjs';
 import {
   MarbleWebSocketClient,
   MarbleWebSocketServer,
@@ -8,6 +8,7 @@ import {
   WebSocketServer,
 } from '../websocket.interface';
 import { WebSocketConnectionError } from '../error/ws-error.model';
+import { takeUntil, catchError, tap, mapTo, timeout, map } from 'rxjs/operators';
 export { WebSocket };
 
 type ExtendableServerFields = {
@@ -21,6 +22,7 @@ type ExtendableClientFields = {
 };
 
 export const HEART_BEAT_INTERVAL = 10 * 1000;
+export const HEART_BEAT_TERMINATE_INTERVAL = HEART_BEAT_INTERVAL + 1000;
 
 export const createWebSocketServer = (options: WebSocket.ServerOptions) =>
   new WebSocket.Server(options);
@@ -60,22 +62,23 @@ export const handleServerBrokenConnections = (server: WebSocketServer) => {
   return server;
 };
 
-export const handleClientBrokenConnection = (client: MarbleWebSocketClient) => {
-  let pingTimeout;
-
-  const heartbeat = (client: MarbleWebSocketClient) => () => {
-    client.isAlive = true;
-    clearTimeout(pingTimeout);
-    pingTimeout = setTimeout(() => client.terminate(), HEART_BEAT_INTERVAL + 1000);
-  };
-
-  client.on('open', heartbeat(client));
-  client.on('ping', heartbeat(client));
-  client.on('pong', heartbeat(client));
-  client.on('close', () => clearTimeout(pingTimeout));
-
-  return client;
-};
+export const handleClientBrokenConnection = (client: MarbleWebSocketClient, scheduler?: SchedulerLike) =>
+  merge(
+    fromEvent(client, 'open'),
+    fromEvent(client, 'ping'),
+    fromEvent(client, 'pong'),
+  )
+  .pipe(
+    takeUntil(fromEvent(client, 'close')),
+    timeout(HEART_BEAT_TERMINATE_INTERVAL, scheduler),
+    mapTo(client),
+    tap(client => client.isAlive = true),
+    map(client => client.isAlive),
+    catchError(error => {
+      client.terminate();
+      return throwError(error);
+    }),
+  );
 
 export const handleClientValidationError = (client: MarbleWebSocketClient) => (error: WebSocketConnectionError) => {
   client.isAlive = false;

@@ -28,7 +28,7 @@ export interface HttpResponse extends http.ServerResponse {
   send: (response: EffectHttpResponse) => Observable<never>;
 }
 
-export interface HttpHeaders extends Record<string, string> {}
+export interface HttpHeaders extends http.OutgoingHttpHeaders {}
 
 export enum HttpMethodType {
   POST,

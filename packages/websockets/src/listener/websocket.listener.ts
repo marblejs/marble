@@ -95,7 +95,7 @@ export const webSocketListener = <IncomingEvent, OutgoingEvent, IncomingError ex
       WSHelper.handleClientValidationError(extendedClient),
     );
 
-    WSHelper.handleClientBrokenConnection(extendedClient);
+    WSHelper.handleClientBrokenConnection(extendedClient).subscribe();
   };
 
   return (server?: http.Server) => {
@@ -105,6 +105,8 @@ export const webSocketListener = <IncomingEvent, OutgoingEvent, IncomingError ex
     const extendedWebSocketServer = WSHelper.extendServerWith({ sendBroadcastResponse })(webSocketServer);
 
     extendedWebSocketServer.on('connection', handleIncomingConnection(extendedWebSocketServer));
-    return WSHelper.handleServerBrokenConnections(extendedWebSocketServer);
+    WSHelper.handleServerBrokenConnections(extendedWebSocketServer);
+
+    return extendedWebSocketServer;
   };
 };

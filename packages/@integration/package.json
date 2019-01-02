@@ -27,7 +27,7 @@
     "@marblejs/middleware-logger": "^1.2.1",
     "@marblejs/middleware-joi": "^1.2.1",
     "@types/node": "^10.1.2",
-    "rxjs": "~6.2.2",
+    "rxjs": "~6.3.3",
     "typescript": "~3.0.3"
   },
   "devDependencies": {
