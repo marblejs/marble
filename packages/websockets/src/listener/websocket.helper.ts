@@ -1,5 +1,5 @@
 import * as WebSocket from 'ws';
-import { EMPTY, fromEvent, merge, SchedulerLike, throwError } from 'rxjs';
+import { EMPTY, fromEvent, merge, SchedulerLike, throwError, interval, from, iif, of } from 'rxjs';
 import {
   MarbleWebSocketClient,
   MarbleWebSocketServer,
@@ -8,7 +8,7 @@ import {
   WebSocketServer,
 } from '../websocket.interface';
 import { WebSocketConnectionError } from '../error/ws-error.model';
-import { takeUntil, catchError, tap, mapTo, timeout, map } from 'rxjs/operators';
+import { takeUntil, catchError, tap, mapTo, timeout, map, mergeMap, mergeMapTo } from 'rxjs/operators';
 export { WebSocket };
 
 type ExtendableServerFields = {
@@ -20,6 +20,11 @@ type ExtendableClientFields = {
   sendResponse: MarbleWebSocketClient['sendResponse'];
   sendBroadcastResponse: MarbleWebSocketClient['sendBroadcastResponse'];
 };
+
+export enum ClientStatus {
+  ALIVE,
+  DEAD,
+}
 
 export const HEART_BEAT_INTERVAL = 10 * 1000;
 export const HEART_BEAT_TERMINATE_INTERVAL = HEART_BEAT_INTERVAL + 1000;
@@ -47,31 +52,37 @@ export const extendClientWith = (extendableFields: ExtendableClientFields) => (c
   return extendedClient;
 };
 
-export const handleServerBrokenConnections = (server: WebSocketServer) => {
-  setInterval(() => {
-    server.clients.forEach((client: WebSocketClient) => {
-      const extendedClient = client as MarbleWebSocketClient;
-
-      if (extendedClient.isAlive === false) { return client.terminate(); }
-
-      extendedClient.isAlive = false;
-      extendedClient.ping();
-    });
-  }, HEART_BEAT_INTERVAL);
-
-  return server;
-};
+export const handleServerBrokenConnections = (server: WebSocketServer, scheduler?: SchedulerLike) =>
+  interval(HEART_BEAT_INTERVAL, scheduler).pipe(
+    takeUntil(fromEvent(server, 'close')),
+    mergeMapTo(from(server.clients)),
+    map(client => client as MarbleWebSocketClient),
+    mergeMap(client => iif(
+      () => !client.isAlive,
+      of(client).pipe(
+        tap(client => client.isAlive = false),
+        tap(() => client.terminate()),
+        mapTo(ClientStatus.DEAD),
+      ),
+      of(client).pipe(
+        tap(() => console.log('interval', client.isAlive)),
+        tap(client => client.isAlive = false),
+        tap(client => client.ping()),
+        mapTo(ClientStatus.ALIVE),
+      ),
+    )),
+  );
 
 export const handleClientBrokenConnection = (client: MarbleWebSocketClient, scheduler?: SchedulerLike) =>
   merge(
     fromEvent(client, 'open'),
     fromEvent(client, 'ping'),
     fromEvent(client, 'pong'),
-  )
-  .pipe(
+  ).pipe(
     takeUntil(fromEvent(client, 'close')),
     timeout(HEART_BEAT_TERMINATE_INTERVAL, scheduler),
     mapTo(client),
+    tap(() => console.log('heartbeat', client.isAlive)),
     tap(client => client.isAlive = true),
     map(client => client.isAlive),
     catchError(error => {

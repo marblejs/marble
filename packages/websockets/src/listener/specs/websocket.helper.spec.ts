@@ -7,7 +7,9 @@ import {
   handleClientValidationError,
   handleClientBrokenConnection,
   handleServerBrokenConnections,
+  HEART_BEAT_INTERVAL,
   HEART_BEAT_TERMINATE_INTERVAL,
+  ClientStatus,
 } from '../websocket.helper';
 
 class WebSocketClientMock extends EventEmitter {
@@ -17,39 +19,53 @@ class WebSocketClientMock extends EventEmitter {
   terminate = jest.fn();
 }
 
+class WebSocketServerMock extends EventEmitter {
+  constructor(public clients: WebSocketClientMock[]) {
+    super();
+  }
+}
+
 describe('#handleServerBrokenConnections', () => {
-  test('heartbeats', () => {
-    // given
-    const server = { clients: [new WebSocketClientMock()] };
-
-    // when
-    jest.spyOn(global, 'setInterval').mockImplementation(jest.fn(cb => cb()));
-    server.clients.forEach(client => client.isAlive = true);
-    handleServerBrokenConnections(server as any as WebSocketServer);
-
-    // then
-    server.clients.forEach(client => {
-      expect(client.isAlive).toEqual(false);
-      expect(client.ping).toHaveBeenCalled();
-    });
-  });
-
   test('terminates dead connections', () => {
     // given
-    const server = { clients: [
+    const scheduler = Marbles.createTestScheduler();
+    const server = new WebSocketServerMock([
       new WebSocketClientMock(),
       new WebSocketClientMock(),
-    ] };
+    ]);
 
     // when
-    jest.spyOn(global, 'setInterval').mockImplementation(jest.fn(cb => cb()));
-    server.clients[0].isAlive = true;
-    server.clients[1].isAlive = false;
-    handleServerBrokenConnections(server as any as WebSocketServer);
+    const brokenConnection$ = handleServerBrokenConnections(server as any as WebSocketServer, scheduler);
+
+    scheduler.schedule(() => {
+      server.clients[0].isAlive = true;
+      server.clients[1].isAlive = true;
+      server.emit('connection');
+    }, 0);
+
+    scheduler.schedule(() => {
+      server.clients[0].isAlive = true;
+      server.clients[1].isAlive = false; // dead client
+    }, HEART_BEAT_INTERVAL + 100);
+
+    scheduler.schedule(() =>
+      server.emit('close'),
+      HEART_BEAT_INTERVAL * 2 + 100
+    );
 
     // then
-    expect(server.clients[0].terminate).not.toHaveBeenCalled();
-    expect(server.clients[1].terminate).toHaveBeenCalled();
+    scheduler.run(({ expectObservable, flush }) => {
+      expectObservable(brokenConnection$).toBe(
+        `${HEART_BEAT_INTERVAL}ms (ab) ${HEART_BEAT_INTERVAL - 4}ms (cd) 96ms |`,
+        {
+          a: ClientStatus.ALIVE, b: ClientStatus.ALIVE,
+          c: ClientStatus.ALIVE, d: ClientStatus.DEAD,
+        },
+      );
+      flush();
+      expect(server.clients[0].terminate).not.toHaveBeenCalled();
+      expect(server.clients[1].terminate).toHaveBeenCalled();
+    });
   });
 });
 
