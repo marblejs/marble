@@ -2187,6 +2187,11 @@ formidable@^1.2.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/formidable/-/formidable-1.2.1.tgz#70fb7ca0290ee6ff961090415f4b3df3d2082659"
 
+fp-ts@^1.0.0:
+  version "1.12.2"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.12.2.tgz#4297ceb989a81d05df10552fb969a73104293a1f"
+  integrity sha512-h5+V5g4o4CiOoAdUxx+g+/n3n9MYw8SgjBygEDqyuyq3gmGSsUKvHtSvHstZ2DVVBadP+XqGiQ6V/qYyMK1iKA==
+
 fragment-cache@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/fragment-cache/-/fragment-cache-0.2.1.tgz#4290fad27f13e89be7f33799c6bc5a0abfff0d19"
@@ -2691,6 +2696,13 @@ invert-kv@^1.0.0:
 invert-kv@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
+
+io-ts@~1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.5.1.tgz#8824f6011ae5987d8bd601af05c4483d013f3044"
+  integrity sha512-2VvrD1xESb8vzZ1kz0fy3mYAALkeAfCLhc7JQKGGvgnxfYgimeodvqf2hEeFEf7ITDEhaGg37dRPsmcp9wliHQ==
+  dependencies:
+    fp-ts "^1.0.0"
 
 ip@^1.1.5:
   version "1.1.5"
