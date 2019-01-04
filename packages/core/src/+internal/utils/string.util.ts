@@ -13,3 +13,8 @@ export const trim = (strings: TemplateStringsArray, ...values: any[]) => {
 
   return interpolation.trim();
 };
+
+export const stringify = (value: any): string =>
+  typeof value === 'function'
+    ? (value.displayName || value.name)
+    : JSON.stringify(value);
