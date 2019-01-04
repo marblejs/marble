@@ -1,13 +1,13 @@
+import * as http from 'http';
 import { Observable } from 'rxjs';
-import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders } from '../http.interface';
+import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders, ServerEvent } from '../http.interface';
+import { HttpError } from '../error/error.model';
+import { InjectionGetter } from '../server/server.injector';
 
-export interface EffectResponse<T = any> {
-  body?: T;
-}
-
-export interface EffectHttpResponse<T = any> extends EffectResponse<T> {
+export interface EffectHttpResponse<T = any> {
   status?: HttpStatus;
   headers?: HttpHeaders;
+  body?: T;
 }
 
 export interface Middleware<
@@ -15,14 +15,17 @@ export interface Middleware<
   O extends HttpRequest = HttpRequest,
 > extends Effect<I, O> {}
 
-export interface ErrorEffect<T extends Error = Error>
+export interface ErrorEffect<T extends HttpError = HttpError>
   extends Effect<HttpRequest, EffectHttpResponse, HttpResponse, T> {}
+
+export interface ServerEffect<T extends ServerEvent = ServerEvent>
+  extends Effect<T, any, http.Server> {}
 
 export interface Effect<
   T = HttpRequest,
   U = EffectHttpResponse,
   V = HttpResponse,
-  W = any,
+  W = InjectionGetter,
 > {
-  (req$: Observable<T>, res: V, meta: W): Observable<U>;
+  (input$: Observable<T>, client: V, meta: W): Observable<U>;
 }

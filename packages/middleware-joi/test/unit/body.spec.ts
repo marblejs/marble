@@ -1,10 +1,12 @@
 import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
-import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { HttpRequest, HttpResponse, createStaticInjectionContainer } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
 const MockReq = require('mock-req');
 
 describe('Joi middleware - Body', () => {
+  const injector = createStaticInjectionContainer();
+
   it('should throws an error if dont pass a required field', done => {
     expect.assertions(2);
 
@@ -22,7 +24,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, injector.get);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -58,7 +60,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, injector.get);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -94,7 +96,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, {});
+    const http$ = bodyParser$(req$, res, injector.get);
     const valid$ = validator$(schema, { allowUnknown: true })(http$);
 
     valid$.subscribe(data => {

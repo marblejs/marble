@@ -1,9 +1,13 @@
 export { EffectFactory } from './effects/effects.factory';
-export { error$ } from './error/error.effect';
+export { defaultError$ } from './error/error.effect';
+export { coreErrorFactory, CoreErrorOptions } from './error/error.factory';
 export { HttpError } from './error/error.model';
 export { combineRoutes } from './router/router.combiner';
+export { combineEffects, combineMiddlewares } from './effects/effects.combiner';
 export * from './effects/effects.interface';
 export * from './router/router.interface';
-export * from './http.interface';
-export * from './http.listener';
 export * from './operators';
+export * from './http.interface';
+export * from './server/server.injector';
+export { marble, MarbleConfig } from './server/server.factory';
+export { HttpListenerConfig, httpListener } from './http.listener';

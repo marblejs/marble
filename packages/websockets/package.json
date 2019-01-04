@@ -1,0 +1,47 @@
+{
+  "name": "@marblejs/websockets",
+  "version": "1.2.1",
+  "description": "Websockets module for Marble.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start": "yarn watch",
+    "watch": "tsc -w",
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "lint": "tslint --config ../../tslint.json --project ./",
+    "test": "jest --config ../../jest.config.js"
+  },
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "yarn": ">= 1.7.0",
+    "npm": ">= 5.0.0"
+  },
+  "author": "Józef Flakus <hello@jflakus.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "homepage": "https://github.com/marblejs/marble#readme",
+  "peerDependencies": {
+    "@marblejs/core": "^1.2.1",
+    "rxjs": "~6.3.3"
+  },
+  "dependencies": {
+    "ws": "~6.1.2",
+    "@types/ws": "~6.0.1"
+  },
+  "devDependencies": {
+    "@marblejs/core": "^1.2.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

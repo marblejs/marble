@@ -1,15 +1,42 @@
-import * as http from 'http';
-import { app } from './app';
+import { marble, matchEvent, Event, ServerEffect, bind } from '@marblejs/core';
+import { mapToServer } from '@marblejs/websockets';
+import { of, concat } from 'rxjs';
+import { mergeMap, tap } from 'rxjs/operators';
+import { httpServer } from './http.listener';
+import { webSocketServer } from './ws.listener';
+import { WebSocketsToken } from './tokens';
 
-const HOSTNAME = '127.0.0.1';
-const PORT = 1337;
+const upgrade$: ServerEffect = (event$, _, injector) =>
+  event$.pipe(
+    matchEvent(Event.UPGRADE),
+    mapToServer({
+      path: '/api/:version/ws',
+      server: WebSocketsToken,
+    })(injector),
+  );
 
-const httpServer = http
-  .createServer(app)
-  .listen(PORT, HOSTNAME, () => {
-    console.log(`Server running @ http://${HOSTNAME}:${PORT}/`);
-  });
+const listen$: ServerEffect = event$ =>
+  event$.pipe(
+    matchEvent(Event.LISTEN),
+    tap(([ port, hostname ]) =>
+      console.log(`Server running @ http://${hostname}:${port}/ 🚀`)
+    ),
+  );
 
-  httpServer.on('close', () => {
-    console.log(`Connection closed`);
-  });
+const events$: ServerEffect = (event$, ...args) =>
+  event$.pipe(
+    mergeMap(event => concat(
+      listen$(of(event), ...args),
+      upgrade$(of(event), ...args),
+    ),
+  ));
+
+export const marbleServer = marble({
+  hostname: '127.0.0.1',
+  port: 1337,
+  httpListener: httpServer,
+  httpEventsHandler: events$,
+  dependencies: [
+    bind(WebSocketsToken).to(() => webSocketServer()),
+  ]
+});

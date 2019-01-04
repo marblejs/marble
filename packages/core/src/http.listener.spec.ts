@@ -3,10 +3,9 @@ import { of, throwError } from 'rxjs';
 import { mapTo, switchMap } from 'rxjs/operators';
 import { httpListener } from './http.listener';
 import { EffectFactory } from './effects/effects.factory';
-import { Middleware, ErrorEffect } from './effects/effects.interface';
+import { Middleware } from './effects/effects.interface';
 
 describe('Http listener', () => {
-  let errorEffect;
   let effectsCombiner;
   let responseHandler;
   let routerFactory;
@@ -18,7 +17,6 @@ describe('Http listener', () => {
     .use(req$ => req$.pipe(mapTo( {} )));
 
   const middleware$: Middleware = req$ => req$;
-  const errorMiddleware$: ErrorEffect = req$ => req$.pipe(mapTo( {} ));
 
   beforeEach(() => {
     jest.unmock('./error/error.effect.ts');
@@ -27,7 +25,6 @@ describe('Http listener', () => {
     jest.unmock('./router/router.factory.ts');
     jest.unmock('./router/router.resolver.ts');
 
-    errorEffect = require('./error/error.effect.ts');
     effectsCombiner = require('./effects/effects.combiner.ts');
     responseHandler = require('./response/response.handler.ts');
     routerFactory = require('./router/router.factory.ts');
@@ -44,7 +41,6 @@ describe('Http listener', () => {
     routerFactory.factorizeRouting = jest.fn(() => []);
     routerResolver.resolveRouting = jest.fn(() => () => () => of({ body: 'test' }));
     responseHandler.handleResponse = jest.fn(() => () => () => undefined);
-    errorEffect.errorEffectProvider = jest.fn(() => errorMiddleware$);
 
     httpListener({
       middlewares: [middleware$],
@@ -53,12 +49,12 @@ describe('Http listener', () => {
 
     // then
     setTimeout(() => {
-      expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith([middleware$]);
+      expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith(middleware$);
       expect(routerFactory.factorizeRouting).toHaveBeenCalledWith([effect$]);
       expect(routerResolver.resolveRouting).toHaveBeenCalled();
       expect(responseHandler.handleResponse).toHaveBeenCalled();
       done();
-    });
+    }, 0);
   });
 
   test('#httpListener allows empty middlewares', () => {
@@ -68,14 +64,13 @@ describe('Http listener', () => {
     // when
     effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
     routerFactory.factorizeRouting = jest.fn(() => []);
-    errorEffect.errorEffectProvider = jest.fn(() => errorMiddleware$);
 
     httpListener({
       effects: [effect$],
     });
 
     // then
-    expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith([]);
+    expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith(...[]);
   });
 
   test('#httpListener catches error', done => {
@@ -83,7 +78,7 @@ describe('Http listener', () => {
     const error = new Error('test');
     const req = {} as IncomingMessage;
     const res = {} as OutgoingMessage;
-    const errorHandler = jest.fn(() => of({ body: 'error' }));
+    const errorEffect$ = jest.fn(() => of({ body: 'error' }));
 
     // when
     effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
@@ -92,19 +87,19 @@ describe('Http listener', () => {
       of({ body: 'test' }).pipe(switchMap(() => throwError(error)))
     );
     responseHandler.handleResponse = jest.fn(() => () => () => undefined);
-    errorEffect.errorEffectProvider = jest.fn(() => errorHandler);
 
     httpListener({
       middlewares: [middleware$],
       effects: [effect$],
+      errorEffect: errorEffect$,
     })(req, res);
 
     // then
     setTimeout(() => {
       expect(responseHandler.handleResponse).toHaveBeenCalledTimes(1);
-      expect(errorHandler).toHaveBeenCalled();
+      expect(errorEffect$).toHaveBeenCalled();
       done();
-    });
+    }, 0);
   });
 
 });

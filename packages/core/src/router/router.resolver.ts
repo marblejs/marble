@@ -1,9 +1,10 @@
 import { EMPTY, Observable, of } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap, takeWhile } from 'rxjs/operators';
 import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
 import { EffectHttpResponse } from '../effects/effects.interface';
 import { RouteMatched, Routing, RoutingItem } from './router.interface';
 import { queryParamsFactory } from './router.query.factory';
+import { InjectionGetter } from '../server/server.injector';
 export { RoutingItem };
 
 export const findRoute = (
@@ -36,7 +37,7 @@ export const findRoute = (
 };
 
 export const resolveRouting =
-  (routing: Routing) =>
+  (routing: Routing, inject: InjectionGetter) =>
   (res: HttpResponse) =>
   (req: HttpRequest): Observable<EffectHttpResponse> => {
     if (res.finished) { return EMPTY; }
@@ -53,8 +54,9 @@ export const resolveRouting =
     const middleware = routeMatched.middleware;
 
     return middleware
-      ? middleware(of(req), res, null).pipe(
-          mergeMap(req => routeMatched.effect(of(req), res, null))
+      ? middleware(of(req), res, inject).pipe(
+          takeWhile(() => !res.finished),
+          mergeMap(req => routeMatched.effect(of(req), res, inject))
         )
-      : routeMatched.effect(of(req), res, null);
+      : routeMatched.effect(of(req), res, inject);
   };

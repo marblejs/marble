@@ -23,7 +23,7 @@ describe('Logger middleware', () => {
     Marbles.assertEffect(logger$, [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
-    ], { response });
+    ], { client: response });
 
     response.emit('finish');
     expect(console.info).toHaveBeenCalled();
@@ -36,7 +36,7 @@ describe('Logger middleware', () => {
     Marbles.assertEffect(logger$, [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
-    ], { response });
+    ], { client: response });
 
     response.emit('finish');
     expect(console.info).toHaveBeenCalled();

@@ -12,7 +12,7 @@ import { factorizeRegExpWithParams } from './router.params.factory';
 
 export const factorizeRouting = (
   routes: (RouteEffect | RouteEffectGroup)[],
-  middleware: Middleware[] = [],
+  middlewares: Middleware[] = [],
   parentPath = '',
 ): Routing => {
   const routing: Routing = [];
@@ -23,7 +23,7 @@ export const factorizeRouting = (
     if (isRouteEffectGroup(route)) {
       return routing.push(...factorizeRouting(
         route.effects,
-        [...middleware, ...route.middlewares],
+        [...middlewares, ...route.middlewares],
         concatenatedPath,
       ));
     }
@@ -32,8 +32,8 @@ export const factorizeRouting = (
     const foundRoute = routing.find(route => route.regExp.source === regExp.source);
     const method: RoutingMethod = {
       effect: route.effect,
-      middleware: middleware.length > 0
-        ? middleware.length > 1 ? combineMiddlewares(middleware) : middleware[0]
+      middleware: middlewares.length > 0
+        ? middlewares.length > 1 ? combineMiddlewares(...middlewares) : middlewares[0]
         : undefined,
       parameters,
     };

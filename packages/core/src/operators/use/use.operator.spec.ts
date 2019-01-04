@@ -1,23 +1,25 @@
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { Marbles } from '../../+internal';
-import { Middleware, Effect } from '../../effects/effects.interface';
+import { Effect } from '../../effects/effects.interface';
 import { HttpRequest } from '../../http.interface';
 import { use } from './use.operator';
 
 const createMockReq = (req: Partial<HttpRequest>) => req;
 
-describe('use.operator', () => {
+describe('#use operator', () => {
   test('applies middlewares to the request pipeline', () => {
-    const middleware$: Middleware<HttpRequest<number>> = req$ =>
-      req$.pipe(tap(req => req.body++ ));
+    const m$ = <T extends HttpRequest<number>>(req$: Observable<T>) =>
+      req$.pipe(
+        tap(req => req.body++)
+      );
 
-    const operators = [
-      use(middleware$),
-      use(middleware$)
-    ];
+    const effect$: Effect<HttpRequest<number>> = req$ => req$.pipe(
+      use(m$),
+      use(m$),
+    );
 
-    Marbles.assert(operators, [
+    Marbles.assertEffect(effect$, [
       ['-a---', { a: createMockReq({ body: 0 }) }],
       ['-a---', { a: createMockReq({ body: 2 }) }],
     ]);
@@ -45,6 +47,7 @@ describe('use.operator', () => {
 
     const m4$ = <T extends HttpRequest>(req$: Observable<T>) =>
       req$.pipe(
+        map(req => req as AuthorizedHttpRequest & T),
         tap(req => req.user = { id: 'test_id' }),
       ) as Observable<AuthorizedHttpRequest & T>;
 

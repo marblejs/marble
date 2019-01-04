@@ -1,9 +1,10 @@
-import { EffectFactory, HttpError, HttpStatus, combineRoutes, use } from '@marblejs/core';
+import { EffectFactory, HttpError, HttpStatus, combineRoutes, use, switchToProtocol } from '@marblejs/core';
 import { validator$, Joi } from '@marblejs/middleware-joi';
 import { throwError } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap, tap } from 'rxjs/operators';
 import { user$ } from './user.effects';
 import { static$ } from './static.effects';
+import { WebSocketsToken } from '../tokens';
 
 const rootValidator$ = validator$({
   params: {
@@ -14,10 +15,12 @@ const rootValidator$ = validator$({
 const root$ = EffectFactory
   .matchPath('/')
   .matchType('GET')
-  .use(req$ => req$.pipe(
+  .use((req$, _, inject) => req$.pipe(
     use(rootValidator$),
     map(req => req.params.version),
-    map(version => ({ body: `API version: ${version}` })),
+    map(version => `API version: ${version}`),
+    tap(message => inject(WebSocketsToken).sendBroadcastResponse({ type: 'ROOT', payload: message })),
+    map(message => ({ body: message })),
   ));
 
 const notImplemented$ = EffectFactory
@@ -27,6 +30,13 @@ const notImplemented$ = EffectFactory
     mergeMap(() => throwError(
       new HttpError('Route not implemented', HttpStatus.NOT_IMPLEMENTED, { reason: 'Not implemented' })
     )),
+  ));
+
+const webSockets$ = EffectFactory
+  .matchPath('/ws')
+  .matchType('GET')
+  .use(req$ => req$.pipe(
+    switchToProtocol('websocket')
   ));
 
 const notFound$ = EffectFactory
@@ -40,5 +50,5 @@ const notFound$ = EffectFactory
 
 export const api$ = combineRoutes(
   '/api/:version',
-  [ root$, user$, static$, notImplemented$, notFound$ ],
+  [ root$, user$, static$, notImplemented$, webSockets$, notFound$ ],
 );
