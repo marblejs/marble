@@ -16,6 +16,15 @@ export class HttpError extends ExtendableError {
   }
 }
 
+export class IOError extends ExtendableError {
+  constructor(
+    public readonly message: string,
+    public readonly data?: object,
+  ) {
+    super('IOError', message);
+  }
+}
+
 export class CoreError extends ExtendableError {
   constructor(
     public readonly message: string,
