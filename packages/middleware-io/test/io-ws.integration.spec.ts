@@ -1,40 +1,25 @@
-import * as WebSocket from 'ws';
-import * as http from 'http';
+import { createWebSocketsTestBed } from '@marblejs/websockets/dist/+internal';
 import { app } from './io-ws.integration';
 
 describe('@marblejs/middleware-io - WebSocket integration', () => {
-  let httpServer: http.Server;
-  let webSocketClient: WebSocket;
+  const testBed = createWebSocketsTestBed();
 
-  const createServer = (cb: () => void) =>
-    http.createServer().listen(1337, '127.0.0.1', cb);
-
-  const createWebSocketClient = () =>
-    new WebSocket('ws://127.0.0.1:1337');
-
-  beforeEach(done => {
-    httpServer = createServer(() => {
-      webSocketClient = createWebSocketClient();
-      done();
-    });
-  });
-
-  afterEach(done => {
-    webSocketClient.close();
-    httpServer.close(done);
-  });
+  beforeEach(testBed.bootstrap);
+  afterEach(testBed.teardown);
 
   test('[POST_USER] sends user object', done => {
     // given
     const user = { id: 'id', age: 100, };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
+    const httpServer = testBed.getServer();
+    const targetClient = testBed.getClient();
 
     // when
     app(httpServer);
-    webSocketClient.once('open', () => webSocketClient.send(event));
+    targetClient.once('open', () => targetClient.send(event));
 
     // then
-    webSocketClient.once('message', message => {
+    targetClient.once('message', message => {
       expect(message).toEqual(event);
       done();
     });
@@ -42,6 +27,8 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
 
   test('[POST_USER] throws an error if incoming object is invalid', done => {
     // given
+    const httpServer = testBed.getServer();
+    const targetClient = testBed.getClient();
     const user = { id: 'id', age: '100', };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
     const expectedError = {
@@ -58,10 +45,10 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
 
     // when
     app(httpServer);
-    webSocketClient.once('open', () => webSocketClient.send(event));
+    targetClient.once('open', () => targetClient.send(event));
 
     // then
-    webSocketClient.once('message', message => {
+    targetClient.once('message', message => {
       const parsedMessage = JSON.parse(message);
       expect(parsedMessage).toEqual(expectedError);
       done();
