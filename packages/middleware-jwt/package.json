@@ -39,7 +39,8 @@
     "jsonwebtoken": "^8.3.0"
   },
   "devDependencies": {
-    "@marblejs/core": "^1.2.1"
+    "@marblejs/core": "^1.2.1",
+    "@marblejs/middleware-body": "^1.2.1"
   },
   "publishConfig": {
     "access": "public"

@@ -1,9 +1,9 @@
 import { HttpStatus } from '../http.interface';
+import { ExtendableError } from '../+internal/utils';
 
-export class ExtendableError extends Error {
-  constructor(public name: string, message: string) {
-    super(message);
-  }
+export enum ErrorType {
+  CORE_ERROR = 'CoreError',
+  HTTP_ERROR = 'HttpError',
 }
 
 export class HttpError extends ExtendableError {
@@ -12,16 +12,7 @@ export class HttpError extends ExtendableError {
     public readonly status: HttpStatus,
     public readonly data?: object,
   ) {
-    super('HttpError', message);
-  }
-}
-
-export class IOError extends ExtendableError {
-  constructor(
-    public readonly message: string,
-    public readonly data?: object,
-  ) {
-    super('IOError', message);
+    super(ErrorType.HTTP_ERROR, message);
   }
 }
 
@@ -33,12 +24,14 @@ export class CoreError extends ExtendableError {
       context: any,
     }
   ) {
-    super('CoreError', message);
-
+    super(ErrorType.CORE_ERROR, message);
     Error.prepareStackTrace = (_, stack) => options.stackTraceFactory(message, stack);
     Error.captureStackTrace(this, options.context);
   }
 }
 
 export const isHttpError = (error: Error): error is HttpError =>
-  error.name === 'HttpError';
+  error.name === ErrorType.HTTP_ERROR;
+
+export const isCoreError = (error: Error): error is CoreError =>
+  error.name === ErrorType.CORE_ERROR;

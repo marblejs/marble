@@ -8,20 +8,21 @@ const defaultHttpError = new HttpError(
   HttpStatus.INTERNAL_SERVER_ERROR,
 );
 
-const getStatusCode = (error: HttpError): HttpStatus => isHttpError(error)
-  ? error.status
-  : HttpStatus.INTERNAL_SERVER_ERROR;
+const getStatusCode = (error: Error): HttpStatus =>
+  isHttpError(error)
+    ? error.status
+    : HttpStatus.INTERNAL_SERVER_ERROR;
 
-const errorFactory = (message: string, status: HttpStatus, data?: any) => ({
-  error: { status, message, data }
-});
+const errorFactory = (status: HttpStatus, error: Error) =>
+  isHttpError(error)
+    ? { error: { status, message: error.message, data: error.data } }
+    : { error: { status, message: error.message } };
 
 export const defaultError$: ErrorEffect<HttpError> = (req$, _, error = defaultHttpError) => req$
   .pipe(
     map(() => {
-      const { message, data } = error;
       const status = getStatusCode(error);
-      const body = errorFactory(message, status, data);
+      const body = errorFactory(status, error);
       return { status, body };
     }),
   );

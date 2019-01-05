@@ -15,7 +15,7 @@ export interface Middleware<
   O extends HttpRequest = HttpRequest,
 > extends Effect<I, O> {}
 
-export interface ErrorEffect<T extends HttpError = HttpError>
+export interface ErrorEffect<T extends Error = HttpError>
   extends Effect<HttpRequest, EffectHttpResponse, HttpResponse, T> {}
 
 export interface ServerEffect<T extends ServerEvent = ServerEvent>

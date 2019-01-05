@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 import * as t from 'io-ts';
 import { validator$ } from '../io.middleware';
-import { IOError } from '@marblejs/core';
+import { IOError } from '../io.error';
 
 describe('#validator$', () => {
   test('passes incoming data', done => {
