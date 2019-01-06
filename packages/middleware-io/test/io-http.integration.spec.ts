@@ -20,10 +20,11 @@ describe('@marblejs/middleware-io - HTTP integration', () => {
         expect(error).toBeDefined();
         expect(error.status).toEqual(400);
         expect(error.message).toEqual('Validation error');
-        expect(error.data).toEqual([
-          // tslint:disable-next-line:max-line-length
-          { expected: 'model: { user: { id: string, name: string, age: number } } / user: { id: string, name: string, age: number } / age: number', got: '"100"' }
-        ]);
+        expect(error.data).toEqual([{
+          path: 'user.age',
+          expected: 'number',
+          got: '"100"'
+        }]);
       });
   });
 });

@@ -33,7 +33,11 @@ describe('#validator$', () => {
   test('throws error if incoming data are not valid', done => {
     // given
     const input = { name: 'test', age: false };
-    const expectedError = [{ expected: 'model: { name: string, age: number } / age: number', got: 'false' }];
+    const expectedError = [{
+      path: 'age',
+      expected: 'number',
+      got: 'false',
+    }];
     const schema = t.interface({
       name: t.string,
       age: t.number,

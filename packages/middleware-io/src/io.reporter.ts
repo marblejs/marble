@@ -1,16 +1,32 @@
 import * as t from 'io-ts';
 import { Reporter } from 'io-ts/lib/Reporter';
-import { stringify } from '@marblejs/core/dist/+internal/utils';
+import { stringify, getLast } from '@marblejs/core/dist/+internal/utils';
 
 export interface DefaultReporterResult {
+  path: string;
   expected: string;
-  got: string;
+  got: any;
 }
 
-const getErrorMessage = (value: any, context: t.Context): DefaultReporterResult => ({
-  expected: context.map(c => `${c.key || 'model'}: ${c.type.name}`).join(' / '),
-  got: stringify(value),
-});
+const getPath = (context: t.Context) =>
+  context
+    .map(c => c.key)
+    .filter(Boolean)
+    .join('.');
+
+const getExpectedType = (context: t.ContextEntry[]) =>
+  getLast(context)
+    .map(c => c.type.name)
+    .valueOr('any');
+
+const getErrorMessage = (value: any, context: t.Context): DefaultReporterResult => {
+
+  return ({
+    path: getPath(context),
+    expected: getExpectedType(context as t.ContextEntry[]),
+    got: stringify(value),
+  });
+};
 
 const failure = (errors: t.ValidationError[]): DefaultReporterResult[] =>
   errors.map(error => getErrorMessage(error.value, error.context));

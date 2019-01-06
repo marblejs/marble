@@ -35,11 +35,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
       type: 'POST_USER',
       error: {
         message: 'Validation error',
-        data: [{
-          // tslint:disable-next-line:max-line-length
-          expected: 'model: { payload: { id: string, age: number } } / payload: { id: string, age: number } / age: number',
-          got: '"100"',
-        }],
+        data: [{ path: 'payload.age', expected: 'number', got: '"100"' }],
       },
     };
 
