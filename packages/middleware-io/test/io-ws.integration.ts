@@ -8,14 +8,10 @@ const user = io.type({
   age: io.number,
 });
 
-const userValidator$ = eventValidator$(io.type({
-  payload: user,
-}));
-
 const postUser$: WebSocketEffect = event$ =>
   event$.pipe(
     matchType('POST_USER'),
-    use(userValidator$),
+    use(eventValidator$(user)),
     map(event => event),
   );
 export const app = webSocketListener({

@@ -6,10 +6,7 @@ import { map} from 'rxjs/operators';
 import { defaultReporter } from './io.reporter';
 import { IOError } from './io.error';
 
-export type Schema =
-  | t.InterfaceType<any, any, any, any>
-  | t.RecursiveType<any, any, any, any>
-  ;
+export type Schema = t.Any;
 
 export interface ValidatorOptions {
   reporter?: Reporter<any>;

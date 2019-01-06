@@ -1,5 +1,6 @@
 export { webSocketListener, WebSocketListenerConfig } from './listener/websocket.listener';
 export {
+  ValidatedWebSocketEvent,
   WebSocketEvent,
   WebSocketServer,
   WebSocketClient,
