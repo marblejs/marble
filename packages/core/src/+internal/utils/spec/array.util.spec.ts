@@ -1,4 +1,4 @@
-import { getArrayFromEnum, getHead, filterArray, mapArray } from '../array.util';
+import { getArrayFromEnum, getHead, getLast, filterArray, mapArray } from '../array.util';
 
 describe('Array util', () => {
   test('#getArrayFromEnum returns array from simple enumerable', () => {
@@ -30,6 +30,20 @@ describe('Array util', () => {
     // then
     expect(none).toEqual('');
     expect(some).toEqual('test');
+  });
+
+  test('#getLast returns safe array last element', () => {
+    // given
+    const emptyArray = [];
+    const filledArray = ['test_1', 'test_2'];
+
+    // when
+    const none = getLast<string>(emptyArray).valueOr('');
+    const some = getLast(filledArray).valueOr('');
+
+    // then
+    expect(none).toEqual('');
+    expect(some).toEqual('test_2');
   });
 
   test('#filterArray filters an array by given predicate', () => {
