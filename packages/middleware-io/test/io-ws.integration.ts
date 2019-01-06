@@ -1,3 +1,4 @@
+import { use } from '@marblejs/core';
 import { webSocketListener, WebSocketEffect, matchType } from '@marblejs/websockets';
 import { map } from 'rxjs/operators';
 import { eventValidator$, io } from '../src';
@@ -12,10 +13,9 @@ const userValidator$ = eventValidator$(io.type({
 }));
 
 const postUser$: WebSocketEffect = event$ =>
-  userValidator$(event$.pipe(
-    matchType('POST_USER')
-  )).pipe(
-    // some computation ...
+  event$.pipe(
+    matchType('POST_USER'),
+    use(userValidator$),
     map(event => event),
   );
 export const app = webSocketListener({

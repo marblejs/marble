@@ -1,3 +1,4 @@
+import { use } from '@marblejs/core';
 import { WebSocketEffect, matchType } from '@marblejs/websockets';
 import { io, eventValidator$ } from '@marblejs/middleware-io';
 import { buffer, map } from 'rxjs/operators';
@@ -12,9 +13,9 @@ export const sum$: WebSocketEffect = event$ =>
   );
 
 export const add$: WebSocketEffect = (event$, client) =>
-  eventValidator$(validator)(event$.pipe(
+  event$.pipe(
     matchType('ADD'),
-  )).pipe(
+    use(eventValidator$(validator)),
     buffer(sum$(event$, client)),
     map(events => events.reduce((a, e) => e.payload! + a, 0)),
     map(payload => ({ type: 'SUM_RESULT', payload })),
