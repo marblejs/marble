@@ -4,7 +4,7 @@ import { validator$ } from '../io.middleware';
 import { IOError } from '../io.error';
 
 describe('#validator$', () => {
-  test('passes incoming data', done => {
+  test('passes incoming data if input is successfuly validated', done => {
     // given
     const input = { name: 'test', age: 100, additional: {} };
     const schema = t.interface({
@@ -21,6 +21,27 @@ describe('#validator$', () => {
         expect(outgoingData.age as number).toEqual(input.age);
         expect(outgoingData.name as string).toEqual(input.name);
         expect((outgoingData as any).additional).toEqual(input.additional);
+        done();
+      },
+      (error: IOError) => {
+        fail(error.data);
+        done();
+      },
+    );
+  });
+
+  test('passes incoming data if schema is not defined', done => {
+    // given
+    const input = { name: 'test', age: 100, additional: {} };
+    const schema = undefined;
+
+    // when
+    const stream$ = validator$(schema)(of(input));
+
+    // then
+    stream$.subscribe(
+      outgoingData => {
+        expect(outgoingData).toEqual(input);
         done();
       },
       (error: IOError) => {
