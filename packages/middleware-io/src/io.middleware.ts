@@ -10,18 +10,21 @@ export type Schema = t.Any;
 
 export interface ValidatorOptions {
   reporter?: Reporter<any>;
+  context?: string;
 }
 
-const validateError = (reporter: Reporter<any> = defaultReporter) => (result: Either<t.Errors, any>) =>
-  result.getOrElseL(() => {
-    throw new IOError('Validation error', reporter.report(result));
-  });
+const validateError =
+  (reporter: Reporter<any> = defaultReporter, context?: string) =>
+  (result: Either<t.Errors, any>) =>
+    result.getOrElseL(() => {
+      throw new IOError('Validation error', reporter.report(result), context);
+    });
 
 export const validator$ = <U extends Schema, T>
   (schema: U | undefined, options: ValidatorOptions = {}) => (i$: Observable<T>) =>
     !!schema ? i$.pipe(
       map(input => schema.decode(input)),
-      map(validateError(options.reporter)),
+      map(validateError(options.reporter, options.context)),
       map(input => input as t.TypeOf<typeof schema>),
     ) : i$;
 

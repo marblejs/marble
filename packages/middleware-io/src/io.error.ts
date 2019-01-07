@@ -8,6 +8,7 @@ export class IOError extends ExtendableError {
   constructor(
     public readonly message: string,
     public readonly data: object,
+    public readonly context?: string,
   ) {
     super(ErrorType.IO_ERROR, message);
   }

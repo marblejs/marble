@@ -20,6 +20,7 @@ describe('@marblejs/middleware-io - HTTP integration', () => {
         expect(error).toBeDefined();
         expect(error.status).toEqual(400);
         expect(error.message).toEqual('Validation error');
+        expect(error.context).toEqual('body');
         expect(error.data).toEqual([{
           path: 'user.age',
           expected: 'number',

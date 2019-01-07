@@ -60,7 +60,7 @@ describe('#eventValidator$', () => {
     // then
     stream$.subscribe(
       () => {
-        fail('Datas should\t be returned');
+        fail('Datas should\'t be returned');
         done();
       },
       (error: IOError) => {

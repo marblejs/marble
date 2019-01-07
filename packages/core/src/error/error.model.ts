@@ -11,6 +11,7 @@ export class HttpError extends ExtendableError {
     public readonly message: string,
     public readonly status: HttpStatus,
     public readonly data?: object,
+    public readonly context?: string,
   ) {
     super(ErrorType.HTTP_ERROR, message);
   }

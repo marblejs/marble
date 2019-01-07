@@ -15,7 +15,7 @@ const getStatusCode = (error: Error): HttpStatus =>
 
 const errorFactory = (status: HttpStatus, error: Error) =>
   isHttpError(error)
-    ? { error: { status, message: error.message, data: error.data } }
+    ? { error: { status, message: error.message, data: error.data, context: error.context } }
     : { error: { status, message: error.message } };
 
 export const defaultError$: ErrorEffect<HttpError> = (req$, _, error = defaultHttpError) => req$

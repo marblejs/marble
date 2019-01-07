@@ -11,12 +11,19 @@ interface HttpSchema<TBody extends Schema, TParams extends Schema, TQuery extend
   headers: Schema;
 }
 
+enum Context {
+  BODY = 'body',
+  PARAMS = 'params',
+  QUERY = 'query',
+  HEADERS = 'headers',
+}
+
 export const httpValidator$ = <TBody extends Schema, TParams extends Schema, TQuery extends Schema>
   (schema: Partial<HttpSchema<TBody, TParams, TQuery>>, options: ValidatorOptions = {}) => {
-    const bodyValidator$ = validator$(schema.body, options);
-    const paramsValidator$ = validator$(schema.params, options);
-    const queryValidator$ = validator$(schema.query, options);
-    const headersValidator$ = validator$(schema.headers, options);
+    const bodyValidator$ = validator$(schema.body, { ...options, context: Context.BODY });
+    const paramsValidator$ = validator$(schema.params, { ...options, context: Context.PARAMS });
+    const queryValidator$ = validator$(schema.query, { ...options, context: Context.QUERY });
+    const headersValidator$ = validator$(schema.headers, { ...options, context: Context.HEADERS });
 
     return (req$: Observable<HttpRequest>) =>
       req$.pipe(
@@ -29,7 +36,7 @@ export const httpValidator$ = <TBody extends Schema, TParams extends Schema, TQu
           ).pipe(
             map(([body, params, query]) => req as HttpRequest<typeof body, typeof params, typeof query>),
             catchError((error: IOError) => throwError(
-              new HttpError(error.message, HttpStatus.BAD_REQUEST, error.data),
+              new HttpError(error.message, HttpStatus.BAD_REQUEST, error.data, error.context),
             )),
           )
         ),
