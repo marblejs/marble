@@ -6,6 +6,6 @@ describe('@marblejs/middleware-io public API', () => {
     expect(API.eventValidator$).toBeDefined();
     expect(API.httpValidator$).toBeDefined();
     expect(API.validator$).toBeDefined();
-    expect(API.io).toBeDefined();
+    expect(API.t).toBeDefined();
   });
 });

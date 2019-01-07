@@ -1,12 +1,12 @@
 import { EffectFactory, httpListener, use } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { map } from 'rxjs/operators';
-import { httpValidator$, io } from '../src';
+import { httpValidator$, t } from '../src';
 
-const user = io.type({
-  id: io.string,
-  name: io.string,
-  age: io.number,
+const user = t.type({
+  id: t.string,
+  name: t.string,
+  age: t.number,
 });
 
 const effect$ = EffectFactory
@@ -14,7 +14,7 @@ const effect$ = EffectFactory
   .matchType('POST')
   .use(req$ => req$.pipe(
     use(httpValidator$({
-      body: io.type({ user })
+      body: t.type({ user })
     })),
     map(req => ({ body: req.body.user })),
   ));
