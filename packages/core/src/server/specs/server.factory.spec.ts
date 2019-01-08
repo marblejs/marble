@@ -1,7 +1,7 @@
 import { mapTo, tap, filter } from 'rxjs/operators';
-import { marble } from '../server.factory';
 import { httpListener } from '../../http.listener';
-import { EventType } from '../../http.interface';
+import { marble } from '../server.factory';
+import { ServerEventType } from '../server.event';
 import { EffectFactory } from '../../effects/effects.factory';
 import { mockHttpServer } from '../../+internal/testing';
 
@@ -99,10 +99,10 @@ describe('#marble', () => {
     expect(injector.registerAll).not.toHaveBeenCalled();
   });
 
-  test(`emits ${EventType.LISTEN} EventType on start`, (done) => {
+  test(`emits ${ServerEventType.LISTEN} EventType on start`, (done) => {
     // given
     const app = httpListener({ effects: [] });
-    const expectedEvent = EventType.LISTEN;
+    const expectedEvent = ServerEventType.LISTEN;
 
     // then
     marbleServer = marble({
@@ -114,10 +114,10 @@ describe('#marble', () => {
     });
   });
 
-  test(`emits ${EventType.UPGRADE} EventType`, (done) => {
+  test(`emits ${ServerEventType.UPGRADE} EventType`, (done) => {
     // given
     const app = httpListener({ effects: [] });
-    const expectedEvent = EventType.UPGRADE;
+    const expectedEvent = ServerEventType.UPGRADE;
 
     // then
     marbleServer = marble({

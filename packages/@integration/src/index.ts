@@ -1,14 +1,14 @@
-import { marble, matchEvent, Event, ServerEffect, bind } from '@marblejs/core';
+import { marble, matchEvent, ServerEvent, ServerEffect, bind } from '@marblejs/core';
 import { mapToServer } from '@marblejs/websockets';
 import { of, concat } from 'rxjs';
-import { mergeMap, tap } from 'rxjs/operators';
+import { mergeMap, tap, map } from 'rxjs/operators';
 import { httpServer } from './http.listener';
 import { webSocketServer } from './ws.listener';
 import { WebSocketsToken } from './tokens';
 
 const upgrade$: ServerEffect = (event$, _, injector) =>
   event$.pipe(
-    matchEvent(Event.UPGRADE),
+    matchEvent(ServerEvent.upgrade),
     mapToServer({
       path: '/api/:version/ws',
       server: WebSocketsToken,
@@ -17,10 +17,9 @@ const upgrade$: ServerEffect = (event$, _, injector) =>
 
 const listen$: ServerEffect = event$ =>
   event$.pipe(
-    matchEvent(Event.LISTEN),
-    tap(([ port, hostname ]) =>
-      console.log(`Server running @ http://${hostname}:${port}/ 🚀`)
-    ),
+    matchEvent(ServerEvent.listen),
+    map(event => event.payload),
+    tap(({ port, host }) => console.log(`Server running @ http://${host}:${port}/ 🚀`)),
   );
 
 const events$: ServerEffect = (event$, ...args) =>

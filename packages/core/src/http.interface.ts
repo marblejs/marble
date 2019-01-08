@@ -1,5 +1,4 @@
 import * as http from 'http';
-import * as net from 'net';
 import { Observable } from 'rxjs';
 import { EffectHttpResponse } from './effects/effects.interface';
 
@@ -76,45 +75,3 @@ export enum HttpStatus {
   GATEWAY_TIMEOUT = 504,
   HTTP_VERSION_NOT_SUPPORTED = 505,
 }
-
-export enum EventType {
-  CONNECT = 'connect',
-  CONNECTION = 'connection',
-  CLIENT_ERROR = 'clientError',
-  CLOSE = 'close',
-  CHECK_CONTINUE = 'checkContinue',
-  CHECK_EXPECTATION = 'checkExpectation',
-  ERROR = 'error',
-  REQUEST = 'request',
-  UPGRADE = 'upgrade',
-  LISTEN = 'listen',
-}
-
-export type ServerEvent<T extends EventType = EventType, U = any> = {
-  type: T;
-  data?: U;
-};
-
-type EventListen = ServerEvent<EventType.LISTEN, [number, string]>;
-type EventUpgrade = ServerEvent<EventType.UPGRADE, [http.IncomingMessage, net.Socket, Buffer]>;
-type EventRequest = ServerEvent<EventType.REQUEST, any>;
-type EventError = ServerEvent<EventType.ERROR, any>;
-type EventClose = ServerEvent<EventType.CLOSE, any>;
-type EventConnect = ServerEvent<EventType.CONNECT, any>;
-type EventConnection = ServerEvent<EventType.CONNECTION, any>;
-type EventClientError = ServerEvent<EventType.CLIENT_ERROR, any>;
-type EventCheckContinue = ServerEvent<EventType.CHECK_CONTINUE, any>;
-type EventCheckExpectation = ServerEvent<EventType.CHECK_EXPECTATION, any>;
-
-export const Event = {
-  CONNECT: { type: EventType.CONNECT } as EventConnect,
-  CONNECTION: { type: EventType.CONNECTION } as EventConnection,
-  CLIENT_ERROR: { type: EventType.CLIENT_ERROR } as EventClientError,
-  CLOSE: { type: EventType.CLOSE } as EventClose,
-  CHECK_CONTINUE: { type: EventType.CHECK_CONTINUE } as EventCheckContinue,
-  CHECK_EXPECTATION: { type: EventType.CHECK_EXPECTATION } as EventCheckExpectation,
-  ERROR: { type: EventType.ERROR } as EventError,
-  REQUEST: { type: EventType.REQUEST } as EventRequest,
-  UPGRADE:  { type: EventType.UPGRADE } as EventUpgrade,
-  LISTEN: { type: EventType.LISTEN } as EventListen,
-};
