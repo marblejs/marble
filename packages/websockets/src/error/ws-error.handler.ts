@@ -1,9 +1,9 @@
 import { of } from 'rxjs';
+import { EventError } from '@marblejs/core';
 import { MarbleWebSocketClient } from '../websocket.interface';
 import { WebSocketErrorEffect } from '../effects/ws-effects.interface';
-import { WebSocketError } from './ws-error.model';
 
-export const handleEffectsError = <IncomingError extends WebSocketError>(
+export const handleEffectsError = <IncomingError extends EventError>(
   client: MarbleWebSocketClient,
   error$: WebSocketErrorEffect<IncomingError, any, any> | undefined,
 ) => (error: IncomingError) => {

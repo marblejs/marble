@@ -1,12 +1,12 @@
+import { EventError } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { error$ } from '../ws-error.effect';
-import { WebSocketError } from '../ws-error.model';
 
 describe('error$', () => {
   test('returns stream of error events for defined error object', () => {
     // given
     const incomingEvent = { type: 'TEST_EVENT' };
-    const error = new WebSocketError(incomingEvent, 'Test error message', { errorData: 'test_error_data' });
+    const error = new EventError(incomingEvent, 'Test error message', { errorData: 'test_error_data' });
     const outgoingEvent = {
       type: incomingEvent.type,
       error: {

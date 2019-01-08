@@ -1,5 +1,4 @@
-import { Event, ValidatedEvent } from '@marblejs/core';
-import { WebSocketError } from '@marblejs/websockets';
+import { Event, EventError, ValidatedEvent } from '@marblejs/core';
 import { Observable, of, throwError } from 'rxjs';
 import { mergeMap, map, catchError } from 'rxjs/operators';
 import { Schema, ValidatorOptions, validator$ } from './io.middleware';
@@ -14,7 +13,7 @@ export const eventValidator$ = <U extends Schema, T extends Event>
         mergeMap(event => eventValidator$(of(event.payload as any)).pipe(
           map(payload => event as ValidatedEvent<typeof payload>),
           catchError((error: IOError) => throwError(
-            new WebSocketError(event as any, error.message, error.data),
+            new EventError(event as any, error.message, error.data),
           )),
         )),
       );
