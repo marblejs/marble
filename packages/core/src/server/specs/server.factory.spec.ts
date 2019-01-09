@@ -1,12 +1,12 @@
 import { mapTo, tap, filter } from 'rxjs/operators';
 import { httpListener } from '../../http.listener';
-import { marble } from '../server.factory';
+import { createServer } from '../server.factory';
 import { ServerEventType } from '../server.event';
 import { EffectFactory } from '../../effects/effects.factory';
 import { mockHttpServer } from '../../+internal/testing';
 
-describe('#marble', () => {
-  let marbleServer: ReturnType<typeof marble>;
+describe('#createServer', () => {
+  let marbleServer: ReturnType<typeof createServer>;
 
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -29,7 +29,7 @@ describe('#marble', () => {
 
     // when
     mockHttpServer(mocks);
-    marbleServer = marble({
+    marbleServer = createServer({
       port,
       hostname,
       httpListener: app,
@@ -47,7 +47,7 @@ describe('#marble', () => {
 
     // when
     mockHttpServer(mocks);
-    marbleServer = marble({ httpListener: app });
+    marbleServer = createServer({ httpListener: app });
 
     // then
     expect(mocks.listen.mock.calls[0][0]).toBe(undefined);
@@ -63,7 +63,7 @@ describe('#marble', () => {
     const app = httpListener({ effects: [effect$] });
 
     // when
-    marbleServer = marble({ httpListener: app });
+    marbleServer = createServer({ httpListener: app });
 
     // then
     expect(marbleServer.server).toBeDefined();
@@ -80,7 +80,7 @@ describe('#marble', () => {
 
     // when
     jest.spyOn(injector, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
-    marbleServer = marble({ httpListener: app, dependencies: [] });
+    marbleServer = createServer({ httpListener: app, dependencies: [] });
 
     // then
     expect(injector.registerAll).toHaveBeenCalledWith([]);
@@ -93,7 +93,7 @@ describe('#marble', () => {
 
     // when
     jest.spyOn(injector, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
-    marbleServer = marble({ httpListener: app });
+    marbleServer = createServer({ httpListener: app });
 
     // then
     expect(injector.registerAll).not.toHaveBeenCalled();
@@ -105,7 +105,7 @@ describe('#marble', () => {
     const expectedEvent = ServerEventType.LISTEN;
 
     // then
-    marbleServer = marble({
+    marbleServer = createServer({
       httpListener: app,
       httpEventsHandler: event$ => event$.pipe(
         filter(event => event.type === expectedEvent),
@@ -120,7 +120,7 @@ describe('#marble', () => {
     const expectedEvent = ServerEventType.UPGRADE;
 
     // then
-    marbleServer = marble({
+    marbleServer = createServer({
       httpListener: app,
       httpEventsHandler: event$ => event$.pipe(
         filter(event => event.type === expectedEvent),

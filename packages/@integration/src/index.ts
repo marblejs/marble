@@ -1,4 +1,4 @@
-import { marble, matchEvent, ServerEvent, ServerEffect, bind } from '@marblejs/core';
+import { createServer, matchEvent, ServerEvent, ServerEffect, bind } from '@marblejs/core';
 import { mapToServer } from '@marblejs/websockets';
 import { of, concat } from 'rxjs';
 import { mergeMap, tap, map } from 'rxjs/operators';
@@ -30,7 +30,7 @@ const events$: ServerEffect = (event$, ...args) =>
     ),
   ));
 
-export const marbleServer = marble({
+export const server = createServer({
   hostname: '127.0.0.1',
   port: 1337,
   httpListener: httpServer,

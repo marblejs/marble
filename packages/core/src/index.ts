@@ -12,5 +12,5 @@ export * from './event/event.factory';
 export * from './event/event.interface';
 export * from './server/server.injector';
 export * from './server/server.event';
-export { marble, MarbleConfig } from './server/server.factory';
+export { createServer, CreateServerConfig } from './server/server.factory';
 export { HttpListenerConfig, httpListener } from './http.listener';

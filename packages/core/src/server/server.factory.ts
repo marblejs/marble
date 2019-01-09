@@ -7,7 +7,7 @@ import { InjectionDependencies } from './server.injector';
 import { ServerEffect } from '../effects/effects.interface';
 import { ServerEvent, ServerEventType } from './server.event';
 
-export interface MarbleConfig {
+export interface CreateServerConfig {
   port?: number;
   hostname?: string;
   httpListener: ReturnType<typeof httpListener>;
@@ -15,7 +15,7 @@ export interface MarbleConfig {
   dependencies?: InjectionDependencies;
 }
 
-export const marble = ({ httpListener, httpEventsHandler, port, hostname, dependencies }: MarbleConfig) => {
+export const createServer = ({ httpListener, httpEventsHandler, port, hostname, dependencies }: CreateServerConfig) => {
   const { injector, routing } = httpListener.config;
   const httpEventsSubject$ = new Subject<Event>();
   const httpServer = http.createServer(httpListener);
