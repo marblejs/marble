@@ -1,11 +1,10 @@
 import * as http from 'http';
-import * as net from 'net';
-import { Subject } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 import { httpListener } from '../http.listener';
-import { Event } from '../event/event.interface';
+import { isCloseEvent } from './server.event';
+import { subscribeServerEvents } from './server.event.subscriber';
 import { InjectionDependencies } from './server.injector';
 import { ServerEffect } from '../effects/effects.interface';
-import { ServerEvent, ServerEventType } from './server.event';
 
 export interface CreateServerConfig {
   port?: number;
@@ -15,61 +14,24 @@ export interface CreateServerConfig {
   dependencies?: InjectionDependencies;
 }
 
-export const createServer = ({ httpListener, httpEventsHandler, port, hostname, dependencies }: CreateServerConfig) => {
+export const createServer = (config: CreateServerConfig) => {
+  const { httpListener, httpEventsHandler, port, hostname, dependencies } = config;
   const { injector, routing } = httpListener.config;
-  const httpEventsSubject$ = new Subject<Event>();
-  const httpServer = http.createServer(httpListener);
 
-  httpServer.on(ServerEventType.CONNECT, () =>
-    httpEventsSubject$.next(ServerEvent.connect()),
-  );
-
-  httpServer.on(ServerEventType.CONNECTION, () =>
-    httpEventsSubject$.next(ServerEvent.connection()),
-  );
-
-  httpServer.on(ServerEventType.CLIENT_ERROR, () =>
-    httpEventsSubject$.next(ServerEvent.clientError()),
-  );
-
-  httpServer.on(ServerEventType.CLOSE, () =>
-    httpEventsSubject$.next(ServerEvent.close()),
-  );
-
-  httpServer.on(ServerEventType.CHECK_CONTINUE, () =>
-    httpEventsSubject$.next(ServerEvent.checkContinue()),
-  );
-
-  httpServer.on(ServerEventType.CHECK_EXPECTATION, () =>
-    httpEventsSubject$.next(ServerEvent.checkExpectation()),
-  );
-
-  httpServer.on(ServerEventType.ERROR, () =>
-    httpEventsSubject$.next(ServerEvent.error()),
-  );
-
-  httpServer.on(ServerEventType.REQUEST, () =>
-    httpEventsSubject$.next(ServerEvent.request()),
-  );
-
-  httpServer.on(ServerEventType.UPGRADE, (req: http.IncomingMessage, socket: net.Socket, head: Buffer) =>
-    httpEventsSubject$.next(ServerEvent.upgrade(req, socket, head)),
-  );
+  const eventsSubscriber = subscribeServerEvents(port, hostname);
+  const server = http.createServer(httpListener);
+  const events$ = eventsSubscriber(server).pipe(takeWhile(e => !isCloseEvent(e)));
 
   if (dependencies) {
-    injector.registerAll(dependencies)(httpServer);
+    injector.registerAll(dependencies)(server);
   }
 
   if (httpEventsHandler) {
-    httpEventsHandler(httpEventsSubject$, httpServer, injector.get).subscribe();
+    httpEventsHandler(events$, server, injector.get).subscribe();
   }
 
-  httpServer.listen(port, hostname, () =>
-    httpEventsSubject$.next(ServerEvent.listen(port!, hostname!)),
-  );
-
   return {
-    server: httpServer,
+    server,
     info: { routing },
   };
 };
