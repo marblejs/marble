@@ -1,4 +1,4 @@
-import { HttpError, isHttpError, CoreError, isCoreError } from '../error.model';
+import { HttpError, isHttpError, CoreError, isCoreError, EventError, isEventError } from '../error.model';
 
 describe('Error model', () => {
 
@@ -53,5 +53,13 @@ describe('Error model', () => {
 
     expect(isCoreError(coreError)).toBe(true);
     expect(isCoreError(otherError)).toBe(false);
+  });
+
+  test('#isEventError detects EventError type', () => {
+    const eventError = new EventError({ type: 'TEST', }, 'test-message', {});
+    const otherError = new Error();
+
+    expect(isEventError(eventError)).toBe(true);
+    expect(isEventError(otherError)).toBe(false);
   });
 });
