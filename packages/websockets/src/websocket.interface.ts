@@ -25,6 +25,11 @@ export interface WebSocketEvent<T = unknown, U = any> {
   error?: U;
 }
 
+export interface ValidatedWebSocketEvent<T = unknown> {
+  type: WebSocketEventType;
+  payload: T;
+}
+
 export enum WebSocketStatus {
   NORMAL_CLOSURE = 1000,
   GOING_AWAY = 1001,

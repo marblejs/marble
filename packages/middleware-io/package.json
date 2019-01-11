@@ -1,7 +1,7 @@
 {
-  "name": "@marblejs/middleware-jwt",
+  "name": "@marblejs/middleware-io",
   "version": "1.2.1",
-  "description": "JWT middleware for Marble.js",
+  "description": "IO middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -35,12 +35,12 @@
     "rxjs": "~6.3.3"
   },
   "dependencies": {
-    "@types/jsonwebtoken": "^7.2.8",
-    "jsonwebtoken": "^8.3.0"
+    "io-ts": "~1.5.1",
+    "@marblejs/websockets": "^1.2.1"
   },
   "devDependencies": {
     "@marblejs/core": "^1.2.1",
-    "@marblejs/middleware-body": "^1.2.1"
+    "@marblejs/websockets": "^1.2.1"
   },
   "publishConfig": {
     "access": "public"

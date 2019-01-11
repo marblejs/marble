@@ -1,10 +1,10 @@
 import * as request from 'supertest';
 import { verifyToken } from '../src';
-import { app, SECRET_KEY } from './api.integration';
+import { app, SECRET_KEY } from './jwt.integration';
 
 const LOGIN_CREDENTIALS = { email: 'admin@admin.com', password: 'admin' };
 
-describe('API integration', () => {
+describe('@marblejs/middleware-jwt - HTTP integration', () => {
   test('POST /api/login returns token and verifies its correctness', async () =>
     request(app)
       .post('/api/login')

@@ -65,7 +65,6 @@ export const handleServerBrokenConnections = (server: WebSocketServer, scheduler
         mapTo(ClientStatus.DEAD),
       ),
       of(client).pipe(
-        tap(() => console.log('interval', client.isAlive)),
         tap(client => client.isAlive = false),
         tap(client => client.ping()),
         mapTo(ClientStatus.ALIVE),
@@ -82,7 +81,6 @@ export const handleClientBrokenConnection = (client: MarbleWebSocketClient, sche
     takeUntil(fromEvent(client, 'close')),
     timeout(HEART_BEAT_TERMINATE_INTERVAL, scheduler),
     mapTo(client),
-    tap(() => console.log('heartbeat', client.isAlive)),
     tap(client => client.isAlive = true),
     map(client => client.isAlive),
     catchError(error => {
