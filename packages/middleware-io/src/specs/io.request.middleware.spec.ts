@@ -2,9 +2,9 @@ import * as t from 'io-ts';
 import { of } from 'rxjs';
 import { HttpError, HttpStatus } from '@marblejs/core';
 import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
-import { httpValidator$ } from '../io.http.middleware';
+import { requestValidator$ } from '../io.request.middleware';
 
-describe('#httpValidator$', () => {
+describe('#requestValidator$', () => {
   test('validates request body, params, query, headers', done => {
     // given
     const defaultSchema = t.type({ test: t.string });
@@ -18,7 +18,7 @@ describe('#httpValidator$', () => {
     });
 
     // when
-    const stream$ = httpValidator$({
+    const stream$ = requestValidator$({
       body: defaultSchema,
       params: defaultSchema,
       query: defaultSchema,
@@ -54,7 +54,7 @@ describe('#httpValidator$', () => {
     });
 
     // when
-    const stream$ = httpValidator$({
+    const stream$ = requestValidator$({
       body: defaultSchema,
       params: defaultSchema,
       query: defaultSchema,

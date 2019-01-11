@@ -1,12 +1,12 @@
 import { EffectFactory, HttpError, HttpStatus, combineRoutes, use, switchToProtocol } from '@marblejs/core';
-import { httpValidator$, t } from '@marblejs/middleware-io';
+import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 import { user$ } from './user.effects';
 import { static$ } from './static.effects';
 import { WebSocketsToken } from '../tokens';
 
-const rootValiadtor$ = httpValidator$({
+const rootValiadtor$ = requestValidator$({
   params: t.type({
     version: t.union([
       t.literal('v1'),

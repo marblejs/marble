@@ -4,7 +4,7 @@ import { mergeMap, map, catchError } from 'rxjs/operators';
 import { Schema, ValidatorOptions, validator$ } from './io.middleware';
 import { IOError } from './io.error';
 
-interface HttpSchema<TBody extends Schema, TParams extends Schema, TQuery extends Schema> {
+interface RequestSchema<TBody extends Schema, TParams extends Schema, TQuery extends Schema> {
   body: TBody;
   params: TParams;
   query: TQuery;
@@ -18,8 +18,8 @@ enum Context {
   HEADERS = 'headers',
 }
 
-export const httpValidator$ = <TBody extends Schema, TParams extends Schema, TQuery extends Schema>
-  (schema: Partial<HttpSchema<TBody, TParams, TQuery>>, options: ValidatorOptions = {}) => {
+export const requestValidator$ = <TBody extends Schema, TParams extends Schema, TQuery extends Schema>
+  (schema: Partial<RequestSchema<TBody, TParams, TQuery>>, options: ValidatorOptions = {}) => {
     const bodyValidator$ = validator$(schema.body, { ...options, context: Context.BODY });
     const paramsValidator$ = validator$(schema.params, { ...options, context: Context.PARAMS });
     const queryValidator$ = validator$(schema.query, { ...options, context: Context.QUERY });

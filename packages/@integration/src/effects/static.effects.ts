@@ -1,12 +1,12 @@
 import * as path from 'path';
 import { EffectFactory, combineRoutes, use } from '@marblejs/core';
-import { httpValidator$, t } from '@marblejs/middleware-io';
+import { requestValidator$, t } from '@marblejs/middleware-io';
 import { readFile } from '@marblejs/core/dist/+internal';
 import { map, mergeMap } from 'rxjs/operators';
 
 const STATIC_PATH = path.resolve(__dirname, '../../../../assets');
 
-const getFileValidator$ = httpValidator$({
+const getFileValidator$ = requestValidator$({
   params: t.type({ dir: t.string })
 });
 

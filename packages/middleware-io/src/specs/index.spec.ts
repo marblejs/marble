@@ -4,7 +4,7 @@ describe('@marblejs/middleware-io public API', () => {
   test('apis are defined', () => {
     expect(API.defaultReporter).toBeDefined();
     expect(API.eventValidator$).toBeDefined();
-    expect(API.httpValidator$).toBeDefined();
+    expect(API.requestValidator$).toBeDefined();
     expect(API.validator$).toBeDefined();
     expect(API.t).toBeDefined();
   });

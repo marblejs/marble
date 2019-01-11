@@ -1,15 +1,15 @@
 import { EffectFactory, combineRoutes, HttpError, HttpStatus, use } from '@marblejs/core';
-import { httpValidator$, t } from '@marblejs/middleware-io';
+import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError, of } from 'rxjs';
 import { map, switchMap, catchError, mergeMap } from 'rxjs/operators';
 import { Dao } from '../fakes/dao.fake';
 import { authorize$ } from '../middlewares/auth.middleware';
 
-const getUserValidator$ = httpValidator$({
+const getUserValidator$ = requestValidator$({
   params: t.type({ id: t.string }),
 });
 
-const postUserValidator$ = httpValidator$({
+const postUserValidator$ = requestValidator$({
   body: t.type({
     user: t.type({ id: t.string })
   }),
