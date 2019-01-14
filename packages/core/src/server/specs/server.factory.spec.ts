@@ -1,12 +1,25 @@
-import { mapTo, tap, filter } from 'rxjs/operators';
-import { marble } from '../server.factory';
+import { forkJoin } from 'rxjs';
+import { mapTo, tap, filter, take } from 'rxjs/operators';
 import { httpListener } from '../../http.listener';
-import { EventType } from '../../http.interface';
+import { createServer } from '../server.factory';
+import {
+  ServerEventType,
+  isListenEvent,
+  isUpgradeEvent,
+  isConnectEvent,
+  isErrorEvent,
+  isConnectionEvent,
+  isCheckContinueEvent,
+  isCheckExpectationEvent,
+  isClientErrorEvent,
+  isRequestEvent,
+} from '../server.event';
 import { EffectFactory } from '../../effects/effects.factory';
 import { mockHttpServer } from '../../+internal/testing';
+import { EventEmitter } from 'events';
 
-describe('#marble', () => {
-  let marbleServer: ReturnType<typeof marble>;
+describe('#createServer', () => {
+  let marbleServer: ReturnType<typeof createServer>;
 
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -29,7 +42,7 @@ describe('#marble', () => {
 
     // when
     mockHttpServer(mocks);
-    marbleServer = marble({
+    marbleServer = createServer({
       port,
       hostname,
       httpListener: app,
@@ -47,7 +60,7 @@ describe('#marble', () => {
 
     // when
     mockHttpServer(mocks);
-    marbleServer = marble({ httpListener: app });
+    marbleServer = createServer({ httpListener: app });
 
     // then
     expect(mocks.listen.mock.calls[0][0]).toBe(undefined);
@@ -63,7 +76,7 @@ describe('#marble', () => {
     const app = httpListener({ effects: [effect$] });
 
     // when
-    marbleServer = marble({ httpListener: app });
+    marbleServer = createServer({ httpListener: app });
 
     // then
     expect(marbleServer.server).toBeDefined();
@@ -80,7 +93,7 @@ describe('#marble', () => {
 
     // when
     jest.spyOn(injector, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
-    marbleServer = marble({ httpListener: app, dependencies: [] });
+    marbleServer = createServer({ httpListener: app, dependencies: [] });
 
     // then
     expect(injector.registerAll).toHaveBeenCalledWith([]);
@@ -93,41 +106,42 @@ describe('#marble', () => {
 
     // when
     jest.spyOn(injector, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
-    marbleServer = marble({ httpListener: app });
+    marbleServer = createServer({ httpListener: app });
 
     // then
     expect(injector.registerAll).not.toHaveBeenCalled();
   });
 
-  test(`emits ${EventType.LISTEN} EventType on start`, (done) => {
+  test(`emits server events`, (done) => {
     // given
     const app = httpListener({ effects: [] });
-    const expectedEvent = EventType.LISTEN;
 
     // then
-    marbleServer = marble({
+    marbleServer = createServer({
       httpListener: app,
-      httpEventsHandler: event$ => event$.pipe(
-        filter(event => event.type === expectedEvent),
-        tap(() => done()),
-      ),
-    });
-  });
-
-  test(`emits ${EventType.UPGRADE} EventType`, (done) => {
-    // given
-    const app = httpListener({ effects: [] });
-    const expectedEvent = EventType.UPGRADE;
-
-    // then
-    marbleServer = marble({
-      httpListener: app,
-      httpEventsHandler: event$ => event$.pipe(
-        filter(event => event.type === expectedEvent),
+      httpEventsHandler: event$ => forkJoin(
+        event$.pipe(filter(isErrorEvent), take(1)),
+        event$.pipe(filter(isClientErrorEvent), take(1)),
+        event$.pipe(filter(isConnectEvent), take(1)),
+        event$.pipe(filter(isConnectionEvent), take(1)),
+        event$.pipe(filter(isListenEvent), take(1)),
+        event$.pipe(filter(isUpgradeEvent), take(1)),
+        event$.pipe(filter(isRequestEvent), take(1)),
+        event$.pipe(filter(isCheckContinueEvent), take(1)),
+        event$.pipe(filter(isCheckExpectationEvent), take(1)),
+      ).pipe(
         tap(() => done()),
       ),
     });
 
-    marbleServer.server.emit(expectedEvent);
+    marbleServer.server.emit(ServerEventType.ERROR);
+    marbleServer.server.emit(ServerEventType.CLIENT_ERROR);
+    marbleServer.server.emit(ServerEventType.CONNECT);
+    marbleServer.server.emit(ServerEventType.CONNECTION, new EventEmitter());
+    marbleServer.server.emit(ServerEventType.LISTEN);
+    marbleServer.server.emit(ServerEventType.UPGRADE);
+    marbleServer.server.emit(ServerEventType.REQUEST);
+    marbleServer.server.emit(ServerEventType.CHECK_CONTINUE);
+    marbleServer.server.emit(ServerEventType.CHECK_EXPECTATION);
   });
 });

@@ -1,8 +1,6 @@
 import * as WebSocket from 'ws';
 import { Observable } from 'rxjs';
 
-export type WebSocketEventType = string;
-
 export type WebSocketServer = WebSocket.Server;
 
 export type WebSocketClient = WebSocket;
@@ -17,17 +15,6 @@ export interface MarbleWebSocketClient extends WebSocketClient {
   isAlive: boolean;
   sendResponse: <T>(response: T) => Observable<never>;
   sendBroadcastResponse: <T>(response: T) => Observable<never>;
-}
-
-export interface WebSocketEvent<T = unknown, U = any> {
-  type: WebSocketEventType;
-  payload?: T;
-  error?: U;
-}
-
-export interface ValidatedWebSocketEvent<T = unknown> {
-  type: WebSocketEventType;
-  payload: T;
 }
 
 export enum WebSocketStatus {

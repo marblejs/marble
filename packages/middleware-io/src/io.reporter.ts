@@ -2,7 +2,7 @@ import * as t from 'io-ts';
 import { Reporter } from 'io-ts/lib/Reporter';
 import { stringify, getLast } from '@marblejs/core/dist/+internal/utils';
 
-export interface DefaultReporterResult {
+export interface ReporterResult {
   path: string;
   expected: string;
   got: any;
@@ -19,21 +19,18 @@ const getExpectedType = (context: t.ContextEntry[]) =>
     .map(c => c.type.name)
     .valueOr('any');
 
-const getErrorMessage = (value: any, context: t.Context): DefaultReporterResult => {
+const getErrorMessage = (value: any, context: t.Context): ReporterResult => ({
+  path: getPath(context),
+  expected: getExpectedType(context as t.ContextEntry[]),
+  got: stringify(value),
+});
 
-  return ({
-    path: getPath(context),
-    expected: getExpectedType(context as t.ContextEntry[]),
-    got: stringify(value),
-  });
-};
-
-const failure = (errors: t.ValidationError[]): DefaultReporterResult[] =>
+const failure = (errors: t.ValidationError[]): ReporterResult[] =>
   errors.map(error => getErrorMessage(error.value, error.context));
 
 const success = () =>
   new Array();
 
-export const defaultReporter: Reporter<DefaultReporterResult[]> = {
+export const defaultReporter: Reporter<ReporterResult[]> = {
   report: validation => validation.fold(failure, success),
 };

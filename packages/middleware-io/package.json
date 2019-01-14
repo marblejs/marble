@@ -35,12 +35,10 @@
     "rxjs": "~6.3.3"
   },
   "dependencies": {
-    "io-ts": "~1.5.1",
-    "@marblejs/websockets": "^1.2.1"
+    "io-ts": "~1.5.1"
   },
   "devDependencies": {
-    "@marblejs/core": "^1.2.1",
-    "@marblejs/websockets": "^1.2.1"
+    "@marblejs/core": "^1.2.1"
   },
   "publishConfig": {
     "access": "public"

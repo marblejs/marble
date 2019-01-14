@@ -1,16 +1,14 @@
 import * as path from 'path';
 import { EffectFactory, combineRoutes, use } from '@marblejs/core';
-import { validator$, Joi } from '@marblejs/middleware-joi';
+import { requestValidator$, t } from '@marblejs/middleware-io';
 import { readFile } from '@marblejs/core/dist/+internal';
 import { map, mergeMap } from 'rxjs/operators';
 
 const STATIC_PATH = path.resolve(__dirname, '../../../../assets');
 
-const getFileValidator$ = validator$({
-  params: {
-    dir: Joi.string().required(),
-  },
-}, { allowUnknown: true });
+const getFileValidator$ = requestValidator$({
+  params: t.type({ dir: t.string })
+});
 
 const getFile$ = EffectFactory
   .matchPath('/:dir*')

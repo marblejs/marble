@@ -25,7 +25,6 @@
     "@marblejs/websockets": "^1.2.1",
     "@marblejs/middleware-body": "^1.2.1",
     "@marblejs/middleware-logger": "^1.2.1",
-    "@marblejs/middleware-joi": "^1.2.1",
     "@marblejs/middleware-io": "^1.2.1",
     "@types/node": "^10.1.2",
     "rxjs": "~6.3.3",

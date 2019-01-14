@@ -1,22 +1,25 @@
 import { EffectFactory, HttpError, HttpStatus, combineRoutes, use, switchToProtocol } from '@marblejs/core';
-import { validator$, Joi } from '@marblejs/middleware-joi';
+import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 import { user$ } from './user.effects';
 import { static$ } from './static.effects';
 import { WebSocketsToken } from '../tokens';
 
-const rootValidator$ = validator$({
-  params: {
-    version: Joi.string().required(),
-  },
-}, { allowUnknown: true });
+const rootValiadtor$ = requestValidator$({
+  params: t.type({
+    version: t.union([
+      t.literal('v1'),
+      t.literal('v2'),
+    ]),
+  }),
+});
 
 const root$ = EffectFactory
   .matchPath('/')
   .matchType('GET')
   .use((req$, _, inject) => req$.pipe(
-    use(rootValidator$),
+    use(rootValiadtor$),
     map(req => req.params.version),
     map(version => `API version: ${version}`),
     tap(message => inject(WebSocketsToken).sendBroadcastResponse({ type: 'ROOT', payload: message })),

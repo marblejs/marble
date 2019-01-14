@@ -1,9 +1,9 @@
+import { Event, EventError } from '@marblejs/core';
 import { throwError, fromEvent, forkJoin } from 'rxjs';
 import { tap, map, mergeMap, first, toArray, take } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.listener';
-import { WebSocketEvent } from '../../websocket.interface';
 import { WebSocketEffect, WebSocketMiddleware, WebSocketConnectionEffect } from '../../effects/ws-effects.interface';
-import { WebSocketError, WebSocketConnectionError } from '../../error/ws-error.model';
+import { WebSocketConnectionError } from '../../error/ws-error.model';
 import { EventTransformer } from '../../transformer/transformer.inteface';
 import { createWebSocketsTestBed } from '../../+internal';
 
@@ -88,7 +88,7 @@ describe('WebSocket listener', () => {
       const outgoingEvent = JSON.stringify({ type: 'EVENT', payload: 3 });
       const e$: WebSocketEffect = event$ => event$;
       const m$: WebSocketMiddleware = event$ => event$.pipe(
-        map(event => event as WebSocketEvent<number>),
+        map(event => event as Event<number>),
         tap(event => event.payload !== undefined && event.payload++)
       );
       const targetClient = testBed.getClient(0);
@@ -142,7 +142,7 @@ describe('WebSocket listener', () => {
       const incomingEvent = JSON.stringify({ type: 'EVENT' });
       const outgoingEvent = JSON.stringify({ type: 'EVENT', error: { message: 'test message' } });
       const effect$: WebSocketEffect = event$ => event$.pipe(
-        mergeMap(event => throwError(new WebSocketError(event, 'test message'))),
+        mergeMap(event => throwError(new EventError(event, 'test message'))),
       );
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();

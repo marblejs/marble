@@ -1,20 +1,5 @@
-import { WebSocketStatus, WebSocketEvent } from '../websocket.interface';
-
-class ExtendableError extends Error {
-  constructor(public name: string, message: string) {
-    super(message);
-  }
-}
-
-export class WebSocketError extends ExtendableError {
-  constructor(
-    public readonly event: WebSocketEvent,
-    public readonly message: string,
-    public readonly data?: object,
-  ) {
-    super('WebSocketError', message);
-  }
-}
+import { ExtendableError } from '@marblejs/core/dist/+internal';
+import { WebSocketStatus } from '../websocket.interface';
 
 export class WebSocketConnectionError extends ExtendableError {
   constructor(

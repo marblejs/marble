@@ -1,7 +1,7 @@
 import * as request from 'supertest';
 import { HttpStatus } from '@marblejs/core';
 import { ContentType } from '@marblejs/core/dist/+internal';
-import { marbleServer } from '../src';
+import { server as marbleServer } from '../src';
 
 const { server } = marbleServer;
 
@@ -20,6 +20,26 @@ describe('API integration', () => {
     request(server)
       .get('/api/v2')
       .expect(200, '"API version: v2"'));
+
+  test('GET returns status 400: /api/v3 if provided version is not supported', async () =>
+    request(server)
+      .get('/api/v3')
+      .expect(400, {
+        error: {
+          status: 400,
+          message: 'Validation error',
+          data: [{
+            path : 'version.0',
+            expected: '"v1"',
+            got: '"v3"'
+          }, {
+            path: 'version.1',
+            expected: '"v2"',
+            got: '"v3"'
+          }],
+          context: 'params'
+        }
+      }));
 
   test('GET: /api/v1/foo triggers 404 effect', async () =>
     request(server)

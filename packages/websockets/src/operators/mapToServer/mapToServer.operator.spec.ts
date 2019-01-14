@@ -1,7 +1,6 @@
 import { Marbles, createHttpRequest } from '@marblejs/core/dist/+internal';
-import { ServerEffect, createInjectionToken, EventType, ServerEvent } from '@marblejs/core';
-import { mapToServer } from './mapToServer.operator';
-import { map } from 'rxjs/operators';
+import { ServerEffect, createInjectionToken, ServerEvent, ServerEventType, matchEvent } from '@marblejs/core';
+import { mapToServer, UpgradeEvent } from './mapToServer.operator';
 
 describe('#mapToServer operator', () => {
   let webSocketServerMock;
@@ -25,15 +24,15 @@ describe('#mapToServer operator', () => {
       url: '/test_1',
       headers: { upgrade: 'websocket' },
     });
-    const incomingEvent: ServerEvent = {
-      type: EventType.UPGRADE,
-      data: [requestMock, socketMock, bufferMock],
+    const incomingEvent: UpgradeEvent = {
+      type: ServerEventType.UPGRADE,
+      payload: { request: requestMock, socket: socketMock, head: bufferMock },
     };
 
     // when
     const effect$: ServerEffect = (event$, _, inject) =>
       event$.pipe(
-        map(event => event.data),
+        matchEvent(ServerEvent.upgrade),
         mapToServer(
           { path: '/test_1', server: createInjectionToken() },
           { path: '/test_2', server: createInjectionToken() },
@@ -57,15 +56,15 @@ describe('#mapToServer operator', () => {
       url: '/test_other',
       headers: { upgrade: 'websocket' },
     });
-    const incomingEvent: ServerEvent = {
-      type: EventType.UPGRADE,
-      data: [requestMock, socketMock, bufferMock],
+    const incomingEvent: UpgradeEvent = {
+      type: ServerEventType.UPGRADE,
+      payload: { request: requestMock, socket: socketMock, head: bufferMock },
     };
 
     // when
     const effect$: ServerEffect = (event$, _, inject) =>
       event$.pipe(
-        map(event => event.data),
+        matchEvent(ServerEvent.upgrade),
         mapToServer(
           { path: '/test_1', server: createInjectionToken() },
           { path: '/test_2', server: createInjectionToken() },
