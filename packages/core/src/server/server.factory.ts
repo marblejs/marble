@@ -10,24 +10,24 @@ export interface CreateServerConfig {
   port?: number;
   hostname?: string;
   httpListener: ReturnType<typeof httpListener>;
-  httpEventsHandler?: ServerEffect;
+  event$?: ServerEffect;
   dependencies?: InjectionDependencies;
 }
 
 export const createServer = (config: CreateServerConfig) => {
-  const { httpListener, httpEventsHandler, port, hostname, dependencies } = config;
+  const { httpListener, event$, port, hostname, dependencies } = config;
   const { injector, routing } = httpListener.config;
 
   const eventsSubscriber = subscribeServerEvents(port, hostname);
   const server = http.createServer(httpListener);
-  const events$ = eventsSubscriber(server).pipe(takeWhile(e => !isCloseEvent(e)));
+  const serverEvent$ = eventsSubscriber(server).pipe(takeWhile(e => !isCloseEvent(e)));
 
   if (dependencies) {
     injector.registerAll(dependencies)(server);
   }
 
-  if (httpEventsHandler) {
-    httpEventsHandler(events$, server, injector.get).subscribe();
+  if (event$) {
+    event$(serverEvent$, server, injector.get).subscribe();
   }
 
   return {
