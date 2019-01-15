@@ -14,13 +14,13 @@ import { createStaticInjectionContainer } from './server/server.injector';
 export interface HttpListenerConfig {
   middlewares?: Middleware[];
   effects: (RouteEffect | RouteEffectGroup)[];
-  errorEffect?: ErrorEffect;
+  error$?: ErrorEffect;
 }
 
 export const httpListener = ({
   middlewares = [],
   effects,
-  errorEffect = defaultError$,
+  error$ = defaultError$,
 }: HttpListenerConfig) => {
   const requestSubject$ = new Subject<Http>();
   const combinedMiddlewares = combineMiddlewares(...middlewares);
@@ -38,7 +38,7 @@ export const httpListener = ({
         defaultIfEmpty(defaultResponse),
         tap(res.send),
         catchError(error =>
-          errorEffect(of(req), res, error).pipe(
+          error$(of(req), res, error).pipe(
             tap(res.send),
           ),
         ),

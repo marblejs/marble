@@ -78,7 +78,7 @@ describe('Http listener', () => {
     const error = new Error('test');
     const req = {} as IncomingMessage;
     const res = {} as OutgoingMessage;
-    const errorEffect$ = jest.fn(() => of({ body: 'error' }));
+    const error$ = jest.fn(() => of({ body: 'error' }));
 
     // when
     effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
@@ -91,13 +91,13 @@ describe('Http listener', () => {
     httpListener({
       middlewares: [middleware$],
       effects: [effect$],
-      errorEffect: errorEffect$,
+      error$,
     })(req, res);
 
     // then
     setTimeout(() => {
       expect(responseHandler.handleResponse).toHaveBeenCalledTimes(1);
-      expect(errorEffect$).toHaveBeenCalled();
+      expect(error$).toHaveBeenCalled();
       done();
     }, 0);
   });
