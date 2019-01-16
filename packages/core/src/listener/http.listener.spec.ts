@@ -2,8 +2,8 @@ import { IncomingMessage, OutgoingMessage } from 'http';
 import { of, throwError } from 'rxjs';
 import { mapTo, switchMap } from 'rxjs/operators';
 import { httpListener } from './http.listener';
-import { EffectFactory } from './effects/effects.factory';
-import { Middleware } from './effects/effects.interface';
+import { EffectFactory } from '../effects/effects.factory';
+import { Middleware } from '../effects/effects.interface';
 
 describe('Http listener', () => {
   let effectsCombiner;
@@ -19,16 +19,16 @@ describe('Http listener', () => {
   const middleware$: Middleware = req$ => req$;
 
   beforeEach(() => {
-    jest.unmock('./error/error.effect.ts');
-    jest.unmock('./effects/effects.combiner.ts');
-    jest.unmock('./response/response.handler.ts');
-    jest.unmock('./router/router.factory.ts');
-    jest.unmock('./router/router.resolver.ts');
+    jest.unmock('../error/error.effect.ts');
+    jest.unmock('../effects/effects.combiner.ts');
+    jest.unmock('../response/response.handler.ts');
+    jest.unmock('../router/router.factory.ts');
+    jest.unmock('../router/router.resolver.ts');
 
-    effectsCombiner = require('./effects/effects.combiner.ts');
-    responseHandler = require('./response/response.handler.ts');
-    routerFactory = require('./router/router.factory.ts');
-    routerResolver = require('./router/router.resolver.ts');
+    effectsCombiner = require('../effects/effects.combiner.ts');
+    responseHandler = require('../response/response.handler.ts');
+    routerFactory = require('../router/router.factory.ts');
+    routerResolver = require('../router/router.resolver.ts');
   });
 
   test('#httpListener handles received HttpRequest', done => {

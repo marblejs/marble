@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { takeWhile } from 'rxjs/operators';
-import { httpListener } from '../http.listener';
+import { httpListener } from '../listener/http.listener';
 import { isCloseEvent } from './server.event';
 import { subscribeServerEvents } from './server.event.subscriber';
 import { InjectionDependencies } from './server.injector';

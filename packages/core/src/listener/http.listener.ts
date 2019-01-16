@@ -1,15 +1,15 @@
 import { IncomingMessage, OutgoingMessage } from 'http';
 import { of, Subject } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, switchMap, tap, takeWhile } from 'rxjs/operators';
-import { combineMiddlewares } from './effects/effects.combiner';
-import { EffectHttpResponse, Middleware, ErrorEffect } from './effects/effects.interface';
-import { Http, HttpRequest, HttpResponse, HttpStatus } from './http.interface';
-import { handleResponse } from './response/response.handler';
-import { RouteEffect, RouteEffectGroup } from './router/router.interface';
-import { resolveRouting } from './router/router.resolver';
-import { factorizeRouting } from './router/router.factory';
-import { defaultError$ } from './error/error.effect';
-import { createStaticInjectionContainer } from './server/server.injector';
+import { combineMiddlewares } from '../effects/effects.combiner';
+import { EffectHttpResponse, Middleware, ErrorEffect } from '../effects/effects.interface';
+import { Http, HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
+import { handleResponse } from '../response/response.handler';
+import { RouteEffect, RouteEffectGroup } from '../router/router.interface';
+import { resolveRouting } from '../router/router.resolver';
+import { factorizeRouting } from '../router/router.factory';
+import { defaultError$ } from '../error/error.effect';
+import { createStaticInjectionContainer } from '../server/server.injector';
 
 export interface HttpListenerConfig {
   middlewares?: Middleware[];
