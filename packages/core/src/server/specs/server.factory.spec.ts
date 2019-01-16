@@ -1,6 +1,6 @@
 import { forkJoin } from 'rxjs';
 import { mapTo, tap, filter, take } from 'rxjs/operators';
-import { httpListener } from '../../http.listener';
+import { httpListener } from '../../listener/http.listener';
 import { createServer } from '../server.factory';
 import {
   ServerEventType,
