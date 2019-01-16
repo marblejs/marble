@@ -1,10 +1,9 @@
 import { Marbles, createHttpRequest } from '@marblejs/core/dist/+internal';
-import { ServerEffect, createInjectionToken, ServerEvent, ServerEventType, matchEvent } from '@marblejs/core';
+import { ServerEffect, ServerEvent, ServerEventType, matchEvent } from '@marblejs/core';
 import { mapToServer, UpgradeEvent } from './mapToServer.operator';
 
 describe('#mapToServer operator', () => {
   let webSocketServerMock;
-  let injectorMock;
   let socketMock;
   let bufferMock;
 
@@ -15,7 +14,6 @@ describe('#mapToServer operator', () => {
       handleUpgrade: jest.fn((req, socket, head, done) => done()),
       emit: jest.fn(),
     };
-    injectorMock = jest.fn(() => webSocketServerMock);
   });
 
   test('connects socket to httpServer', () => {
@@ -30,20 +28,20 @@ describe('#mapToServer operator', () => {
     };
 
     // when
-    const effect$: ServerEffect = (event$, _, inject) =>
+    const effect$: ServerEffect = event$ =>
       event$.pipe(
         matchEvent(ServerEvent.upgrade),
         mapToServer(
-          { path: '/test_1', server: createInjectionToken() },
-          { path: '/test_2', server: createInjectionToken() },
-        )(inject),
+          { path: '/test_1', server: webSocketServerMock },
+          { path: '/test_2', server: webSocketServerMock },
+        ),
       );
 
     // then
     Marbles.assertEffect(effect$, [
       ['--a--', { a: incomingEvent }],
       ['-----', {}],
-    ], { meta: injectorMock });
+    ]);
 
     expect(webSocketServerMock.handleUpgrade).toHaveBeenCalledTimes(1);
     expect(webSocketServerMock.emit).toHaveBeenCalledTimes(1);
@@ -62,20 +60,20 @@ describe('#mapToServer operator', () => {
     };
 
     // when
-    const effect$: ServerEffect = (event$, _, inject) =>
+    const effect$: ServerEffect = event$ =>
       event$.pipe(
         matchEvent(ServerEvent.upgrade),
         mapToServer(
-          { path: '/test_1', server: createInjectionToken() },
-          { path: '/test_2', server: createInjectionToken() },
-        )(inject),
+          { path: '/test_1', server: webSocketServerMock },
+          { path: '/test_2', server: webSocketServerMock },
+        ),
       );
 
     // then
     Marbles.assertEffect(effect$, [
       ['--a--', { a: incomingEvent }],
       ['-----', {}],
-    ], { meta: injectorMock });
+    ]);
 
     expect(webSocketServerMock.handleUpgrade).not.toHaveBeenCalled();
     expect(webSocketServerMock.emit).not.toHaveBeenCalled();

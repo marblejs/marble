@@ -1,4 +1,4 @@
-import { InjectionToken, InjectionGetter, ServerEvent, ServerEventType } from '@marblejs/core';
+import { ServerEvent, ServerEventType } from '@marblejs/core';
 import * as pathToRegexp from 'path-to-regexp';
 import { Observable, from, EMPTY } from 'rxjs';
 import { filter, mergeMap, map, tap, mapTo, toArray, mergeMapTo } from 'rxjs/operators';
@@ -8,16 +8,16 @@ export type UpgradeEvent = ReturnType<typeof ServerEvent.upgrade>;
 
 type WebSocketServerCollection = Array<{
   path: string,
-  server: InjectionToken,
+  server: MarbleWebSocketServer,
 }>;
 
 const isWebSocketUpgrade = ({ request }: UpgradeEvent['payload']) =>
   request.headers.upgrade === 'websocket';
 
-export const mapToServer = (...servers: WebSocketServerCollection) => (inject: InjectionGetter) => {
-  const mappedCollection = servers.map(({ path, server: serverToken }) => ({
+export const mapToServer = (...servers: WebSocketServerCollection) => {
+  const mappedCollection = servers.map(({ path, server }) => ({
     pathToMatch: pathToRegexp(path),
-    serverToken,
+    server,
   }));
 
   return (input$: Observable<UpgradeEvent>) =>
@@ -26,10 +26,7 @@ export const mapToServer = (...servers: WebSocketServerCollection) => (inject: I
       filter(isWebSocketUpgrade),
       mergeMap(({ request, socket, head }) => from(mappedCollection).pipe(
         filter(({ pathToMatch }) => pathToMatch.test(request.url!)),
-        map(({ serverToken }) => inject<MarbleWebSocketServer>(serverToken)),
-        map(data => data),
-        filter(Boolean),
-        tap(server => server.handleUpgrade(request, socket, head, (ws) =>
+        tap(({ server }) => server.handleUpgrade(request, socket, head, (ws) =>
           server.emit(ServerEventType.CONNECTION, ws, request),
         )),
         mapTo(true),

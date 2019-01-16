@@ -27,7 +27,7 @@ export const createServer = (config: CreateServerConfig) => {
   }
 
   if (event$) {
-    event$(serverEvent$, server, injector.get).subscribe();
+    event$(serverEvent$, server, { inject: injector.get }).subscribe();
   }
 
   return {

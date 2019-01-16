@@ -16,6 +16,7 @@ describe('JWT middleware', () => {
   let utilModule;
   let factoryModule;
   const injector = createStaticInjectionContainer();
+  const effectMeta = { inject: injector.get };
 
   beforeEach(() => {
     jest.unmock('../jwt.util.ts');
@@ -43,7 +44,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, injector.get);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, effectMeta);
 
     // then
     middleware$.subscribe(
@@ -74,7 +75,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => throwError(expectedError));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, injector.get);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, effectMeta);
 
     // then
     middleware$.subscribe(
@@ -106,7 +107,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, injector.get);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, effectMeta);
 
     // then
     middleware$.subscribe(

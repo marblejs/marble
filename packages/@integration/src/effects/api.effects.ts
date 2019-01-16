@@ -18,7 +18,7 @@ const rootValiadtor$ = requestValidator$({
 const root$ = EffectFactory
   .matchPath('/')
   .matchType('GET')
-  .use((req$, _, inject) => req$.pipe(
+  .use((req$, _, { inject }) => req$.pipe(
     use(rootValiadtor$),
     map(req => req.params.version),
     map(version => `API version: ${version}`),

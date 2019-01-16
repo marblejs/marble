@@ -6,13 +6,13 @@ import { httpServer } from './http.listener';
 import { webSocketServer } from './ws.listener';
 import { WebSocketsToken } from './tokens';
 
-const upgrade$: ServerEffect = (event$, _, injector) =>
+const upgrade$: ServerEffect = (event$, _, { inject }) =>
   event$.pipe(
     matchEvent(ServerEvent.upgrade),
     mapToServer({
       path: '/api/:version/ws',
-      server: WebSocketsToken,
-    })(injector),
+      server: inject(WebSocketsToken),
+    }),
   );
 
 const listen$: ServerEffect = event$ =>
