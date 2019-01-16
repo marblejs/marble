@@ -15,5 +15,5 @@ const connection$: WebSocketConnectionEffect = req$ =>
 export const webSocketServer = webSocketListener({
   middlewares: [],
   effects: [add$],
-  connection: connection$,
+  connection$,
 });

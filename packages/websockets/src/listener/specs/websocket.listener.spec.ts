@@ -169,7 +169,7 @@ describe('WebSocket listener', () => {
       // given
       const error = new WebSocketConnectionError('Unauthorized', 4000);
       const connection$: WebSocketConnectionEffect = req$ => req$.pipe(mergeMap(() => throwError(error)));
-      const webSocketServer = webSocketListener({ connection: connection$ });
+      const webSocketServer = webSocketListener({ connection$ });
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
 

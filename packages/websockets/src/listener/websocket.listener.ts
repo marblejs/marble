@@ -2,7 +2,7 @@ import * as http from 'http';
 import * as WebSocket from 'ws';
 import { Subject, of, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { combineEffects, combineMiddlewares } from '@marblejs/core';
+import { combineEffects, combineMiddlewares, Event } from '@marblejs/core';
 import * as WS from '../websocket.interface';
 import * as WSHelper from './websocket.helper';
 import * as WSEffect from '../effects/ws-effects.interface';
@@ -20,41 +20,39 @@ type HandleIncomingConnection =
   (server: WS.MarbleWebSocketServer) =>
   (client: WS.WebSocketClient, request: http.IncomingMessage) =>  void;
 
-export interface WebSocketListenerConfig<IncomingEvent, OutgoingEvent, IncomingError extends Error = Error> {
-  effects?: WSEffect.WebSocketEffect<IncomingEvent, OutgoingEvent>[];
-  middlewares?: WSEffect.WebSocketMiddleware<IncomingEvent, IncomingEvent>[];
-  error?: WSEffect.WebSocketErrorEffect<IncomingError, IncomingEvent, OutgoingEvent>;
-  eventTransformer?: EventTransformer<IncomingEvent, any>;
-  connection?: WSEffect.WebSocketConnectionEffect;
+export interface WebSocketListenerConfig {
+  effects?: WSEffect.WebSocketEffect<any, any>[];
+  middlewares?: WSEffect.WebSocketMiddleware<any, any>[];
+  error$?: WSEffect.WebSocketErrorEffect<Error, any, any>;
+  eventTransformer?: EventTransformer<Event, any>;
+  connection$?: WSEffect.WebSocketConnectionEffect;
 }
 
-export const webSocketListener = <IncomingEvent, OutgoingEvent, IncomingError extends Error>(
-  config: WebSocketListenerConfig<IncomingEvent, OutgoingEvent, IncomingError> = {}
-) => {
+export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   const {
-    error,
+    error$,
     effects = [],
     middlewares = [],
     eventTransformer,
-    connection = (req$: Observable<http.IncomingMessage>) => req$,
+    connection$ = (req$: Observable<http.IncomingMessage>) => req$,
   } = config;
 
   const combinedMiddlewares = combineMiddlewares(...middlewares);
   const combinedEffects = combineEffects(...effects);
-  const error$ = provideErrorEffect(error, eventTransformer);
+  const providedError$ = provideErrorEffect(error$, eventTransformer);
   const providedTransformer: EventTransformer<any, any> = eventTransformer || jsonTransformer;
 
   const handleIncomingMessage: HandleIncomingMessage = client => () => {
     const subscribeMiddlewares = (input$: Observable<any>) =>
       input$.subscribe(
         event => eventSubject$.next(event),
-        error => handleEffectsError(client, error$)(error),
+        error => handleEffectsError(client, providedError$)(error),
       );
 
     const subscribeEffects = (input$: Observable<any>) =>
       input$.subscribe(
         event => client.sendResponse(event),
-        error => handleEffectsError(client, error$)(error),
+        error => handleEffectsError(client, providedError$)(error),
       );
 
     const onMessage = (event: WS.WebSocketData) => {
@@ -70,7 +68,7 @@ export const webSocketListener = <IncomingEvent, OutgoingEvent, IncomingError ex
     };
 
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
-    const eventSubject$ = new Subject<IncomingEvent>();
+    const eventSubject$ = new Subject<any>();
     const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
     const middlewares$ = combinedMiddlewares(decodedEvent$, client);
     const effects$ = combinedEffects(eventSubject$, client);
@@ -90,7 +88,7 @@ export const webSocketListener = <IncomingEvent, OutgoingEvent, IncomingError ex
       isAlive: true,
     })(client);
 
-    connection(request$, extendedClient).subscribe(
+    connection$(request$, extendedClient).subscribe(
       handleIncomingMessage(extendedClient),
       WSHelper.handleClientValidationError(extendedClient),
     );

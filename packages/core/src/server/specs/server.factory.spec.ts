@@ -119,7 +119,7 @@ describe('#createServer', () => {
     // then
     marbleServer = createServer({
       httpListener: app,
-      httpEventsHandler: event$ => forkJoin(
+      event$: event$ => forkJoin(
         event$.pipe(filter(isErrorEvent), take(1)),
         event$.pipe(filter(isClientErrorEvent), take(1)),
         event$.pipe(filter(isConnectEvent), take(1)),

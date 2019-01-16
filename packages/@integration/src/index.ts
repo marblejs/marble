@@ -22,18 +22,15 @@ const listen$: ServerEffect = event$ =>
     tap(({ port, host }) => console.log(`Server running @ http://${host}:${port}/ 🚀`)),
   );
 
-const event$: ServerEffect = (event$, ...args) =>
-  merge(
-    listen$(event$, ...args),
-    upgrade$(event$, ...args),
-  );
-
 export const server = createServer({
   hostname: '127.0.0.1',
   port: 1337,
   httpListener: httpServer,
-  httpEventsHandler: event$,
   dependencies: [
     bind(WebSocketsToken).to(() => webSocketServer()),
-  ]
+  ],
+  event$: (...args) => merge(
+    listen$(...args),
+    upgrade$(...args),
+  ),
 });
