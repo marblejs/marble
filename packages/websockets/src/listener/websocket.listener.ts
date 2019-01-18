@@ -2,7 +2,13 @@ import * as http from 'http';
 import * as WebSocket from 'ws';
 import { Subject, of, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { combineEffects, combineMiddlewares, Event } from '@marblejs/core';
+import {
+  combineEffects,
+  combineMiddlewares,
+  createStaticInjectionContainer,
+  Event,
+  EffectMetadata,
+} from '@marblejs/core';
 import * as WS from '../websocket.interface';
 import * as WSHelper from './websocket.helper';
 import * as WSEffect from '../effects/ws-effects.interface';
@@ -41,18 +47,20 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   const combinedEffects = combineEffects(...effects);
   const providedError$ = provideErrorEffect(error$, eventTransformer);
   const providedTransformer: EventTransformer<any, any> = eventTransformer || jsonTransformer;
+  const injector = createStaticInjectionContainer();
+  const defaultMetadata: EffectMetadata = { inject: injector.get };
 
   const handleIncomingMessage: HandleIncomingMessage = client => () => {
     const subscribeMiddlewares = (input$: Observable<any>) =>
       input$.subscribe(
         event => eventSubject$.next(event),
-        error => handleEffectsError(client, providedError$)(error),
+        error => handleEffectsError(defaultMetadata, client, providedError$)(error),
       );
 
     const subscribeEffects = (input$: Observable<any>) =>
       input$.subscribe(
         event => client.sendResponse(event),
-        error => handleEffectsError(client, providedError$)(error),
+        error => handleEffectsError(defaultMetadata, client, providedError$)(error),
       );
 
     const onMessage = (event: WS.WebSocketData) => {
@@ -70,8 +78,8 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
     const eventSubject$ = new Subject<any>();
     const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
-    const middlewares$ = combinedMiddlewares(decodedEvent$, client);
-    const effects$ = combinedEffects(eventSubject$, client);
+    const middlewares$ = combinedMiddlewares(decodedEvent$, client, defaultMetadata);
+    const effects$ = combinedEffects(eventSubject$, client, defaultMetadata);
 
     let middlewaresSub = subscribeMiddlewares(middlewares$);
     let effectsSub = subscribeEffects(effects$);
@@ -88,7 +96,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
       isAlive: true,
     })(client);
 
-    connection$(request$, extendedClient).subscribe(
+    connection$(request$, extendedClient, defaultMetadata).subscribe(
       handleIncomingMessage(extendedClient),
       WSHelper.handleClientValidationError(extendedClient),
     );

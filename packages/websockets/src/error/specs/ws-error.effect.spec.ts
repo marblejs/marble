@@ -19,7 +19,7 @@ describe('error$', () => {
     Marbles.assertEffect(error$, [
       ['--a--', { a: incomingEvent }],
       ['--b--', { b: outgoingEvent }],
-    ], { meta: error });
+    ], { meta: { error } });
   });
 
   test('returns stream of error events for undefined error object', () => {
@@ -32,7 +32,7 @@ describe('error$', () => {
     Marbles.assertEffect(error$, [
       ['--a--', { a: incomingEvent }],
       ['--b--', { b: outgoingEvent }],
-    ], { meta: error });
+    ], { meta: { error } });
   });
 
   test('returns stream of error events for undefined event object', () => {
@@ -45,6 +45,6 @@ describe('error$', () => {
     Marbles.assertEffect(error$, [
       ['--a--', { a: incomingEvent }],
       ['--b--', { b: outgoingEvent }],
-    ], { meta: error });
+    ], { meta: { error } });
   });
 });

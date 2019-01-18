@@ -27,19 +27,19 @@ export const httpListener = ({
   const routing = factorizeRouting(effects);
   const injector = createStaticInjectionContainer();
   const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectHttpResponse;
-  const effectDefaultMeta = { inject: injector.get };
+  const defaultMetadata = { inject: injector.get };
 
   const effect$ = requestSubject$.pipe(
     mergeMap(({ req, res }) => {
       res.send = handleResponse(res)(req);
 
-      return combinedMiddlewares(of(req), res, effectDefaultMeta).pipe(
+      return combinedMiddlewares(of(req), res, defaultMetadata).pipe(
         takeWhile(() => !res.finished),
-        switchMap(resolveRouting(routing, injector.get)(res)),
+        switchMap(resolveRouting(routing, defaultMetadata)(res)),
         defaultIfEmpty(defaultResponse),
         tap(res.send),
         catchError(error =>
-          error$(of(req), res, { ...effectDefaultMeta, error }).pipe(
+          error$(of(req), res, { ...defaultMetadata, error }).pipe(
             tap(res.send),
           ),
         ),

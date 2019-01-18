@@ -1,5 +1,5 @@
 import { mapTo, tap, map } from 'rxjs/operators';
-import { Effect, Middleware } from '../../effects/effects.interface';
+import { Effect, Middleware, EffectMetadata } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
@@ -99,13 +99,14 @@ describe('#findRoute', () => {
 describe('#resolveRouting', () => {
   let router;
   let queryFactory;
-  const injector = createStaticInjectionContainer();
+  let metadata: EffectMetadata;
 
   beforeEach(() => {
     jest.unmock('../router.resolver.ts');
     jest.unmock('../router.query.factory');
     router = require('../router.resolver.ts');
     queryFactory = require('../router.query.factory');
+    metadata = { inject: createStaticInjectionContainer().get };
   });
 
   test('resolves found effect', done => {
@@ -118,7 +119,7 @@ describe('#resolveRouting', () => {
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);
     queryFactory.queryParamsFactory = jest.fn(() => ({}));
-    const resolvedRoute = resolveRouting([], injector.get)(res)(req);
+    const resolvedRoute = resolveRouting([], metadata)(res)(req);
 
     // then
     resolvedRoute.subscribe(effect => {
@@ -136,7 +137,7 @@ describe('#resolveRouting', () => {
 
     // when
     router.findRoute = jest.fn(() => undefined);
-    const resolvedRoute = resolveRouting([], injector.get)(res)(req);
+    const resolvedRoute = resolveRouting([], metadata)(res)(req);
 
     // then
     resolvedRoute.subscribe(
@@ -161,7 +162,7 @@ describe('#resolveRouting', () => {
     const res = { finished: true } as HttpResponse;
 
     // when
-    const resolvedRoute = resolveRouting([], injector.get)(res)(req);
+    const resolvedRoute = resolveRouting([], metadata)(res)(req);
 
     // then
     resolvedRoute.subscribe(
@@ -192,7 +193,7 @@ describe('#resolveRouting', () => {
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);
     queryFactory.queryParamsFactory = jest.fn(() => ({}));
-    const resolvedRoute = resolveRouting([], injector.get)(res)(req);
+    const resolvedRoute = resolveRouting([], metadata)(res)(req);
 
     // then
     resolvedRoute.subscribe(effect => {

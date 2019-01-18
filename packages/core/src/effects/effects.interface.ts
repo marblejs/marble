@@ -5,9 +5,9 @@ import { HttpError } from '../error/error.model';
 import { InjectorGetter } from '../server/server.injector';
 import { Event } from '../event/event.interface';
 
-export interface EffectMetadata<T extends Error> {
-  error?: T;
+export interface EffectMetadata<T extends Error = Error> {
   inject: InjectorGetter;
+  error?: T;
   [key: string]: any;
 }
 
