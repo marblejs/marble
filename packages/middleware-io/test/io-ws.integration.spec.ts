@@ -1,5 +1,6 @@
 import { createWebSocketsTestBed } from '@marblejs/websockets/dist/+internal';
 import { app } from './io-ws.integration';
+import { createStaticInjectionContainer, httpServerToken } from '@marblejs/core';
 
 describe('@marblejs/middleware-io - WebSocket integration', () => {
   const testBed = createWebSocketsTestBed();
@@ -13,9 +14,10 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
     const httpServer = testBed.getServer();
     const targetClient = testBed.getClient();
+    const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
 
     // when
-    app(httpServer);
+    app()(injector);
     targetClient.once('open', () => targetClient.send(event));
 
     // then
@@ -29,6 +31,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     // given
     const httpServer = testBed.getServer();
     const targetClient = testBed.getClient();
+    const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
     const user = { id: 'id', age: '100', };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
     const expectedError = {
@@ -40,7 +43,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     };
 
     // when
-    app(httpServer);
+    app()(injector);
     targetClient.once('open', () => targetClient.send(event));
 
     // then

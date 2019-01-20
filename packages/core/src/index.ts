@@ -12,5 +12,6 @@ export * from './event/event.factory';
 export * from './event/event.interface';
 export * from './server/server.injector';
 export * from './server/server.event';
+export * from './server/server.token';
 export { createServer, CreateServerConfig } from './server/server.factory';
 export { HttpListenerConfig, httpListener } from './listener/http.listener';

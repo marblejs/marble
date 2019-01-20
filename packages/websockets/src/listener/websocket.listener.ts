@@ -5,9 +5,11 @@ import { map } from 'rxjs/operators';
 import {
   combineEffects,
   combineMiddlewares,
-  createStaticInjectionContainer,
   Event,
   EffectMetadata,
+  httpServerToken,
+  Injector,
+  Injectable,
 } from '@marblejs/core';
 import * as WS from '../websocket.interface';
 import * as WSHelper from './websocket.helper';
@@ -19,11 +21,11 @@ import { handleEffectsError } from '../error/ws-error.handler';
 import { provideErrorEffect } from '../error/ws-error.provider';
 
 type HandleIncomingMessage =
-  (client: WS.MarbleWebSocketClient) =>
+  (client: WS.MarbleWebSocketClient, context: Injector) =>
   () => void;
 
 type HandleIncomingConnection =
-  (server: WS.MarbleWebSocketServer) =>
+  (server: WS.MarbleWebSocketServer, context: Injector) =>
   (client: WS.WebSocketClient, request: http.IncomingMessage) =>  void;
 
 export interface WebSocketListenerConfig {
@@ -47,10 +49,8 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   const combinedEffects = combineEffects(...effects);
   const providedError$ = provideErrorEffect(error$, eventTransformer);
   const providedTransformer: EventTransformer<any, any> = eventTransformer || jsonTransformer;
-  const injector = createStaticInjectionContainer();
-  const defaultMetadata: EffectMetadata = { inject: injector.get };
 
-  const handleIncomingMessage: HandleIncomingMessage = client => () => {
+  const handleIncomingMessage: HandleIncomingMessage = (client, ctx) => () => {
     const subscribeMiddlewares = (input$: Observable<any>) =>
       input$.subscribe(
         event => eventSubject$.next(event),
@@ -75,6 +75,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
       effectsSub.unsubscribe();
     };
 
+    const defaultMetadata: EffectMetadata = { inject: ctx.get };
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
     const eventSubject$ = new Subject<any>();
     const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
@@ -88,8 +89,9 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     client.once('close', onClose);
   };
 
-  const handleIncomingConnection: HandleIncomingConnection = (server) => (client, req) => {
+  const handleIncomingConnection: HandleIncomingConnection = (server, ctx) => (client, req) => {
     const request$ = of(req);
+    const defaultMetadata: EffectMetadata = { inject: ctx.get };
     const extendedClient = WSHelper.extendClientWith({
       sendResponse: handleResponse(client, providedTransformer),
       sendBroadcastResponse: handleBroadcastResponse(server, providedTransformer),
@@ -97,20 +99,20 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     })(client);
 
     connection$(request$, extendedClient, defaultMetadata).subscribe(
-      handleIncomingMessage(extendedClient),
+      handleIncomingMessage(extendedClient, ctx),
       WSHelper.handleClientValidationError(extendedClient),
     );
 
     WSHelper.handleClientBrokenConnection(extendedClient).subscribe();
   };
 
-  return (server?: http.Server) => {
-    const serverOptions: WebSocket.ServerOptions = server ? { server } : { noServer: true };
-    const webSocketServer = WSHelper.createWebSocketServer(serverOptions);
+  return (serverOptions?: WebSocket.ServerOptions): Injectable => ctx => {
+    const providedOptions: WebSocket.ServerOptions = serverOptions || { server: ctx.get(httpServerToken) };
+    const webSocketServer = WSHelper.createWebSocketServer(providedOptions);
     const sendBroadcastResponse = handleBroadcastResponse(webSocketServer, providedTransformer);
     const extendedWebSocketServer = WSHelper.extendServerWith({ sendBroadcastResponse })(webSocketServer);
 
-    extendedWebSocketServer.on('connection', handleIncomingConnection(extendedWebSocketServer));
+    extendedWebSocketServer.on('connection', handleIncomingConnection(extendedWebSocketServer, ctx));
     WSHelper.handleServerBrokenConnections(extendedWebSocketServer).subscribe();
 
     return extendedWebSocketServer;
