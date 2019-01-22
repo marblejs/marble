@@ -7,6 +7,7 @@ const MockReq = require('mock-req');
 
 describe('BodyParser middleware', () => {
   const injector = createStaticInjectionContainer();
+  const effectMeta = { inject: injector.get };
 
   beforeEach(() => {
     spyOn(console, 'log').and.stub();
@@ -31,7 +32,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, injector.get);
+    const http$ = bodyParser$(req$, res, effectMeta);
 
     http$.subscribe(data => {
       expect(data.body).toEqual({ test: 'test' });
@@ -49,7 +50,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, injector.get);
+    const http$ = bodyParser$(req$, res, effectMeta);
 
     http$.subscribe(data => {
       expect(data.body).toEqual({
@@ -72,7 +73,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, injector.get);
+    const http$ = bodyParser$(req$, res, effectMeta);
 
     http$.subscribe(
       () => {
@@ -97,7 +98,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, injector.get);
+    const http$ = bodyParser$(req$, res, effectMeta);
 
     http$.subscribe(data => {
       expect(data.body).toEqual('test');
@@ -115,7 +116,7 @@ describe('BodyParser middleware', () => {
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, injector.get);
+    const http$ = bodyParser$(req$, res, effectMeta);
 
     http$.subscribe(
       () => {

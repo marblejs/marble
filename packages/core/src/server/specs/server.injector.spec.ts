@@ -1,8 +1,7 @@
-import * as http from 'http';
 import { bind, createInjectionToken, createStaticInjectionContainer } from '../server.injector';
 
 describe('#bind', () => {
-  const httpServer = {} as http.Server;
+  const injector = createStaticInjectionContainer();
 
   test('factorizes dependency', () => {
     // given
@@ -14,13 +13,11 @@ describe('#bind', () => {
 
     // then
     expect(factorizedDependency.token).toBe(Token);
-    expect(factorizedDependency.factory(httpServer)).toEqual(dependency);
+    expect(factorizedDependency.factory(injector)).toEqual(dependency);
   });
 });
 
 describe('#createStaticInjectionContainer', () => {
-  const httpServer = {} as http.Server;
-
   test('#register registers single dependency', () => {
     // given
     const dependency = { test: 'test_string' };
@@ -28,7 +25,7 @@ describe('#createStaticInjectionContainer', () => {
     const container = createStaticInjectionContainer();
 
     // when
-    container.register(Token, () => dependency)(httpServer);
+    container.register(Token, () => dependency);
 
     // then
     expect(container.get(Token)).toEqual(dependency);
@@ -49,7 +46,7 @@ describe('#createStaticInjectionContainer', () => {
       { token: Token1, factory: () => dependency1 },
       { token: Token2, factory: () => dependency2 },
       { token: Token3, factory: () => dependency3 },
-    ])(httpServer);
+    ]);
 
     // then
     expect(container.get(Token1)).toEqual(dependency1);
@@ -66,8 +63,8 @@ describe('#createStaticInjectionContainer', () => {
     const container = createStaticInjectionContainer();
 
     // when
-    container.register(Token1, () => dependency1)(httpServer);
-    container.register(Token2, () => dependency2)(httpServer);
+    container.register(Token1, () => dependency1);
+    container.register(Token2, () => dependency2);
     container.deregister(Token1);
 
     // then
@@ -82,7 +79,7 @@ describe('#createStaticInjectionContainer', () => {
     const container = createStaticInjectionContainer();
 
     // when
-    container.register(Token, () => dependency)(httpServer);
+    container.register(Token, () => dependency);
     container.deregisterAll();
 
     // then

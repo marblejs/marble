@@ -1,10 +1,16 @@
-import { EventError } from '@marblejs/core';
+import { EventError, createStaticInjectionContainer, EffectMetadata } from '@marblejs/core';
 import { mapTo } from 'rxjs/operators';
 import { handleEffectsError } from '../ws-error.handler';
 import { MarbleWebSocketClient } from '../../websocket.interface';
 import { WebSocketErrorEffect } from '../../effects/ws-effects.interface';
 
 describe('#handleEffectsError', () => {
+  let defaultMetadata: EffectMetadata;
+
+  beforeEach(() => {
+    defaultMetadata = { inject: createStaticInjectionContainer().get };
+  });
+
   test('handles error if error$ is defined', () => {
     // given
     const client = { sendResponse: jest.fn() } as any as MarbleWebSocketClient;
@@ -14,7 +20,7 @@ describe('#handleEffectsError', () => {
     );
 
     // when
-    handleEffectsError(client, error$)(error);
+    handleEffectsError(defaultMetadata, client, error$)(error);
 
     // then
     expect(client.sendResponse).toHaveBeenCalled();
@@ -26,7 +32,7 @@ describe('#handleEffectsError', () => {
     const error = new EventError({ type: 'EVENT' }, '');
 
     // when
-    handleEffectsError(client, undefined)(error);
+    handleEffectsError(defaultMetadata, client, undefined)(error);
 
     // then
     expect(client.sendResponse).not.toHaveBeenCalled();

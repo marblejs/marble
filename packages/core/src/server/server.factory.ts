@@ -5,6 +5,7 @@ import { isCloseEvent } from './server.event';
 import { subscribeServerEvents } from './server.event.subscriber';
 import { InjectionDependencies } from './server.injector';
 import { ServerEffect } from '../effects/effects.interface';
+import { httpServerToken } from './server.token';
 
 export interface CreateServerConfig {
   port?: number;
@@ -22,12 +23,14 @@ export const createServer = (config: CreateServerConfig) => {
   const server = http.createServer(httpListener);
   const serverEvent$ = eventsSubscriber(server).pipe(takeWhile(e => !isCloseEvent(e)));
 
+  injector.register(httpServerToken, () => server);
+
   if (dependencies) {
-    injector.registerAll(dependencies)(server);
+    injector.registerAll(dependencies);
   }
 
   if (event$) {
-    event$(serverEvent$, server, injector.get).subscribe();
+    event$(serverEvent$, server, { inject: injector.get }).subscribe();
   }
 
   return {

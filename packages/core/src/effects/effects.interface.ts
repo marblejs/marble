@@ -2,8 +2,14 @@ import * as http from 'http';
 import { Observable } from 'rxjs';
 import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders } from '../http.interface';
 import { HttpError } from '../error/error.model';
-import { InjectionGetter } from '../server/server.injector';
+import { InjectorGetter } from '../server/server.injector';
 import { Event } from '../event/event.interface';
+
+export interface EffectMetadata<T extends Error = Error> {
+  inject: InjectorGetter;
+  error?: T;
+  [key: string]: any;
+}
 
 export interface EffectHttpResponse<T = any> {
   status?: HttpStatus;
@@ -26,7 +32,7 @@ export interface Effect<
   T = HttpRequest,
   U = EffectHttpResponse,
   V = HttpResponse,
-  W = InjectionGetter,
+  W extends Error = Error,
 > {
-  (input$: Observable<T>, client: V, meta: W): Observable<U>;
+  (input$: Observable<T>, client: V, meta: EffectMetadata<W>): Observable<U>;
 }

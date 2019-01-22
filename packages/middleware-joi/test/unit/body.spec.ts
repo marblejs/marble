@@ -5,7 +5,7 @@ import { bodyParser$ } from '@marblejs/middleware-body';
 const MockReq = require('mock-req');
 
 describe('Joi middleware - Body', () => {
-  const injector = createStaticInjectionContainer();
+  const metadata = { inject: createStaticInjectionContainer().get };
 
   it('should throws an error if dont pass a required field', done => {
     expect.assertions(2);
@@ -24,7 +24,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, injector.get);
+    const http$ = bodyParser$(req$, res, metadata);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -60,7 +60,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, injector.get);
+    const http$ = bodyParser$(req$, res, metadata);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -96,7 +96,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, injector.get);
+    const http$ = bodyParser$(req$, res, metadata);
     const valid$ = validator$(schema, { allowUnknown: true })(http$);
 
     valid$.subscribe(data => {
