@@ -1,4 +1,11 @@
-import { HttpRequest, HttpResponse, HttpError, HttpStatus, createStaticInjectionContainer } from '@marblejs/core';
+import {
+  HttpRequest,
+  HttpResponse,
+  HttpError,
+  HttpStatus,
+  createStaticInjectionContainer,
+  createEffectMetadata,
+} from '@marblejs/core';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
 import { of, throwError, iif } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
@@ -16,7 +23,7 @@ describe('JWT middleware', () => {
   let utilModule;
   let factoryModule;
   const injector = createStaticInjectionContainer();
-  const effectMeta = { inject: injector.get };
+  const effectMeta = createEffectMetadata({ inject: injector.get });
 
   beforeEach(() => {
     jest.unmock('../jwt.util.ts');

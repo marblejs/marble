@@ -10,6 +10,7 @@ import { resolveRouting } from '../router/router.resolver';
 import { factorizeRouting } from '../router/router.factory';
 import { defaultError$ } from '../error/error.effect';
 import { createStaticInjectionContainer } from '../server/server.injector';
+import { createEffectMetadata } from '../effects/effectsMetadata.factory';
 
 export interface HttpListenerConfig {
   middlewares?: Middleware[];
@@ -26,8 +27,8 @@ export const httpListener = ({
   const combinedMiddlewares = combineMiddlewares(...middlewares);
   const routing = factorizeRouting(effects);
   const injector = createStaticInjectionContainer();
+  const defaultMetadata = createEffectMetadata({ inject: injector.get });
   const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectHttpResponse;
-  const defaultMetadata = { inject: injector.get };
 
   const effect$ = requestSubject$.pipe(
     mergeMap(({ req, res }) => {
@@ -39,7 +40,7 @@ export const httpListener = ({
         defaultIfEmpty(defaultResponse),
         tap(res.send),
         catchError(error =>
-          error$(of(req), res, { ...defaultMetadata, error }).pipe(
+          error$(of(req), res, createEffectMetadata({ ...defaultMetadata, error })).pipe(
             tap(res.send),
           ),
         ),

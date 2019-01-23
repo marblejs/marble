@@ -6,10 +6,10 @@ import {
   combineEffects,
   combineMiddlewares,
   Event,
-  EffectMetadata,
   httpServerToken,
   Injector,
   Injectable,
+  createEffectMetadata,
 } from '@marblejs/core';
 import * as WS from '../websocket.interface';
 import * as WSHelper from './websocket.helper';
@@ -75,7 +75,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
       effectsSub.unsubscribe();
     };
 
-    const defaultMetadata: EffectMetadata = { inject: ctx.get };
+    const defaultMetadata = createEffectMetadata({ inject: ctx.get });
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
     const eventSubject$ = new Subject<any>();
     const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
@@ -91,7 +91,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
 
   const handleIncomingConnection: HandleIncomingConnection = (server, ctx) => (client, req) => {
     const request$ = of(req);
-    const defaultMetadata: EffectMetadata = { inject: ctx.get };
+    const defaultMetadata = createEffectMetadata({ inject: ctx.get });
     const extendedClient = WSHelper.extendClientWith({
       sendResponse: handleResponse(client, providedTransformer),
       sendBroadcastResponse: handleBroadcastResponse(server, providedTransformer),

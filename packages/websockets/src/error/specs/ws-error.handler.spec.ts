@@ -1,4 +1,4 @@
-import { EventError, createStaticInjectionContainer, EffectMetadata } from '@marblejs/core';
+import { EventError, EffectMetadata, createStaticInjectionContainer, createEffectMetadata } from '@marblejs/core';
 import { mapTo } from 'rxjs/operators';
 import { handleEffectsError } from '../ws-error.handler';
 import { MarbleWebSocketClient } from '../../websocket.interface';
@@ -8,7 +8,7 @@ describe('#handleEffectsError', () => {
   let defaultMetadata: EffectMetadata;
 
   beforeEach(() => {
-    defaultMetadata = { inject: createStaticInjectionContainer().get };
+    defaultMetadata = createEffectMetadata({ inject: createStaticInjectionContainer().get });
   });
 
   test('handles error if error$ is defined', () => {

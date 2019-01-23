@@ -6,6 +6,7 @@ import { subscribeServerEvents } from './server.event.subscriber';
 import { InjectionDependencies } from './server.injector';
 import { ServerEffect } from '../effects/effects.interface';
 import { httpServerToken } from './server.token';
+import { createEffectMetadata } from '../effects/effectsMetadata.factory';
 
 export interface CreateServerConfig {
   port?: number;
@@ -30,7 +31,8 @@ export const createServer = (config: CreateServerConfig) => {
   }
 
   if (event$) {
-    event$(serverEvent$, server, { inject: injector.get }).subscribe();
+    const metadata = createEffectMetadata( { inject: injector.get });
+    event$(serverEvent$, server, metadata).subscribe();
   }
 
   return {
