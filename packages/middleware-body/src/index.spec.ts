@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse, createStaticInjectionContainer } from '@marblejs/core';
+import { HttpRequest, HttpResponse, createStaticInjectionContainer, createEffectMetadata } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { of } from 'rxjs';
 import { bodyParser$ } from '.';
@@ -7,7 +7,7 @@ const MockReq = require('mock-req');
 
 describe('BodyParser middleware', () => {
   const injector = createStaticInjectionContainer();
-  const effectMeta = { inject: injector.get };
+  const effectMeta = createEffectMetadata({ inject: injector.get });
 
   beforeEach(() => {
     spyOn(console, 'log').and.stub();

@@ -1,11 +1,11 @@
 import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
-import { HttpRequest, HttpResponse, createStaticInjectionContainer } from '@marblejs/core';
+import { HttpRequest, HttpResponse, createStaticInjectionContainer, createEffectMetadata } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
 const MockReq = require('mock-req');
 
 describe('Joi middleware - Body', () => {
-  const metadata = { inject: createStaticInjectionContainer().get };
+  const metadata = createEffectMetadata({ inject: createStaticInjectionContainer().get });
 
   it('should throws an error if dont pass a required field', done => {
     expect.assertions(2);

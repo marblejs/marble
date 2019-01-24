@@ -1,5 +1,5 @@
 import * as http from 'http';
-import { Observable } from 'rxjs';
+import { Observable, SchedulerLike } from 'rxjs';
 import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders } from '../http.interface';
 import { HttpError } from '../error/error.model';
 import { InjectorGetter } from '../server/server.injector';
@@ -7,6 +7,7 @@ import { Event } from '../event/event.interface';
 
 export interface EffectMetadata<T extends Error = Error> {
   inject: InjectorGetter;
+  scheduler: SchedulerLike;
   error?: T;
   [key: string]: any;
 }
@@ -35,4 +36,8 @@ export interface Effect<
   W extends Error = Error,
 > {
   (input$: Observable<T>, client: V, meta: EffectMetadata<W>): Observable<U>;
+}
+
+export interface EffectLike {
+  (input$: Observable<any>, ...args: any[]): Observable<any>;
 }
