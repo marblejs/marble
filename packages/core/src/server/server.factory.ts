@@ -31,7 +31,7 @@ export const createServer = (config: CreateServerConfig) => {
   }
 
   if (event$) {
-    const metadata = createEffectMetadata( { inject: injector.get });
+    const metadata = createEffectMetadata({ inject: injector.get });
     event$(serverEvent$, server, metadata).subscribe();
   }
 
