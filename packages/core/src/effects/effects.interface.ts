@@ -29,6 +29,9 @@ export interface ErrorEffect<T extends Error = HttpError>
 export interface ServerEffect<T extends Event = Event>
   extends Effect<T, any, http.Server> {}
 
+export interface OutputEffect<T extends EffectHttpResponse = EffectHttpResponse>
+  extends Effect<T, EffectHttpResponse> {}
+
 export interface Effect<
   T = HttpRequest,
   U = EffectHttpResponse,

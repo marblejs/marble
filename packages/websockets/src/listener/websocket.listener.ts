@@ -34,6 +34,7 @@ export interface WebSocketListenerConfig {
   error$?: WSEffect.WebSocketErrorEffect<Error, any, any>;
   eventTransformer?: EventTransformer<Event, any>;
   connection$?: WSEffect.WebSocketConnectionEffect;
+  output$?: WSEffect.WebSocketOutputEffect;
 }
 
 export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
@@ -43,6 +44,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     middlewares = [],
     eventTransformer,
     connection$ = (req$: Observable<http.IncomingMessage>) => req$,
+    output$ = (out$: Observable<Event>) => out$,
   } = config;
 
   const combinedMiddlewares = combineMiddlewares(...middlewares);
@@ -81,9 +83,10 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
     const middlewares$ = combinedMiddlewares(decodedEvent$, client, defaultMetadata);
     const effects$ = combinedEffects(eventSubject$, client, defaultMetadata);
+    const effectsOutput$ = output$(effects$, client, defaultMetadata);
 
     let middlewaresSub = subscribeMiddlewares(middlewares$);
-    let effectsSub = subscribeEffects(effects$);
+    let effectsSub = subscribeEffects(effectsOutput$);
 
     client.on('message', onMessage);
     client.once('close', onClose);

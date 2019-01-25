@@ -7,12 +7,9 @@ export const DEFAULT_CONTENT_TYPE = ContentType.APPLICATION_JSON;
 
 export const getMimeType = (body: any, path: string) => {
   const mimeFromBuffer = Buffer.isBuffer(body) && fileType(body);
-
-  if (mimeFromBuffer) {
-    return mimeFromBuffer.mime;
-  }
-
-  return mime.getType(path) || DEFAULT_CONTENT_TYPE;
+  return mimeFromBuffer
+    ? mimeFromBuffer.mime
+    : mime.getType(path) || DEFAULT_CONTENT_TYPE;
 };
 
 export const contentTypeFactory = (data: {
