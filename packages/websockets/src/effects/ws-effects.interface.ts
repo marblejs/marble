@@ -1,6 +1,5 @@
 import * as http from 'http';
-import { Event, EffectMetadata } from '@marblejs/core';
-import { Observable } from 'rxjs';
+import { Event, Effect } from '@marblejs/core';
 import { MarbleWebSocketClient } from '../websocket.interface';
 
 export interface WebSocketMiddleware<
@@ -27,6 +26,4 @@ export interface WebSocketEffect<
   U = Event,
   V = MarbleWebSocketClient,
   W extends Error = Error,
-> {
-  (input$: Observable<T>, client: V, meta: EffectMetadata<W>): Observable<U>;
-}
+> extends Effect<T, U, V, W> {}

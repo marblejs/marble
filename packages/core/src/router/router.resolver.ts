@@ -1,7 +1,7 @@
 import { EMPTY, Observable, of } from 'rxjs';
 import { mergeMap, takeWhile } from 'rxjs/operators';
 import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
-import { EffectHttpResponse, EffectMetadata } from '../effects/effects.interface';
+import { HttpEffectResponse, EffectMetadata } from '../effects/effects.interface';
 import { RouteMatched, Routing, RoutingItem } from './router.interface';
 import { queryParamsFactory } from './router.query.factory';
 export { RoutingItem };
@@ -38,7 +38,7 @@ export const findRoute = (
 export const resolveRouting =
   (routing: Routing, metadata: EffectMetadata) =>
   (res: HttpResponse) =>
-  (req: HttpRequest): Observable<EffectHttpResponse> => {
+  (req: HttpRequest): Observable<HttpEffectResponse> => {
     if (res.finished) { return EMPTY; }
 
     const [urlPath, urlQuery] = req.url.split('?');

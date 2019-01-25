@@ -3,7 +3,7 @@ import { of, throwError } from 'rxjs';
 import { mapTo, switchMap } from 'rxjs/operators';
 import { httpListener } from './http.listener';
 import { EffectFactory } from '../effects/effects.factory';
-import { Middleware } from '../effects/effects.interface';
+import { HttpMiddleware } from '../effects/effects.interface';
 
 describe('Http listener', () => {
   let effectsCombiner;
@@ -16,7 +16,7 @@ describe('Http listener', () => {
     .matchType('GET')
     .use(req$ => req$.pipe(mapTo( {} )));
 
-  const middleware$: Middleware = req$ => req$;
+  const middleware$: HttpMiddleware = req$ => req$;
 
   beforeEach(() => {
     jest.unmock('../error/error.effect.ts');

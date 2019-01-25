@@ -1,5 +1,5 @@
 import { Marbles, createHttpRequest } from '@marblejs/core/dist/+internal';
-import { ServerEffect, ServerEvent, ServerEventType, matchEvent } from '@marblejs/core';
+import { HttpServerEffect, ServerEvent, ServerEventType, matchEvent } from '@marblejs/core';
 import { mapToServer, UpgradeEvent } from './mapToServer.operator';
 
 describe('#mapToServer operator', () => {
@@ -28,7 +28,7 @@ describe('#mapToServer operator', () => {
     };
 
     // when
-    const effect$: ServerEffect = event$ =>
+    const effect$: HttpServerEffect = event$ =>
       event$.pipe(
         matchEvent(ServerEvent.upgrade),
         mapToServer(
@@ -60,7 +60,7 @@ describe('#mapToServer operator', () => {
     };
 
     // when
-    const effect$: ServerEffect = event$ =>
+    const effect$: HttpServerEffect = event$ =>
       event$.pipe(
         matchEvent(ServerEvent.upgrade),
         mapToServer(

@@ -1,5 +1,5 @@
 import { mapTo, tap, map } from 'rxjs/operators';
-import { Effect, Middleware, EffectMetadata } from '../../effects/effects.interface';
+import { HttpEffect, HttpMiddleware, EffectMetadata } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
@@ -9,10 +9,10 @@ import { createEffectMetadata } from '../../effects/effectsMetadata.factory';
 describe('#findRoute', () => {
   test('finds route inside collection', () => {
     // given
-    const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
-    const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
-    const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
-    const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e1$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e2$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e3$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e4$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
 
     const routing: Routing = [
       {
@@ -47,7 +47,7 @@ describe('#findRoute', () => {
 
   test('finds parametrized route inside collection', () => {
     // given
-    const e$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
 
     const routing: Routing = [{
       regExp: /^\/group\/([^\/]+)\/foo$/,
@@ -67,8 +67,8 @@ describe('#findRoute', () => {
 
   test('matches wildcard route if doesn\'t found proper route', () => {
     // given
-    const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'e1' }));
-    const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'e2' }));
+    const e1$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'e1' }));
+    const e2$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'e2' }));
 
     const routing: Routing = [
       {
@@ -112,7 +112,7 @@ describe('#resolveRouting', () => {
 
   test('resolves found effect', done => {
     // given
-    const effect$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
     const expectedMachingResult: RouteMatched = { effect: effect$, params: {} };
     const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
     const res = {} as HttpResponse;
@@ -184,8 +184,8 @@ describe('#resolveRouting', () => {
 
   test('applies middlewares to found effect', done => {
     // given
-    const middleware$: Middleware = req$ => req$.pipe(tap(req => req.test = 'test' ));
-    const effect$: Effect = req$ => req$.pipe(map(req => ({ body: req.test }) ));
+    const middleware$: HttpMiddleware = req$ => req$.pipe(tap(req => req.test = 'test' ));
+    const effect$: HttpEffect = req$ => req$.pipe(map(req => ({ body: req.test }) ));
 
     const expectedMachingResult: RouteMatched = { middleware: middleware$, effect: effect$, params: {} };
     const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;

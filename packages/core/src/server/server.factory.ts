@@ -4,7 +4,7 @@ import { httpListener } from '../listener/http.listener';
 import { isCloseEvent } from './server.event';
 import { subscribeServerEvents } from './server.event.subscriber';
 import { InjectionDependencies } from './server.injector';
-import { ServerEffect } from '../effects/effects.interface';
+import { HttpServerEffect } from '../effects/effects.interface';
 import { httpServerToken } from './server.token';
 import { createEffectMetadata } from '../effects/effectsMetadata.factory';
 
@@ -12,7 +12,7 @@ export interface CreateServerConfig {
   port?: number;
   hostname?: string;
   httpListener: ReturnType<typeof httpListener>;
-  event$?: ServerEffect;
+  event$?: HttpServerEffect;
   dependencies?: InjectionDependencies;
 }
 

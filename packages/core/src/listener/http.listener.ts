@@ -2,7 +2,7 @@ import { IncomingMessage, OutgoingMessage } from 'http';
 import { of, Subject } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, tap, takeWhile } from 'rxjs/operators';
 import { combineMiddlewares } from '../effects/effects.combiner';
-import { EffectHttpResponse, Middleware, ErrorEffect, OutputEffect } from '../effects/effects.interface';
+import { HttpEffectResponse, HttpMiddleware, HttpErrorEffect, HttpOutputEffect } from '../effects/effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { handleResponse } from '../response/response.handler';
 import { RouteEffect, RouteEffectGroup } from '../router/router.interface';
@@ -13,10 +13,10 @@ import { createStaticInjectionContainer } from '../server/server.injector';
 import { createEffectMetadata } from '../effects/effectsMetadata.factory';
 
 export interface HttpListenerConfig {
-  middlewares?: Middleware[];
+  middlewares?: HttpMiddleware[];
   effects: (RouteEffect | RouteEffectGroup)[];
-  error$?: ErrorEffect;
-  output$?: OutputEffect;
+  error$?: HttpErrorEffect;
+  output$?: HttpOutputEffect;
 }
 
 export const httpListener = ({
@@ -30,7 +30,7 @@ export const httpListener = ({
   const routing = factorizeRouting(effects);
   const injector = createStaticInjectionContainer();
   const defaultMetadata = createEffectMetadata({ inject: injector.get });
-  const defaultResponse = { status: HttpStatus.NOT_FOUND } as EffectHttpResponse;
+  const defaultResponse = { status: HttpStatus.NOT_FOUND } as HttpEffectResponse;
 
   requestSubject$.pipe(
     tap(({ req, res }) => res.send = handleResponse(res)(req)),

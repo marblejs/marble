@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { Marbles } from '../../+internal';
-import { Effect } from '../../effects/effects.interface';
+import { HttpEffect } from '../../effects/effects.interface';
 import { HttpRequest } from '../../http.interface';
 import { use } from './use.operator';
 
@@ -14,7 +14,7 @@ describe('#use operator', () => {
         tap(req => req.body++)
       );
 
-    const effect$: Effect<HttpRequest<number>> = req$ => req$.pipe(
+    const effect$: HttpEffect<HttpRequest<number>> = req$ => req$.pipe(
       use(m$),
       use(m$),
     );
@@ -51,7 +51,7 @@ describe('#use operator', () => {
         tap(req => req.user = { id: 'test_id' }),
       ) as Observable<AuthorizedHttpRequest & T>;
 
-    const effect$: Effect = req$ =>
+    const effect$: HttpEffect = req$ =>
       req$.pipe(
         use(m1$),
         use(m2$),
