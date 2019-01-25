@@ -29,12 +29,12 @@ type HandleIncomingConnection =
   (client: WS.WebSocketClient, request: http.IncomingMessage) =>  void;
 
 export interface WebSocketListenerConfig {
-  effects?: WSEffect.WebSocketEffect<any, any>[];
-  middlewares?: WSEffect.WebSocketMiddleware<any, any>[];
-  error$?: WSEffect.WebSocketErrorEffect<Error, any, any>;
+  effects?: WSEffect.WsEffect<any, any>[];
+  middlewares?: WSEffect.WsMiddleware<any, any>[];
+  error$?: WSEffect.WsErrorEffect<Error, any, any>;
   eventTransformer?: EventTransformer<Event, any>;
-  connection$?: WSEffect.WebSocketConnectionEffect;
-  output$?: WSEffect.WebSocketOutputEffect;
+  connection$?: WSEffect.WsConnectionEffect;
+  output$?: WSEffect.WsOutputEffect;
 }
 
 export const webSocketListener = (config: WebSocketListenerConfig = {}) => {

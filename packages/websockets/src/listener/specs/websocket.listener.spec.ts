@@ -2,7 +2,7 @@ import { Event, EventError, createStaticInjectionContainer, httpServerToken } fr
 import { throwError, fromEvent, forkJoin } from 'rxjs';
 import { tap, map, mergeMap, first, toArray, take } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.listener';
-import { WebSocketEffect, WebSocketMiddleware, WebSocketConnectionEffect } from '../../effects/ws-effects.interface';
+import { WsEffect, WsMiddleware, WsConnectionEffect } from '../../effects/ws-effects.interface';
 import { WebSocketConnectionError } from '../../error/ws-error.model';
 import { EventTransformer } from '../../transformer/transformer.inteface';
 import { createWebSocketsTestBed } from '../../+internal';
@@ -19,7 +19,7 @@ describe('WebSocket listener', () => {
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
       const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
-      const echo$: WebSocketEffect = event$ => event$;
+      const echo$: WsEffect = event$ => event$;
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
       const webSocketServer = webSocketListener({ effects: [echo$] });
 
@@ -36,7 +36,7 @@ describe('WebSocket listener', () => {
 
     test('echoes back to all clients', done => {
       // given
-      const echo$: WebSocketEffect = (event$, client) => event$.pipe(
+      const echo$: WsEffect = (event$, client) => event$.pipe(
         mergeMap(client.sendBroadcastResponse),
       );
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
@@ -62,7 +62,7 @@ describe('WebSocket listener', () => {
 
     test('echoes back on upgraded http server', done => {
       // given
-      const echo$: WebSocketEffect = event$ => event$;
+      const echo$: WsEffect = event$ => event$;
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
       const httpServer = testBed.getServer();
       const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
@@ -89,8 +89,8 @@ describe('WebSocket listener', () => {
       // given
       const incomingEvent = JSON.stringify({ type: 'EVENT', payload: 0 });
       const outgoingEvent = JSON.stringify({ type: 'EVENT', payload: 3 });
-      const e$: WebSocketEffect = event$ => event$;
-      const m$: WebSocketMiddleware = event$ => event$.pipe(
+      const e$: WsEffect = event$ => event$;
+      const m$: WsMiddleware = event$ => event$.pipe(
         map(event => event as Event<number>),
         tap(event => event.payload !== undefined && event.payload++)
       );
@@ -146,7 +146,7 @@ describe('WebSocket listener', () => {
       // given
       const incomingEvent = JSON.stringify({ type: 'EVENT' });
       const outgoingEvent = JSON.stringify({ type: 'EVENT', error: { message: 'test message' } });
-      const effect$: WebSocketEffect = event$ => event$.pipe(
+      const effect$: WsEffect = event$ => event$.pipe(
         mergeMap(event => throwError(new EventError(event, 'test message'))),
       );
       const targetClient = testBed.getClient(0);
@@ -174,7 +174,7 @@ describe('WebSocket listener', () => {
     test('triggers connection error', done => {
       // given
       const error = new WebSocketConnectionError('Unauthorized', 4000);
-      const connection$: WebSocketConnectionEffect = req$ => req$.pipe(mergeMap(() => throwError(error)));
+      const connection$: WsConnectionEffect = req$ => req$.pipe(mergeMap(() => throwError(error)));
       const webSocketServer = webSocketListener({ connection$ });
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
@@ -207,7 +207,7 @@ describe('WebSocket listener', () => {
         decode: event => event,
         encode: event => event,
       };
-      const effect$: WebSocketEffect<Buffer, string> = event$ => event$.pipe(
+      const effect$: WsEffect<Buffer, string> = event$ => event$.pipe(
         map(event => event.toString('utf8'))
       );
       const httpServer = testBed.getServer();

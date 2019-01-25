@@ -2,7 +2,7 @@ import { EventError, EffectMetadata, createStaticInjectionContainer, createEffec
 import { mapTo } from 'rxjs/operators';
 import { handleEffectsError } from '../ws-error.handler';
 import { MarbleWebSocketClient } from '../../websocket.interface';
-import { WebSocketErrorEffect } from '../../effects/ws-effects.interface';
+import { WsErrorEffect } from '../../effects/ws-effects.interface';
 
 describe('#handleEffectsError', () => {
   let defaultMetadata: EffectMetadata;
@@ -15,7 +15,7 @@ describe('#handleEffectsError', () => {
     // given
     const client = { sendResponse: jest.fn() } as any as MarbleWebSocketClient;
     const error = new EventError({ type: 'EVENT' }, '');
-    const error$: WebSocketErrorEffect = event$ => event$.pipe(
+    const error$: WsErrorEffect = event$ => event$.pipe(
       mapTo({ type: error.event.type, error: {} }),
     );
 
