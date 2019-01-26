@@ -1,5 +1,5 @@
 import { HttpMethod, HttpMethodType } from '../http.interface';
-import { HttpEffect } from './effects.interface';
+import { HttpEffect } from './http-effects.interface';
 import { RouteEffect } from '../router/router.interface';
 import { coreErrorFactory, CoreErrorOptions } from '../error/error.factory';
 import { getArrayFromEnum } from '../+internal';

@@ -1,5 +1,5 @@
 import { EMPTY } from 'rxjs';
-import { HttpEffectResponse } from '../effects/effects.interface';
+import { HttpEffectResponse } from '../effects/http-effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { bodyFactory } from './responseBody.factory';
 import { headersFactory } from './responseHeaders.factory';

@@ -1,7 +1,7 @@
 import { mapTo } from 'rxjs/operators';
 import { combineRoutes } from '../router.combiner';
 import { EffectFactory } from '../../effects/effects.factory';
-import { HttpMiddleware, HttpEffect } from '../../effects/effects.interface';
+import { HttpMiddleware, HttpEffect } from '../../effects/http-effects.interface';
 
 describe('#combineRoutes', () => {
   test('factorizes combined routes for effects only', () => {

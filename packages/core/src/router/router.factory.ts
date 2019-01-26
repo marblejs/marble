@@ -1,4 +1,4 @@
-import { HttpMiddleware } from '../effects/effects.interface';
+import { HttpMiddleware } from '../effects/http-effects.interface';
 import { combineMiddlewares } from '../effects/effects.combiner';
 import { isRouteEffectGroup } from './router.helpers';
 import {

@@ -1,5 +1,5 @@
 import { map, mapTo } from 'rxjs/operators';
-import { HttpErrorEffect } from '../effects/effects.interface';
+import { HttpErrorEffect } from '../effects/http-effects.interface';
 import { HttpStatus } from '../http.interface';
 import { HttpError, isHttpError } from './error.model';
 

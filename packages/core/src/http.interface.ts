@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { Observable } from 'rxjs';
-import { HttpEffectResponse } from './effects/effects.interface';
+import { HttpEffectResponse } from './effects/http-effects.interface';
 
 export interface HttpRequest<
   TBody = unknown,

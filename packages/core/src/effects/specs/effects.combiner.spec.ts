@@ -1,5 +1,5 @@
 import { tap, mapTo, filter } from 'rxjs/operators';
-import { HttpMiddleware, HttpEffect } from '../effects.interface';
+import { HttpMiddleware, HttpEffect } from '../http-effects.interface';
 import { combineMiddlewares, combineEffects } from '../effects.combiner';
 import { Marbles, createHttpRequest } from '../../+internal';
 

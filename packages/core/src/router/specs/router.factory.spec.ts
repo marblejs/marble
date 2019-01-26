@@ -1,5 +1,5 @@
 import { mapTo } from 'rxjs/operators';
-import { HttpEffect, HttpMiddleware } from '../../effects/effects.interface';
+import { HttpEffect, HttpMiddleware } from '../../effects/http-effects.interface';
 import { RouteEffect, RouteEffectGroup, Routing } from '../router.interface';
 import { factorizeRouting } from '../router.factory';
 

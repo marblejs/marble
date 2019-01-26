@@ -2,7 +2,12 @@ import { IncomingMessage, OutgoingMessage } from 'http';
 import { of, Subject } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, tap, takeWhile } from 'rxjs/operators';
 import { combineMiddlewares } from '../effects/effects.combiner';
-import { HttpEffectResponse, HttpMiddleware, HttpErrorEffect, HttpOutputEffect } from '../effects/effects.interface';
+import {
+  HttpEffectResponse,
+  HttpMiddleware,
+  HttpErrorEffect,
+  HttpOutputEffect,
+} from '../effects/http-effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { handleResponse } from '../response/response.handler';
 import { RouteEffect, RouteEffectGroup } from '../router/router.interface';

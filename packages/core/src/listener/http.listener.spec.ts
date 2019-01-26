@@ -3,7 +3,7 @@ import { of, throwError } from 'rxjs';
 import { mapTo, switchMap } from 'rxjs/operators';
 import { httpListener } from './http.listener';
 import { EffectFactory } from '../effects/effects.factory';
-import { HttpMiddleware } from '../effects/effects.interface';
+import { HttpMiddleware } from '../effects/http-effects.interface';
 
 describe('Http listener', () => {
   let effectsCombiner;

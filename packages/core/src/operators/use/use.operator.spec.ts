@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { Marbles } from '../../+internal';
-import { HttpEffect } from '../../effects/effects.interface';
+import { HttpEffect } from '../../effects/http-effects.interface';
 import { HttpRequest } from '../../http.interface';
 import { use } from './use.operator';
 

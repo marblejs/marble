@@ -4,7 +4,7 @@ import { httpListener } from '../listener/http.listener';
 import { isCloseEvent } from './server.event';
 import { subscribeServerEvents } from './server.event.subscriber';
 import { InjectionDependencies } from './server.injector';
-import { HttpServerEffect } from '../effects/effects.interface';
+import { HttpServerEffect } from '../effects/http-effects.interface';
 import { httpServerToken } from './server.token';
 import { createEffectMetadata } from '../effects/effectsMetadata.factory';
 

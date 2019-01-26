@@ -1,5 +1,5 @@
 import { mapTo } from 'rxjs/operators';
-import { HttpEffect } from '../effects.interface';
+import { HttpEffect } from '../http-effects.interface';
 import { EffectFactory } from '../effects.factory';
 import { HttpMethod } from '../../http.interface';
 

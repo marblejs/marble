@@ -1,5 +1,5 @@
 import { HttpMethod, HttpRequest } from '../http.interface';
-import { HttpEffect, HttpMiddleware, HttpEffectResponse } from '../effects/effects.interface';
+import { HttpEffect, HttpMiddleware, HttpEffectResponse } from '../effects/http-effects.interface';
 
 // Route
 export interface RouteEffect<T extends HttpRequest = HttpRequest> {

@@ -1,5 +1,6 @@
 import { mapTo, tap, map } from 'rxjs/operators';
-import { HttpEffect, HttpMiddleware, EffectMetadata } from '../../effects/effects.interface';
+import { HttpEffect, HttpMiddleware } from '../../effects/http-effects.interface';
+import { EffectMetadata } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
