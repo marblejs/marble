@@ -18,6 +18,10 @@ export interface WebSocketConnectionEffect<
   T extends http.IncomingMessage = http.IncomingMessage
 > extends WebSocketEffect<T, T, MarbleWebSocketClient> {}
 
+export interface WebSocketOutputEffect<
+  T extends Event = Event
+> extends WebSocketEffect<T, Event> {}
+
 export interface WebSocketEffect<
   T = Event,
   U = Event,
