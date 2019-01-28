@@ -1,11 +1,11 @@
 import { HttpRequest, HttpResponse, createStaticInjectionContainer, createEffectMetadata } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { of } from 'rxjs';
-import { bodyParser$ } from '.';
+import { bodyParser$ } from '../body.middleware';
 
 const MockReq = require('mock-req');
 
-describe('BodyParser middleware', () => {
+describe('bodyParser$ middleware', () => {
   const injector = createStaticInjectionContainer();
   const effectMeta = createEffectMetadata({ inject: injector.get });
 
@@ -14,25 +14,25 @@ describe('BodyParser middleware', () => {
     spyOn(console, 'error').and.stub();
   });
 
-  it('bodyParser$ passes through non POST || PATCH || PUT requests', () => {
+  test('passes through non POST || PATCH || PUT requests', () => {
     const request = new MockReq({
       method: 'GET',
     });
 
-    Marbles.assertEffect(bodyParser$, [
+    Marbles.assertEffect(bodyParser$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
     ]);
   });
 
-  it('bodyParser$ parses "application/json" body', done => {
+  test('parses "application/json" body', done => {
     const request = new MockReq({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, res, effectMeta);
 
     http$.subscribe(data => {
       expect(data.body).toEqual({ test: 'test' });
@@ -43,14 +43,14 @@ describe('BodyParser middleware', () => {
     request.end();
   });
 
-  it('bodyParser$ parses "x-www-form-urlencoded" body', done => {
+  test('parses "x-www-form-urlencoded" body', done => {
     const request = new MockReq({
       method: 'POST',
       headers: { 'Content-Type': 'x-www-form-urlencoded' },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, res, effectMeta);
 
     http$.subscribe(data => {
       expect(data.body).toEqual({
@@ -66,14 +66,14 @@ describe('BodyParser middleware', () => {
   });
 
 
-  it('bodyParser$ throws exception on "application/json" parse', done => {
+  test('throws exception on "application/json" parse', done => {
     const request = new MockReq({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, res, effectMeta);
 
     http$.subscribe(
       () => {
@@ -91,14 +91,14 @@ describe('BodyParser middleware', () => {
     request.end();
   });
 
-  it('bodyParser$ parses "text/plain" body', done => {
+  test('parses "text/plain" body', done => {
     const request = new MockReq({
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, res, effectMeta);
 
     http$.subscribe(data => {
       expect(data.body).toEqual('test');
@@ -109,14 +109,14 @@ describe('BodyParser middleware', () => {
     request.end();
   });
 
-  it('bodyParser$ throws exception on EventEmitter "error" event', done => {
+  test('throws exception on EventEmitter "error" event', done => {
     const request = new MockReq({
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
-    const http$ = bodyParser$(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, res, effectMeta);
 
     http$.subscribe(
       () => {

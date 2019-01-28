@@ -20,6 +20,6 @@ const effect$ = EffectFactory
   ));
 
 export const app = httpListener({
-  middlewares: [bodyParser$],
+  middlewares: [bodyParser$()],
   effects: [effect$],
 });

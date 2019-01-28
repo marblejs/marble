@@ -47,7 +47,7 @@ const secured$ = combineRoutes('/secured', {
 const api$ = combineRoutes('/api', [login$, secured$]);
 
 // bootstraping
-const middlewares = [bodyParser$];
+const middlewares = [bodyParser$()];
 const effects = [api$];
 
 export const app = httpListener({ middlewares, effects });

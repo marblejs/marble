@@ -24,7 +24,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, metadata);
+    const http$ = bodyParser$()(req$, res, metadata);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -60,7 +60,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, metadata);
+    const http$ = bodyParser$()(req$, res, metadata);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -96,7 +96,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, metadata);
+    const http$ = bodyParser$()(req$, res, metadata);
     const valid$ = validator$(schema, { allowUnknown: true })(http$);
 
     valid$.subscribe(data => {
