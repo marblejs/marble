@@ -20,7 +20,7 @@ describe('Logger middleware', () => {
     const request = createMockReq('/', 'GET');
     const response = createMockRes(200);
 
-    Marbles.assertEffect(logger$, [
+    Marbles.assertEffect(logger$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
     ], { client: response });
@@ -33,7 +33,7 @@ describe('Logger middleware', () => {
     const request = createMockReq('/test', 'POST');
     const response = createMockRes(403);
 
-    Marbles.assertEffect(logger$, [
+    Marbles.assertEffect(logger$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
     ], { client: response });
