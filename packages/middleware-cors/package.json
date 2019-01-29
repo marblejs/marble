@@ -31,7 +31,7 @@
     "yarn": ">= 1.7.0",
     "npm": ">= 5.0.0"
   },
-  "author": "marblejs",
+  "author": "Edouard Bozon <bozonedouard@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/marblejs/marble/issues"

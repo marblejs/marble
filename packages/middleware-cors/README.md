@@ -1,43 +1,39 @@
 Middleware Cors
 =======
 
-A [joi](https://github.com/hapijs/joi) validation middleware for [Marble.js](https://github.com/marblejs/marble).
+A CORS middleware for [Marble.js](https://github.com/marblejs/marble).
 
 ## Usage
 
-Example of using this middleware on a GET route to validate params.
+Example of using this middleware on a GET route.
 
 ```javascript
-import { validator$, Joi } from '@marblejs/middleware-joi';
+import { cors$ } from '@marblejs/middleware-cors';
 
 const foo$ = EffectFactory
   .matchPath('/foo/:id')
   .matchType('GET')
   .use(req$ => req$.pipe(
-    use(validator$({
-      params: Joi.object({
-        id: Joi.number().min(1).max(10),
-      })
+    use(cors$({
+      origin: 'https://foo.bar',
     }));
     // ...
   ));
 ```
 
-Example to validate all incoming requests.
+Example to allow all incoming requests.
 
 ```javascript
-import { validator$, Joi } from '@marblejs/middleware-joi';
+import { cors$ } from '@marblejs/middleware-cors';
 
 const middlewares = [
   logger$,
-  validator$({
-    headers: Joi.object({
-      sign: Joi.string(),
-      accept: Joi.string().default('application/json'),
-    }),
-    params: Joi.object({
-      apiKey: Joi.string().token().required(),
-    })
+  cors$({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    withCredentials: false,
+    optionsSuccessStatus: 204,
+    allowHeaders: '*',
   })
 ];
 
