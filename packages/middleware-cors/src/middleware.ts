@@ -25,7 +25,7 @@ export const cors$ = (options: CORSOptions = {}): Middleware => (req$, res) => {
 
   return req$.pipe(
     tap(req => {
-      configureHeaders(req, res, options);
+      configureHeaders(req.headers.origin as string, req.method, res, options);
 
       if (req.method === 'OPTIONS') {
         res.end();

@@ -3,24 +3,24 @@ import { of } from 'rxjs';
 
 import { cors$ } from './middleware';
 
+export const createMockResponse = () =>
+  (({
+    writeHead: jest.fn(),
+    setHeader: jest.fn(),
+    getHeader: jest.fn(),
+    end: jest.fn(),
+  } as unknown) as HttpResponse);
+
+export const createMockRequest = (
+  method: HttpMethod = 'GET',
+  headers: any = { origin: 'fake-origin' },
+) =>
+  (({
+    method,
+    headers: { ...headers },
+  } as unknown) as HttpRequest);
+
 describe('CORS middleware', () => {
-  const createMockResponse = () =>
-    (({
-      writeHead: jest.fn(),
-      setHeader: jest.fn(),
-      getHeader: jest.fn(),
-      end: jest.fn(),
-    } as unknown) as HttpResponse);
-
-  const createMockRequest = (
-    method: HttpMethod = 'GET',
-    headers: any = { origin: 'fake-origin' },
-  ) =>
-    (({
-      method,
-      headers: { ...headers },
-    } as unknown) as HttpRequest);
-
   describe('Access-Control-Allow-Origin', () => {
     describe('String arg', () => {
       test('should allow wildcard', done => {

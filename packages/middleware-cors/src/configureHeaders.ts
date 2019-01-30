@@ -1,7 +1,7 @@
-import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { HttpMethod, HttpResponse } from '@marblejs/core';
 
-import { capitalize, isNotEmptyArray, isString } from './util';
 import { CORSOptions } from './middleware';
+import { capitalize, isNotEmptyArray, isString } from './util';
 
 interface ConfiguredHeader {
   key: string;
@@ -15,12 +15,11 @@ enum AccessControlAllow {
   Credentials = 'Access-Control-Allow-Credentials',
 }
 
-const configureAllowedOrigin = (
-  req: HttpRequest,
+export const configureAllowedOrigin = (
+  origin: string,
   allowedOrigin: string | string[] | RegExp,
 ): ConfiguredHeader[] => {
   const headers: ConfiguredHeader[] = [];
-  const origin = req.headers.origin as string;
 
   if (isString(allowedOrigin) && allowedOrigin === '*') {
     headers.push({ key: AccessControlAllow.Origin, value: '*' });
@@ -42,13 +41,13 @@ const configureAllowedOrigin = (
   return headers;
 };
 
-const configureAllowedMethods = (
-  req: HttpRequest,
+export const configureAllowedMethods = (
+  method: HttpMethod,
   methods: string[],
 ): ConfiguredHeader[] => {
   const headers: ConfiguredHeader[] = [];
 
-  if (isNotEmptyArray(methods) && methods.includes(req.method)) {
+  if (isNotEmptyArray(methods) && methods.includes(method)) {
     headers.push({
       key: AccessControlAllow.Methods,
       value: methods.join(', '),
@@ -58,7 +57,7 @@ const configureAllowedMethods = (
   return headers;
 };
 
-const configureAllowedHeaders = (
+export const configureAllowedHeaders = (
   allowedHeaders: string | string[],
 ): ConfiguredHeader[] => {
   const headers: ConfiguredHeader[] = [];
@@ -80,7 +79,9 @@ const configureAllowedHeaders = (
   return headers;
 };
 
-const configureCredentials = (withCredentials: boolean): ConfiguredHeader[] => {
+export const configureCredentials = (
+  withCredentials: boolean,
+): ConfiguredHeader[] => {
   if (withCredentials) {
     return [{ key: AccessControlAllow.Credentials, value: 'true' }];
   }
@@ -88,27 +89,31 @@ const configureCredentials = (withCredentials: boolean): ConfiguredHeader[] => {
   return [];
 };
 
-const applyHeaders = (headers: ConfiguredHeader[], res: HttpResponse): void => {
+export const applyHeaders = (
+  headers: ConfiguredHeader[],
+  res: HttpResponse,
+): void => {
   headers.forEach(({ key, value }) => {
     res.setHeader(key, value);
   });
 };
 
 export function configureHeaders(
-  req: HttpRequest,
+  origin: string,
+  method: HttpMethod,
   res: HttpResponse,
   options: CORSOptions,
 ): void {
   // @todo add exposed headers
   const headers = [
-    ...configureAllowedOrigin(req, options.origin!),
+    ...configureAllowedOrigin(origin, options.origin!),
     ...configureCredentials(options.withCredentials!),
   ];
 
-  if (req.method === 'OPTIONS') {
+  if (method === 'OPTIONS') {
     // @todo add max age header, exposed headers
     const preflightHeaders = [
-      ...configureAllowedMethods(req, options.methods!),
+      ...configureAllowedMethods(method, options.methods!),
       ...configureAllowedHeaders(options.allowHeaders!),
       { key: 'Content-Length', value: '0' },
     ];
