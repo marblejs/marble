@@ -1,4 +1,4 @@
-import { HttpError, HttpRequest, HttpStatus, HttpMiddleware } from '@marblejs/core';
+import { HttpError, HttpRequest, HttpStatus, HttpMiddlewareEffect } from '@marblejs/core';
 import { ContentType } from '@marblejs/core/dist/+internal';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap, toArray, mapTo } from 'rxjs/operators';
@@ -44,7 +44,7 @@ const getBody = (req: HttpRequest) =>
     })
   );
 
-export const bodyParser$: HttpMiddleware = req$ =>
+export const bodyParser$: HttpMiddlewareEffect = req$ =>
   req$.pipe(
     switchMap(req =>
       PARSEABLE_METHODS.includes(req.method)

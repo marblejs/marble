@@ -2,7 +2,7 @@ import { Event, EventError, createStaticInjectionContainer, httpServerToken } fr
 import { throwError, fromEvent, forkJoin } from 'rxjs';
 import { tap, map, mergeMap, first, toArray, take } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.listener';
-import { WsEffect, WsMiddleware, WsConnectionEffect } from '../../effects/ws-effects.interface';
+import { WsEffect, WsMiddlewareEffect, WsConnectionEffect } from '../../effects/ws-effects.interface';
 import { WebSocketConnectionError } from '../../error/ws-error.model';
 import { EventTransformer } from '../../transformer/transformer.inteface';
 import { createWebSocketsTestBed } from '../../+internal';
@@ -90,7 +90,7 @@ describe('WebSocket listener', () => {
       const incomingEvent = JSON.stringify({ type: 'EVENT', payload: 0 });
       const outgoingEvent = JSON.stringify({ type: 'EVENT', payload: 3 });
       const e$: WsEffect = event$ => event$;
-      const m$: WsMiddleware = event$ => event$.pipe(
+      const m$: WsMiddlewareEffect = event$ => event$.pipe(
         map(event => event as Event<number>),
         tap(event => event.payload !== undefined && event.payload++)
       );

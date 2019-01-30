@@ -1,4 +1,4 @@
-import { HttpMiddleware } from '../effects/http-effects.interface';
+import { HttpMiddlewareEffect } from '../effects/http-effects.interface';
 import { combineMiddlewares } from '../effects/effects.combiner';
 import { isRouteEffectGroup } from './router.helpers';
 import {
@@ -12,7 +12,7 @@ import { factorizeRegExpWithParams } from './router.params.factory';
 
 export const factorizeRouting = (
   routes: (RouteEffect | RouteEffectGroup)[],
-  middlewares: HttpMiddleware[] = [],
+  middlewares: HttpMiddlewareEffect[] = [],
   parentPath = '',
 ): Routing => {
   const routing: Routing = [];

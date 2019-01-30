@@ -1,5 +1,5 @@
 import { mapTo, tap, map } from 'rxjs/operators';
-import { HttpEffect, HttpMiddleware } from '../../effects/http-effects.interface';
+import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
 import { EffectMetadata } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
@@ -185,7 +185,7 @@ describe('#resolveRouting', () => {
 
   test('applies middlewares to found effect', done => {
     // given
-    const middleware$: HttpMiddleware = req$ => req$.pipe(tap(req => req.test = 'test' ));
+    const middleware$: HttpMiddlewareEffect = req$ => req$.pipe(tap(req => req.test = 'test' ));
     const effect$: HttpEffect = req$ => req$.pipe(map(req => ({ body: req.test }) ));
 
     const expectedMachingResult: RouteMatched = { middleware: middleware$, effect: effect$, params: {} };

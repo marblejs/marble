@@ -1,23 +1,23 @@
 import { HttpMethod, HttpRequest } from '../http.interface';
-import { HttpEffect, HttpMiddleware, HttpEffectResponse } from '../effects/http-effects.interface';
+import { HttpEffect, HttpMiddlewareEffect, HttpEffectResponse } from '../effects/http-effects.interface';
 
 // Route
 export interface RouteEffect<T extends HttpRequest = HttpRequest> {
   path: string;
   method: HttpMethod;
   effect: HttpEffect<T, HttpEffectResponse>;
-  middleware?: HttpMiddleware;
+  middleware?: HttpMiddlewareEffect;
 }
 
 export interface RouteEffectGroup {
   path: string;
-  middlewares: HttpMiddleware[];
+  middlewares: HttpMiddlewareEffect[];
   effects: (RouteEffect | RouteEffectGroup)[];
 }
 
 // Combiner
 export interface RouteCombinerConfig {
-  middlewares?: HttpMiddleware[];
+  middlewares?: HttpMiddlewareEffect[];
   effects: (RouteEffect | RouteEffectGroup)[];
 }
 
@@ -30,7 +30,7 @@ export interface ParametricRegExp {
 
 export interface RoutingMethod {
   parameters?: string[] | undefined;
-  middleware?: HttpMiddleware | undefined;
+  middleware?: HttpMiddlewareEffect | undefined;
   effect: HttpEffect;
 }
 
@@ -41,7 +41,7 @@ export interface RoutingItem {
 }
 
 export interface RouteMatched {
-  middleware?: HttpMiddleware | undefined;
+  middleware?: HttpMiddlewareEffect | undefined;
   effect: HttpEffect;
   params: Record<string, string>;
 }

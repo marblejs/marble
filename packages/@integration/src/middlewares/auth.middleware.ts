@@ -1,9 +1,9 @@
-import { HttpError, HttpStatus, HttpMiddleware } from '@marblejs/core';
+import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/core';
 import { iif, of, throwError } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { isAuthorized } from '../fakes/auth.fake';
 
-export const authorize$: HttpMiddleware = req$ =>
+export const authorize$: HttpMiddlewareEffect = req$ =>
   req$.pipe(
     switchMap(req => iif(
       () => !isAuthorized(req),

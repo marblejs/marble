@@ -1,7 +1,7 @@
 import { mapTo } from 'rxjs/operators';
 import { combineRoutes } from '../router.combiner';
 import { EffectFactory } from '../../effects/effects.factory';
-import { HttpMiddleware, HttpEffect } from '../../effects/http-effects.interface';
+import { HttpMiddlewareEffect, HttpEffect } from '../../effects/http-effects.interface';
 
 describe('#combineRoutes', () => {
   test('factorizes combined routes for effects only', () => {
@@ -27,8 +27,8 @@ describe('#combineRoutes', () => {
     const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
     const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
 
-    const m1$: HttpMiddleware = req$ => req$;
-    const m2$: HttpMiddleware = req$ => req$;
+    const m1$: HttpMiddlewareEffect = req$ => req$;
+    const m2$: HttpMiddlewareEffect = req$ => req$;
 
     // when
     const combiner = combineRoutes('/test', {

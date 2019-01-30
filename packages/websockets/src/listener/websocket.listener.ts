@@ -30,7 +30,7 @@ type HandleIncomingConnection =
 
 export interface WebSocketListenerConfig {
   effects?: WSEffect.WsEffect<any, any>[];
-  middlewares?: WSEffect.WsMiddleware<any, any>[];
+  middlewares?: WSEffect.WsMiddlewareEffect<any, any>[];
   error$?: WSEffect.WsErrorEffect<Error, any, any>;
   eventTransformer?: EventTransformer<Event, any>;
   connection$?: WSEffect.WsConnectionEffect;
