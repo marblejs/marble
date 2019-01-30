@@ -1,7 +1,7 @@
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { EMPTY } from 'rxjs';
 import { broadcast } from './broadcast.operator';
-import { WebSocketEffect } from '../../effects/ws-effects.interface';
+import { WsEffect } from '../../effects/ws-effects.interface';
 
 describe('#broadcast operator', () => {
   const client = { sendBroadcastResponse: jest.fn(() => EMPTY) };
@@ -12,7 +12,7 @@ describe('#broadcast operator', () => {
     const outgoingEvent = { type: 'TEST_EVENT_RESPONSE', payload: 'test_payload' };
 
     // when
-    const effect$: WebSocketEffect = (event$, client) =>
+    const effect$: WsEffect = (event$, client) =>
       event$.pipe(
         broadcast(client, () => outgoingEvent),
       );

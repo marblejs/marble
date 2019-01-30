@@ -1,4 +1,4 @@
-import { createServer, matchEvent, ServerEvent, ServerEffect, bind } from '@marblejs/core';
+import { createServer, matchEvent, ServerEvent, HttpServerEffect, bind } from '@marblejs/core';
 import { mapToServer } from '@marblejs/websockets';
 import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
@@ -6,7 +6,7 @@ import { httpServer } from './http.listener';
 import { webSocketServer } from './ws.listener';
 import { WebSocketsToken } from './tokens';
 
-const upgrade$: ServerEffect = (event$, _, { inject }) =>
+const upgrade$: HttpServerEffect = (event$, _, { inject }) =>
   event$.pipe(
     matchEvent(ServerEvent.upgrade),
     mapToServer({
@@ -15,7 +15,7 @@ const upgrade$: ServerEffect = (event$, _, { inject }) =>
     }),
   );
 
-const listen$: ServerEffect = event$ =>
+const listen$: HttpServerEffect = event$ =>
   event$.pipe(
     matchEvent(ServerEvent.listen),
     map(event => event.payload),

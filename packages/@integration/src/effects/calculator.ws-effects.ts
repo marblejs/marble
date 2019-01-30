@@ -1,14 +1,14 @@
 import { use, matchEvent } from '@marblejs/core';
-import { WebSocketEffect } from '@marblejs/websockets';
+import { WsEffect } from '@marblejs/websockets';
 import { t, eventValidator$ } from '@marblejs/middleware-io';
 import { buffer, map } from 'rxjs/operators';
 
-export const sum$: WebSocketEffect = event$ =>
+export const sum$: WsEffect = event$ =>
   event$.pipe(
     matchEvent('SUM')
   );
 
-export const add$: WebSocketEffect = (event$, ...args) =>
+export const add$: WsEffect = (event$, ...args) =>
   event$.pipe(
     matchEvent('ADD'),
     use(eventValidator$(t.number)),

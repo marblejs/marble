@@ -1,9 +1,9 @@
-import { webSocketListener, WebSocketConnectionError, WebSocketConnectionEffect } from '@marblejs/websockets';
+import { webSocketListener, WebSocketConnectionError, WsConnectionEffect } from '@marblejs/websockets';
 import { iif, throwError, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { add$ } from './effects/calculator.ws-effects';
 
-const connection$: WebSocketConnectionEffect = req$ =>
+const connection$: WsConnectionEffect = req$ =>
   req$.pipe(
     mergeMap(req => iif(
       () => req.headers.upgrade !== 'websocket',

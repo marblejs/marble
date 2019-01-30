@@ -1,5 +1,5 @@
 import { mapTo } from 'rxjs/operators';
-import { Effect, Middleware } from '../../effects/effects.interface';
+import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
 import { RouteEffect, RouteEffectGroup, Routing } from '../router.interface';
 import { factorizeRouting } from '../router.factory';
 
@@ -13,12 +13,12 @@ describe('#factorizeRouting', () => {
 
   test('factorizes routing with nested groups', () => {
     // given
-    const m$: Middleware = req$ => req$;
-    const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'test1' }));
-    const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'test2' }));
-    const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test3' }));
-    const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test4' }));
-    const e5$: Effect = req$ => req$.pipe(mapTo({ body: 'test5' }));
+    const m$: HttpMiddlewareEffect = req$ => req$;
+    const e1$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test1' }));
+    const e2$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test2' }));
+    const e3$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test3' }));
+    const e4$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test4' }));
+    const e5$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test5' }));
 
     const routeGroupNested: RouteEffectGroup = {
       path: '/nested',
@@ -76,7 +76,7 @@ describe('#factorizeRouting', () => {
 
   test('throws error if route is redefined', () => {
     // given
-    const e$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
 
     const route1: RouteEffect = { path: '/test', method: 'GET', effect: e$ };
     const route2: RouteEffect = { path: '/test', method: 'GET', effect: e$ };

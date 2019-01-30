@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { Observable } from 'rxjs';
-import { EffectHttpResponse } from './effects/effects.interface';
+import { HttpEffectResponse } from './effects/http-effects.interface';
 
 export interface HttpRequest<
   TBody = unknown,
@@ -24,7 +24,7 @@ export interface QueryParameters {
 }
 
 export interface HttpResponse extends http.ServerResponse {
-  send: (response: EffectHttpResponse) => Observable<never>;
+  send: (response: HttpEffectResponse) => Observable<never>;
 }
 
 export interface HttpHeaders extends http.OutgoingHttpHeaders {}

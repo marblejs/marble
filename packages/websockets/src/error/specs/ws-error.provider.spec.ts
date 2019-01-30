@@ -1,5 +1,5 @@
 import { mapTo } from 'rxjs/operators';
-import { WebSocketErrorEffect } from '../../effects/ws-effects.interface';
+import { WsErrorEffect } from '../../effects/ws-effects.interface';
 import { error$ as defaultError$ } from '../ws-error.effect';
 import { provideErrorEffect } from '../ws-error.provider';
 
@@ -7,7 +7,7 @@ describe('#provideErrorEffect', () => {
   test('provides passed error$', () => {
     // given
     const transformer = undefined;
-    const error$: WebSocketErrorEffect = event$ => event$.pipe(
+    const error$: WsErrorEffect = event$ => event$.pipe(
       mapTo({ type: 'ERROR', payload: 'error' }),
     );
 

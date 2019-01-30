@@ -1,4 +1,4 @@
-import { Effect } from '../../effects/effects.interface';
+import { HttpEffect } from '../../effects/http-effects.interface';
 import { HttpStatus } from '../../http.interface';
 import { createHttpRequest, Marbles } from '../../+internal/testing';
 import { switchToProtocol } from './switchToProtocol.operator';
@@ -29,7 +29,7 @@ describe('#switchToProtocol operator', () => {
     };
 
     // when
-    const effect$: Effect = req$ =>
+    const effect$: HttpEffect = req$ =>
       req$.pipe(
         switchToProtocol('websocket'),
       );

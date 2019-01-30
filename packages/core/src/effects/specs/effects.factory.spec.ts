@@ -1,5 +1,5 @@
 import { mapTo } from 'rxjs/operators';
-import { Effect } from '../effects.interface';
+import { HttpEffect } from '../http-effects.interface';
 import { EffectFactory } from '../effects.factory';
 import { HttpMethod } from '../../http.interface';
 
@@ -20,7 +20,7 @@ describe('EffectFactory', () => {
 
   test('factorizes RouteConfig', () => {
     // given
-    const effect$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
     const path = '/foo';
     const method = 'GET';
 
