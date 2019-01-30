@@ -1,5 +1,13 @@
 import * as http from 'http';
-import { HttpRequest, HttpHeaders, RouteParameters, QueryParameters, HttpResponse } from '../../http.interface';
+import {
+  HttpRequest,
+  HttpResponse,
+  HttpHeaders,
+  HttpMethod,
+  RouteParameters,
+  QueryParameters,
+} from '../../http.interface';
+import { EventEmitter } from 'events';
 
 interface HttpRequestMockParams {
   url: string;
@@ -7,6 +15,7 @@ interface HttpRequestMockParams {
   params?: RouteParameters;
   query?: QueryParameters;
   headers?: HttpHeaders;
+  method?: HttpMethod;
   [key: string]: any;
 }
 
@@ -28,12 +37,13 @@ export const createHttpRequest = (data: HttpRequestMockParams = { url: '/' }) =>
   params: data.params || {},
   query: data.query || {},
   headers: data.headers || {},
+  method: data.method || 'GET',
 }) as HttpRequest;
 
-export const createHttpResponse = (data: HttpResponseMockParams = {}) => ({
-  ...data,
-  statusCode: data.statusCode,
-}) as HttpResponse;
+export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
+  new class extends EventEmitter {
+    statusCode = data.statusCode;
+  } as any as HttpResponse;
 
 export const mockHttpServer = (mocks: HttpServerMocks = {}) =>
   jest.spyOn(http, 'createServer').mockImplementation(jest.fn(() => ({
