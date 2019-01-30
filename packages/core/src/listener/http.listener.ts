@@ -4,7 +4,7 @@ import { catchError, defaultIfEmpty, mergeMap, tap, takeWhile } from 'rxjs/opera
 import { combineMiddlewares } from '../effects/effects.combiner';
 import {
   HttpEffectResponse,
-  HttpMiddleware,
+  HttpMiddlewareEffect,
   HttpErrorEffect,
   HttpOutputEffect,
 } from '../effects/http-effects.interface';
@@ -18,7 +18,7 @@ import { createStaticInjectionContainer } from '../server/server.injector';
 import { createEffectMetadata } from '../effects/effectsMetadata.factory';
 
 export interface HttpListenerConfig {
-  middlewares?: HttpMiddleware[];
+  middlewares?: HttpMiddlewareEffect[];
   effects: (RouteEffect | RouteEffectGroup)[];
   error$?: HttpErrorEffect;
   output$?: HttpOutputEffect;

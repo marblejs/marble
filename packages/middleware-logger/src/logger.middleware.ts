@@ -1,9 +1,9 @@
-import { HttpMiddleware } from '@marblejs/core';
+import { HttpMiddlewareEffect } from '@marblejs/core';
 import { timestamp, tap, map } from 'rxjs/operators';
 import { LoggerOptions } from './logger.model';
 import { loggerHandler } from './logger.handler';
 
-export const logger$ = (opts: LoggerOptions = {}): HttpMiddleware => (req$, res) =>
+export const logger$ = (opts: LoggerOptions = {}): HttpMiddlewareEffect => (req$, res) =>
   req$.pipe(
     timestamp(),
     tap(loggerHandler(res, opts)),
@@ -15,7 +15,7 @@ export const logger$ = (opts: LoggerOptions = {}): HttpMiddleware => (req$, res)
  * [#2] will be deleted in version 3.0,
  * [#3] use logger$ instead,
  */
-export const loggerWithOpts$ = (opts: LoggerOptions = {}): HttpMiddleware => (req$, res, meta) => {
+export const loggerWithOpts$ = (opts: LoggerOptions = {}): HttpMiddlewareEffect => (req$, res, meta) => {
   // tslint:disable-next-line:max-line-length
   console.warn('Deprecation warning: loggerWithOpts$ is deprecated since v2.0 and will be removed in v3.0. Use logger$ instead.');
   return logger$(opts)(req$, res, meta);

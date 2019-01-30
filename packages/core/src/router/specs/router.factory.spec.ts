@@ -1,5 +1,5 @@
 import { mapTo } from 'rxjs/operators';
-import { HttpEffect, HttpMiddleware } from '../../effects/http-effects.interface';
+import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
 import { RouteEffect, RouteEffectGroup, Routing } from '../router.interface';
 import { factorizeRouting } from '../router.factory';
 
@@ -13,7 +13,7 @@ describe('#factorizeRouting', () => {
 
   test('factorizes routing with nested groups', () => {
     // given
-    const m$: HttpMiddleware = req$ => req$;
+    const m$: HttpMiddlewareEffect = req$ => req$;
     const e1$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test1' }));
     const e2$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test2' }));
     const e3$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test3' }));

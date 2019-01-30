@@ -1,14 +1,14 @@
 import { tap, mapTo, filter } from 'rxjs/operators';
-import { HttpMiddleware, HttpEffect } from '../http-effects.interface';
+import { HttpMiddlewareEffect, HttpEffect } from '../http-effects.interface';
 import { combineMiddlewares, combineEffects } from '../effects.combiner';
 import { Marbles, createHttpRequest } from '../../+internal';
 
 describe('#combineMiddlewares', () => {
   test('combines middlewares into one stream', () => {
     // given
-    const a$: HttpMiddleware = req$ => req$.pipe(tap(req => { req.test = 1; }));
-    const b$: HttpMiddleware = req$ => req$.pipe(tap(req => { req.test = req.test + 1; }));
-    const c$: HttpMiddleware = req$ => req$.pipe(tap(req => { req.test = req.test + 1; }));
+    const a$: HttpMiddlewareEffect = req$ => req$.pipe(tap(req => { req.test = 1; }));
+    const b$: HttpMiddlewareEffect = req$ => req$.pipe(tap(req => { req.test = req.test + 1; }));
+    const c$: HttpMiddlewareEffect = req$ => req$.pipe(tap(req => { req.test = req.test + 1; }));
     const incomingRequest = createHttpRequest({ url: '/' });
     const outgoingRequest = createHttpRequest({ url: '/', test: 3 });
 

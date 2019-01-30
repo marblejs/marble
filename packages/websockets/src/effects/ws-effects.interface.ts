@@ -2,7 +2,7 @@ import * as http from 'http';
 import { Event, Effect } from '@marblejs/core';
 import { MarbleWebSocketClient } from '../websocket.interface';
 
-export interface WsMiddleware<
+export interface WsMiddlewareEffect<
   I = Event,
   O = Event,
 > extends WsEffect<I, O> {}

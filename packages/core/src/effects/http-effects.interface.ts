@@ -10,7 +10,7 @@ export interface HttpEffectResponse<T = any> {
   body?: T;
 }
 
-export interface HttpMiddleware<
+export interface HttpMiddlewareEffect<
   I extends HttpRequest = HttpRequest,
   O extends HttpRequest = HttpRequest,
 > extends HttpEffect<I, O> {}
