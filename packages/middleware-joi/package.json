@@ -10,7 +10,8 @@
     "build": "tsc",
     "lint": "tslint --config ../../tslint.json --project ./",
     "test": "jest --config ../../jest.config.js",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "postinstall": "node ./src/deprecation.js"
   },
   "files": [
     "dist/"
