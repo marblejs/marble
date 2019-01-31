@@ -1,93 +1,22 @@
-import { HttpMethod, HttpResponse } from '@marblejs/core';
+import { HttpRequest, HttpResponse, HttpMethod, HttpStatus } from '@marblejs/core';
 
+import { checkOrigin } from './checkOrigin';
 import { CORSOptions } from './middleware';
-import { capitalize, isNotEmptyArray, isString } from './util';
+import { capitalize, isString } from './util';
 
 interface ConfiguredHeader {
   key: string;
   value: string;
 }
 
-enum AccessControlAllow {
+enum AccessControlHeader {
   Origin = 'Access-Control-Allow-Origin',
   Methods = 'Access-Control-Allow-Methods',
   Headers = 'Access-Control-Allow-Headers',
   Credentials = 'Access-Control-Allow-Credentials',
+  MaxAge = 'Access-Control-Max-Age',
+  ExposeHeaders = 'Access-Control-Expose-Headers',
 }
-
-export const configureAllowedOrigin = (
-  origin: string,
-  allowedOrigin: string | string[] | RegExp,
-): ConfiguredHeader[] => {
-  const headers: ConfiguredHeader[] = [];
-
-  if (isString(allowedOrigin) && allowedOrigin === '*') {
-    headers.push({ key: AccessControlAllow.Origin, value: '*' });
-  } else if (
-    isString(allowedOrigin) &&
-    allowedOrigin !== '*' &&
-    origin.match(allowedOrigin as string)
-  ) {
-    headers.push({ key: AccessControlAllow.Origin, value: origin });
-  } else if (
-    isNotEmptyArray(allowedOrigin) &&
-    (allowedOrigin as Array<string>).includes(origin)
-  ) {
-    headers.push({ key: AccessControlAllow.Origin, value: origin });
-  } else if (allowedOrigin instanceof RegExp && allowedOrigin.test(origin)) {
-    headers.push({ key: AccessControlAllow.Origin, value: origin });
-  }
-
-  return headers;
-};
-
-export const configureAllowedMethods = (
-  method: HttpMethod,
-  methods: string[],
-): ConfiguredHeader[] => {
-  const headers: ConfiguredHeader[] = [];
-
-  if (isNotEmptyArray(methods) && methods.includes(method)) {
-    headers.push({
-      key: AccessControlAllow.Methods,
-      value: methods.join(', '),
-    });
-  }
-
-  return headers;
-};
-
-export const configureAllowedHeaders = (
-  allowedHeaders: string | string[],
-): ConfiguredHeader[] => {
-  const headers: ConfiguredHeader[] = [];
-
-  if (isString(allowedHeaders) && allowedHeaders === '*') {
-    headers.push({
-      key: AccessControlAllow.Headers,
-      value: '*',
-    });
-  } else if (isNotEmptyArray(allowedHeaders)) {
-    headers.push({
-      key: AccessControlAllow.Headers,
-      value: (allowedHeaders as Array<string>)
-        .map(header => capitalize(header))
-        .join(', '),
-    });
-  }
-
-  return headers;
-};
-
-export const configureCredentials = (
-  withCredentials: boolean,
-): ConfiguredHeader[] => {
-  if (withCredentials) {
-    return [{ key: AccessControlAllow.Credentials, value: 'true' }];
-  }
-
-  return [];
-};
 
 export const applyHeaders = (
   headers: ConfiguredHeader[],
@@ -98,29 +27,89 @@ export const applyHeaders = (
   });
 };
 
-export function configureHeaders(
-  origin: string,
-  method: HttpMethod,
+export function configurePreflightResponse(
+  req: HttpRequest,
   res: HttpResponse,
   options: CORSOptions,
 ): void {
-  // @todo add exposed headers
-  const headers = [
-    ...configureAllowedOrigin(origin, options.origin!),
-    ...configureCredentials(options.withCredentials!),
-  ];
+  const origin = req.headers.origin as string;
+  const headers: ConfiguredHeader[] = [];
 
-  if (method === 'OPTIONS') {
-    // @todo add max age header, exposed headers
-    const preflightHeaders = [
-      ...configureAllowedMethods(method, options.methods!),
-      ...configureAllowedHeaders(options.allowHeaders!),
-      { key: 'Content-Length', value: '0' },
-    ];
+  res.statusCode = options.optionsSuccessStatus as HttpStatus;
 
-    headers.push(...preflightHeaders);
+  if (!checkOrigin(req, options.origin as string)) {
+    return;
+  }
 
-    res.statusCode = options.optionsSuccessStatus!;
+  headers.push({ key: AccessControlHeader.Origin, value: origin });
+
+  if (options.withCredentials) {
+    headers.push({ key: AccessControlHeader.Credentials, value: 'true' });
+  }
+
+  if (isString(options.allowHeaders) && options.allowHeaders === '*') {
+    headers.push({
+      key: AccessControlHeader.Headers,
+      value: '*',
+    });
+  } else if (
+    Array.isArray(options.allowHeaders) &&
+    options.allowHeaders.length > 0
+  ) {
+    headers.push({
+      key: AccessControlHeader.Headers,
+      value: options.allowHeaders.map(header => capitalize(header)).join(', '),
+    });
+  }
+
+  if (options.maxAge) {
+    headers.push({
+      key: AccessControlHeader.MaxAge,
+      value: `${options.maxAge}`,
+    });
+  }
+
+  if (Array.isArray(options.methods) && options.methods.length > 0) {
+    if (
+      req.headers['access-control-request-method'] &&
+      !options.methods.includes((req.headers[
+        'access-control-request-method'
+      ] as unknown) as HttpMethod)
+    ) {
+      res.statusCode = 405;
+    } else {
+      headers.push({
+        key: AccessControlHeader.Methods,
+        value: options.methods.join(', '),
+      });
+    }
+  }
+
+  applyHeaders(headers, res);
+}
+
+export function configureResponse(
+  req: HttpRequest,
+  res: HttpResponse,
+  options: CORSOptions,
+): void {
+  const headers: ConfiguredHeader[] = [];
+  const origin = req.headers.origin as string;
+
+  headers.push({ key: AccessControlHeader.Origin, value: origin });
+
+  if (options.withCredentials) {
+    headers.push({ key: AccessControlHeader.Credentials, value: 'true' });
+  }
+
+  if (
+    Array.isArray(options.exposeHeaders) &&
+    options.exposeHeaders.length > 0
+  ) {
+    headers.push({
+      key: AccessControlHeader.ExposeHeaders,
+      value: options.exposeHeaders.map(header => capitalize(header)).join(', '),
+    });
   }
 
   applyHeaders(headers, res);

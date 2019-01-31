@@ -6,5 +6,3 @@ export const capitalize = (str: string): string =>
 
 export const isString = (str: any): boolean =>
   typeof str === 'string' || str instanceof String;
-
-export const isNotEmptyArray = (arr: any) => Array.isArray(arr) && arr.length > 0;
