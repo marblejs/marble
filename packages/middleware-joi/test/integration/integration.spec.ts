@@ -5,6 +5,10 @@ describe('Joi middleware - Integration', () => {
   const app = server();
   const token = '181782881DB38D84';
 
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn);
+  });
+
   it('should fail without a token', async () => {
     const expected = {
       error: {
