@@ -15,7 +15,7 @@ Requires `@marblejs/core` to be installed.
 import { bodyParser$ } from '@marblejs/middleware-body';
 ​
 const middlewares = [
-  bodyParser$,
+  bodyParser$(),
   // ...
 ];
 ​

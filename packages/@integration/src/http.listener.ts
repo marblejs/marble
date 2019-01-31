@@ -7,7 +7,7 @@ export const httpServer = httpListener({
   middlewares: [
     loggerDev$,
     loggerFile$,
-    bodyParser$,
+    bodyParser$(),
   ],
   effects: [api$]
 });

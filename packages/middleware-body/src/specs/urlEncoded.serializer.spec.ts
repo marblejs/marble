@@ -1,7 +1,7 @@
-import { serializeUrlEncoded } from './urlEncoded.serializer';
+import { serializeUrlEncoded } from '../body.urlEncoded.serializer';
 
 describe('serializeUrlEncoded', () => {
-  test('should return object with params', () => {
+  test('returns object with params', () => {
     // given
     const formData = 'test=test&test-2=test-2&test-3=3';
 

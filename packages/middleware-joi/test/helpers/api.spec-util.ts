@@ -59,7 +59,7 @@ const postUser$ = EffectFactory
 const api$ = combineRoutes('/api', [getPost$, getUser$, postUser$, storePost$]);
 
 const middlewares = [
-  bodyParser$,
+  bodyParser$(),
   validator$(
     { headers: { token: Joi.string().token().required() } },
     { stripUnknown: true }

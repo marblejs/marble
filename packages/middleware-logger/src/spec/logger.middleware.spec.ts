@@ -1,14 +1,7 @@
-import { HttpRequest, HttpResponse } from '@marblejs/core';
-import { Marbles } from '@marblejs/core/dist/+internal';
-import { EventEmitter } from 'events';
-import { logger$ } from '../logger.middleware';
+import { Marbles, createHttpRequest, createHttpResponse } from '@marblejs/core/dist/+internal';
+import { logger$, loggerWithOpts$ } from '../logger.middleware';
 
-const createMockReq = (url: string, method: string) => ({ url, method } as HttpRequest);
-const createMockRes = (status: number) => new class extends EventEmitter {
-  statusCode = status;
-} as HttpResponse;
-
-describe('Logger middleware', () => {
+describe('logger$', () => {
 
   beforeEach(() => {
     spyOn(console, 'log').and.stub();
@@ -17,10 +10,10 @@ describe('Logger middleware', () => {
   });
 
   test('reacts to 200 status on the console', () => {
-    const request = createMockReq('/', 'GET');
-    const response = createMockRes(200);
+    const request = createHttpRequest({ url: '/', method: 'GET' });
+    const response = createHttpResponse({ statusCode: 200 });
 
-    Marbles.assertEffect(logger$, [
+    Marbles.assertEffect(logger$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
     ], { client: response });
@@ -30,10 +23,29 @@ describe('Logger middleware', () => {
   });
 
   test('reacts to 400 status on the console', () => {
-    const request = createMockReq('/test', 'POST');
-    const response = createMockRes(403);
+    const request = createHttpRequest({ url: '/test', method: 'POST' });
+    const response = createHttpResponse({ statusCode: 403 });
 
-    Marbles.assertEffect(logger$, [
+    Marbles.assertEffect(logger$(), [
+      ['-a-', { a: request }],
+      ['-a-', { a: request }],
+    ], { client: response });
+
+    response.emit('finish');
+    expect(console.info).toHaveBeenCalled();
+  });
+
+});
+
+describe('loggerWithOpts$', () => {
+
+  test('reacts to 200 status on the console', () => {
+    const request = createHttpRequest({ url: '/', method: 'GET' });
+    const response = createHttpResponse({ statusCode: 200 });
+
+    spyOn(console, 'info').and.stub();
+
+    Marbles.assertEffect(loggerWithOpts$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
     ], { client: response });
