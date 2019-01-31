@@ -1,6 +1,6 @@
 {
   "name": "marblejs",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "postinstall": "yarn clean && yarn build && sleep 5s && yarn test",
@@ -17,7 +17,8 @@
     "clean": "lerna run clean",
     "prepublishOnly": "yarn clean && yarn build && yarn test",
     "publish": "lerna publish --no-push",
-    "publish:canary": "lerna publish --no-push --npm-tag next --canary minor --preid dev --force-publish=* --npm-client npm",
+    "publish:canary:minor": "lerna publish --no-push --npm-tag next --canary minor --preid dev --force-publish=* --npm-client npm",
+    "publish:canary:major": "lerna publish --no-push --npm-tag next --canary major --preid next --force-publish=* --npm-client npm",
     "precommit": "lint-staged"
   },
   "lint-staged": {
