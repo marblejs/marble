@@ -11,10 +11,11 @@
     "lint": "tslint --config ../../tslint.json --project ./",
     "test": "jest --config ../../jest.config.js",
     "clean": "rimraf dist",
-    "postinstall": "node ./src/deprecation.js"
+    "postinstall": "node ./deprecation.js"
   },
   "files": [
-    "dist/"
+    "dist/",
+    "deprecation.js"
   ],
   "keywords": [
     "marble.js",
