@@ -21,11 +21,11 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "@marblejs/core": "^1.2.1",
-    "@marblejs/websockets": "^1.2.1",
-    "@marblejs/middleware-body": "^1.2.1",
-    "@marblejs/middleware-logger": "^1.2.1",
-    "@marblejs/middleware-io": "^1.2.1",
+    "@marblejs/core": "^2.0.0-rc.0",
+    "@marblejs/websockets": "^2.0.0-rc.0",
+    "@marblejs/middleware-body": "^2.0.0-rc.0",
+    "@marblejs/middleware-logger": "^2.0.0-rc.0",
+    "@marblejs/middleware-io": "^2.0.0-rc.0",
     "@types/node": "^10.1.2",
     "rxjs": "~6.3.3",
     "typescript": "~3.0.3"
