@@ -9,7 +9,7 @@ const getPost$ = EffectFactory
   .use(req$ => req$
     .pipe(
       use(validator$({
-        query: { page: Joi.number().integer().greater(1) }
+        query: Joi.object({ page: Joi.number().integer().greater(1) })
       })),
       map(req => req.query),
       map(query => ({ status: 200, body: { ...query } }))
@@ -23,7 +23,7 @@ const getUser$ = EffectFactory
       use(validator$({
         params: {
           id: Joi.number().integer().min(1).max(10).required(),
-        }
+        },
       })),
       map(req => req.params),
       map(params => ({ status: 200, body: { id: params.id } }))
@@ -35,8 +35,8 @@ const storePost$ = EffectFactory
   .use(req$ => req$
     .pipe(
       use(validator$({
-        query: { timestamp: Joi.date().required() },
-        body: { title: Joi.string().required() },
+        query: Joi.object({ timestamp: Joi.date().required() }),
+        body: Joi.object({ title: Joi.string().required() }),
       })),
       map(resp => ({ body: { ...resp.body, ...resp.query } }))
     ));
@@ -47,10 +47,10 @@ const postUser$ = EffectFactory
   .use(req$ => req$
     .pipe(
       use(validator$({
-        body: {
+        body: Joi.object({
           name: Joi.string().required(),
           passport: Joi.string().default('marble.js')
-        }
+        })
       })),
       map(req => req.body),
       map(response => ({ body: response }))

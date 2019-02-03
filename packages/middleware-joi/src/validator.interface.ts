@@ -1,16 +1,25 @@
 import * as Joi from 'joi';
 import { Schema } from './validator.schema';
 
-export type ExtractedSchema<SchemaToExtract extends Schema> = {
-  [K1 in keyof SchemaToExtract]:
-    SchemaToExtract[K1] extends undefined
-      ? unknown
-      : { [K2 in keyof SchemaToExtract[K1]]: Joi.ExtractType<SchemaToExtract[K1][K2]> }
-};
+export type ExtractedBody<T extends Schema> = ExtractObject<T['body']>;
+export type ExtractedParams<T extends Schema> = ExtractObject<T['params']>;
+export type ExtractedQuery<T extends Schema> = ExtractObject<T['query']>;
 
-export type ExtractedBody<T extends Schema> = ExtractedSchema<T>['body'];
-export type ExtractedParams<T extends Schema> = ExtractedSchema<T>['params'];
-export type ExtractedQuery<T extends Schema> = ExtractedSchema<T>['query'];
+export type ExtractObject<T> =
+  T extends Joi.ObjectSchema
+    ? ExtractType<T>
+    : { [K in keyof T]: ExtractType<T[K]> };
+
+export type ExtractType<T> =
+  T extends Joi.NumberSchema ? number :
+  T extends Joi.BooleanSchema ? boolean :
+  T extends Joi.StringSchema ? string :
+  T extends Joi.DateSchema ? Date :
+  T extends Joi.ObjectSchema<infer U> ?
+    U extends null ? Record<string, any> : { [K in keyof U]: ExtractType<U[K]> } :
+  T extends Joi.ArraySchema<infer U> ?
+    U extends null ? any[] : U[] :
+  unknown;
 
 declare module 'joi' {
   // Object Schema
@@ -24,16 +33,4 @@ declare module 'joi' {
   export interface ArraySchema<T = null> {
     items<T>(schema: T): ArraySchema<ExtractType<T>>;
   }
-
-  // ExtractType
-  export type ExtractType<T> =
-    T extends NumberSchema ? number :
-    T extends BooleanSchema ? boolean :
-    T extends StringSchema ? string :
-    T extends DateSchema ? Date :
-    T extends ObjectSchema<infer U> ?
-      U extends null ? Record<string, any> : { [K in keyof U]: ExtractType<U[K]> } :
-    T extends ArraySchema<infer U> ?
-      U extends null ? any[] : U[] :
-    unknown;
 }
