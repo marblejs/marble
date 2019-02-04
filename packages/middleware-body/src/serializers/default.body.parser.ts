@@ -1,11 +1,11 @@
 import { ContentType } from '@marblejs/core/dist/+internal';
-import { BodyParser } from '../body.model';
+import { RequestBodyParser } from '../body.model';
 import { jsonParser } from './json.body.parser';
 import { textParser } from './text.body.parser';
 import { rawParser } from './raw.body.parser';
 import { urlEncodedParser } from './url.body.parser';
 
-export const defaultParser: BodyParser = req => body => {
+export const defaultParser: RequestBodyParser = req => body => {
   switch (req.headers['content-type']) {
     case ContentType.APPLICATION_JSON:
       return jsonParser(req)(body);

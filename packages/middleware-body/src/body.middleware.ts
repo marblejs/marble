@@ -2,13 +2,13 @@ import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/core';
 import { of, throwError, iif } from 'rxjs';
 import { catchError, map, switchMap, tap, mapTo } from 'rxjs/operators';
 import { defaultParser } from './serializers';
-import { BodyParser } from './body.model';
+import { RequestBodyParser } from './body.model';
 import { matchType, getBody, hasBody } from './body.util';
 
 const PARSEABLE_METHODS = ['POST', 'PUT', 'PATCH'];
 
 interface BodyParserOptions {
-  parser?: BodyParser;
+  parser?: RequestBodyParser;
   type?: string[];
 }
 

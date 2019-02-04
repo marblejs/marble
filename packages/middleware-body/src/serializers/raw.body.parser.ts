@@ -1,3 +1,3 @@
-import { BodyParser } from '../body.model';
+import { RequestBodyParser } from '../body.model';
 
-export const rawParser: BodyParser = _ => body => body;
+export const rawParser: RequestBodyParser = _ => body => body;

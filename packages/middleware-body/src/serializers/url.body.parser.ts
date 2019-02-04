@@ -1,5 +1,5 @@
 import { compose } from '@marblejs/core/dist/+internal';
-import { BodyParser } from '../body.model';
+import { RequestBodyParser } from '../body.model';
 
 const decodeComponent = (urlEncoded: string) => urlEncoded
   .split('&')
@@ -9,5 +9,5 @@ const decodeComponent = (urlEncoded: string) => urlEncoded
     [key]: isNaN(+value) ? value : +value,
   }), {});
 
-export const urlEncodedParser: BodyParser = _ => body =>
+export const urlEncodedParser: RequestBodyParser = _ => body =>
   compose(decodeComponent, decodeURIComponent)(body.toString());

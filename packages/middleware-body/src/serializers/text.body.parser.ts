@@ -1,4 +1,4 @@
-import { BodyParser } from '../body.model';
+import { RequestBodyParser } from '../body.model';
 
-export const textParser: BodyParser = _ => body =>
+export const textParser: RequestBodyParser = _ => body =>
   body.toString();
