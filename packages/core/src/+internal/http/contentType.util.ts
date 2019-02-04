@@ -4,7 +4,7 @@ export enum ContentType {
   APPLICATION_JAVASCRIPT = 'application/javascript',
   APPLICATION_ECMASCRIPT = 'application/ecmascript',
   APPLICATION_OCTET_STREAM = 'application/octet-stream',
-  APPLICATION_X_WWW_FORM_URLENCODED = 'x-www-form-urlencoded',
+  APPLICATION_X_WWW_FORM_URLENCODED = 'application/x-www-form-urlencoded',
   TEXT_PLAIN = 'text/plain',
   TEXT_HTML = 'text/html',
   TEXT_CSS = 'text/css',
