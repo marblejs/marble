@@ -1,5 +1,5 @@
 import { HttpRequest, HttpResponse, createStaticInjectionContainer, createEffectMetadata } from '@marblejs/core';
-import { Marbles } from '@marblejs/core/dist/+internal';
+import { Marbles, ContentType } from '@marblejs/core/dist/+internal';
 import { of } from 'rxjs';
 import { bodyParser$ } from '../body.middleware';
 
@@ -25,10 +25,10 @@ describe('bodyParser$ middleware', () => {
     ]);
   });
 
-  test('parses "application/json" body', done => {
+  test(`parses ${ContentType.APPLICATION_JSON} body`, done => {
     const request = new MockReq({
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': ContentType.APPLICATION_JSON },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
@@ -43,10 +43,10 @@ describe('bodyParser$ middleware', () => {
     request.end();
   });
 
-  test('parses "x-www-form-urlencoded" body', done => {
+  test(`parses ${ContentType.APPLICATION_X_WWW_FORM_URLENCODED} body`, done => {
     const request = new MockReq({
       method: 'POST',
-      headers: { 'Content-Type': 'x-www-form-urlencoded' },
+      headers: { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
@@ -66,10 +66,10 @@ describe('bodyParser$ middleware', () => {
   });
 
 
-  test('throws exception on "application/json" parse', done => {
+  test(`throws exception on ${ContentType.APPLICATION_JSON} parse`, done => {
     const request = new MockReq({
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': ContentType.APPLICATION_JSON },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
@@ -91,10 +91,10 @@ describe('bodyParser$ middleware', () => {
     request.end();
   });
 
-  test('parses "text/plain" body', done => {
+  test(`parses ${ContentType.TEXT_PLAIN} body`, done => {
     const request = new MockReq({
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': ContentType.TEXT_PLAIN },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
@@ -112,7 +112,7 @@ describe('bodyParser$ middleware', () => {
   test('throws exception on EventEmitter "error" event', done => {
     const request = new MockReq({
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': ContentType.TEXT_PLAIN },
     });
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
