@@ -34,6 +34,10 @@
     "@marblejs/core": "^2.0.0-rc.0",
     "rxjs": "~6.3.3"
   },
+  "dependencies": {
+    "type-is": "~1.6.16",
+    "@types/type-is": "~1.6.2"
+  },
   "devDependencies": {
     "@marblejs/core": "^2.0.0-rc.0"
   },

@@ -1,62 +1,35 @@
-import { HttpError, HttpRequest, HttpStatus, HttpMiddlewareEffect } from '@marblejs/core';
-import { ContentType, compose } from '@marblejs/core/dist/+internal';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap, toArray, mapTo } from 'rxjs/operators';
-import { serializeUrlEncoded } from './body.urlEncoded.serializer';
-import { BodyParserOptions} from './body.model';
+import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/core';
+import { of, throwError, iif } from 'rxjs';
+import { catchError, map, switchMap, tap, mapTo } from 'rxjs/operators';
+import { defaultParser } from './parsers';
+import { RequestBodyParser } from './body.model';
+import { matchType, getBody, hasBody } from './body.util';
 
 const PARSEABLE_METHODS = ['POST', 'PUT', 'PATCH'];
 
-const fromReadableStream = (stream: HttpRequest): Observable<any> => {
-  stream.pause();
-  return new Observable(observer => {
-    const next = chunk => observer.next(chunk);
-    const complete = () => observer.complete();
-    const error = err => observer.error(err);
+interface BodyParserOptions {
+  parser?: RequestBodyParser;
+  type?: string[];
+}
 
-    stream
-      .on('data', next)
-      .on('error', error)
-      .on('end', complete)
-      .resume();
-
-    return () => {
-      stream.removeListener('data', next);
-      stream.removeListener('error', error);
-      stream.removeListener('end', complete);
-    };
-  });
-};
-
-const getBody = (req: HttpRequest) =>
-  fromReadableStream(req).pipe(
-    toArray(),
-    map(chunks => Buffer.concat(chunks)),
-    map(buffer => buffer.toString()),
-    map(body => {
-      switch (req.headers['content-type']) {
-        case ContentType.APPLICATION_JSON:
-          return JSON.parse(body);
-        case ContentType.APPLICATION_X_WWW_FORM_URLENCODED:
-          return compose(serializeUrlEncoded, decodeURIComponent)(body);
-        default:
-          return body;
-      }
-    })
-  );
-
-export const bodyParser$ = (opts: BodyParserOptions = {}): HttpMiddlewareEffect => (req$) =>
+export const bodyParser$ = ({
+  type = ['*/*'],
+  parser = defaultParser,
+}: BodyParserOptions = {}): HttpMiddlewareEffect => req$ =>
   req$.pipe(
-    switchMap(req =>
-      PARSEABLE_METHODS.includes(req.method)
-        ? of(req).pipe(
-            switchMap(getBody),
-            tap(body => (req.body = body)),
-            mapTo(req),
-            catchError(() => throwError(
-              new HttpError('Request body parse error', HttpStatus.BAD_REQUEST),
-            ))
-          )
-        : of(req)
-    )
+    switchMap(req => iif(
+      () =>
+        PARSEABLE_METHODS.includes(req.method)
+        && !hasBody(req)
+        && matchType(type)(req),
+      getBody(req).pipe(
+        map(parser(req)),
+        tap(body => req.body = body),
+        mapTo(req),
+        catchError(() => throwError(
+          new HttpError('Request body parse error', HttpStatus.BAD_REQUEST),
+        ))
+      ),
+      of(req),
+    )),
   );

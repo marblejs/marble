@@ -65,6 +65,42 @@ describe('bodyParser$ middleware', () => {
     request.end();
   });
 
+  test(`parses ${ContentType.APPLICATION_OCTET_STREAM} body`, done => {
+    const message = 'test message';
+    const request = new MockReq({
+      method: 'POST',
+      headers: { 'Content-Type': ContentType.APPLICATION_OCTET_STREAM },
+    });
+    const req$ = of(request as HttpRequest);
+    const res = {} as HttpResponse;
+    const http$ = bodyParser$()(req$, res, effectMeta);
+
+    http$.subscribe(data => {
+      expect(data.body).toEqual(new Buffer(message));
+      done();
+    });
+
+    request.write(message);
+    request.end();
+  });
+
+  test(`parses ${ContentType.TEXT_PLAIN} body`, done => {
+    const request = new MockReq({
+      method: 'POST',
+      headers: { 'Content-Type': ContentType.TEXT_PLAIN },
+    });
+    const req$ = of(request as HttpRequest);
+    const res = {} as HttpResponse;
+    const http$ = bodyParser$()(req$, res, effectMeta);
+
+    http$.subscribe(data => {
+      expect(data.body).toEqual('test');
+      done();
+    });
+
+    request.write('test');
+    request.end();
+  });
 
   test(`throws exception on ${ContentType.APPLICATION_JSON} parse`, done => {
     const request = new MockReq({
@@ -91,24 +127,6 @@ describe('bodyParser$ middleware', () => {
     request.end();
   });
 
-  test(`parses ${ContentType.TEXT_PLAIN} body`, done => {
-    const request = new MockReq({
-      method: 'POST',
-      headers: { 'Content-Type': ContentType.TEXT_PLAIN },
-    });
-    const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
-
-    http$.subscribe(data => {
-      expect(data.body).toEqual('test');
-      done();
-    });
-
-    request.write('test');
-    request.end();
-  });
-
   test('throws exception on EventEmitter "error" event', done => {
     const request = new MockReq({
       method: 'POST',
@@ -130,6 +148,24 @@ describe('bodyParser$ middleware', () => {
     );
 
     request._fail(new Error());
+    request.write('test');
+    request.end();
+  });
+
+  test('does nothing if Content-Type is unsupported', done => {
+    const request = new MockReq({
+      method: 'POST',
+      headers: { 'Content-Type': ContentType.AUDIO_MPEG },
+    });
+    const req$ = of(request as HttpRequest);
+    const res = {} as HttpResponse;
+    const http$ = bodyParser$()(req$, res, effectMeta);
+
+    http$.subscribe(data => {
+      expect(data.body).toBeUndefined();
+      done();
+    });
+
     request.write('test');
     request.end();
   });
