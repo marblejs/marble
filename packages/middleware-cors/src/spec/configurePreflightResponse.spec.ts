@@ -1,9 +1,5 @@
-import {
-  applyHeaders,
-  configurePreflightResponse,
-  configureResponse,
-} from './configureHeaders';
-import { CORSOptions } from './middleware';
+import { configurePreflightResponse } from '../configurePreflightResponse';
+import { CORSOptions } from '../middleware';
 import { createMockRequest, createMockResponse } from './middleware.spec';
 
 describe('configurePreflightResponse', () => {
@@ -117,87 +113,6 @@ describe('configurePreflightResponse', () => {
 
     expect(res.statusCode).toBe(405);
     expect(res.setHeader).not.toBeCalledWith('Access-Control-Allow-Methods');
-    done();
-  });
-});
-
-describe('configureResponse', () => {
-  test('should configure response correctly', done => {
-    const origin = 'fake-origin';
-    const req = createMockRequest('GET', { origin });
-    const res = createMockResponse();
-    const options: CORSOptions = {
-      origin: 'fake-origin',
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      withCredentials: true,
-      optionsSuccessStatus: 204,
-      allowHeaders: '*',
-      maxAge: 3600,
-      exposeHeaders: ['x-header', 'x-custom-header'],
-    };
-
-    configureResponse(req, res, options);
-
-    expect(res.setHeader).toBeCalledTimes(3);
-    expect(res.setHeader).toBeCalledWith(
-      'Access-Control-Allow-Origin',
-      'fake-origin',
-    );
-    expect(res.setHeader).toBeCalledWith(
-      'Access-Control-Allow-Credentials',
-      'true',
-    );
-    expect(res.setHeader).toBeCalledWith(
-      'Access-Control-Expose-Headers',
-      'X-Header, X-Custom-Header',
-    );
-    done();
-  });
-
-  test('should configure response correctly', done => {
-    const origin = 'fake-origin';
-    const req = createMockRequest('GET', { origin });
-    const res = createMockResponse();
-    const options: CORSOptions = {
-      origin: 'fake-origin',
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      withCredentials: false,
-      optionsSuccessStatus: 204,
-      allowHeaders: '*',
-      maxAge: 3600,
-    };
-
-    configureResponse(req, res, options);
-
-    expect(res.setHeader).toBeCalledTimes(1);
-    expect(res.setHeader).toBeCalledWith(
-      'Access-Control-Allow-Origin',
-      'fake-origin',
-    );
-    expect(res.setHeader).not.toBeCalledWith(
-      'Access-Control-Allow-Credentials',
-    );
-    expect(res.setHeader).not.toBeCalledWith('Access-Control-Expose-Headers');
-    done();
-  });
-});
-
-describe('applyHeaders', () => {
-  test('should handle many methods correctly', done => {
-    const configured = [
-      { key: 'Access-Control-Allow-Origin', value: '*' },
-      { key: 'Access-Control-Allow-Methods', value: 'POST' },
-    ];
-    const res = createMockResponse();
-
-    applyHeaders(configured, res);
-
-    expect(res.setHeader).toBeCalledTimes(2);
-    expect(res.setHeader).toBeCalledWith('Access-Control-Allow-Origin', '*');
-    expect(res.setHeader).toBeCalledWith(
-      'Access-Control-Allow-Methods',
-      'POST',
-    );
     done();
   });
 });

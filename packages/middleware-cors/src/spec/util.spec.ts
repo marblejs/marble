@@ -1,4 +1,4 @@
-import { capitalize, isString } from './util';
+import { capitalize, isString } from '../util';
 
 describe('Utils', () => {
   describe('Capitalize', () => {

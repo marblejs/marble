@@ -1,7 +1,7 @@
 import { HttpMethod, HttpRequest, HttpResponse } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
 
-import { cors$, CORSOptions } from './middleware';
+import { cors$, CORSOptions } from '../middleware';
 import { of } from 'rxjs';
 
 export const createMockResponse = () =>

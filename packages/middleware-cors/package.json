@@ -1,7 +1,7 @@
 {
   "name": "@marblejs/middleware-cors",
   "version": "1.2.1",
-  "description": "A joi validation middleware for Marble.js",
+  "description": "A CORS middleware for Marble.js",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {

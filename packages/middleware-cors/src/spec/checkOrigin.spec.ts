@@ -1,4 +1,4 @@
-import { checkOrigin, checkStringOrigin, checkArrayOrigin, checkRegexpOrigin } from './checkOrigin';
+import { checkOrigin } from '../checkOrigin';
 import { createMockRequest } from './middleware.spec';
 
 describe('checkOrigin', () => {
@@ -44,35 +44,7 @@ describe('checkOrigin', () => {
   });
 });
 
-describe('checkStringOrigin', () => {
-  test('check string option correctly', done => {
-    const option1 = 'fake-origin';
-    const option2 = 'fake-origin-2';
 
-    expect(checkStringOrigin('fake-origin', option1)).toBeTruthy();
-    expect(checkStringOrigin('fake-origin', option2)).toBeFalsy();
-    done();
-  });
-});
 
-describe('checkArrayOrigin', () => {
-  test('check array option correctly', done => {
-    const option1 = ['fake-origin'];
-    const option2 = ['fake-origin-2'];
 
-    expect(checkArrayOrigin('fake-origin', option2)).toBeFalsy();
-    expect(checkArrayOrigin('fake-origin', option1)).toBeTruthy();
-    done();
-  });
-});
 
-describe('checkStringOrigin', () => {
-  test('check regexp option correctly', done => {
-    const option1 = /[a-z]/;
-    const option2 = /[0-9]/;
-
-    expect(checkRegexpOrigin('fake-origin', option1)).toBeTruthy();
-    expect(checkRegexpOrigin('fake-origin', option2)).toBeFalsy();
-    done();
-  });
-});

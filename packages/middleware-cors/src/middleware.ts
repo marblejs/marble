@@ -2,7 +2,9 @@ import { HttpMethod, HttpStatus, Middleware } from '@marblejs/core';
 import { tap } from 'rxjs/operators';
 import { isString } from 'util';
 
-import { configurePreflightResponse, configureResponse } from './configureHeaders';
+import { configurePreflightResponse } from './configurePreflightResponse';
+import { configureResponse } from './configureResponse';
+
 
 export interface CORSOptions {
   origin?: string | string[] | RegExp;

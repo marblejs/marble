@@ -1,31 +1,10 @@
-import { HttpRequest, HttpResponse, HttpMethod, HttpStatus } from '@marblejs/core';
+import { HttpMethod, HttpRequest, HttpResponse, HttpStatus } from '@marblejs/core';
+import { isString } from 'util';
 
 import { checkOrigin } from './checkOrigin';
+import { AccessControlHeader, applyHeaders, ConfiguredHeader } from './applyHeaders';
 import { CORSOptions } from './middleware';
-import { capitalize, isString } from './util';
-
-interface ConfiguredHeader {
-  key: string;
-  value: string;
-}
-
-enum AccessControlHeader {
-  Origin = 'Access-Control-Allow-Origin',
-  Methods = 'Access-Control-Allow-Methods',
-  Headers = 'Access-Control-Allow-Headers',
-  Credentials = 'Access-Control-Allow-Credentials',
-  MaxAge = 'Access-Control-Max-Age',
-  ExposeHeaders = 'Access-Control-Expose-Headers',
-}
-
-export const applyHeaders = (
-  headers: ConfiguredHeader[],
-  res: HttpResponse,
-): void => {
-  headers.forEach(({ key, value }) => {
-    res.setHeader(key, value);
-  });
-};
+import { capitalize } from './util';
 
 export function configurePreflightResponse(
   req: HttpRequest,
@@ -83,33 +62,6 @@ export function configurePreflightResponse(
         value: options.methods.join(', '),
       });
     }
-  }
-
-  applyHeaders(headers, res);
-}
-
-export function configureResponse(
-  req: HttpRequest,
-  res: HttpResponse,
-  options: CORSOptions,
-): void {
-  const headers: ConfiguredHeader[] = [];
-  const origin = req.headers.origin as string;
-
-  headers.push({ key: AccessControlHeader.Origin, value: origin });
-
-  if (options.withCredentials) {
-    headers.push({ key: AccessControlHeader.Credentials, value: 'true' });
-  }
-
-  if (
-    Array.isArray(options.exposeHeaders) &&
-    options.exposeHeaders.length > 0
-  ) {
-    headers.push({
-      key: AccessControlHeader.ExposeHeaders,
-      value: options.exposeHeaders.map(header => capitalize(header)).join(', '),
-    });
   }
 
   applyHeaders(headers, res);
