@@ -32,8 +32,10 @@ export const factorizeRouting = (
     const foundRoute = routing.find(route => route.regExp.source === regExp.source);
     const method: RoutingMethod = {
       effect: route.effect,
-      middleware: middlewares.length > 0
-        ? middlewares.length > 1 ? combineMiddlewares(...middlewares) : middlewares[0]
+      middleware: middlewares.length
+        ? route.middleware
+          ? combineMiddlewares(...middlewares, route.middleware)
+          : combineMiddlewares(...middlewares)
         : undefined,
       parameters,
     };
