@@ -1,13 +1,14 @@
 import * as querystring from 'querystring';
-import { Nullable, Maybe, getHead } from '../+internal';
+import { getHead } from '../+internal';
 import { QueryParameters } from '../http.interface';
+import { fromNullable } from 'fp-ts/lib/Option';
 
 const getNestedQueryParam = (params: Object) => (key: string): QueryParameters => {
   const paramValue = params[key];
   const nestedKeys = /\[.*]/.exec(key);
 
-  return Maybe.of(nestedKeys)
-    .flatMap(getHead)
+  return fromNullable(nestedKeys)
+    .chain(getHead)
     .map(_ => _.replace(/\[/g, ''))
     .map(_ => _.split(']'))
     .map(_ => _.filter(v => v.length > 0))
@@ -15,12 +16,12 @@ const getNestedQueryParam = (params: Object) => (key: string): QueryParameters =
       (value, key) => ({ [key]: value }),
       paramValue,
     ))
-    .flatMap(nestedQueryObject => Maybe.of(nestedKeys)
-      .flatMap(getHead)
+    .chain(nestedQueryObject => fromNullable(nestedKeys)
+      .chain(getHead)
       .map(head => key.replace(head, ''))
       .map(key => ({ [key]: nestedQueryObject }))
     )
-    .valueOr({ [key]: paramValue });
+    .getOrElse({ [key]: paramValue });
 };
 
 const extractNestedQueryParams = (queryParams: Object): QueryParameters =>
@@ -29,8 +30,8 @@ const extractNestedQueryParams = (queryParams: Object): QueryParameters =>
     ...Object.keys(queryParams).map(getNestedQueryParam(queryParams))
   );
 
-export const queryParamsFactory = (queryParams: Nullable<string>): QueryParameters =>
-  Maybe.of(queryParams)
+export const queryParamsFactory = (queryParams: string | undefined | null): QueryParameters =>
+  fromNullable(queryParams)
     .map(querystring.parse)
     .map(extractNestedQueryParams)
-    .valueOr({});
+    .getOrElse({});

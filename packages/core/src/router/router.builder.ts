@@ -1,4 +1,5 @@
 import { Either, left, right } from 'fp-ts/lib/Either';
+import { isNonNullable } from '../+internal/utils';
 import { HttpMiddlewareEffect, HttpEffect } from '../effects/http-effects.interface';
 import { combineMiddlewares } from '../effects/effects.combiner';
 import { coreErrorFactory } from '../error/error.factory';
@@ -26,17 +27,17 @@ const pipe = (
 };
 
 const matchPath = (path: string): Pipeable => route =>
-  !!path
+  isNonNullable(path)
     ? route.map(r => ({ ...r, path }))
     : left(coreErrorFactory('Route path has to be defined', { contextMethod: 'matchPath'}));
 
 const matchType = (method: HttpMethod): Pipeable => route =>
-  !!method
+  isNonNullable(method)
     ? route.map(r => ({ ...r, method }))
     : left(coreErrorFactory('HttpMethod has to be defined', { contextMethod: 'matchType'}));
 
 const use = (middleware: HttpMiddlewareEffect): Pipeable => route =>
-  !!middleware
+  isNonNullable(middleware)
     ? route.map(r => ({
         ...r,
         middleware: r.middleware
@@ -46,8 +47,8 @@ const use = (middleware: HttpMiddlewareEffect): Pipeable => route =>
     : left(coreErrorFactory('Middleware has to be defined', { contextMethod: 'use'}));
 
 const useEffect = (effect: HttpEffect): Pipeable => route =>
-  !!effect
+  isNonNullable(effect)
     ? route.map(r => ({ ...r, effect }))
     : left(coreErrorFactory('Effect has to be defined', { contextMethod: 'useEffect'}));
 
-export const r = { pipe, matchPath, matchType, useEffect, use };
+export const r = { pipe, matchPath, matchType, use, useEffect };
