@@ -17,7 +17,7 @@ const getPath = (context: t.Context) =>
 const getExpectedType = (context: t.ContextEntry[]) =>
   getLast(context)
     .map(c => c.type.name)
-    .valueOr('any');
+    .getOrElse('any');
 
 const getErrorMessage = (value: any, context: t.Context): ReporterResult => ({
   path: getPath(context),
