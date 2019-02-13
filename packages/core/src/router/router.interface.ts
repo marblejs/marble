@@ -7,6 +7,7 @@ export interface RouteEffect<T extends HttpRequest = HttpRequest> {
   method: HttpMethod;
   effect: HttpEffect<T, HttpEffectResponse>;
   middleware?: HttpMiddlewareEffect;
+  meta?: any;
 }
 
 export interface RouteEffectGroup {

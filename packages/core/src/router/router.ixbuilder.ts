@@ -9,6 +9,7 @@ type PathApplied = 'PathApplied';
 type TypeApplied = 'TypeApplied';
 type MiddlewareApplied = 'MiddlewareApplied';
 type EffectApplied = 'EffectApplied';
+type MetaApplied = 'MetaApplied';
 
 type RouteEffectSpec = Partial<RouteEffect>;
 
@@ -143,4 +144,10 @@ const use = (middleware: HttpMiddlewareEffect) => ichain((spec: RouteEffectSpec)
 const useEffect = (effect: HttpEffect) => ichain((spec: RouteEffectSpec) =>
   new IxRouteBuilder<TypeApplied | MiddlewareApplied, EffectApplied, RouteEffectSpec>({ ...spec, effect }));
 
-export const r = { matchPath, matchType, use, useEffect, pipe };
+const applyMeta = (meta: Record<string, any>) => ichain((spec: RouteEffectSpec) =>
+  new IxRouteBuilder<EffectApplied | MetaApplied, MetaApplied, RouteEffectSpec>({
+    ...spec,
+    meta: { ...spec.meta, ...meta },
+  }));
+
+export const r = { matchPath, matchType, use, useEffect, applyMeta, pipe };
