@@ -22,7 +22,7 @@ describe('#factorizeRouting', () => {
 
     const routeGroupNested: RouteEffectGroup = {
       path: '/nested',
-      effects: [{ path: '/', method: 'GET', effect: e5$ }],
+      effects: [{ path: '/', method: 'GET', effect: e5$, middlewares: m$ }],
       middlewares: [m$],
     };
 
@@ -30,11 +30,11 @@ describe('#factorizeRouting', () => {
       path: '/:id',
       effects: [
         { path: '/', method: 'GET', effect: e2$ },
-        { path: '/', method: 'POST', effect: e3$ },
+        { path: '/', method: 'POST', effect: e3$, middlewares: m$ },
         routeGroupNested,
         { path: '*', method: '*', effect: e4$ },
       ],
-      middlewares: [m$],
+      middlewares: [m$, m$],
     };
 
     const routing: (RouteEffect | RouteEffectGroup)[] = [
@@ -51,7 +51,9 @@ describe('#factorizeRouting', () => {
       {
         regExp: /^(?:\/)?$/i,
         path: '',
-        methods: { GET: { effect: e1$, middleware: undefined, parameters: undefined } },
+        methods: {
+          GET: { effect: e1$, middleware: undefined, parameters: undefined },
+        },
       },
       {
         regExp: /^\/([^\/]+?)(?:\/)?$/i,
@@ -64,12 +66,16 @@ describe('#factorizeRouting', () => {
       {
         regExp: /^\/([^\/]+?)\/nested(?:\/)?$/i,
         path: '/:id/nested',
-        methods: { GET: { middleware: m$, effect: e5$, parameters: ['id'] } },
+        methods: {
+          GET: { middleware: m$, effect: e5$, parameters: ['id'] },
+        },
       },
       {
         regExp: /^\/([^\/]+?)\/(.*)(?:\/)?$/i,
         path: '/:id/(.*)',
-        methods: { '*': { middleware: m$, effect: e4$, parameters: ['id'] } },
+        methods: {
+          '*': { middleware: m$, effect: e4$, parameters: ['id'] },
+        },
       },
     ] as Routing);
   });

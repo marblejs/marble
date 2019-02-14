@@ -33,10 +33,8 @@ export const factorizeRouting = (
     const method: RoutingMethod = {
       effect: route.effect,
       middleware: middlewares.length
-        ? route.middleware
-          ? combineMiddlewares(...middlewares, route.middleware)
-          : combineMiddlewares(...middlewares)
-        : undefined,
+        ? combineMiddlewares(...middlewares)
+        : route.middleware,
       parameters,
     };
 
