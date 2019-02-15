@@ -15,6 +15,7 @@
     "test:integration": "SCOPE=integration jest --expand",
     "test:watch": "jest --expand --onlyChanged --watch",
     "clean": "lerna run clean",
+    "purge": "yarn clean && rimraf node_modules",
     "prepublishOnly": "yarn clean && yarn build && yarn test",
     "publish": "lerna publish --no-push",
     "publish:canary:minor": "lerna publish --no-push --npm-tag next --canary minor --preid dev --force-publish=* --npm-client npm",

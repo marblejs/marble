@@ -24,8 +24,8 @@ describe('Array util', () => {
     const filledArray = ['test'];
 
     // when
-    const none = getHead<string>(emptyArray).valueOr('');
-    const some = getHead(filledArray).valueOr('');
+    const none = getHead<string>(emptyArray).getOrElse('');
+    const some = getHead(filledArray).getOrElse('');
 
     // then
     expect(none).toEqual('');
@@ -38,8 +38,8 @@ describe('Array util', () => {
     const filledArray = ['test_1', 'test_2'];
 
     // when
-    const none = getLast<string>(emptyArray).valueOr('');
-    const some = getLast(filledArray).valueOr('');
+    const none = getLast<string>(emptyArray).getOrElse('');
+    const some = getLast(filledArray).getOrElse('');
 
     // then
     expect(none).toEqual('');

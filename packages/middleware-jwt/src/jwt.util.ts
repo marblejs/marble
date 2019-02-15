@@ -1,11 +1,11 @@
+import { fromNullable } from 'fp-ts/lib/Option';
 import { HttpRequest } from '@marblejs/core';
-import { Maybe } from '@marblejs/core/dist/+internal';
 
 const splitHeader = (header: string) => header.split(' ');
 const getLastElement = (array: string[]) => array[array.length - 1];
 
 export const parseAuthorizationHeader = (req: HttpRequest) =>
-  Maybe.of(req.headers.authorization)
+  fromNullable(req.headers.authorization)
     .map(splitHeader)
     .map(getLastElement)
-    .valueOr('');
+    .getOrElse('');

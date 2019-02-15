@@ -3,6 +3,7 @@ export { defaultError$ } from './error/error.effect';
 export { coreErrorFactory, CoreErrorOptions } from './error/error.factory';
 export { HttpError, CoreError, EventError } from './error/error.model';
 export { combineRoutes } from './router/router.combiner';
+export { r } from './router/router.ixbuilder';
 export { combineEffects, combineMiddlewares } from './effects/effects.combiner';
 export { createEffectMetadata } from './effects/effectsMetadata.factory';
 export * from './effects/effects.interface';

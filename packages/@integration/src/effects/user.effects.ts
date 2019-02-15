@@ -1,4 +1,4 @@
-import { EffectFactory, combineRoutes, HttpError, HttpStatus, use } from '@marblejs/core';
+import { combineRoutes, HttpError, HttpStatus, use, r } from '@marblejs/core';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError, of } from 'rxjs';
 import { map, switchMap, catchError, mergeMap } from 'rxjs/operators';
@@ -15,18 +15,18 @@ const postUserValidator$ = requestValidator$({
   }),
 });
 
-const getUserList$ = EffectFactory
-  .matchPath('/')
-  .matchType('GET')
-  .use(req$ => req$.pipe(
+const getUserList$ = r.pipe(
+  r.matchPath('/'),
+  r.matchType('GET'),
+  r.useEffect(req$ => req$.pipe(
     mergeMap(Dao.getUsers),
     map(users => ({ body: users })),
-  ));
+  )));
 
-const getUser$ = EffectFactory
-  .matchPath('/:id')
-  .matchType('GET')
-  .use(req$ => req$.pipe(
+const getUser$ = r.pipe(
+  r.matchPath('/:id'),
+  r.matchType('GET'),
+  r.useEffect(req$ => req$.pipe(
     use(getUserValidator$),
     mergeMap(req => of(req).pipe(
       map(req => req.params.id),
@@ -36,17 +36,17 @@ const getUser$ = EffectFactory
         new HttpError('User does not exist', HttpStatus.NOT_FOUND)
       ))
     )),
-  ));
+  )));
 
-const postUser$ = EffectFactory
-  .matchPath('/')
-  .matchType('POST')
-  .use(req$ => req$.pipe(
+const postUser$ = r.pipe(
+  r.matchPath('/'),
+  r.matchType('POST'),
+  r.useEffect(req$ => req$.pipe(
     use(postUserValidator$),
     map(req => req.body),
     mergeMap(Dao.postUser),
     map(body => ({ body })),
-  ));
+  )));
 
 export const user$ = combineRoutes('/user', {
   middlewares: [authorize$],

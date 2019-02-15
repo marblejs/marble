@@ -1,12 +1,12 @@
-export function isString(data: any): data is string {
-  return typeof data === 'string' || data instanceof String;
-}
+import { fromNullable } from 'fp-ts/lib/Option';
+
+export const isString = (value: any): value is string =>
+  typeof value === 'string' || value instanceof String;
 
 export const trim = (strings: TemplateStringsArray, ...values: any[]) => {
   const notNilValues = values.map(value =>
-    value !== null && value !== undefined ? value : ''
+    fromNullable(value).getOrElse('')
   );
-
   const interpolation = strings.reduce(
     (prev, current) => prev + current + (notNilValues.length ? notNilValues.shift() : ''), '',
   );
