@@ -35,11 +35,13 @@
     "rxjs": "~6.3.3"
   },
   "dependencies": {
+    "@types/qs": "^6.5.1",
     "chalk": "~2.4.1",
     "file-type": "^8.0.0",
+    "fp-ts": "1.12.2",
     "mime": "^2.3.1",
     "path-to-regexp": "^2.4.0",
-    "fp-ts": "1.12.2"
+    "qs": "^6.6.0"
   },
   "devDependencies": {
     "@types/file-type": "^5.2.1",

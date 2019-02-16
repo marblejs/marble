@@ -35,7 +35,9 @@
     "rxjs": "~6.3.3"
   },
   "dependencies": {
+    "@types/qs": "^6.5.1",
     "@types/type-is": "~1.6.2",
+    "qs": "^6.6.0",
     "type-is": "~1.6.16"
   },
   "devDependencies": {

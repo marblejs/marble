@@ -98,6 +98,15 @@ describe('API integration', () => {
       .send({ user: { id: 'test_id' } })
       .expect(200, { data: { user: { id: 'test_id' } } }));
 
+  // tslint:disable-next-line:max-line-length
+  test(`parses POST ${ContentType.APPLICATION_X_WWW_FORM_URLENCODED} body and echoes back for secured route: /api/v1/user`, async () =>
+    request(server)
+      .post('/api/v1/user')
+      .set('Authorization', 'Bearer FAKE')
+      .set('Content-Type', ContentType.APPLICATION_X_WWW_FORM_URLENCODED)
+      .send({ user: { id: 'test_id' } })
+      .expect(200, { data: { user: { id: 'test_id' } } }));
+
   test(`returns static file as ${ContentType.TEXT_HTML}: /api/v1/static/index.html`, async () =>
     request(server)
       .get('/api/v1/static/index.html')

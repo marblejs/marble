@@ -1,5 +1,6 @@
 import { HttpRequest, HttpResponse, createStaticInjectionContainer, createEffectMetadata } from '@marblejs/core';
 import { Marbles, ContentType } from '@marblejs/core/dist/+internal';
+import * as qs from 'qs';
 import { of } from 'rxjs';
 import { bodyParser$ } from '../body.middleware';
 
@@ -51,17 +52,65 @@ describe('bodyParser$ middleware', () => {
     const req$ = of(request as HttpRequest);
     const res = {} as HttpResponse;
     const http$ = bodyParser$()(req$, res, effectMeta);
+    const body = {
+      test: 'test',
+      'test-2': 'test-2',
+      'test-3': '3',
+    };
 
     http$.subscribe(data => {
-      expect(data.body).toEqual({
-        test: 'test',
-        'test-2': 'test-2',
-        'test-3': 3,
-      });
+      expect(data.body).toEqual(body);
       done();
     });
 
-    request.write('test=test&test-2=test-2&test-3=3');
+    request.write(qs.stringify(body));
+    request.end();
+  });
+
+  test(`parses complex ${ContentType.APPLICATION_X_WWW_FORM_URLENCODED} body`, done => {
+    const request = new MockReq({
+      method: 'POST',
+      headers: { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED },
+    });
+    const req$ = of(request as HttpRequest);
+    const res = {} as HttpResponse;
+    const http$ = bodyParser$()(req$, res, effectMeta);
+    const body = {
+      test1: 'field=with=equals&and&ampersands',
+      test2: 'field=with=equals&and&ampersands',
+    };
+
+    http$.subscribe(data => {
+      expect(data.body).toEqual(body);
+      done();
+    });
+
+    request.write(qs.stringify(body));
+    request.end();
+  });
+
+  test(`parses array-like ${ContentType.APPLICATION_X_WWW_FORM_URLENCODED} body`, done => {
+    const request = new MockReq({
+      method: 'POST',
+      headers: { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED },
+    });
+    const req$ = of(request as HttpRequest);
+    const res = {} as HttpResponse;
+    const http$ = bodyParser$()(req$, res, effectMeta);
+    const body = {
+      children: [
+        { bar: 'foo', foo: 'bar' },
+        { bar: 'foo', foo: 'bar' },
+      ],
+      somekey: 'value',
+    };
+
+    http$.subscribe(data => {
+      expect(data.body).toEqual(body),
+      done();
+    });
+
+    request.write(qs.stringify(body));
     request.end();
   });
 
