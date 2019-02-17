@@ -1,4 +1,5 @@
 import * as http from 'http';
+import * as https from 'https';
 import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders } from '../http.interface';
 import { HttpError } from '../error/error.model';
 import { Event } from '../event/event.interface';
@@ -19,7 +20,7 @@ export interface HttpErrorEffect<T extends Error = HttpError>
   extends HttpEffect<HttpRequest, HttpEffectResponse, HttpResponse, T> {}
 
 export interface HttpServerEffect<T extends Event = Event>
-  extends HttpEffect<T, any, http.Server> {}
+  extends HttpEffect<T, any, http.Server | https.Server> {}
 
 export interface HttpOutputEffect<T extends HttpEffectResponse = HttpEffectResponse>
   extends HttpEffect<T, HttpEffectResponse> {}

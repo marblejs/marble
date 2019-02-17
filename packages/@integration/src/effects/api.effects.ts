@@ -4,7 +4,7 @@ import { throwError } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 import { user$ } from './user.effects';
 import { static$ } from './static.effects';
-import { WebSocketsToken } from '../tokens';
+import { WebSocketServerToken } from '../tokens';
 
 const rootValiadtor$ = requestValidator$({
   params: t.type({
@@ -22,7 +22,7 @@ const root$ = r.pipe(
     use(rootValiadtor$),
     map(req => req.params.version),
     map(version => `API version: ${version}`),
-    tap(message => inject(WebSocketsToken).sendBroadcastResponse({ type: 'ROOT', payload: message })),
+    tap(message => inject(WebSocketServerToken).sendBroadcastResponse({ type: 'ROOT', payload: message })),
     map(message => ({ body: message })),
   )));
 

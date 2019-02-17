@@ -1,3 +1,6 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import * as https from 'https';
 import { forkJoin } from 'rxjs';
 import { mapTo, tap, filter, take } from 'rxjs/operators';
 import { httpListener } from '../../listener/http.listener';
@@ -65,6 +68,27 @@ describe('#createServer', () => {
     // then
     expect(mocks.listen.mock.calls[0][0]).toBe(undefined);
     expect(mocks.listen.mock.calls[0][1]).toBe(undefined);
+  });
+
+  test('creates https server', done => {
+    // given
+    const app = httpListener({ effects: [] });
+    const httpsOptions: https.ServerOptions = {
+      key: fs.readFileSync(path.resolve(__dirname, '../../../../../assets/key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, '../../../../../assets/cert.pem')),
+    };
+
+    // when
+    marbleServer = createServer({
+      httpListener: app,
+      options: { httpsOptions },
+    });
+
+    // then
+    setTimeout(() => {
+      expect(marbleServer.server.listening).toBe(true);
+      marbleServer.server.close(done);
+    }, 100);
   });
 
   test('returns server and routing', () => {
