@@ -1,9 +1,10 @@
 import * as http from 'http';
+import * as https from 'https';
 import * as net from 'net';
 import { Subject } from 'rxjs';
 import { ServerEventType, ServerEvent, AllServerEvents } from './server.event';
 
-export const subscribeServerEvents = (port?: number, hostname?: string) => (httpServer: http.Server) => {
+export const subscribeServerEvents = (port?: number, hostname?: string) => (httpServer: http.Server | https.Server) => {
   const event$ = new Subject<AllServerEvents>();
 
   httpServer.on(ServerEventType.CONNECT, () =>
