@@ -4,14 +4,14 @@ import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { httpServer } from './http.listener';
 import { webSocketServer } from './ws.listener';
-import { WebSocketServerToken } from './tokens';
+import { WsServerToken } from './tokens';
 
 const upgrade$: HttpServerEffect = (event$, _, { ask }) =>
   event$.pipe(
     matchEvent(ServerEvent.upgrade),
     mapToServer({
       path: '/api/:version/ws',
-      server: ask(WebSocketServerToken),
+      server: ask(WsServerToken),
     }),
   );
 
@@ -27,7 +27,7 @@ export const server = createServer({
   port: 1337,
   httpListener: httpServer,
   dependencies: [
-    bindTo(webSocketServer({ noServer: true }))(WebSocketServerToken),
+    bindTo(WsServerToken)(webSocketServer({ noServer: true })),
   ],
   event$: (...args) => merge(
     listen$(...args),
