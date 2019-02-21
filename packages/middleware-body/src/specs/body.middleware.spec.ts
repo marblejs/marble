@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse, createContext, createEffectMetadata } from '@marblejs/core';
+import { HttpRequest, HttpResponse, createContext, createEffectMetadata, lookup } from '@marblejs/core';
 import { Marbles, ContentType } from '@marblejs/core/dist/+internal';
 import * as qs from 'qs';
 import { of } from 'rxjs';
@@ -8,7 +8,7 @@ const MockReq = require('mock-req');
 
 describe('bodyParser$ middleware', () => {
   const context = createContext();
-  const effectMeta = createEffectMetadata({ ask: context.ask });
+  const effectMeta = createEffectMetadata({ ask: lookup(context) });
 
   beforeEach(() => {
     spyOn(console, 'log').and.stub();

@@ -1,8 +1,9 @@
-export type ContextToken<T = any> = new() => Token<T>;
+import * as uuid from 'uuid';
 
-export class Token<T = any> {
-  surrogate!: T;
+export class ContextToken<T = any> {
+  _id = uuid();
+  _T!: T;
 }
 
 export const createContextToken = <T>() =>
-  class extends Token<T> {};
+  new class extends ContextToken<T> {};

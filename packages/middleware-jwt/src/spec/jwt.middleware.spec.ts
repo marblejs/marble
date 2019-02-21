@@ -5,6 +5,7 @@ import {
   HttpStatus,
   createContext,
   createEffectMetadata,
+  lookup,
 } from '@marblejs/core';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
 import { of, throwError, iif } from 'rxjs';
@@ -23,7 +24,7 @@ describe('JWT middleware', () => {
   let utilModule;
   let factoryModule;
   const context = createContext();
-  const effectMeta = createEffectMetadata({ ask: context.ask });
+  const effectMeta = createEffectMetadata({ ask: lookup(context) });
 
   beforeEach(() => {
     jest.unmock('../jwt.util.ts');

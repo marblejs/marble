@@ -1,3 +1,4 @@
+import { some } from 'fp-ts/lib/Option';
 import { Marbles, createHttpRequest } from '@marblejs/core/dist/+internal';
 import { HttpServerEffect, ServerEvent, ServerEventType, matchEvent } from '@marblejs/core';
 import { mapToServer, UpgradeEvent } from './mapToServer.operator';
@@ -32,8 +33,8 @@ describe('#mapToServer operator', () => {
       event$.pipe(
         matchEvent(ServerEvent.upgrade),
         mapToServer(
-          { path: '/test_1', server: webSocketServerMock },
-          { path: '/test_2', server: webSocketServerMock },
+          { path: '/test_1', server: some(webSocketServerMock) },
+          { path: '/test_2', server: some(webSocketServerMock) },
         ),
       );
 
@@ -64,8 +65,8 @@ describe('#mapToServer operator', () => {
       event$.pipe(
         matchEvent(ServerEvent.upgrade),
         mapToServer(
-          { path: '/test_1', server: webSocketServerMock },
-          { path: '/test_2', server: webSocketServerMock },
+          { path: '/test_1', server: some(webSocketServerMock) },
+          { path: '/test_2', server: some(webSocketServerMock) },
         ),
       );
 

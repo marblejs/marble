@@ -7,9 +7,9 @@ import {
   combineMiddlewares,
   Event,
   httpServerToken,
-  Context,
-  Injectable,
   createEffectMetadata,
+  askContext,
+  ContextReader,
 } from '@marblejs/core';
 import * as WS from '../websocket.interface';
 import * as WSHelper from './websocket.helper';
@@ -21,11 +21,11 @@ import { handleEffectsError } from '../error/ws-error.handler';
 import { provideErrorEffect } from '../error/ws-error.provider';
 
 type HandleIncomingMessage =
-  (client: WS.MarbleWebSocketClient, context: Context) =>
+  (client: WS.MarbleWebSocketClient, reader: ContextReader) =>
   () => void;
 
 type HandleIncomingConnection =
-  (server: WS.MarbleWebSocketServer, context: Context) =>
+  (server: WS.MarbleWebSocketServer, reader: ContextReader) =>
   (client: WS.WebSocketClient, request: http.IncomingMessage) =>  void;
 
 export interface WebSocketListenerConfig {
@@ -52,7 +52,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   const providedError$ = provideErrorEffect(error$, eventTransformer);
   const providedTransformer: EventTransformer<any, any> = eventTransformer || jsonTransformer;
 
-  const handleIncomingMessage: HandleIncomingMessage = (client, ctx) => () => {
+  const handleIncomingMessage: HandleIncomingMessage = (client, ask) => () => {
     const subscribeMiddlewares = (input$: Observable<any>) =>
       input$.subscribe(
         event => eventSubject$.next(event),
@@ -77,7 +77,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
       effectsSub.unsubscribe();
     };
 
-    const defaultMetadata = createEffectMetadata({ ask: ctx.ask });
+    const defaultMetadata = createEffectMetadata({ ask });
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
     const eventSubject$ = new Subject<any>();
     const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
@@ -92,9 +92,9 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     client.once('close', onClose);
   };
 
-  const handleIncomingConnection: HandleIncomingConnection = (server, ctx) => (client, req) => {
+  const handleIncomingConnection: HandleIncomingConnection = (server, ask) => (client, req) => {
     const request$ = of(req);
-    const defaultMetadata = createEffectMetadata({ ask: ctx.ask });
+    const defaultMetadata = createEffectMetadata({ ask });
     const extendedClient = WSHelper.extendClientWith({
       sendResponse: handleResponse(client, providedTransformer),
       sendBroadcastResponse: handleBroadcastResponse(server, providedTransformer),
@@ -102,22 +102,23 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     })(client);
 
     connection$(request$, extendedClient, defaultMetadata).subscribe(
-      handleIncomingMessage(extendedClient, ctx),
+      handleIncomingMessage(extendedClient, ask),
       WSHelper.handleClientValidationError(extendedClient),
     );
 
     WSHelper.handleClientBrokenConnection(extendedClient).subscribe();
   };
 
-  return (serverOptions?: WebSocket.ServerOptions): Injectable => ctx => {
-    const providedOptions: WebSocket.ServerOptions = serverOptions || { server: ctx.ask(httpServerToken) };
+  return (serverOptions?: WebSocket.ServerOptions) => askContext.map(ask => {
+    const providedOptions: WebSocket.ServerOptions = serverOptions
+      || { server: ask(httpServerToken).getOrElse(undefined as any as http.Server) };
     const webSocketServer = WSHelper.createWebSocketServer(providedOptions);
     const sendBroadcastResponse = handleBroadcastResponse(webSocketServer, providedTransformer);
     const extendedWebSocketServer = WSHelper.extendServerWith({ sendBroadcastResponse })(webSocketServer);
 
-    extendedWebSocketServer.on('connection', handleIncomingConnection(extendedWebSocketServer, ctx));
+    extendedWebSocketServer.on('connection', handleIncomingConnection(extendedWebSocketServer, ask));
     WSHelper.handleServerBrokenConnections(extendedWebSocketServer).subscribe();
 
     return extendedWebSocketServer;
-  };
+  });
 };

@@ -22,7 +22,9 @@ const root$ = r.pipe(
     use(rootValiadtor$),
     map(req => req.params.version),
     map(version => `API version: ${version}`),
-    tap(message => ask(WebSocketServerToken).sendBroadcastResponse({ type: 'ROOT', payload: message })),
+    tap(message => ask(WebSocketServerToken).map(server =>
+      server.sendBroadcastResponse({ type: 'ROOT', payload: message })),
+    ),
     map(message => ({ body: message })),
   )));
 

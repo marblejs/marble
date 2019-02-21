@@ -1,40 +1,36 @@
+import * as R from 'fp-ts/lib/Reader';
+import * as M from 'fp-ts/lib/Map';
+import { Setoid } from 'fp-ts/lib/Setoid';
+import { Option } from 'fp-ts/lib/Option';
+import { contramap, ordString, Ord } from 'fp-ts/lib/Ord';
 import { ContextToken } from './context.token.factory';
 
-export type Injectable = (context: Context) => any;
-export type ContextDependencies = { token: ContextToken, factory: Injectable }[];
+const ordContextToken: Ord<ContextToken<any>> = contramap((t: ContextToken) => t._id, ordString);
+const setoidContextToken: Setoid<ContextToken> = { equals: ordContextToken.equals };
 
-export interface ContextReader {
-  <T>(token: ContextToken<T>): T;
-}
+export interface Context extends Map<ContextToken, any> {}
+export interface ContextReader { <T>(token: ContextToken<T>): Option<T>; }
+export interface Injectable extends R.Reader<Context, any> {}
+export interface BoundInjectable<T> { token: ContextToken<T>; factory: Injectable; }
 
-export class Context {
-  private dependencies = new Map<ContextToken, any>();
+export const createContext = () => M.empty;
 
-  register = <T>(token: ContextToken<T>, factory: Injectable) => {
-    this.dependencies.set(token, factory(this));
-    return this;
-  }
+export const register = <T>(i: BoundInjectable<T>) => (context: Context) =>
+  M.insert(setoidContextToken)(i.token, i.factory.run(context), context);
 
-  deregister = <T>(token: ContextToken<T>) => {
-    this.dependencies.delete(token);
-    return this;
-  }
+export const registerAll = (boundInjectables: BoundInjectable<any>[]) => (context: Context) =>
+  boundInjectables.reduce(
+    (ctx, i) => register(i)(ctx),
+    context,
+  );
 
-  ask = <T>(token: ContextToken<T>): T => {
-    return this.dependencies.get(token);
-  }
+export const lookupToken = <T>(token: ContextToken<T>) => (context: Context): Option<T> =>
+  M.lookup(ordContextToken)(token, context);
 
-  registerAll = (dependencies: ContextDependencies) => {
-    dependencies.forEach(({ token, factory }) =>
-      this.register(token, factory)
-    );
-    return this;
-  }
+export const lookup = (context: Context) => <T>(token: ContextToken<T>): Option<T> =>
+  lookupToken(token)(context);
 
-  deregisterAll = () => {
-    this.dependencies.clear();
-    return this;
-  }
-}
+export const bindTo = <T>(token: ContextToken<T>) => (factory: Injectable): BoundInjectable<T> =>
+  ({ token, factory });
 
-export const createContext = () => new Context();
+export const askContext = R.ask<Context>().map(lookup);

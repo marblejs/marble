@@ -110,32 +110,6 @@ describe('#createServer', () => {
     expect(marbleServer.info.routing[0].methods.GET!.effect).toBeDefined();
   });
 
-  test('registers dependencies if defined', () => {
-    // given
-    const app = httpListener({ effects: [] });
-    const { context } = app.config;
-
-    // when
-    jest.spyOn(context, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
-    marbleServer = createServer({ httpListener: app, dependencies: [] });
-
-    // then
-    expect(context.registerAll).toHaveBeenCalledWith([]);
-  });
-
-  test('doesn\'t register dependencies if not defined', () => {
-    // given
-    const app = httpListener({ effects: [] });
-    const { context } = app.config;
-
-    // when
-    jest.spyOn(context, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
-    marbleServer = createServer({ httpListener: app });
-
-    // then
-    expect(context.registerAll).not.toHaveBeenCalled();
-  });
-
   test(`emits server events`, (done) => {
     // given
     const app = httpListener({ effects: [] });
