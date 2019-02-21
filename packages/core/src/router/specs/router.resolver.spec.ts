@@ -4,7 +4,7 @@ import { EffectMetadata } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
-import { createStaticInjectionContainer } from '../../server/server.injector';
+import { createContext } from '../../context/context.factory';
 import { createEffectMetadata } from '../../effects/effectsMetadata.factory';
 
 describe('#findRoute', () => {
@@ -108,7 +108,7 @@ describe('#resolveRouting', () => {
     jest.unmock('../router.query.factory');
     router = require('../router.resolver.ts');
     queryFactory = require('../router.query.factory');
-    metadata = createEffectMetadata({ inject: createStaticInjectionContainer().get });
+    metadata = createEffectMetadata({ ask: createContext().ask });
   });
 
   test('resolves found effect', done => {

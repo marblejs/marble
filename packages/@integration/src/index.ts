@@ -1,4 +1,4 @@
-import { createServer, matchEvent, ServerEvent, HttpServerEffect, bind } from '@marblejs/core';
+import { createServer, matchEvent, ServerEvent, HttpServerEffect, bindTo } from '@marblejs/core';
 import { mapToServer } from '@marblejs/websockets';
 import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
@@ -6,12 +6,12 @@ import { httpServer } from './http.listener';
 import { webSocketServer } from './ws.listener';
 import { WebSocketServerToken } from './tokens';
 
-const upgrade$: HttpServerEffect = (event$, _, { inject }) =>
+const upgrade$: HttpServerEffect = (event$, _, { ask }) =>
   event$.pipe(
     matchEvent(ServerEvent.upgrade),
     mapToServer({
       path: '/api/:version/ws',
-      server: inject(WebSocketServerToken),
+      server: ask(WebSocketServerToken),
     }),
   );
 
@@ -27,7 +27,7 @@ export const server = createServer({
   port: 1337,
   httpListener: httpServer,
   dependencies: [
-    bind(WebSocketServerToken).to(webSocketServer({ noServer: true })),
+    bindTo(webSocketServer({ noServer: true }))(WebSocketServerToken),
   ],
   event$: (...args) => merge(
     listen$(...args),

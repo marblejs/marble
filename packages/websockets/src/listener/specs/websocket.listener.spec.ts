@@ -1,4 +1,4 @@
-import { Event, EventError, createStaticInjectionContainer, httpServerToken } from '@marblejs/core';
+import { Event, EventError, createContext, httpServerToken } from '@marblejs/core';
 import { throwError, fromEvent, forkJoin } from 'rxjs';
 import { tap, map, mergeMap, first, toArray, take } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.listener';
@@ -18,13 +18,13 @@ describe('WebSocket listener', () => {
       // given
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
+      const context = createContext().register(httpServerToken, () => httpServer);
       const echo$: WsEffect = event$ => event$;
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
       const webSocketServer = webSocketListener({ effects: [echo$] });
 
       // when
-      webSocketServer()(injector);
+      webSocketServer()(context);
       targetClient.once('open', () => targetClient.send(event));
 
       // then
@@ -42,11 +42,11 @@ describe('WebSocket listener', () => {
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
       const webSocketServer = webSocketListener({ effects: [echo$] });
       const httpServer = testBed.getServer();
-      const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
+      const context = createContext().register(httpServerToken, () => httpServer);
       const targetClient = testBed.getClient(0);
 
       // when
-      webSocketServer()(injector);
+      webSocketServer()(context);
       targetClient.on('open', () => targetClient.send(event));
 
       // then
@@ -65,8 +65,8 @@ describe('WebSocket listener', () => {
       const echo$: WsEffect = event$ => event$;
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
       const httpServer = testBed.getServer();
-      const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
-      const webSocketServer = webSocketListener({ effects: [echo$] })({ noServer: true })(injector);
+      const context = createContext().register(httpServerToken, () => httpServer);
+      const webSocketServer = webSocketListener({ effects: [echo$] })({ noServer: true })(context);
       const targetClient = testBed.getClient(0);
 
       // when
@@ -96,14 +96,14 @@ describe('WebSocket listener', () => {
       );
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
+      const context = createContext().register(httpServerToken, () => httpServer);
       const webSocketServer = webSocketListener({
         effects: [e$],
         middlewares: [m$, m$, m$],
       });
 
       // when
-      webSocketServer()(injector);
+      webSocketServer()(context);
       targetClient.once('open', () => targetClient.send(incomingEvent));
 
       // then
@@ -122,11 +122,11 @@ describe('WebSocket listener', () => {
       });
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
+      const context = createContext().register(httpServerToken, () => httpServer);
       const webSocketServer = webSocketListener();
 
       // when
-      webSocketServer()(injector);
+      webSocketServer()(context);
       targetClient.once('open', () => {
         targetClient.send(incomingEvent);
         targetClient.send(incomingEvent);
@@ -151,11 +151,11 @@ describe('WebSocket listener', () => {
       );
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
+      const context = createContext().register(httpServerToken, () => httpServer);
       const webSocketServer = webSocketListener({ effects: [effect$] });
 
       // when
-      webSocketServer()(injector);
+      webSocketServer()(context);
       targetClient.once('open', () => {
         targetClient.send(incomingEvent);
         targetClient.send(incomingEvent);
@@ -178,10 +178,10 @@ describe('WebSocket listener', () => {
       const webSocketServer = webSocketListener({ connection$ });
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
+      const context = createContext().register(httpServerToken, () => httpServer);
 
       // when
-      webSocketServer()(injector);
+      webSocketServer()(context);
       targetClient.once('open', () => targetClient.send('test'));
 
       // then
@@ -212,10 +212,10 @@ describe('WebSocket listener', () => {
       );
       const httpServer = testBed.getServer();
       const webSocketServer = webSocketListener({ effects: [effect$], eventTransformer });
-      const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
+      const context = createContext().register(httpServerToken, () => httpServer);
 
       // when
-      webSocketServer()(injector);
+      webSocketServer()(context);
       targetClient.once('open', () => {
         targetClient.send(Buffer.from(decodedMessage));
       });

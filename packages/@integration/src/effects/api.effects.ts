@@ -18,11 +18,11 @@ const rootValiadtor$ = requestValidator$({
 const root$ = r.pipe(
   r.matchPath('/'),
   r.matchType('GET'),
-  r.useEffect((req$, _, { inject }) => req$.pipe(
+  r.useEffect((req$, _, { ask }) => req$.pipe(
     use(rootValiadtor$),
     map(req => req.params.version),
     map(version => `API version: ${version}`),
-    tap(message => inject(WebSocketServerToken).sendBroadcastResponse({ type: 'ROOT', payload: message })),
+    tap(message => ask(WebSocketServerToken).sendBroadcastResponse({ type: 'ROOT', payload: message })),
     map(message => ({ body: message })),
   )));
 

@@ -3,7 +3,7 @@ import {
   HttpResponse,
   HttpError,
   HttpStatus,
-  createStaticInjectionContainer,
+  createContext,
   createEffectMetadata,
 } from '@marblejs/core';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
@@ -22,8 +22,8 @@ const verifyPayload$ = (payload: { id: string }) =>
 describe('JWT middleware', () => {
   let utilModule;
   let factoryModule;
-  const injector = createStaticInjectionContainer();
-  const effectMeta = createEffectMetadata({ inject: injector.get });
+  const context = createContext();
+  const effectMeta = createEffectMetadata({ ask: context.ask });
 
   beforeEach(() => {
     jest.unmock('../jwt.util.ts');

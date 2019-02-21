@@ -7,7 +7,7 @@ import {
   combineMiddlewares,
   Event,
   httpServerToken,
-  Injector,
+  Context,
   Injectable,
   createEffectMetadata,
 } from '@marblejs/core';
@@ -21,11 +21,11 @@ import { handleEffectsError } from '../error/ws-error.handler';
 import { provideErrorEffect } from '../error/ws-error.provider';
 
 type HandleIncomingMessage =
-  (client: WS.MarbleWebSocketClient, context: Injector) =>
+  (client: WS.MarbleWebSocketClient, context: Context) =>
   () => void;
 
 type HandleIncomingConnection =
-  (server: WS.MarbleWebSocketServer, context: Injector) =>
+  (server: WS.MarbleWebSocketServer, context: Context) =>
   (client: WS.WebSocketClient, request: http.IncomingMessage) =>  void;
 
 export interface WebSocketListenerConfig {
@@ -77,7 +77,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
       effectsSub.unsubscribe();
     };
 
-    const defaultMetadata = createEffectMetadata({ inject: ctx.get });
+    const defaultMetadata = createEffectMetadata({ ask: ctx.ask });
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
     const eventSubject$ = new Subject<any>();
     const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
@@ -94,7 +94,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
 
   const handleIncomingConnection: HandleIncomingConnection = (server, ctx) => (client, req) => {
     const request$ = of(req);
-    const defaultMetadata = createEffectMetadata({ inject: ctx.get });
+    const defaultMetadata = createEffectMetadata({ ask: ctx.ask });
     const extendedClient = WSHelper.extendClientWith({
       sendResponse: handleResponse(client, providedTransformer),
       sendBroadcastResponse: handleBroadcastResponse(server, providedTransformer),
@@ -110,7 +110,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   };
 
   return (serverOptions?: WebSocket.ServerOptions): Injectable => ctx => {
-    const providedOptions: WebSocket.ServerOptions = serverOptions || { server: ctx.get(httpServerToken) };
+    const providedOptions: WebSocket.ServerOptions = serverOptions || { server: ctx.ask(httpServerToken) };
     const webSocketServer = WSHelper.createWebSocketServer(providedOptions);
     const sendBroadcastResponse = handleBroadcastResponse(webSocketServer, providedTransformer);
     const extendedWebSocketServer = WSHelper.extendServerWith({ sendBroadcastResponse })(webSocketServer);

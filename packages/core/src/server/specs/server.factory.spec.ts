@@ -113,27 +113,27 @@ describe('#createServer', () => {
   test('registers dependencies if defined', () => {
     // given
     const app = httpListener({ effects: [] });
-    const { injector } = app.config;
+    const { context } = app.config;
 
     // when
-    jest.spyOn(injector, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
+    jest.spyOn(context, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
     marbleServer = createServer({ httpListener: app, dependencies: [] });
 
     // then
-    expect(injector.registerAll).toHaveBeenCalledWith([]);
+    expect(context.registerAll).toHaveBeenCalledWith([]);
   });
 
   test('doesn\'t register dependencies if not defined', () => {
     // given
     const app = httpListener({ effects: [] });
-    const { injector } = app.config;
+    const { context } = app.config;
 
     // when
-    jest.spyOn(injector, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
+    jest.spyOn(context, 'registerAll').mockImplementation(jest.fn(() => jest.fn()));
     marbleServer = createServer({ httpListener: app });
 
     // then
-    expect(injector.registerAll).not.toHaveBeenCalled();
+    expect(context.registerAll).not.toHaveBeenCalled();
   });
 
   test(`emits server events`, (done) => {

@@ -1,4 +1,4 @@
 import * as http from 'http';
-import { createInjectionToken } from './server.injector';
+import { createContextToken } from '../context/context.token.factory';
 
-export const httpServerToken = createInjectionToken<http.Server>();
+export const httpServerToken = createContextToken<http.Server>();
