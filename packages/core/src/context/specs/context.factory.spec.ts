@@ -1,7 +1,7 @@
 import { isEmpty, size } from 'fp-ts/lib/Map';
 import { some } from 'fp-ts/lib/Option';
 import { ask } from 'fp-ts/lib/Reader';
-import { createContext, bindTo, register, lookupToken, registerAll, Context, askContext } from '../context.factory';
+import { createContext, bindTo, register, lookupToken, registerAll, Context, reader } from '../context.factory';
 import { createContextToken } from '../context.token.factory';
 import { compose } from 'fp-ts/lib/function';
 
@@ -72,14 +72,14 @@ describe('#registerAll', () => {
   });
 });
 
-describe('#askContext', () => {
+describe('#reader', () => {
   test('asks context for dependency', () => {
     // given
     const context = createContext();
     const token1 = createContextToken<string>();
     const token2 = createContextToken<number>();
-    const dependency1 = askContext.map(() => 'test_1');
-    const dependency2 = askContext
+    const dependency1 = reader.map(() => 'test_1');
+    const dependency2 = reader
       .map(ask => ask(token1)
         .map(v => v + '_2')
         .getOrElse(''));

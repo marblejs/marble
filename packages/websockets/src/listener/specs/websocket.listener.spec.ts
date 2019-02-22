@@ -1,4 +1,4 @@
-import { EventError, createContext, httpServerToken, askContext, register, bindTo } from '@marblejs/core';
+import { EventError, createContext, httpServerToken, reader, register, bindTo } from '@marblejs/core';
 import { throwError, fromEvent, forkJoin } from 'rxjs';
 import { tap, map, mergeMap, first, toArray, take } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.listener';
@@ -18,7 +18,7 @@ describe('WebSocket listener', () => {
       // given
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+      const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
       const context = register(boundHttpServer)(createContext());
       const echo$: WsEffect = event$ => event$;
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
@@ -43,7 +43,7 @@ describe('WebSocket listener', () => {
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
       const webSocketServer = webSocketListener({ effects: [echo$] });
       const httpServer = testBed.getServer();
-      const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+      const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
       const context = register(boundHttpServer)(createContext());
       const targetClient = testBed.getClient(0);
 
@@ -67,7 +67,7 @@ describe('WebSocket listener', () => {
       const echo$: WsEffect = event$ => event$;
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
       const httpServer = testBed.getServer();
-      const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+      const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
       const context = register(boundHttpServer)(createContext());
       const webSocketServer = webSocketListener({ effects: [echo$] })({ noServer: true }).run(context);
       const targetClient = testBed.getClient(0);
@@ -98,7 +98,7 @@ describe('WebSocket listener', () => {
       );
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+      const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
       const context = register(boundHttpServer)(createContext());
       const webSocketServer = webSocketListener({
         effects: [e$],
@@ -125,7 +125,7 @@ describe('WebSocket listener', () => {
       });
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+      const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
       const context = register(boundHttpServer)(createContext());
       const webSocketServer = webSocketListener();
 
@@ -155,7 +155,7 @@ describe('WebSocket listener', () => {
       );
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+      const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
       const context = register(boundHttpServer)(createContext());
       const webSocketServer = webSocketListener({ effects: [effect$] });
 
@@ -183,7 +183,7 @@ describe('WebSocket listener', () => {
       const webSocketServer = webSocketListener({ connection$ });
       const targetClient = testBed.getClient(0);
       const httpServer = testBed.getServer();
-      const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+      const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
       const context = register(boundHttpServer)(createContext());
 
       // when
@@ -218,7 +218,7 @@ describe('WebSocket listener', () => {
       );
       const httpServer = testBed.getServer();
       const webSocketServer = webSocketListener({ effects: [effect$], eventTransformer });
-      const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+      const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
       const context = register(boundHttpServer)(createContext());
 
       // when

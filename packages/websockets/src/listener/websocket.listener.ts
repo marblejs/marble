@@ -8,7 +8,7 @@ import {
   Event,
   httpServerToken,
   createEffectMetadata,
-  askContext,
+  reader,
   ContextProvider,
   ContextReader,
 } from '@marblejs/core';
@@ -110,7 +110,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     WSHelper.handleClientBrokenConnection(extendedClient).subscribe();
   };
 
-  return (serverOptions?: WebSocket.ServerOptions): ContextReader => askContext.map(ask => {
+  return (serverOptions?: WebSocket.ServerOptions): ContextReader => reader.map(ask => {
     const providedOptions: WebSocket.ServerOptions = serverOptions
       || { server: ask(httpServerToken).getOrElse(undefined as any as http.Server) };
     const webSocketServer = WSHelper.createWebSocketServer(providedOptions);

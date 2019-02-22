@@ -33,4 +33,4 @@ export const lookup = (context: Context) => <T>(token: ContextToken<T>): Option<
 export const bindTo = <T>(token: ContextToken<T>) => (reader: ContextReader): BoundContextReader<T> =>
   ({ token, reader });
 
-export const askContext = R.ask<Context>().map(lookup);
+export const reader: ContextReader = R.ask<Context>().map(lookup);

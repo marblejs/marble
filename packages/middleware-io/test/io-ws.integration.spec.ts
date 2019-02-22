@@ -1,6 +1,6 @@
 import { createWebSocketsTestBed } from '@marblejs/websockets/dist/+internal';
 import { app } from './io-ws.integration';
-import { createContext, httpServerToken, bindTo, askContext, register } from '@marblejs/core';
+import { createContext, httpServerToken, bindTo, reader, register } from '@marblejs/core';
 
 describe('@marblejs/middleware-io - WebSocket integration', () => {
   const testBed = createWebSocketsTestBed();
@@ -14,7 +14,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
     const httpServer = testBed.getServer();
     const targetClient = testBed.getClient();
-    const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+    const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
     const context = register(boundHttpServer)(createContext());
 
     // when
@@ -32,7 +32,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     // given
     const httpServer = testBed.getServer();
     const targetClient = testBed.getClient();
-    const boundHttpServer = bindTo(httpServerToken)(askContext.map(_ => httpServer));
+    const boundHttpServer = bindTo(httpServerToken)(reader.map(_ => httpServer));
     const context = register(boundHttpServer)(createContext());
     const user = { id: 'id', age: '100', };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
