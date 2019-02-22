@@ -9,18 +9,18 @@ const ordContextToken: Ord<ContextToken<any>> = contramap((t: ContextToken) => t
 const setoidContextToken: Setoid<ContextToken> = { equals: ordContextToken.equals };
 
 export interface Context extends Map<ContextToken, any> {}
-export interface ContextReader { <T>(token: ContextToken<T>): Option<T>; }
-export interface Injectable extends R.Reader<Context, any> {}
-export interface BoundInjectable<T> { token: ContextToken<T>; factory: Injectable; }
+export interface ContextProvider { <T>(token: ContextToken<T>): Option<T>; }
+export interface ContextReader extends R.Reader<Context, any> {}
+export interface BoundContextReader<T> { token: ContextToken<T>; reader: ContextReader; }
 
 export const createContext = () => M.empty;
 
-export const register = <T>(i: BoundInjectable<T>) => (context: Context) =>
-  M.insert(setoidContextToken)(i.token, i.factory.run(context), context);
+export const register = <T>(boundReader: BoundContextReader<T>) => (context: Context) =>
+  M.insert(setoidContextToken)(boundReader.token, boundReader.reader.run(context), context);
 
-export const registerAll = (boundInjectables: BoundInjectable<any>[]) => (context: Context) =>
-  boundInjectables.reduce(
-    (ctx, i) => register(i)(ctx),
+export const registerAll = (boundReaders: BoundContextReader<any>[]) => (context: Context) =>
+  boundReaders.reduce(
+    (ctx, reader) => register(reader)(ctx),
     context,
   );
 
@@ -30,7 +30,7 @@ export const lookupToken = <T>(token: ContextToken<T>) => (context: Context): Op
 export const lookup = (context: Context) => <T>(token: ContextToken<T>): Option<T> =>
   lookupToken(token)(context);
 
-export const bindTo = <T>(token: ContextToken<T>) => (factory: Injectable): BoundInjectable<T> =>
-  ({ token, factory });
+export const bindTo = <T>(token: ContextToken<T>) => (reader: ContextReader): BoundContextReader<T> =>
+  ({ token, reader });
 
 export const askContext = R.ask<Context>().map(lookup);

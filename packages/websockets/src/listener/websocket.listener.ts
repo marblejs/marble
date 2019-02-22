@@ -9,6 +9,7 @@ import {
   httpServerToken,
   createEffectMetadata,
   askContext,
+  ContextProvider,
   ContextReader,
 } from '@marblejs/core';
 import * as WS from '../websocket.interface';
@@ -21,11 +22,11 @@ import { handleEffectsError } from '../error/ws-error.handler';
 import { provideErrorEffect } from '../error/ws-error.provider';
 
 type HandleIncomingMessage =
-  (client: WS.MarbleWebSocketClient, reader: ContextReader) =>
+  (client: WS.MarbleWebSocketClient, contextProvider: ContextProvider) =>
   () => void;
 
 type HandleIncomingConnection =
-  (server: WS.MarbleWebSocketServer, reader: ContextReader) =>
+  (server: WS.MarbleWebSocketServer, contextProvider: ContextProvider) =>
   (client: WS.WebSocketClient, request: http.IncomingMessage) =>  void;
 
 export interface WebSocketListenerConfig {
@@ -109,7 +110,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     WSHelper.handleClientBrokenConnection(extendedClient).subscribe();
   };
 
-  return (serverOptions?: WebSocket.ServerOptions) => askContext.map(ask => {
+  return (serverOptions?: WebSocket.ServerOptions): ContextReader => askContext.map(ask => {
     const providedOptions: WebSocket.ServerOptions = serverOptions
       || { server: ask(httpServerToken).getOrElse(undefined as any as http.Server) };
     const webSocketServer = WSHelper.createWebSocketServer(providedOptions);

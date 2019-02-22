@@ -1,5 +1,5 @@
 import { Observable, SchedulerLike } from 'rxjs';
-import { ContextReader } from '../context/context.factory';
+import { ContextProvider } from '../context/context.factory';
 
 export interface EffectLike {
   (input$: Observable<any>, ...args: any[]): Observable<any>;
@@ -10,7 +10,7 @@ export interface Effect<I, O, C, E extends Error = Error> {
 }
 
 export interface EffectMetadata<T extends Error = Error> {
-  ask: ContextReader;
+  ask: ContextProvider;
   scheduler: SchedulerLike;
   error?: T;
   [key: string]: any;

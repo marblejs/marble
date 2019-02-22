@@ -6,18 +6,18 @@ import { createContextToken } from '../context.token.factory';
 import { compose } from 'fp-ts/lib/function';
 
 describe('#bindTo', () => {
-  test('binds factory to token', () => {
+  test('binds reader to token', () => {
     // given
     const context = createContext();
-    const dependency = ask<Context>().map(_ => 'test');
-    const Token = createContextToken<typeof dependency>();
+    const reader = ask<Context>().map(_ => 'test');
+    const Token = createContextToken<typeof reader>();
 
     // when
-    const boundFactory = bindTo(Token)(dependency);
+    const boundFactory = bindTo(Token)(reader);
 
     // then
     expect(boundFactory.token).toBe(Token);
-    expect(boundFactory.factory.run(context)).toEqual('test');
+    expect(boundFactory.reader.run(context)).toEqual('test');
   });
 });
 
@@ -29,17 +29,17 @@ describe('#createContext', () => {
 });
 
 describe('#register', () => {
-  test('registers bound injectable', () => {
+  test('registers bound readers', () => {
     // given
     const context = createContext();
     const token = createContextToken();
     const dependency = ask<Context>().map(_ => 'test');
-    const boundInjectable = bindTo(token)(dependency);
+    const boundReader = bindTo(token)(dependency);
 
     // when
     const result = compose(
       lookupToken(token),
-      register(boundInjectable),
+      register(boundReader),
     )(context);
 
     // then
@@ -48,7 +48,7 @@ describe('#register', () => {
 });
 
 describe('#registerAll', () => {
-  test('registers set of bound injectables', () => {
+  test('registers set of bound readers', () => {
     // given
     const context = createContext();
     const token1 = createContextToken<string>();
