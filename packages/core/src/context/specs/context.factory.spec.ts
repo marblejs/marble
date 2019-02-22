@@ -1,9 +1,8 @@
 import { isEmpty, size } from 'fp-ts/lib/Map';
 import { some } from 'fp-ts/lib/Option';
 import { ask } from 'fp-ts/lib/Reader';
-import { createContext, bindTo, register, lookupToken, registerAll, Context, reader } from '../context.factory';
+import { createContext, bindTo, register, registerAll, Context, reader, lookup } from '../context.factory';
 import { createContextToken } from '../context.token.factory';
-import { compose } from 'fp-ts/lib/function';
 
 describe('#bindTo', () => {
   test('binds reader to token', () => {
@@ -31,26 +30,21 @@ describe('#createContext', () => {
 describe('#register', () => {
   test('registers bound readers', () => {
     // given
-    const context = createContext();
     const token = createContextToken();
     const dependency = ask<Context>().map(_ => 'test');
     const boundReader = bindTo(token)(dependency);
 
     // when
-    const result = compose(
-      lookupToken(token),
-      register(boundReader),
-    )(context);
+    const context = register(boundReader)(createContext());
 
     // then
-    expect(result).toEqual(some('test'));
+    expect(lookup(context)(token)).toEqual(some('test'));
   });
 });
 
 describe('#registerAll', () => {
   test('registers set of bound readers', () => {
     // given
-    const context = createContext();
     const token1 = createContextToken<string>();
     const token2 = createContextToken<string>();
     const token3 = createContextToken<string>();
@@ -59,41 +53,43 @@ describe('#registerAll', () => {
     const dependency3 = ask<Context>().map(_ => 'test_3');
 
     // when
-    const newContext = registerAll([
+    const context = registerAll([
       bindTo(token1)(dependency1),
       bindTo(token2)(dependency2),
       bindTo(token3)(dependency3),
-    ])(context);
-    const result = lookupToken(token2)(newContext);
+    ])(createContext());
 
     // then
-    expect(size(newContext)).toEqual(3);
-    expect(result).toEqual(some('test_2'));
+    expect(size(context)).toEqual(3);
+    expect(lookup(context)(token2)).toEqual(some('test_2'));
   });
 });
 
 describe('#reader', () => {
   test('asks context for dependency', () => {
     // given
-    const context = createContext();
     const token1 = createContextToken<string>();
-    const token2 = createContextToken<number>();
+    const token2 = createContextToken<string>();
     const dependency1 = reader.map(() => 'test_1');
     const dependency2 = reader
       .map(ask => ask(token1)
         .map(v => v + '_2')
         .getOrElse(''));
 
-    // when
-    const result = compose(
-      lookupToken(token2),
-      registerAll([
-        bindTo(token1)(dependency1),
-        bindTo(token2)(dependency2),
-      ]),
-    )(context);
+    // when ordered
+    const context1 = registerAll([
+      bindTo(token1)(dependency1),
+      bindTo(token2)(dependency2),
+    ])(createContext());
+
+    // when reordered
+    const context2 = registerAll([
+      bindTo(token2)(dependency2),
+      bindTo(token1)(dependency1),
+    ])(createContext());
 
     // then
-    expect(result).toEqual(some('test_1_2'));
+    expect(lookup(context1)(token2)).toEqual(some('test_1_2'));
+    expect(lookup(context2)(token2)).toEqual(some('test_1_2'));
   });
 });
