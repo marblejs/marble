@@ -1,7 +1,16 @@
 import { isEmpty, size } from 'fp-ts/lib/Map';
 import { some } from 'fp-ts/lib/Option';
 import { ask } from 'fp-ts/lib/Reader';
-import { createContext, bindTo, register, registerAll, Context, reader, lookup } from '../context.factory';
+import {
+  Context,
+  ContextEagerReader,
+  createContext,
+  bindTo,
+  register,
+  registerAll,
+  reader,
+  lookup,
+} from '../context.factory';
 import { createContextToken } from '../context.token.factory';
 
 describe('#bindTo', () => {
@@ -12,11 +21,24 @@ describe('#bindTo', () => {
     const Token = createContextToken<typeof reader>();
 
     // when
-    const boundFactory = bindTo(Token)(reader);
+    const boundDependency = bindTo(Token)(reader);
 
     // then
-    expect(boundFactory.token).toBe(Token);
-    expect(boundFactory.reader.run(context)).toEqual('test');
+    expect(boundDependency.token).toBe(Token);
+    expect((boundDependency.dependency).run(context)).toEqual('test');
+  });
+
+  test('binds singleton to token', () => {
+    // given
+    const singleton: ContextEagerReader = _ => 'test';
+    const Token = createContextToken<typeof reader>();
+
+    // when
+    const boundDependency = bindTo(Token)(singleton);
+
+    // then
+    expect(boundDependency.token).toBe(Token);
+    expect(boundDependency.dependency).toEqual(singleton);
   });
 });
 
@@ -32,10 +54,10 @@ describe('#register', () => {
     // given
     const token = createContextToken();
     const dependency = ask<Context>().map(_ => 'test');
-    const boundReader = bindTo(token)(dependency);
+    const boundDependency = bindTo(token)(dependency);
 
     // when
-    const context = register(boundReader)(createContext());
+    const context = register(boundDependency)(createContext());
 
     // then
     expect(lookup(context)(token)).toEqual(some('test'));
@@ -66,7 +88,7 @@ describe('#registerAll', () => {
 });
 
 describe('#reader', () => {
-  test('asks context for dependency', () => {
+  test('asks context for a reader dependency', () => {
     // given
     const token1 = createContextToken<string>();
     const token2 = createContextToken<string>();
@@ -91,5 +113,26 @@ describe('#reader', () => {
     // then
     expect(lookup(context1)(token2)).toEqual(some('test_1_2'));
     expect(lookup(context2)(token2)).toEqual(some('test_1_2'));
+  });
+
+  test('asks context for a eager reader dependency', () => {
+    // given
+    const token1 = createContextToken<string>();
+    const token2 = createContextToken<string>();
+    const token3 = createContextToken<string>();
+    const dependency1 = reader.map(() => 'test');
+    const dependency2 = reader.map(ask => ask(token1).map(v => v + '_1').getOrElse(''));
+    const dependency3 = reader.map(ask => ask(token2).map(v => v + '_2').getOrElse(''));
+
+    const context = registerAll([
+      bindTo(token1)(dependency1),
+      bindTo(token2)(ctx => dependency2.run(ctx)),
+      bindTo(token3)(dependency3),
+    ])(createContext());
+
+    // then
+    expect(lookup(context)(token1)).toEqual(some('test'));
+    expect(lookup(context)(token2)).toEqual(some('test_1'));
+    expect(lookup(context)(token3)).toEqual(some('test_1_2'));
   });
 });

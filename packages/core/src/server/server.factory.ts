@@ -5,7 +5,7 @@ import { takeWhile } from 'rxjs/operators';
 import { httpListener } from '../listener/http.listener';
 import { isCloseEvent } from './server.event';
 import { subscribeServerEvents } from './server.event.subscriber';
-import { createContext, BoundContextReader, lookup, bindTo, register, registerAll } from '../context/context.factory';
+import { createContext, BoundDependency, lookup, bindTo, register, registerAll } from '../context/context.factory';
 import { HttpServerEffect } from '../effects/http-effects.interface';
 import { httpServerToken } from './server.token';
 import { createEffectMetadata } from '../effects/effectsMetadata.factory';
@@ -20,7 +20,7 @@ export interface CreateServerConfig {
   httpListener: ReturnType<typeof httpListener>;
   event$?: HttpServerEffect;
   options?: ServerOptions;
-  dependencies?: BoundContextReader<any>[];
+  dependencies?: BoundDependency<any>[];
 }
 
 export const createServer = (config: CreateServerConfig) => {

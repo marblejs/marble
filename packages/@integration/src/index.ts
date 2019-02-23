@@ -27,7 +27,7 @@ export const server = createServer({
   port: 1337,
   httpListener: httpServer,
   dependencies: [
-    bindTo(WsServerToken)(webSocketServer({ noServer: true })),
+    bindTo(WsServerToken)(webSocketServer({ noServer: true }).run),
   ],
   event$: (...args) => merge(
     listen$(...args),
