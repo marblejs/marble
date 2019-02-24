@@ -70,6 +70,18 @@ describe('#createServer', () => {
     });
   });
 
+  test(`creates https server but doesn't start listening`, () => {
+    // given
+    const app = httpListener({ effects: [] });
+
+    // when
+    marbleServer = createServer({ httpListener: app });
+    marbleServer.run(false);
+
+    // then
+    expect(marbleServer.server.listening).toBe(false);
+  });
+
   test('creates https server', done => {
     // given
     const app = httpListener({ effects: [] });

@@ -42,7 +42,9 @@ export const createServer = (config: CreateServerConfig) => {
   }
 
   return {
-    run: () => server.listen(port, hostname),
+    run: (predicate = true) => predicate
+      ? server.listen(port, hostname)
+      : server,
     server,
     info: {
       routing: httpListenerWithContext.config.routing,
