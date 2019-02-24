@@ -8,7 +8,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
   beforeEach(testBed.bootstrap);
   afterEach(testBed.teardown);
 
-  xtest('[POST_USER] sends user object', done => {
+  test('[POST_USER] sends user object', done => {
     // given
     const user = { id: 'id', age: 100, };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
@@ -27,7 +27,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     });
   });
 
-  xtest('[POST_USER] throws an error if incoming object is invalid', done => {
+  test('[POST_USER] throws an error if incoming object is invalid', done => {
     // given
     const server = testBed.getServer();
     const targetClient = testBed.getClient();
