@@ -35,7 +35,7 @@
     "rxjs": "~6.3.3"
   },
   "dependencies": {
-    "io-ts": "^1.8.1"
+    "io-ts": "1.8.2"
   },
   "devDependencies": {
     "@marblejs/core": "^2.0.0-rc.2"

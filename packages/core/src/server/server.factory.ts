@@ -1,12 +1,12 @@
 import * as http from 'http';
 import * as https from 'https';
+import { Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { httpListener } from '../listener/http.listener';
-import { isCloseEvent } from './server.event';
+import { isCloseEvent, AllServerEvents } from './server.event';
 import { subscribeServerEvents } from './server.event.subscriber';
-import { InjectionDependencies } from './server.injector';
+import { createContext, BoundDependency, lookup, registerAll } from '../context/context.factory';
 import { HttpServerEffect } from '../effects/http-effects.interface';
-import { httpServerToken } from './server.token';
 import { createEffectMetadata } from '../effects/effectsMetadata.factory';
 
 export interface ServerOptions {
@@ -19,32 +19,35 @@ export interface CreateServerConfig {
   httpListener: ReturnType<typeof httpListener>;
   event$?: HttpServerEffect;
   options?: ServerOptions;
-  dependencies?: InjectionDependencies;
+  dependencies?: BoundDependency<any>[];
 }
 
+const DEFAULT_HOSTNAME = '127.0.0.1';
+
 export const createServer = (config: CreateServerConfig) => {
-  const { httpListener, event$, port, hostname, dependencies, options = {} } = config;
-  const { injector, routing } = httpListener.config;
+  const { httpListener, event$, port, hostname, dependencies = [], options = {} } = config;
+  const serverEvent$ = new Subject<AllServerEvents>();
 
-  const eventsSubscriber = subscribeServerEvents(port, hostname);
+  const context = registerAll(dependencies)(createContext());
+  const httpListenerWithContext = httpListener.run(context);
   const server = options.httpsOptions
-    ? https.createServer(options.httpsOptions, httpListener)
-    : http.createServer(httpListener);
-  const serverEvent$ = eventsSubscriber(server).pipe(takeWhile(e => !isCloseEvent(e)));
+    ? https.createServer(options.httpsOptions, httpListenerWithContext)
+    : http.createServer(httpListenerWithContext);
 
-  injector.register(httpServerToken, () => server);
-
-  if (dependencies) {
-    injector.registerAll(dependencies);
-  }
+  subscribeServerEvents(hostname || DEFAULT_HOSTNAME)(serverEvent$)(server);
 
   if (event$) {
-    const metadata = createEffectMetadata({ inject: injector.get });
-    event$(serverEvent$, server, metadata).subscribe();
+    const metadata = createEffectMetadata({ ask: lookup(context) });
+    event$(serverEvent$.pipe(takeWhile(e => !isCloseEvent(e))), server, metadata).subscribe();
   }
 
   return {
+    run: (predicate = true) => predicate
+      ? server.listen(port, hostname)
+      : server,
     server,
-    info: { routing },
+    info: {
+      routing: httpListenerWithContext.config.routing,
+    },
   };
 };

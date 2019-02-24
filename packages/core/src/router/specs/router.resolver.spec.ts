@@ -4,8 +4,9 @@ import { EffectMetadata } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
-import { createStaticInjectionContainer } from '../../server/server.injector';
+import { createContext } from '../../context/context.factory';
 import { createEffectMetadata } from '../../effects/effectsMetadata.factory';
+import { lookup } from '../../context/context.factory';
 
 describe('#findRoute', () => {
   test('finds route inside collection', () => {
@@ -102,13 +103,14 @@ describe('#resolveRouting', () => {
   let router;
   let queryFactory;
   let metadata: EffectMetadata;
+  const context = createContext();
 
   beforeEach(() => {
     jest.unmock('../router.resolver.ts');
     jest.unmock('../router.query.factory');
     router = require('../router.resolver.ts');
     queryFactory = require('../router.query.factory');
-    metadata = createEffectMetadata({ inject: createStaticInjectionContainer().get });
+    metadata = createEffectMetadata({ ask: lookup(context) });
   });
 
   test('resolves found effect', done => {

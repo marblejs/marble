@@ -1,36 +1,39 @@
-import { createServer, matchEvent, ServerEvent, HttpServerEffect, bind } from '@marblejs/core';
+import { createServer, matchEvent, ServerEvent, HttpServerEffect, bindTo } from '@marblejs/core';
 import { mapToServer } from '@marblejs/websockets';
 import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
-import { httpServer } from './http.listener';
-import { webSocketServer } from './ws.listener';
-import { WebSocketServerToken } from './tokens';
+import { WsServerToken } from './tokens';
+import httpListener from './http.listener';
+import webSocketListener from './ws.listener';
 
-const upgrade$: HttpServerEffect = (event$, _, { inject }) =>
+const upgrade$: HttpServerEffect = (event$, _, { ask }) =>
   event$.pipe(
     matchEvent(ServerEvent.upgrade),
     mapToServer({
       path: '/api/:version/ws',
-      server: inject(WebSocketServerToken),
+      server: ask(WsServerToken),
     }),
   );
 
-const listen$: HttpServerEffect = event$ =>
+const listening$: HttpServerEffect = event$ =>
   event$.pipe(
-    matchEvent(ServerEvent.listen),
+    matchEvent(ServerEvent.listening),
     map(event => event.payload),
     tap(({ port, host }) => console.log(`Server running @ http://${host}:${port}/ 🚀`)),
   );
 
 export const server = createServer({
-  hostname: '127.0.0.1',
   port: 1337,
-  httpListener: httpServer,
+  httpListener,
   dependencies: [
-    bind(WebSocketServerToken).to(webSocketServer({ noServer: true })),
+    bindTo(WsServerToken)(webSocketListener().run),
   ],
   event$: (...args) => merge(
-    listen$(...args),
+    listening$(...args),
     upgrade$(...args),
   ),
 });
+
+server.run(
+  process.env.NODE_ENV !== 'test'
+);

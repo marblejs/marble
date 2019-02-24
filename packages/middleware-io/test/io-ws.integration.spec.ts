@@ -1,6 +1,6 @@
 import { createWebSocketsTestBed } from '@marblejs/websockets/dist/+internal';
 import { app } from './io-ws.integration';
-import { createStaticInjectionContainer, httpServerToken } from '@marblejs/core';
+import { createContext } from '@marblejs/core';
 
 describe('@marblejs/middleware-io - WebSocket integration', () => {
   const testBed = createWebSocketsTestBed();
@@ -12,12 +12,12 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     // given
     const user = { id: 'id', age: 100, };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
-    const httpServer = testBed.getServer();
+    const server = testBed.getServer();
     const targetClient = testBed.getClient();
-    const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
+    const context = createContext();
 
     // when
-    app()(injector);
+    app({ server }).run(context);
     targetClient.once('open', () => targetClient.send(event));
 
     // then
@@ -29,9 +29,9 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
 
   test('[POST_USER] throws an error if incoming object is invalid', done => {
     // given
-    const httpServer = testBed.getServer();
+    const server = testBed.getServer();
     const targetClient = testBed.getClient();
-    const injector = createStaticInjectionContainer().register(httpServerToken, () => httpServer);
+    const context = createContext();
     const user = { id: 'id', age: '100', };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
     const expectedError = {
@@ -43,7 +43,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     };
 
     // when
-    app()(injector);
+    app({ server }).run(context);
     targetClient.once('open', () => targetClient.send(event));
 
     // then

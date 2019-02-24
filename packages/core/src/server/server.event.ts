@@ -13,7 +13,7 @@ export enum ServerEventType {
   ERROR = 'error',
   REQUEST = 'request',
   UPGRADE = 'upgrade',
-  LISTEN = 'listen',
+  LISTENING = 'listening',
 }
 
 export const ServerEvent = {
@@ -38,8 +38,8 @@ export const ServerEvent = {
     (request: http.IncomingMessage, socket: net.Socket, head: Buffer) => ({ request, socket, head }),
   ),
 
-  listen: createEvent(
-    ServerEventType.LISTEN,
+  listening: createEvent(
+    ServerEventType.LISTENING,
     (port: number, host: string) => ({ port, host }),
   ),
 };
@@ -70,8 +70,8 @@ export function isCheckExpectationEvent(event: Event): event is ReturnType<typeo
   return event.type === ServerEventType.CHECK_EXPECTATION;
 }
 
-export function isListenEvent(event: Event): event is ReturnType<typeof ServerEvent.listen> {
-  return event.type === ServerEventType.LISTEN;
+export function isListeningEvent(event: Event): event is ReturnType<typeof ServerEvent.listening> {
+  return event.type === ServerEventType.LISTENING;
 }
 
 export function isUpgradeEvent(event: Event): event is ReturnType<typeof ServerEvent.upgrade> {

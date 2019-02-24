@@ -12,7 +12,7 @@
     "pretest": "yarn lint",
     "test": "yarn test:unit && yarn test:integration",
     "test:unit": "SCOPE=unit jest --expand --coverage --detectOpenHandles",
-    "test:integration": "SCOPE=integration jest --expand",
+    "test:integration": "SCOPE=integration jest --expand --detectOpenHandles",
     "test:watch": "jest --expand --onlyChanged --watch",
     "clean": "lerna run clean",
     "purge": "yarn clean && rimraf node_modules",

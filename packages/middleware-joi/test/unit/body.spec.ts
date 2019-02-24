@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse, createStaticInjectionContainer, createEffectMetadata } from '@marblejs/core';
+import { HttpRequest, HttpResponse, createContext, createEffectMetadata, lookup } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { of } from 'rxjs';
 import { validator$, Joi } from '../../src';
@@ -6,7 +6,8 @@ import { validator$, Joi } from '../../src';
 const MockReq = require('mock-req');
 
 describe('Joi middleware - Body', () => {
-  const metadata = createEffectMetadata({ inject: createStaticInjectionContainer().get });
+  const context = createContext();
+  const metadata = createEffectMetadata({ ask: lookup(context) });
 
   it(`throws an error if doesn't pass a required field`, done => {
     expect.assertions(2);

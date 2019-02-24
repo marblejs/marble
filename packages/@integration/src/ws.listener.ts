@@ -2,6 +2,7 @@ import { webSocketListener, WebSocketConnectionError, WsConnectionEffect } from 
 import { iif, throwError, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { add$ } from './effects/calculator.ws-effects';
+import { logger$ } from './middlewares/logger.ws-middleware';
 
 const connection$: WsConnectionEffect = req$ =>
   req$.pipe(
@@ -12,8 +13,8 @@ const connection$: WsConnectionEffect = req$ =>
     )),
   );
 
-export const webSocketServer = webSocketListener({
-  middlewares: [],
+export default webSocketListener({
+  middlewares: [logger$],
   effects: [add$],
   connection$,
 });

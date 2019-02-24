@@ -13,6 +13,6 @@ export const add$: WsEffect = (event$, ...args) =>
     matchEvent('ADD'),
     use(eventValidator$(t.number)),
     buffer(sum$(event$, ...args)),
-    map(events => events.reduce((a, e) => e.payload! + a, 0)),
+    map(addEvents => addEvents.reduce((a, e) => e.payload + a, 0)),
     map(payload => ({ type: 'SUM_RESULT', payload })),
   );
