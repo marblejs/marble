@@ -2,9 +2,9 @@ import { createServer, matchEvent, ServerEvent, HttpServerEffect, bindTo } from 
 import { mapToServer } from '@marblejs/websockets';
 import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
-import { httpServer } from './http.listener';
-import { webSocketServer } from './ws.listener';
 import { WsServerToken } from './tokens';
+import httpListener from './http.listener';
+import webSocketListener from './ws.listener';
 
 const upgrade$: HttpServerEffect = (event$, _, { ask }) =>
   event$.pipe(
@@ -23,11 +23,10 @@ const listen$: HttpServerEffect = event$ =>
   );
 
 export const server = createServer({
-  hostname: '127.0.0.1',
   port: 1337,
-  httpListener: httpServer,
+  httpListener,
   dependencies: [
-    bindTo(WsServerToken)(webSocketServer({ noServer: true }).run),
+    bindTo(WsServerToken)(webSocketListener().run),
   ],
   event$: (...args) => merge(
     listen$(...args),

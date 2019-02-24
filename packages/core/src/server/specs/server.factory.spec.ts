@@ -18,7 +18,6 @@ import {
   isRequestEvent,
 } from '../server.event';
 import { EffectFactory } from '../../effects/effects.factory';
-import { mockHttpServer } from '../../+internal/testing';
 import { EventEmitter } from 'events';
 
 describe('#createServer', () => {
@@ -36,38 +35,37 @@ describe('#createServer', () => {
     }
   });
 
-  test('creates http server and starts listening to given port', () => {
+  test('creates http server and starts listening to given port', done => {
     // given
     const port = 1337;
     const hostname = '127.0.0.1';
     const app = httpListener({ effects: [] });
-    const mocks = { listen: jest.fn(), on: jest.fn() };
 
     // when
-    mockHttpServer(mocks);
     marbleServer = createServer({
       port,
       hostname,
       httpListener: app,
     });
 
-    // then
-    expect(mocks.listen.mock.calls[0][0]).toBe(port);
-    expect(mocks.listen.mock.calls[0][1]).toBe(hostname);
+    marbleServer.server.on('listening', () => {
+      expect(marbleServer.server.listening).toBe(true);
+      done();
+    });
   });
 
-  test('creates http server and starts listening without specified port and hostname', () => {
+  test('creates http server and starts listening without specified port and hostname', done => {
     // given
     const app = httpListener({ effects: [] });
-    const mocks = { listen: jest.fn(), on: jest.fn() };
 
     // when
-    mockHttpServer(mocks);
     marbleServer = createServer({ httpListener: app });
 
     // then
-    expect(mocks.listen.mock.calls[0][0]).toBe(undefined);
-    expect(mocks.listen.mock.calls[0][1]).toBe(undefined);
+    marbleServer.server.on('listening', () => {
+      expect(marbleServer.server.listening).toBe(true);
+      done();
+    });
   });
 
   test('creates https server', done => {

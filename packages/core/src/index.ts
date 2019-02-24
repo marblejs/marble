@@ -16,6 +16,5 @@ export * from './event/event.interface';
 export * from './context/context.factory';
 export * from './context/context.token.factory';
 export * from './server/server.event';
-export * from './server/server.token';
 export { createServer, CreateServerConfig } from './server/server.factory';
 export { HttpListenerConfig, httpListener } from './listener/http.listener';

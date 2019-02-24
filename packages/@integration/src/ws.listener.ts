@@ -13,7 +13,7 @@ const connection$: WsConnectionEffect = req$ =>
     )),
   );
 
-export const webSocketServer = webSocketListener({
+export default webSocketListener({
   middlewares: [logger$],
   effects: [add$],
   connection$,

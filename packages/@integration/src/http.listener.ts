@@ -3,7 +3,7 @@ import { bodyParser$ } from '@marblejs/middleware-body';
 import { loggerDev$, loggerFile$ } from './middlewares/logger.middleware';
 import { api$ } from './effects/api.effects';
 
-export const httpServer = httpListener({
+export default httpListener({
   middlewares: [
     loggerDev$,
     loggerFile$,

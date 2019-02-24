@@ -4,9 +4,7 @@ import * as net from 'net';
 import { Subject } from 'rxjs';
 import { ServerEventType, ServerEvent, AllServerEvents } from './server.event';
 
-export const subscribeServerEvents = (port?: number, hostname?: string) => (httpServer: http.Server | https.Server) => {
-  const event$ = new Subject<AllServerEvents>();
-
+export const subscribeServerEvents = (event$: Subject<AllServerEvents>) => (httpServer: http.Server | https.Server) => {
   httpServer.on(ServerEventType.CONNECT, () =>
     event$.next(ServerEvent.connect()),
   );
@@ -42,10 +40,4 @@ export const subscribeServerEvents = (port?: number, hostname?: string) => (http
   httpServer.on(ServerEventType.UPGRADE, (req: http.IncomingMessage, socket: net.Socket, head: Buffer) =>
     event$.next(ServerEvent.upgrade(req, socket, head)),
   );
-
-  httpServer.listen(port, hostname, () =>
-    event$.next(ServerEvent.listen(port!, hostname!)),
-  );
-
-  return event$;
 };

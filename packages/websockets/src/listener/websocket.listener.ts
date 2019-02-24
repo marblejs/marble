@@ -6,7 +6,6 @@ import {
   combineEffects,
   combineMiddlewares,
   Event,
-  httpServerToken,
   createEffectMetadata,
   reader,
   ContextProvider,
@@ -110,10 +109,8 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     WSHelper.handleClientBrokenConnection(extendedClient).subscribe();
   };
 
-  return (serverOptions?: WebSocket.ServerOptions): ContextReader => reader.map(ask => {
-    const providedOptions: WebSocket.ServerOptions = serverOptions
-      || { server: ask(httpServerToken).getOrElse(undefined as any as http.Server) };
-    const webSocketServer = WSHelper.createWebSocketServer(providedOptions);
+  return (serverOptions: WebSocket.ServerOptions = { noServer: true }): ContextReader => reader.map(ask => {
+    const webSocketServer = WSHelper.createWebSocketServer(serverOptions);
     const sendBroadcastResponse = handleBroadcastResponse(webSocketServer, providedTransformer);
     const extendedWebSocketServer = WSHelper.extendServerWith({ sendBroadcastResponse })(webSocketServer);
 
