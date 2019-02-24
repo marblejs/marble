@@ -7,7 +7,7 @@ import { httpListener } from '../../listener/http.listener';
 import { createServer } from '../server.factory';
 import {
   ServerEventType,
-  isListenEvent,
+  isListeningEvent,
   isUpgradeEvent,
   isConnectEvent,
   isErrorEvent,
@@ -47,6 +47,7 @@ describe('#createServer', () => {
       hostname,
       httpListener: app,
     });
+    marbleServer.run();
 
     marbleServer.server.on('listening', () => {
       expect(marbleServer.server.listening).toBe(true);
@@ -60,6 +61,7 @@ describe('#createServer', () => {
 
     // when
     marbleServer = createServer({ httpListener: app });
+    marbleServer.run();
 
     // then
     marbleServer.server.on('listening', () => {
@@ -81,6 +83,7 @@ describe('#createServer', () => {
       httpListener: app,
       options: { httpsOptions },
     });
+    marbleServer.run();
 
     // then
     setTimeout(() => {
@@ -99,6 +102,7 @@ describe('#createServer', () => {
 
     // when
     marbleServer = createServer({ httpListener: app });
+    marbleServer.run();
 
     // then
     expect(marbleServer.server).toBeDefined();
@@ -120,7 +124,7 @@ describe('#createServer', () => {
         event$.pipe(filter(isClientErrorEvent), take(1)),
         event$.pipe(filter(isConnectEvent), take(1)),
         event$.pipe(filter(isConnectionEvent), take(1)),
-        event$.pipe(filter(isListenEvent), take(1)),
+        event$.pipe(filter(isListeningEvent), take(1)),
         event$.pipe(filter(isUpgradeEvent), take(1)),
         event$.pipe(filter(isRequestEvent), take(1)),
         event$.pipe(filter(isCheckContinueEvent), take(1)),
@@ -129,12 +133,13 @@ describe('#createServer', () => {
         tap(() => done()),
       ),
     });
+    marbleServer.run();
 
     marbleServer.server.emit(ServerEventType.ERROR);
     marbleServer.server.emit(ServerEventType.CLIENT_ERROR);
     marbleServer.server.emit(ServerEventType.CONNECT);
     marbleServer.server.emit(ServerEventType.CONNECTION, new EventEmitter());
-    marbleServer.server.emit(ServerEventType.LISTEN);
+    marbleServer.server.emit(ServerEventType.LISTENING);
     marbleServer.server.emit(ServerEventType.UPGRADE);
     marbleServer.server.emit(ServerEventType.REQUEST);
     marbleServer.server.emit(ServerEventType.CHECK_CONTINUE);

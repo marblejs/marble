@@ -52,14 +52,14 @@ describe('#matchEvent operator', () => {
 
   test(`matches incoming EventCreator`, () => {
     // given
-    const listenEvent: Event = { type: ServerEventType.LISTEN, payload: { port: 80, host: 'localhost' } };
+    const listenEvent: Event = { type: ServerEventType.LISTENING, payload: { port: 80, host: 'localhost' } };
     const closeEvent: Event = { type: ServerEventType.CLOSE, payload: {} };
     const errorEvent: Event = { type: ServerEventType.ERROR, payload: {} };
 
     // when
     const listen$ = (event$: Observable<AllServerEvents>) =>
       event$.pipe(
-        matchEvent(ServerEvent.listen),
+        matchEvent(ServerEvent.listening),
         map(event => event.payload),
       );
 

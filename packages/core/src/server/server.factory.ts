@@ -3,12 +3,11 @@ import * as https from 'https';
 import { Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { httpListener } from '../listener/http.listener';
-import { isCloseEvent, ServerEvent, AllServerEvents } from './server.event';
+import { isCloseEvent, AllServerEvents } from './server.event';
 import { subscribeServerEvents } from './server.event.subscriber';
 import { createContext, BoundDependency, lookup, registerAll } from '../context/context.factory';
 import { HttpServerEffect } from '../effects/http-effects.interface';
 import { createEffectMetadata } from '../effects/effectsMetadata.factory';
-import { AddressInfo } from 'net';
 
 export interface ServerOptions {
   httpsOptions?: https.ServerOptions;
@@ -31,17 +30,11 @@ export const createServer = (config: CreateServerConfig) => {
 
   const context = registerAll(dependencies)(createContext());
   const httpListenerWithContext = httpListener.run(context);
-  const server = (options.httpsOptions
+  const server = options.httpsOptions
     ? https.createServer(options.httpsOptions, httpListenerWithContext)
-    : http.createServer(httpListenerWithContext)
-  ).listen(port, hostname, () => {
-    const serverAddressInfo = server.address() as AddressInfo;
-    serverEvent$.next(
-      ServerEvent.listen(serverAddressInfo.port, hostname || DEFAULT_HOSTNAME)
-    );
-  });
+    : http.createServer(httpListenerWithContext);
 
-  subscribeServerEvents(serverEvent$)(server);
+  subscribeServerEvents(hostname || DEFAULT_HOSTNAME)(serverEvent$)(server);
 
   if (event$) {
     const metadata = createEffectMetadata({ ask: lookup(context) });
@@ -49,6 +42,7 @@ export const createServer = (config: CreateServerConfig) => {
   }
 
   return {
+    run: () => server.listen(port, hostname),
     server,
     info: {
       routing: httpListenerWithContext.config.routing,
