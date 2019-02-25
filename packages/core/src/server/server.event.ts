@@ -17,21 +17,42 @@ export enum ServerEventType {
 }
 
 export const ServerEvent = {
-  connect: createEvent(ServerEventType.CONNECT),
+  connect: createEvent(
+    ServerEventType.CONNECT,
+    (request: http.IncomingMessage, socket: net.Socket, head: Buffer) => ({ request, socket, head }),
+  ),
 
-  connection: createEvent(ServerEventType.CONNECTION),
+  connection: createEvent(
+    ServerEventType.CONNECTION,
+    (socket: net.Socket) => ({ socket }),
+  ),
 
-  clientError: createEvent(ServerEventType.CLIENT_ERROR),
+  clientError: createEvent(
+    ServerEventType.CLIENT_ERROR,
+    (error: Error, socket: net.Socket) => ({ error, socket }),
+  ),
 
   close: createEvent(ServerEventType.CLOSE),
 
-  checkContinue: createEvent(ServerEventType.CHECK_CONTINUE),
+  checkContinue: createEvent(
+    ServerEventType.CHECK_CONTINUE,
+    (request: http.IncomingMessage, response: http.ServerResponse) => ({ request, response }),
+  ),
 
-  checkExpectation: createEvent(ServerEventType.CHECK_EXPECTATION),
+  checkExpectation: createEvent(
+    ServerEventType.CHECK_EXPECTATION,
+    (request: http.IncomingMessage, response: http.ServerResponse) => ({ request, response }),
+  ),
 
-  error: createEvent(ServerEventType.ERROR),
+  error: createEvent(
+    ServerEventType.ERROR,
+    (error: Error) => ({ error }),
+  ),
 
-  request: createEvent(ServerEventType.REQUEST),
+  request: createEvent(
+    ServerEventType.REQUEST,
+    (request: http.IncomingMessage, response: http.ServerResponse) => ({ request, response }),
+  ),
 
   upgrade: createEvent(
     ServerEventType.UPGRADE,
