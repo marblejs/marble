@@ -1,5 +1,10 @@
 # @marblejs/middleware-jwt
 
+<a href="https://marblejs.com">
+  <img src="https://github.com/marblejs/marble/blob/master/assets/img/logo.png?raw=true" width="320" alt="Marble.js logo"/>
+</a>
+
+
 A [JWT](http://jwt.io) middleware for [Marble.js](https://github.com/marblejs/marble).
 
 ## Installation
@@ -39,16 +44,16 @@ const verifyPayload$ = (payload: { id: string }) =>
 
 **Validate routes:**
 ```typescript
-import { EffectFactory } from '@marblejs/core';
+import { r } from '@marblejs/core';
 import { authorize$ } from '@marblejs/middleware-jwt';
 import { SECRET_KEY } from './config';
 
-const getUsers$ = EffectFactory
-  .matchPath('/')
-  .matchType('GET')
-  .use(req$ => req$.pipe(
+const getUsers$ = r.pipe(
+  r.matchPath('/'),
+  r.matchType('GET'),
+  r.useEffect(req$ => req$.pipe(
     // ...
-  ));
+  )));
 
 const user$ = combineRoutes('/user', {
   effects: [

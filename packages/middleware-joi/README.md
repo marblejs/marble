@@ -1,31 +1,46 @@
-Middleware Joi
-=======
+# @marblejs/middleware-joi
+
+<a href="https://marblejs.com">
+  <img src="https://github.com/marblejs/marble/blob/master/assets/img/logo.png?raw=true" width="320" alt="Marble.js logo"/>
+</a>
+
 
 A [joi](https://github.com/hapijs/joi) validation middleware for [Marble.js](https://github.com/marblejs/marble).
+
+## Installation
+
+```
+$ npm i @marblejs/middleware-joi
+```
+Requires `@marblejs/core` to be installed.
+
+## Documentation
+
+For the latest updates, documentation, change log, and release information visit [docs.marblejs.com](https://docs.marblejs.com) and follow [@marble_js](https://twitter.com/marble_js) on Twitter.
 
 ## Usage
 
 Example of using this middleware on a GET route to validate params.
 
-```javascript
+```typescript
 import { validator$, Joi } from '@marblejs/middleware-joi';
 
-const foo$ = EffectFactory
-  .matchPath('/foo/:id')
-  .matchType('GET')
-  .use(req$ => req$.pipe(
+const foo$ = r.pipe(
+  r.matchPath('/foo/:id'),
+  r.matchType('GET'),
+  r.useEffect(req$ => req$.pipe(
     use(validator$({
       params: Joi.object({
         id: Joi.number().min(1).max(10),
       })
     }));
     // ...
-  ));
+  )));
 ```
 
 Example to validate all incoming requests.
 
-```javascript
+```typescript
 import { validator$, Joi } from '@marblejs/middleware-joi';
 
 const middlewares = [
