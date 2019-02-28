@@ -4,12 +4,20 @@ import { defaultReporter } from '../io.reporter';
 describe('#defaultReporter', () => {
   let input;
 
+  interface NumberAdultBrand {
+    readonly NumberAdult: unique symbol;
+  }
+
   const schema = t.type({
     user: t.type({
       id: t.string,
       firstName: t.string,
       lastName: t.string,
-      age: t.refinement(t.number, age => age >= 18, 'NumberAdult'),
+      age: t.brand(
+        t.number,
+        (age): age is t.Branded<number, NumberAdultBrand> => age >= 18,
+        'NumberAdult'
+        ),
       roles: t.array(t.union([
         t.literal('ADMIN'),
         t.literal('GUEST'),
