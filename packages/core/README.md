@@ -29,7 +29,7 @@ Functional reactive HTTP middleware framework built on top of <a href="http://no
 
 If we think closely how typical HTTP API works we can quickly recognize that it deals with streams of asynchronous events also called as HTTP requests. Describing it very briefly - typically each request needs to be transformed into response that goes back to the client (which is our event initiator) using custom middlewares or designated endpoints. In reactive programming world, all those core concepts we can translate into very simple marble diagram:
 
-![Marble.js core concept](https://github.com/marblejs/marble/blob/master/assets/flow.png?raw=true)
+![Marble.js core concept](https://github.com/marblejs/marble/blob/master/assets/img/flow.png?raw=true)
 
 In this world everything is a stream. The core concept of **Marble.js** is based on the event flow of marble diagrams which are used to visually express time based behavior of HTTP streams. Ok, but why the heck we need those `observables`? Trends come and go, but asynchronously nature of JavaScript and Node.js platform constantly evolves. With reactive manner we can deliver complex features faster by providing the ability to compose complex tasks with ease and with less amount of code. If you have ever worked with libraries like <a href="https://redux-observable.js.org" target="blank">Redux Observable</a>, <a href="https://github.com/ngrx/platform/blob/master/docs/effects/README.md" target="blank">@ngrx/effects</a> or other libraries that leverages functional reactive paradigm, you will feel like at home. Still there? So lets get started!
 
@@ -40,10 +40,6 @@ For the latest updates, documentation, change log, and release information visit
 ## <a name="examples"></a> Examples
 
 To view the example project structure, visit the [example](https://github.com/marblejs/example) repository.
-
-## <a name="roadmap"></a> Roadmap
-
-**Marble.js** is not yet a final and production ready product. Its APIs can improve over time when reaching stable version `1.0.0`. But in the meantime you can play easily and contribute to the growing community of functional reactive programming freaks.
 
 ## Contributing
 

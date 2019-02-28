@@ -1,6 +1,6 @@
 import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
-import { HttpRequest, RouteParameters, QueryParameters, HttpResponse } from '@marblejs/core';
+import { HttpRequest, RouteParameters, QueryParameters } from '@marblejs/core';
 
 const reqMatched = (
   url: string,
@@ -21,7 +21,7 @@ describe('Joi middleware - Query', () => {
           .required()
       })
     };
-    const http$ = validator$(schema)(req$, undefined as unknown as HttpResponse, {});
+    const http$ = validator$(schema)(req$);
 
     http$.subscribe(
       () => {
@@ -45,7 +45,7 @@ describe('Joi middleware - Query', () => {
         id: Joi.string().token()
       })
     };
-    const http$ = validator$(schema)(req$, undefined as unknown as HttpResponse, {});
+    const http$ = validator$(schema)(req$);
 
     http$.subscribe(
       () => {
@@ -71,7 +71,7 @@ describe('Joi middleware - Query', () => {
         id: Joi.string().token()
       })
     };
-    const http$ = validator$(schema)(req$, undefined as unknown as HttpResponse, {});
+    const http$ = validator$(schema)(req$);
 
     http$.subscribe(data => {
       expect(data).toBeDefined();

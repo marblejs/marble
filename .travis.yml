@@ -25,3 +25,4 @@ branches:
   only:
   - master
   - develop
+  - next

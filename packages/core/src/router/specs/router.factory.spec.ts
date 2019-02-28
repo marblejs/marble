@@ -1,10 +1,9 @@
 import { mapTo } from 'rxjs/operators';
-import { EffectFactory } from '../../effects/effects.factory';
-import { Effect, Middleware } from '../../effects/effects.interface';
+import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
 import { RouteEffect, RouteEffectGroup, Routing } from '../router.interface';
-import { factorizeRouting, combineRoutes } from '../router.factory';
+import { factorizeRouting } from '../router.factory';
 
-describe('Router factory', () => {
+describe('#factorizeRouting', () => {
   let effectsCombiner;
 
   beforeEach(() => {
@@ -12,18 +11,18 @@ describe('Router factory', () => {
     effectsCombiner = require('../../effects/effects.combiner');
   });
 
-  test('#factorizeRouting factorizes routing with nested groups', () => {
+  test('factorizes routing with nested groups', () => {
     // given
-    const m$: Middleware = req$ => req$;
-    const e1$: Effect = req$ => req$.pipe(mapTo({ body: 'test1' }));
-    const e2$: Effect = req$ => req$.pipe(mapTo({ body: 'test2' }));
-    const e3$: Effect = req$ => req$.pipe(mapTo({ body: 'test3' }));
-    const e4$: Effect = req$ => req$.pipe(mapTo({ body: 'test4' }));
-    const e5$: Effect = req$ => req$.pipe(mapTo({ body: 'test5' }));
+    const m$: HttpMiddlewareEffect = req$ => req$;
+    const e1$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test1' }));
+    const e2$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test2' }));
+    const e3$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test3' }));
+    const e4$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test4' }));
+    const e5$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test5' }));
 
     const routeGroupNested: RouteEffectGroup = {
       path: '/nested',
-      effects: [{ path: '/', method: 'GET', effect: e5$ }],
+      effects: [{ path: '/', method: 'GET', effect: e5$, middlewares: m$ }],
       middlewares: [m$],
     };
 
@@ -31,11 +30,11 @@ describe('Router factory', () => {
       path: '/:id',
       effects: [
         { path: '/', method: 'GET', effect: e2$ },
-        { path: '/', method: 'POST', effect: e3$ },
+        { path: '/', method: 'POST', effect: e3$, middlewares: m$ },
         routeGroupNested,
         { path: '*', method: '*', effect: e4$ },
       ],
-      middlewares: [m$],
+      middlewares: [m$, m$],
     };
 
     const routing: (RouteEffect | RouteEffectGroup)[] = [
@@ -44,7 +43,7 @@ describe('Router factory', () => {
     ];
 
     // when
-    effectsCombiner.combineMiddlewareEffects = jest.fn(() => m$);
+    effectsCombiner.combineMiddlewares = jest.fn(() => m$);
     const factorizedRouting = factorizeRouting(routing);
 
     // then
@@ -52,7 +51,9 @@ describe('Router factory', () => {
       {
         regExp: /^(?:\/)?$/i,
         path: '',
-        methods: { GET: { effect: e1$, middleware: undefined, parameters: undefined } },
+        methods: {
+          GET: { effect: e1$, middleware: undefined, parameters: undefined },
+        },
       },
       {
         regExp: /^\/([^\/]+?)(?:\/)?$/i,
@@ -65,19 +66,23 @@ describe('Router factory', () => {
       {
         regExp: /^\/([^\/]+?)\/nested(?:\/)?$/i,
         path: '/:id/nested',
-        methods: { GET: { middleware: m$, effect: e5$, parameters: ['id'] } },
+        methods: {
+          GET: { middleware: m$, effect: e5$, parameters: ['id'] },
+        },
       },
       {
         regExp: /^\/([^\/]+?)\/(.*)(?:\/)?$/i,
         path: '/:id/(.*)',
-        methods: { '*': { middleware: m$, effect: e4$, parameters: ['id'] } },
+        methods: {
+          '*': { middleware: m$, effect: e4$, parameters: ['id'] },
+        },
       },
     ] as Routing);
   });
 
-  test('#factorizeRouting throws error if route is redefined', () => {
+  test('throws error if route is redefined', () => {
     // given
-    const e$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
 
     const route1: RouteEffect = { path: '/test', method: 'GET', effect: e$ };
     const route2: RouteEffect = { path: '/test', method: 'GET', effect: e$ };
@@ -93,66 +98,4 @@ describe('Router factory', () => {
     // then
     expect(error).toThrowError('Redefinition of route at "GET: /test"');
   });
-
-  describe('#combineRoutes', () => {
-    test('factorizes combined routes for effects only', () => {
-      // given
-      const effect$ = req$ => req$.pipe(mapTo({}));
-      const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
-      const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
-
-      // when
-      const combiner = combineRoutes('/test', [a$, b$]);
-
-      // then
-      expect(combiner).toEqual({
-        path: '/test',
-        middlewares: [],
-        effects: [a$, b$],
-      });
-    });
-
-    test('factorizes combined routes for effects with middlewares', () => {
-      // given
-      const effect$ = req$ => req$.pipe(mapTo({}));
-      const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
-      const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
-
-      const m1$: Middleware = req$ => req$;
-      const m2$: Middleware = req$ => req$;
-
-      // when
-      const combiner = combineRoutes('/test', {
-        middlewares: [m1$, m2$],
-        effects: [a$, b$],
-      });
-
-      // then
-      expect(combiner).toEqual({
-        path: '/test',
-        middlewares: [m1$, m2$],
-        effects: [a$, b$],
-      });
-    });
-
-    test('factorizes combined routes for effects with empty middlewares', () => {
-      // given
-      const effect$ = req$ => req$.pipe(mapTo({}));
-      const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
-      const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
-
-      // when
-      const combiner = combineRoutes('/test', {
-        effects: [a$, b$],
-      });
-
-      // then
-      expect(combiner).toEqual({
-        path: '/test',
-        middlewares: [],
-        effects: [a$, b$],
-      });
-    });
-  });
-
 });

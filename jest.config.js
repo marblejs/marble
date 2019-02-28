@@ -1,24 +1,18 @@
-const SCOPE_ALL = 'all';
-const SCOPE_UNIT = 'unit';
-const SCOPE = process.env.SCOPE || SCOPE_ALL;
+const SCOPE = process.env.SCOPE;
 
-module.exports = {
+const config = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
-  testRegex: SCOPE === SCOPE_UNIT
-    ? '^((?!integration).)*\.spec\.ts$'
-    : '.?(spec|integration\.spec)\.ts$',
+  testRegex: 'spec\.ts$',
   coverageDirectory: './coverage/',
   coveragePathIgnorePatterns: [
-    'spec-util.ts$',
-    'integration.ts$',
-    '.d.ts$',
-    '.spec.ts',
-    'webpack.config.ts',
-    '@example',
+    'dist',
+    'testing',
     '@integration',
-    '\\+internal/testing',
+    'spec-util.ts$',
+    'integration.spec.ts$',
+    'integration.ts$'
   ],
   collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [
@@ -28,7 +22,22 @@ module.exports = {
   ],
   globals: {
     'ts-jest': {
-      tsConfigFile: './tsconfig.json',
-    }
+      tsConfig: './tsconfig.test.json',
+      diagnostics: {
+        ignoreCodes: [2300],
+      },
+    },
   },
 };
+
+if (SCOPE === 'integration') {
+  config.testRegex = 'integration\.spec\.ts$';
+  console.info('RUNNING INTEGRATION TESTS');
+}
+
+if (SCOPE === 'unit') {
+  config.testRegex = '^((?!integration).)*\.spec\.ts$';
+  console.info('RUNNING UNIT TESTS');
+}
+
+module.exports = config;

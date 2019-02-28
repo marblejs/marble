@@ -1,6 +1,6 @@
 {
   "name": "marblejs",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "postinstall": "yarn clean && yarn build && sleep 5s && yarn test",
@@ -10,21 +10,21 @@
     "watch": "lerna run --parallel --stream watch",
     "lint": "lerna run lint",
     "pretest": "yarn lint",
-    "test": "if [[ ${IS_TRAVIS_CI} == \"true\" ]]; then yarn test:ci; else yarn test:dev; fi",
-    "test:ci": "jest --expand --coverage --runInBand",
-    "test:dev": "SCOPE=unit jest --expand --coverage",
+    "test": "yarn test:unit && yarn test:integration",
+    "test:unit": "SCOPE=unit jest --expand --coverage --detectOpenHandles",
+    "test:integration": "SCOPE=integration jest --expand --detectOpenHandles",
     "test:watch": "jest --expand --onlyChanged --watch",
     "clean": "lerna run clean",
+    "purge": "yarn clean && rimraf node_modules",
     "prepublishOnly": "yarn clean && yarn build && yarn test",
     "publish": "lerna publish --no-push",
-    "publish:canary": "lerna publish --no-push --npm-tag next --canary minor --preid dev --force-publish=* --npm-client npm",
+    "publish:canary:minor": "lerna publish --no-push --npm-tag next --canary minor --preid dev --force-publish=* --npm-client npm",
+    "publish:canary:major": "lerna publish --no-push --npm-tag next --canary major --preid next --force-publish=* --npm-client npm",
     "precommit": "lint-staged"
   },
   "lint-staged": {
     "*.ts": [
-      "yarn lint",
-      "git add",
-      "jest --bail --findRelatedTests --passWithNoTests"
+      "yarn lint"
     ]
   },
   "private": true,
@@ -53,23 +53,23 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "rxjs": "~6.2.2"
+    "rxjs": "~6.3.3"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.1",
-    "@types/supertest": "^2.0.4",
+    "@types/jest": "~23.3.10",
+    "@types/supertest": "^2.0.7",
+    "@types/node": "^10.12.15",
     "husky": "^0.14.0",
-    "jest": "^23.5.0",
-    "lerna": "~3.3.0",
-    "lint-staged": "^7.2.2",
+    "jest": "~23.6.0",
+    "lerna": "~3.10.7",
+    "lint-staged": "~8.1.0",
     "mock-req": "^0.2.0",
     "rimraf": "^2.6.2",
-    "rxjs-compat": "^6.1.0",
     "supertest": "^3.0.0",
-    "ts-jest": "^23.1.3",
+    "ts-jest": "~23.10.5",
     "ts-loader": "^5.0.0",
-    "tslint": "~5.9.1",
-    "typescript": "~3.1.1"
+    "tslint": "~5.11.0",
+    "typescript": "~3.3.1"
   },
   "workspaces": [
     "packages/*"

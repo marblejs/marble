@@ -1,9 +1,14 @@
-import { server } from '../helpers/api.spec-util';
 import * as request from 'supertest';
+import { createContext } from '@marblejs/core';
+import { server } from '../helpers/api.spec-util';
 
 describe('Joi middleware - Integration', () => {
-  const app = server();
+  const app = server().run(createContext());
   const token = '181782881DB38D84';
+
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn);
+  });
 
   it('should fail without a token', async () => {
     const expected = {

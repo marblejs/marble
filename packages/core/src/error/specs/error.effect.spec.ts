@@ -1,17 +1,14 @@
-import { mapTo } from 'rxjs/operators';
-import { Marbles } from '../../+internal';
-import { HttpRequest, HttpResponse } from '../../http.interface';
-import { error$, errorEffectProvider } from '../error.effect';
+import { Marbles, createHttpResponse, createHttpRequest } from '../../+internal';
+import { defaultError$ } from '../error.effect';
 import { HttpError } from '../error.model';
 
-const createMockRes = () => ({} as HttpResponse);
-const createMockReq = (url = '/') => ({ url } as HttpRequest);
+describe('defaultError$', () => {
+  const incomingRequest = createHttpRequest({ url: '/' });
+  const client = createHttpResponse();
 
-describe('Error effect', () => {
-
-  it('error$ maps HttpError', () => {
+  test('maps HttpError', () => {
     const error = new HttpError('test-message', 400);
-    const expectedResponse = {
+    const outgoingResponse = {
       status: 400,
       body: { error: {
         message: 'test-message',
@@ -19,15 +16,15 @@ describe('Error effect', () => {
       }},
     };
 
-    Marbles.assertEffect(error$, [
-      ['-a-', { a: createMockReq('/') }],
-      ['-a-', { a: expectedResponse }],
-    ], { response: createMockRes(), error });
+    Marbles.assertEffect(defaultError$, [
+      ['-a-', { a: incomingRequest }],
+      ['-a-', { a: outgoingResponse }],
+    ], { client, meta: { error } });
   });
 
-  it('error$ maps other errors', () => {
+  test('maps other errors', () => {
     const error = new Error('test-message');
-    const expectedResponse = {
+    const outgoingResponse = {
       status: 500,
       body: { error: {
         message: 'test-message',
@@ -35,21 +32,24 @@ describe('Error effect', () => {
       }},
     };
 
-    Marbles.assertEffect(error$, [
-      ['-a-', { a: createMockReq('/') }],
-      ['-a-', { a: expectedResponse }],
-    ], { response: createMockRes(), error });
+    Marbles.assertEffect(defaultError$, [
+      ['-a-', { a: incomingRequest }],
+      ['-a-', { a: outgoingResponse }],
+    ], { client, meta: { error } });
   });
 
-  it('#errorEffectProvider provides error handler implementation', () => {
-    const customError$ = req$ => req$.pipe(mapTo({ status: 500, body: 'error' }));
-    const effect = errorEffectProvider(customError$);
-    expect(effect).toBe(customError$);
-  });
+  test('maps to "Internal server error" if "error" is not provided', () => {
+    const outgoingResponse = {
+      status: 500,
+      body: { error: {
+        message: 'Internal server error',
+        status: 500,
+      }}
+    };
 
-  it('#errorEffectProvider provides default error handler implementation if not passed', () => {
-    const effect = errorEffectProvider();
-    expect(effect).toBe(error$);
+    Marbles.assertEffect(defaultError$, [
+      ['-a-', { a: incomingRequest }],
+      ['-a-', { a: outgoingResponse }],
+    ], { client, meta: {} });
   });
-
 });

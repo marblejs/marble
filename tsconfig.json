@@ -9,17 +9,19 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "pretty": true,
     "strict": true,
     "target": "es6",
     "lib": [
       "dom",
-      "es7"
+      "es2018"
     ],
     "baseUrl": "."
   },
-  "exclude": [
-    "**/*.d.ts"
+  "include": [
+    "./packages/**/*.ts",
+    "./packages/**/*.d.ts",
+    "./packages/**/*.json"
   ]
 }

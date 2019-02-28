@@ -1,19 +1,24 @@
 import * as path from 'path';
-import { EffectFactory, combineRoutes } from '@marblejs/core';
+import { r, combineRoutes, use } from '@marblejs/core';
+import { requestValidator$, t } from '@marblejs/middleware-io';
 import { readFile } from '@marblejs/core/dist/+internal';
-import { map, switchMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
 const STATIC_PATH = path.resolve(__dirname, '../../../../assets');
 
-const getFile$ = EffectFactory
-  .matchPath('/:dir*')
-  .matchType('GET')
-  .use(req$ => req$
-    .pipe(
-      map(req => req.params!.dir as string),
-      switchMap(readFile(STATIC_PATH)),
-      map(body => ({ body }))
-    ));
+const getFileValidator$ = requestValidator$({
+  params: t.type({ dir: t.string })
+});
+
+const getFile$ = r.pipe(
+  r.matchPath('/:dir*'),
+  r.matchType('GET'),
+  r.useEffect(req$ => req$.pipe(
+    use(getFileValidator$),
+    map(req => req.params.dir),
+    mergeMap(readFile(STATIC_PATH)),
+    map(body => ({ body }))
+  )));
 
 export const static$ = combineRoutes(
   '/static',

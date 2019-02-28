@@ -1,15 +1,15 @@
 import * as http from 'http';
 import { Observable } from 'rxjs';
-import { EffectResponse } from './effects/effects.interface';
+import { HttpEffectResponse } from './effects/http-effects.interface';
 
 export interface HttpRequest<
-  TBody = any,
-  TParams = any,
-  TQuery = any,
+  TBody = unknown,
+  TParams = unknown,
+  TQuery = unknown,
 > extends http.IncomingMessage {
   url: string;
   method: HttpMethod;
-  body?: TBody;
+  body: TBody;
   params: TParams;
   query: TQuery;
   [key: string]: any;
@@ -24,10 +24,10 @@ export interface QueryParameters {
 }
 
 export interface HttpResponse extends http.ServerResponse {
-  send: (effect: EffectResponse) => Observable<never>;
+  send: (response: HttpEffectResponse) => Observable<never>;
 }
 
-export type HttpHeaders = Record<string, string>;
+export interface HttpHeaders extends http.OutgoingHttpHeaders {}
 
 export enum HttpMethodType {
   POST,
@@ -44,12 +44,9 @@ export enum HttpMethodType {
 
 export type HttpMethod = keyof typeof HttpMethodType;
 
-export type Http = {
-  req: HttpRequest;
-  res: HttpResponse;
-};
-
 export enum HttpStatus {
+  CONTINUE = 100,
+  SWITCHING_PROTOCOLS = 101,
   OK = 200,
   CREATED = 201,
   ACCEPTED = 202,
@@ -65,9 +62,11 @@ export enum HttpStatus {
   CONFLICT = 409,
   GONE = 410,
   FAILED_DEPENDENCY = 424,
+  UPGRADE_REQUIRED = 426,
   INTERNAL_SERVER_ERROR = 500,
   NOT_IMPLEMENTED = 501,
   BAD_GATEWAY = 502,
   SERVICE_UNAVAILABLE = 503,
-  GATEWAY_TIMEOUT = 504
+  GATEWAY_TIMEOUT = 504,
+  HTTP_VERSION_NOT_SUPPORTED = 505,
 }

@@ -1,24 +1,12 @@
-import { Observable, from } from 'rxjs';
-import { concatMap, last, takeWhile } from 'rxjs/operators';
-import { HttpRequest, HttpResponse } from '../http.interface';
-import { Middleware } from './effects.interface';
-export { HttpRequest, HttpResponse, Observable };
+import { Observable, merge } from 'rxjs';
+import { Effect, EffectMetadata } from './effects.interface';
 
-export const combineMiddlewareEffects = (effects: Middleware[]): Middleware => {
-  const middlewaresObservable = from(middlewaresGuard(effects));
+export const combineMiddlewares = <T, U>
+  (...effects: Effect<T, T, U>[]) =>
+  (input$: Observable<T>, client: U, meta: EffectMetadata): Observable<T> =>
+    effects.reduce((i$, effect) => effect(i$, client, meta!), input$);
 
-  return (req$, res, metadata) => {
-    return middlewaresObservable.pipe(
-      takeWhile(() => !res.finished),
-      concatMap(effect => effect(req$, res, metadata)),
-      last(),
-    );
-  };
-};
-
-const middlewaresGuard = (middlewares: Middleware[]) => {
-  const emptyMiddleware: Middleware = req$ => req$;
-  return middlewares.length
-    ? middlewares
-    : [emptyMiddleware];
-};
+export const combineEffects = <T, U, V>
+  (...effects: Effect<T, U, V>[]) =>
+  (input$: Observable<T>, client: V, meta: EffectMetadata): Observable<U> =>
+    merge(...effects.map(effect => effect(input$, client, meta)));

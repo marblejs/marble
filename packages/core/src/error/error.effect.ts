@@ -1,29 +1,29 @@
-import { map } from 'rxjs/operators';
-import { Effect, EffectResponse } from '../effects/effects.interface';
+import { map, mapTo } from 'rxjs/operators';
+import { HttpErrorEffect } from '../effects/http-effects.interface';
 import { HttpStatus } from '../http.interface';
 import { HttpError, isHttpError } from './error.model';
 
-export type ThrownError = HttpError & Error;
+const defaultHttpError = new HttpError(
+  'Internal server error',
+  HttpStatus.INTERNAL_SERVER_ERROR,
+);
 
-export const errorEffectProvider = (customError$?: Effect<EffectResponse, ThrownError>) => !!customError$
-  ? customError$
-  : error$;
+const getStatusCode = (error: Error): HttpStatus =>
+  isHttpError(error)
+    ? error.status
+    : HttpStatus.INTERNAL_SERVER_ERROR;
 
-const getStatusCode = (error: ThrownError): HttpStatus => isHttpError(error)
-  ? error.status
-  : HttpStatus.INTERNAL_SERVER_ERROR;
+const errorFactory = (status: HttpStatus, error: Error) =>
+  isHttpError(error)
+    ? { error: { status, message: error.message, data: error.data, context: error.context } }
+    : { error: { status, message: error.message } };
 
-const errorFactory = (message: string, status: HttpStatus, data?: any) => ({
-  error: { status, message, data }
-});
-
-export const error$: Effect<EffectResponse, ThrownError> = (request$, _, error) => request$
+export const defaultError$: HttpErrorEffect<HttpError> = (req$, _, meta) => req$
   .pipe(
-    map(() => {
-      const { message, data } = error;
+    mapTo(meta.error || defaultHttpError),
+    map(error => {
       const status = getStatusCode(error);
-      const body = errorFactory(message, status, data);
-
+      const body = errorFactory(status, error);
       return { status, body };
     }),
   );

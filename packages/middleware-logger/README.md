@@ -15,7 +15,7 @@ Requires `@marblejs/core` to be installed.
 import { logger$ } from '@marblejs/middleware-logger';
 
 const middlewares = [
-  logger$,
+  logger$(),
   ...
 ];
 

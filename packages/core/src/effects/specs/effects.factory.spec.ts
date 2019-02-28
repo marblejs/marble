@@ -1,5 +1,5 @@
 import { mapTo } from 'rxjs/operators';
-import { Effect } from '../effects.interface';
+import { HttpEffect } from '../http-effects.interface';
 import { EffectFactory } from '../effects.factory';
 import { HttpMethod } from '../../http.interface';
 
@@ -20,7 +20,7 @@ describe('EffectFactory', () => {
 
   test('factorizes RouteConfig', () => {
     // given
-    const effect$: Effect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
     const path = '/foo';
     const method = 'GET';
 
@@ -31,11 +31,9 @@ describe('EffectFactory', () => {
       .use(effect$);
 
     // then
-    expect(factorizedEffect).toEqual({
-      path: '/foo',
-      method: 'GET',
-      effect: effect$,
-    });
+    expect(factorizedEffect.path).toEqual('/foo');
+    expect(factorizedEffect.method).toEqual('GET');
+    expect(factorizedEffect.effect).toBeDefined();
   });
 
   test('throws an error if "path" is not provided', () => {

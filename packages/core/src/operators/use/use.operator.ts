@@ -1,11 +1,14 @@
 import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { Middleware } from '../../effects/effects.interface';
-import { HttpRequest, HttpResponse } from '../../http.interface';
+import { mergeMap } from 'rxjs/operators';
+import { EffectMetadata } from '../../effects/effects.interface';
 
-export const use = <T, U, V>
-  (middleware: Middleware<T, U, V>, res?: HttpResponse) =>
-  (source$: Observable<HttpRequest>): Observable<HttpRequest<T, U, V>> =>
+interface MiddlewareLike<I, O> {
+  (i$: Observable<I>, client: any, meta: any): Observable<O>;
+}
+
+export const use = <I, O>
+  (middleware: MiddlewareLike<I, O>, client?: any, meta?: EffectMetadata) =>
+  (source$: Observable<I>) =>
     source$.pipe(
-      switchMap(req => middleware(of(req), res!, {}))
+      mergeMap(req => middleware(of(req), client!, meta!) as Observable<O>)
     );

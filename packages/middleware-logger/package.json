@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-logger",
-  "version": "1.2.1",
+  "version": "2.0.0-rc.3",
   "description": "Logger middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -31,14 +31,14 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "@marblejs/core": "^1.1.0",
-    "rxjs": "~6.2.2"
+    "@marblejs/core": "^2.0.0-rc.3",
+    "rxjs": "~6.3.3"
   },
   "dependencies": {
     "chalk": "^2.4.1"
   },
   "devDependencies": {
-    "@marblejs/core": "^1.2.1",
+    "@marblejs/core": "^2.0.0-rc.3",
     "@types/chalk": "^2.2.0"
   },
   "publishConfig": {

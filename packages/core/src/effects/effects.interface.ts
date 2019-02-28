@@ -1,22 +1,17 @@
-import { Observable } from 'rxjs';
-import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
+import { Observable, SchedulerLike } from 'rxjs';
+import { ContextProvider } from '../context/context.factory';
 
-export interface EffectResponse {
-  status?: HttpStatus;
-  body?: any;
-  headers?: Record<string, string>;
+export interface EffectLike {
+  (input$: Observable<any>, ...args: any[]): Observable<any>;
 }
 
-export type Middleware<
-  TBody = any,
-  TParams = any,
-  TQuery = any,
-> = Effect<HttpRequest<TBody, TParams, TQuery>>;
+export interface Effect<I, O, C, E extends Error = Error> {
+  (input$: Observable<I>, client: C, meta: EffectMetadata<E>): Observable<O>;
+}
 
-export type ErrorEffect = Effect<EffectResponse, Error>;
-
-export type Effect<T = EffectResponse, U = any> = (
-  request$: Observable<HttpRequest>,
-  response: HttpResponse,
-  metadata: U
-) => Observable<T>;
+export interface EffectMetadata<T extends Error = Error> {
+  ask: ContextProvider;
+  scheduler: SchedulerLike;
+  error?: T;
+  [key: string]: any;
+}

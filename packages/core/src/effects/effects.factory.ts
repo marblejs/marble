@@ -1,5 +1,5 @@
 import { HttpMethod, HttpMethodType } from '../http.interface';
-import { Effect, EffectResponse } from './effects.interface';
+import { HttpEffect } from './http-effects.interface';
 import { RouteEffect } from '../router/router.interface';
 import { coreErrorFactory, CoreErrorOptions } from '../error/error.factory';
 import { getArrayFromEnum } from '../+internal';
@@ -32,7 +32,7 @@ export namespace EffectFactory {
     return { use: use(path)(method) };
   };
 
-  const use = (path: string) => (method: HttpMethod) => (effect: Effect<EffectResponse>): RouteEffect => {
+  const use = (path: string) => (method: HttpMethod) => (effect: HttpEffect): RouteEffect => {
     if (!effect) {
       throw coreErrorFactory('Effect needs to be provided', coreErrorOptions);
     }

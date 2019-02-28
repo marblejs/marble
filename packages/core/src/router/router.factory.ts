@@ -1,20 +1,18 @@
-import { Effect } from '../effects/effects.interface';
-import { HttpRequest } from '../http.interface';
-import { isRouteEffectGroup, isRouteCombinerConfig } from './router.helpers';
+import { HttpMiddlewareEffect } from '../effects/http-effects.interface';
+import { combineMiddlewares } from '../effects/effects.combiner';
+import { isRouteEffectGroup } from './router.helpers';
 import {
   Routing,
   RoutingMethod,
   RoutingItem,
   RouteEffect,
   RouteEffectGroup,
-  RouteCombinerConfig,
 } from './router.interface';
-import { factorizeRegExpWithParams } from './urlParams.factory';
-import { combineMiddlewareEffects } from '../effects/effects.combiner';
+import { factorizeRegExpWithParams } from './router.params.factory';
 
 export const factorizeRouting = (
   routes: (RouteEffect | RouteEffectGroup)[],
-  middleware: Effect<HttpRequest>[] = [],
+  middlewares: HttpMiddlewareEffect[] = [],
   parentPath = '',
 ): Routing => {
   const routing: Routing = [];
@@ -25,7 +23,7 @@ export const factorizeRouting = (
     if (isRouteEffectGroup(route)) {
       return routing.push(...factorizeRouting(
         route.effects,
-        [...middleware, ...route.middlewares],
+        [...middlewares, ...route.middlewares],
         concatenatedPath,
       ));
     }
@@ -34,9 +32,9 @@ export const factorizeRouting = (
     const foundRoute = routing.find(route => route.regExp.source === regExp.source);
     const method: RoutingMethod = {
       effect: route.effect,
-      middleware: middleware.length > 0
-        ? middleware.length > 1 ? combineMiddlewareEffects(middleware) : middleware[0]
-        : undefined,
+      middleware: middlewares.length
+        ? combineMiddlewares(...middlewares)
+        : route.middleware,
       parameters,
     };
 
@@ -58,15 +56,3 @@ export const factorizeRouting = (
   return routing;
 };
 
-export const combineRoutes = (
-  path: string,
-  configOrEffects: RouteCombinerConfig | (RouteEffect | RouteEffectGroup)[]
-): RouteEffectGroup => ({
-  path,
-  effects: isRouteCombinerConfig(configOrEffects)
-    ? configOrEffects.effects
-    : configOrEffects,
-  middlewares: isRouteCombinerConfig(configOrEffects)
-    ? (configOrEffects.middlewares || [])
-    : [],
-});

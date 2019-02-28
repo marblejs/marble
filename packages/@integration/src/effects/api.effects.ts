@@ -1,38 +1,59 @@
-import { EffectFactory, HttpError, HttpStatus, combineRoutes } from '@marblejs/core';
+import { r, HttpError, HttpStatus, combineRoutes, use, switchToProtocol } from '@marblejs/core';
+import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, mergeMap, tap } from 'rxjs/operators';
 import { user$ } from './user.effects';
 import { static$ } from './static.effects';
+import { WsServerToken } from '../tokens';
 
-const root$ = EffectFactory
-  .matchPath('/')
-  .matchType('GET')
-  .use(req$ => req$.pipe(
+const rootValiadtor$ = requestValidator$({
+  params: t.type({
+    version: t.union([
+      t.literal('v1'),
+      t.literal('v2'),
+    ]),
+  }),
+});
+
+const root$ = r.pipe(
+  r.matchPath('/'),
+  r.matchType('GET'),
+  r.useEffect((req$, _, { ask }) => req$.pipe(
+    use(rootValiadtor$),
     map(req => req.params.version),
-    map(version => ({ body: `API version: ${version}` })),
-  ));
+    map(version => `API version: ${version}`),
+    tap(message => ask(WsServerToken).map(server =>
+      server.sendBroadcastResponse({ type: 'ROOT', payload: message })),
+    ),
+    map(message => ({ body: message })),
+  )));
 
-const notImplemented$ = EffectFactory
-  .matchPath('/error')
-  .matchType('GET')
-  .use(req$ => req$
-    .pipe(
-      switchMap(() => throwError(
-        new HttpError('Route not implemented', HttpStatus.NOT_IMPLEMENTED, { reason: 'Not implemented' })
-      )),
-    )
-  );
+const notImplemented$ = r.pipe(
+  r.matchPath('/error'),
+  r.matchType('GET'),
+  r.useEffect(req$ => req$.pipe(
+    mergeMap(() => throwError(
+      new HttpError('Route not implemented', HttpStatus.NOT_IMPLEMENTED, { reason: 'Not implemented' })
+    )),
+  )));
 
-const notFound$ = EffectFactory
-  .matchPath('*')
-  .matchType('*')
-  .use(req$ => req$.pipe(
-    switchMap(() =>
-      throwError(new HttpError('Route not found', HttpStatus.NOT_FOUND))
-    )
-  ));
+const webSockets$ = r.pipe(
+  r.matchPath('/ws'),
+  r.matchType('GET'),
+  r.useEffect(req$ => req$.pipe(
+    switchToProtocol('websocket')
+  )));
+
+const notFound$ = r.pipe(
+  r.matchPath('*'),
+  r.matchType('*'),
+  r.useEffect(req$ => req$.pipe(
+    mergeMap(() => throwError(
+      new HttpError('Route not found', HttpStatus.NOT_FOUND)
+    )),
+  )));
 
 export const api$ = combineRoutes(
   '/api/:version',
-  [ root$, user$, static$, notImplemented$, notFound$ ],
+  [ root$, user$, static$, notImplemented$, webSockets$, notFound$ ],
 );

@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-body",
-  "version": "1.2.1",
+  "version": "2.0.0-rc.3",
   "description": "Body parser middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -31,11 +31,17 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "@marblejs/core": "^1.1.0",
-    "rxjs": "~6.2.2"
+    "@marblejs/core": "^2.0.0-rc.3",
+    "rxjs": "~6.3.3"
+  },
+  "dependencies": {
+    "@types/qs": "^6.5.1",
+    "@types/type-is": "~1.6.2",
+    "qs": "^6.6.0",
+    "type-is": "~1.6.16"
   },
   "devDependencies": {
-    "@marblejs/core": "^1.2.1"
+    "@marblejs/core": "^2.0.0-rc.3"
   },
   "publishConfig": {
     "access": "public"

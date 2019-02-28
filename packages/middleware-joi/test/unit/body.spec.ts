@@ -1,15 +1,20 @@
-import { validator$, Joi } from '../../src';
-import { of } from 'rxjs';
-import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { HttpRequest, HttpResponse, createContext, createEffectMetadata, lookup } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
+import { of } from 'rxjs';
+import { validator$, Joi } from '../../src';
+
 const MockReq = require('mock-req');
 
 describe('Joi middleware - Body', () => {
-  it('should throws an error if dont pass a required field', done => {
+  const context = createContext();
+  const metadata = createEffectMetadata({ ask: lookup(context) });
+
+  it(`throws an error if doesn't pass a required field`, done => {
     expect.assertions(2);
 
     const request = new MockReq({
-      method: 'POST'
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
     });
 
     const req$ = of(request as HttpRequest);
@@ -22,8 +27,8 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, {});
-    const valid$ = validator$(schema)(http$, undefined as unknown as HttpResponse, {});
+    const http$ = bodyParser$()(req$, res, metadata);
+    const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
       () => {
@@ -41,11 +46,12 @@ describe('Joi middleware - Body', () => {
     request.end();
   });
 
-  it('should throws an error if pass a unknown field', done => {
+  it('throws an error if passed a unknown field', done => {
     expect.assertions(2);
 
     const request = new MockReq({
-      method: 'POST'
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
     });
 
     const req$ = of(request as HttpRequest);
@@ -58,8 +64,8 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, {});
-    const valid$ = validator$(schema)(http$, undefined as unknown as HttpResponse, {});
+    const http$ = bodyParser$()(req$, res, metadata);
+    const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
       () => {
@@ -77,11 +83,12 @@ describe('Joi middleware - Body', () => {
     request.end();
   });
 
-  it('should validates body with a unknown field', done => {
+  it('validates body with a unknown field', done => {
     expect.assertions(2);
 
     const request = new MockReq({
-      method: 'POST'
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
     });
 
     const req$ = of(request as HttpRequest);
@@ -94,8 +101,8 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$(req$, res, {});
-    const valid$ = validator$(schema, { allowUnknown: true })(http$, undefined as unknown as HttpResponse, {});
+    const http$ = bodyParser$()(req$, res, metadata);
+    const valid$ = validator$(schema, { allowUnknown: true })(http$);
 
     valid$.subscribe(data => {
       expect(data).toBeTruthy();

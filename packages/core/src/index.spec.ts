@@ -1,13 +1,12 @@
 import * as API from './index';
 
 describe('@marblejs/core public API', () => {
-
-  it('apis should be defined', () => {
+  test('apis are defined', () => {
     expect(API.httpListener).toBeDefined();
     expect(API.HttpError).toBeDefined();
-    expect(API.error$).toBeDefined();
+    expect(API.CoreError).toBeDefined();
+    expect(API.defaultError$).toBeDefined();
     expect(API.EffectFactory).toBeDefined();
     expect(API.combineRoutes).toBeDefined();
   });
-
 });
