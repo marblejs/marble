@@ -1,8 +1,10 @@
-# @marblejs/middleware-body
+<p align="center">
+  <a href="https://marblejs.com">
+    <img src="https://github.com/marblejs/marble/blob/master/assets/img/logo.png?raw=true" width="200" alt="Marble.js logo"/>
+  </a>
+</p>
 
-<a href="https://marblejs.com">
-  <img src="https://github.com/marblejs/marble/blob/master/assets/img/logo.png?raw=true" width="320" alt="Marble.js logo"/>
-</a>
+# @marblejs/middleware-body
 
 A request body parser middleware for [Marble.js](https://github.com/marblejs/marble).
 
