@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as http from 'http';
 import * as https from 'https';
 import { forkJoin } from 'rxjs';
 import { mapTo, tap, filter, take } from 'rxjs/operators';
@@ -21,15 +22,15 @@ import { EffectFactory } from '../../effects/effects.factory';
 import { EventEmitter } from 'events';
 
 describe('#createServer', () => {
-  let marbleServer: ReturnType<typeof createServer>;
+  let server: https.Server | http.Server;
 
   beforeEach(() => {
     jest.restoreAllMocks();
   });
 
   afterEach(done => {
-    if (marbleServer) {
-      marbleServer.server.close(() => done());
+    if (server) {
+      server.close(() => done());
     } else {
       done();
     }
@@ -42,15 +43,14 @@ describe('#createServer', () => {
     const app = httpListener({ effects: [] });
 
     // when
-    marbleServer = createServer({
+    server = createServer({
       port,
       hostname,
       httpListener: app,
-    });
-    marbleServer.run();
+    }).run();
 
-    marbleServer.server.on('listening', () => {
-      expect(marbleServer.server.listening).toBe(true);
+    server.on('listening', () => {
+      expect(server.listening).toBe(true);
       done();
     });
   });
@@ -60,12 +60,11 @@ describe('#createServer', () => {
     const app = httpListener({ effects: [] });
 
     // when
-    marbleServer = createServer({ httpListener: app });
-    marbleServer.run();
+    server = createServer({ httpListener: app }).run();
 
     // then
-    marbleServer.server.on('listening', () => {
-      expect(marbleServer.server.listening).toBe(true);
+    server.on('listening', () => {
+      expect(server.listening).toBe(true);
       done();
     });
   });
@@ -75,11 +74,10 @@ describe('#createServer', () => {
     const app = httpListener({ effects: [] });
 
     // when
-    marbleServer = createServer({ httpListener: app });
-    marbleServer.run(false);
+    server = createServer({ httpListener: app }).run(false);
 
     // then
-    expect(marbleServer.server.listening).toBe(false);
+    expect(server.listening).toBe(false);
   });
 
   test('creates https server', done => {
@@ -91,16 +89,15 @@ describe('#createServer', () => {
     };
 
     // when
-    marbleServer = createServer({
+    server = createServer({
       httpListener: app,
       options: { httpsOptions },
-    });
-    marbleServer.run();
+    }).run();
 
     // then
     setTimeout(() => {
-      expect(marbleServer.server.listening).toBe(true);
-      marbleServer.server.close(done);
+      expect(server.listening).toBe(true);
+      server.close(done);
     }, 100);
   });
 
@@ -113,8 +110,8 @@ describe('#createServer', () => {
     const app = httpListener({ effects: [effect$] });
 
     // when
-    marbleServer = createServer({ httpListener: app });
-    marbleServer.run();
+    const marbleServer = createServer({ httpListener: app });
+    server = marbleServer.run();
 
     // then
     expect(marbleServer.server).toBeDefined();
@@ -129,7 +126,7 @@ describe('#createServer', () => {
     const app = httpListener({ effects: [] });
 
     // then
-    marbleServer = createServer({
+    server = createServer({
       httpListener: app,
       event$: event$ => forkJoin(
         event$.pipe(filter(isErrorEvent), take(1)),
@@ -144,17 +141,16 @@ describe('#createServer', () => {
       ).pipe(
         tap(() => done()),
       ),
-    });
-    marbleServer.run();
+    }).run();
 
-    marbleServer.server.emit(ServerEventType.ERROR);
-    marbleServer.server.emit(ServerEventType.CLIENT_ERROR);
-    marbleServer.server.emit(ServerEventType.CONNECT);
-    marbleServer.server.emit(ServerEventType.CONNECTION, new EventEmitter());
-    marbleServer.server.emit(ServerEventType.LISTENING);
-    marbleServer.server.emit(ServerEventType.UPGRADE);
-    marbleServer.server.emit(ServerEventType.REQUEST);
-    marbleServer.server.emit(ServerEventType.CHECK_CONTINUE);
-    marbleServer.server.emit(ServerEventType.CHECK_EXPECTATION);
+    server.emit(ServerEventType.ERROR);
+    server.emit(ServerEventType.CLIENT_ERROR);
+    server.emit(ServerEventType.CONNECT);
+    server.emit(ServerEventType.CONNECTION, new EventEmitter());
+    server.emit(ServerEventType.LISTENING);
+    server.emit(ServerEventType.UPGRADE);
+    server.emit(ServerEventType.REQUEST);
+    server.emit(ServerEventType.CHECK_CONTINUE);
+    server.emit(ServerEventType.CHECK_EXPECTATION);
   });
 });
