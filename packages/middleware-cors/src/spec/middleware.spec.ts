@@ -1,4 +1,4 @@
-import { HttpMethod, HttpRequest, HttpResponse } from '@marblejs/core';
+import { HttpMethod, HttpRequest, HttpResponse, createEffectMetadata, lookup, createContext } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
 
 import { cors$, CORSOptions } from '../middleware';
@@ -20,6 +20,9 @@ export const createMockRequest = (
     method,
     headers: { ...headers },
   } as unknown) as HttpRequest);
+
+const context = createContext();
+const metadata = createEffectMetadata({ ask: lookup(context) });
 
 describe('CORS middleware', () => {
   test('pass through non CORS requests', () => {
@@ -43,7 +46,7 @@ describe('CORS middleware', () => {
 
     const middleware$ = cors$();
 
-    middleware$(request$, response, undefined).subscribe(() => {
+    middleware$(request$, response, metadata).subscribe(() => {
       expect(response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
       done();
     });
@@ -67,7 +70,7 @@ describe('CORS middleware', () => {
 
     const middleware$ = cors$(options);
 
-    middleware$(request$, response, undefined).subscribe(() => {
+    middleware$(request$, response, metadata).subscribe(() => {
       expect(response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
       expect(response.setHeader).toBeCalledWith('Access-Control-Allow-Credentials', 'true');
       expect(response.setHeader).toBeCalledWith('Access-Control-Expose-Headers', 'X-Header, X-Custom-Header');

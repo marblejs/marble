@@ -1,10 +1,15 @@
-import { HttpMethod, HttpStatus, Middleware } from '@marblejs/core';
+import {
+  HttpMethod,
+  HttpMiddlewareEffect,
+  HttpRequest,
+  HttpStatus,
+} from '@marblejs/core';
+import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { isString } from 'util';
 
 import { configurePreflightResponse } from './configurePreflightResponse';
 import { configureResponse } from './configureResponse';
-
 
 export interface CORSOptions {
   origin?: string | string[] | RegExp;
@@ -23,7 +28,10 @@ const DEFAULT_OPTIONS: CORSOptions = {
   optionsSuccessStatus: HttpStatus.NO_CONTENT,
 };
 
-export const cors$ = (options: CORSOptions = {}): Middleware => (req$, res) => {
+export const cors$ = (options: CORSOptions = {}): HttpMiddlewareEffect => (
+  req$: Observable<HttpRequest>,
+  res,
+) => {
   options = { ...DEFAULT_OPTIONS, ...options };
 
   return req$.pipe(

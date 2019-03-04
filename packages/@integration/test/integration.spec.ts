@@ -119,7 +119,7 @@ describe('API integration', () => {
       .expect('Content-Type', ContentType.IMAGE_PNG));
 
   test(`OPTIONS returns 204`, async () =>
-    request(app)
+    request(server)
       .options('/api/v2')
       .set('origin', 'fake-origin')
       .expect('Access-Control-Allow-Methods', 'HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS')
@@ -130,7 +130,7 @@ describe('API integration', () => {
       .expect(204));
 
   test(`GET returns 200`, async () =>
-    request(app)
+    request(server)
       .get('/api/v2')
       .set('origin', 'fake-origin')
       .expect('Access-Control-Allow-Origin', 'fake-origin')
