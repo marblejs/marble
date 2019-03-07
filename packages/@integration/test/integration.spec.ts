@@ -117,4 +117,22 @@ describe('API integration', () => {
     request(server)
       .get('/api/v1/static/img/flow.png')
       .expect('Content-Type', ContentType.IMAGE_PNG));
+
+  test(`OPTIONS returns 204`, async () =>
+    request(server)
+      .options('/api/v2')
+      .set('origin', 'fake-origin')
+      .expect('Access-Control-Allow-Methods', 'HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS')
+      .expect('Access-Control-Allow-Origin', 'fake-origin')
+      .expect('Access-Control-Allow-Headers', 'Authorization, X-Header')
+      .expect('Access-Control-Max-Age', '36000')
+      .expect('Access-Control-Allow-Credentials', 'true')
+      .expect(204));
+
+  test(`GET returns 200`, async () =>
+    request(server)
+      .get('/api/v2')
+      .set('origin', 'fake-origin')
+      .expect('Access-Control-Allow-Origin', 'fake-origin')
+      .expect(200));
 });

@@ -1,0 +1,50 @@
+{
+  "name": "@marblejs/middleware-cors",
+  "version": "2.0.0",
+  "description": "A CORS middleware for Marble.js",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start": "yarn watch",
+    "watch": "tsc -w",
+    "build": "tsc",
+    "lint": "tslint --config ../../tslint.json --project ./",
+    "test": "jest --config ../../jest.config.js",
+    "clean": "rimraf dist"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "marble.js",
+    "cors",
+    "middleware",
+    "http",
+    "rxjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "yarn": ">= 1.7.0",
+    "npm": ">= 5.0.0"
+  },
+  "author": "Edouard Bozon <bozonedouard@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "homepage": "https://github.com/marblejs/marble#readme",
+  "peerDependencies": {
+    "@marblejs/core": "^2.0.0",
+    "rxjs": "~6.2.2"
+  },
+  "devDependencies": {
+    "@marblejs/core": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
