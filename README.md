@@ -39,11 +39,11 @@ When looking at Marble.js you can ask: **"Why do we need RxJS for HTTP?"**. Desp
 | [@marblejs/core](https://www.npmjs.com/package/@marblejs/core)                           | Framework core module           |
 | [@marblejs/websockets](https://www.npmjs.com/package/@marblejs/websockets)               | WebSockets module               |
 | [@marblejs/middleware-logger](https://www.npmjs.com/package/@marblejs/middleware-logger) | Logger middleware               |
-| [@marblejs/middlware-body](https://www.npmjs.com/package/@marblejs/middleware-body)      | Body parser middleware          |
-| [@marblejs/middlware-io](https://www.npmjs.com/package/@marblejs/middleware-io)          | I/O validation middleware       |
-| [@marblejs/middlware-jwt](https://www.npmjs.com/package/@marblejs/middleware-jwt)        | JWT autgorization middleware    |
-| [@marblejs/middlware-joi](https://www.npmjs.com/package/@marblejs/middleware-joi)        | JOI-based validation middleware |
-| [@marblejs/middlware-cors](https://www.npmjs.com/package/@marblejs/middleware-cors)      | CORS middleware                 |
+| [@marblejs/middleware-body](https://www.npmjs.com/package/@marblejs/middleware-body)     | Body parser middleware          |
+| [@marblejs/middleware-io](https://www.npmjs.com/package/@marblejs/middleware-io)         | I/O validation middleware       |
+| [@marblejs/middleware-jwt](https://www.npmjs.com/package/@marblejs/middleware-jwt)       | JWT autgorization middleware    |
+| [@marblejs/middleware-joi](https://www.npmjs.com/package/@marblejs/middleware-joi)       | JOI-based validation middleware |
+| [@marblejs/middleware-cors](https://www.npmjs.com/package/@marblejs/middleware-cors)     | CORS middleware                 |
 
 ## <a name="docs"></a> Documentation
 
