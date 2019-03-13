@@ -10,36 +10,36 @@ export const subscribeServerEvents =
   (event$: Subject<AllServerEvents>) =>
   (httpServer: http.Server | https.Server) => {
 
-  httpServer.on(ServerEventType.CONNECT, () =>
-    event$.next(ServerEvent.connect()),
+  httpServer.on(ServerEventType.CONNECT, (req: http.IncomingMessage, socket: net.Socket, head: Buffer) =>
+    event$.next(ServerEvent.connect(req, socket, head)),
   );
 
-  httpServer.on(ServerEventType.CONNECTION, () =>
-    event$.next(ServerEvent.connection()),
+  httpServer.on(ServerEventType.CONNECTION, (socket: net.Socket) =>
+    event$.next(ServerEvent.connection(socket)),
   );
 
-  httpServer.on(ServerEventType.CLIENT_ERROR, () =>
-    event$.next(ServerEvent.clientError()),
+  httpServer.on(ServerEventType.CLIENT_ERROR, (error: Error, socket: net.Socket) =>
+    event$.next(ServerEvent.clientError(error, socket)),
   );
 
   httpServer.on(ServerEventType.CLOSE, () =>
     event$.next(ServerEvent.close()),
   );
 
-  httpServer.on(ServerEventType.CHECK_CONTINUE, () =>
-    event$.next(ServerEvent.checkContinue()),
+  httpServer.on(ServerEventType.CHECK_CONTINUE, (req: http.IncomingMessage, res: http.ServerResponse) =>
+    event$.next(ServerEvent.checkContinue(req, res)),
   );
 
-  httpServer.on(ServerEventType.CHECK_EXPECTATION, () =>
-    event$.next(ServerEvent.checkExpectation()),
+  httpServer.on(ServerEventType.CHECK_EXPECTATION, (req: http.IncomingMessage, res: http.ServerResponse) =>
+    event$.next(ServerEvent.checkExpectation(req, res)),
   );
 
-  httpServer.on(ServerEventType.ERROR, () =>
-    event$.next(ServerEvent.error()),
+  httpServer.on(ServerEventType.ERROR, (error: Error) =>
+    event$.next(ServerEvent.error(error)),
   );
 
-  httpServer.on(ServerEventType.REQUEST, () =>
-    event$.next(ServerEvent.request()),
+  httpServer.on(ServerEventType.REQUEST, (req: http.IncomingMessage, res: http.ServerResponse) =>
+    event$.next(ServerEvent.request(req, res)),
   );
 
   httpServer.on(ServerEventType.UPGRADE, (req: http.IncomingMessage, socket: net.Socket, head: Buffer) =>
