@@ -98,6 +98,12 @@ To view the example project, visit the [example](https://github.com/marblejs/exa
         <p style="text-align: center"><small>Krzysztof Miemiec</small></p>
       </a>
     </td>
+    <td align="center">
+      <a href="https://github.com/Edouardbozon" style="color: white">
+        <img src="https://github.com/Edouardbozon.png?s=150" width="100"/>
+        <p style="text-align: center"><small>Edouard Bozon</small></p>
+      </a>
+    </td>
   </tr>
 </table>
 
