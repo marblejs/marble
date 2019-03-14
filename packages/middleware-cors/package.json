@@ -12,6 +12,7 @@
     "test": "jest --config ../../jest.config.js",
     "clean": "rimraf dist"
   },
+  "private": true,
   "files": [
     "dist/"
   ],
