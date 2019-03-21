@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-Functional reactive HTTP framework built on top of <a href="http://nodejs.org" target="blank">Node.js</a> platform, <a href="https://www.typescriptlang.org" target="blank">TypeScript</a> and <a href="http://reactivex.io/rxjs" target="blank">RxJS</a>.
+Functional reactive <a href="http://nodejs.org" target="blank">Node.js</a> framework for building <strong>server-side</strong> applications, based on <a href="https://www.typescriptlang.org" target="blank">TypeScript</a> and <a href="http://reactivex.io/rxjs" target="blank">RxJS</a>.
 </p>
 
 ## <a name="philosophy"></a> Philosophy
