@@ -2318,10 +2318,10 @@ formidable@^1.2.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/formidable/-/formidable-1.2.1.tgz#70fb7ca0290ee6ff961090415f4b3df3d2082659"
 
-fp-ts@1.14.1, fp-ts@^1.0.0:
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.14.1.tgz#de652b8a50f48af805be22dd7fb69f359b2ced6e"
-  integrity sha512-Y6fHvsclMc7Wc8QvEUYzcY+3SNGnAOdhb4Ty6iY5fnSNnroNXH3iyKyr5137GRghPruyBPE46+2Lr4iqe2famw==
+fp-ts@1.15.0, fp-ts@^1.0.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.15.0.tgz#7706d6761cc98ccbece91c2ff2e5a5b924f65f3d"
+  integrity sha512-D0gnY9qnpifaqNABqSKjttOW4YVpAHK7I7hcstJllbyqS1GKzbQoAguZYr77DhXzIXnsJiqo65dCHJZq6ouxiQ==
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -2851,10 +2851,10 @@ invert-kv@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
 
-io-ts@1.8.2:
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.8.2.tgz#4fe3878c147c9851604d36982ee6f64d3e6a4a1e"
-  integrity sha512-BvP7iC4bgum5e3Fh82xCUrKWt739osKjmQBMORGij2AOMfTmevj8SEqBhN8EeI0GEwIMHb2bXe4fuikN0lsTWg==
+io-ts@1.8.5:
+  version "1.8.5"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.8.5.tgz#2e102f7f518abe17b0f7e7ede0db54a4c4ddc188"
+  integrity sha512-4HzDeg7mTygFjFIKh7ajBSanoVaFryYSFI0ocdwndSWl3eWQXhg3wVR0WI+Li5Vq11TIsoIngQszVbN4dy//9A==
   dependencies:
     fp-ts "^1.0.0"
 
@@ -6083,10 +6083,10 @@ typescript@~3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
 
-typescript@~3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.3.1.tgz#6de14e1db4b8a006ac535e482c8ba018c55f750b"
-  integrity sha512-cTmIDFW7O0IHbn1DPYjkiebHxwtCMU+eTy30ZtJNBPF9j2O1ITu5XH2YnBeVRKWHqF+3JQwWJv0Q0aUgX8W7IA==
+typescript@~3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.1.tgz#b6691be11a881ffa9a05765a205cb7383f3b63c6"
+  integrity sha512-3NSMb2VzDQm8oBTLH6Nj55VVtUEpe/rgkIzMir0qVoLyjDZlnMBva0U6vDiV3IH+sl/Yu6oP5QwsAQtHPmDd2Q==
 
 uglify-js@^3.1.4:
   version "3.4.9"
