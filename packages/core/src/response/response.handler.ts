@@ -1,3 +1,4 @@
+import * as stream from 'stream';
 import { EMPTY } from 'rxjs';
 import { HttpEffectResponse } from '../effects/http-effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
@@ -15,12 +16,17 @@ export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effe
   const bodyFactoryWithHeaders = bodyFactory(headers);
   const body = bodyFactoryWithHeaders(effect.body);
 
-  if (body) {
-    res.setHeader('Content-Length', Buffer.byteLength(body));
-  }
+  if (body instanceof stream.Readable) {
+    res.writeHead(status, headers);
+    body.pipe(res);
+  } else {
+    if (body) {
+      res.setHeader('Content-Length', Buffer.byteLength(body));
+    }
 
-  res.writeHead(status, headers);
-  res.end(body);
+    res.writeHead(status, headers);
+    res.end(body);
+  }
 
   return EMPTY;
 };
