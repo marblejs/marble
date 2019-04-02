@@ -1,5 +1,5 @@
-import { HttpResponse, HttpRequest } from '@marblejs/core';
 import { prepareLogString, factorizeLog } from '../logger.factory';
+import { createHttpResponse, createHttpRequest } from '@marblejs/core/dist/+internal';
 
 describe('Logger factory', () => {
   let loggerFactoryModule;
@@ -48,8 +48,8 @@ describe('Logger factory', () => {
 
   test('#factorizeLog factorizes logger message', () => {
     // given
-    const res = { statusCode: 200 } as HttpResponse;
-    const req = { method: 'GET', url: '/api/v1' } as HttpRequest;
+    const res = createHttpResponse({ statusCode: 200 });
+    const req = createHttpRequest({ method: 'GET', url: '/api/v1' });
     const stamp = { value: req, timestamp: 1539031930521 };
     const opts = { colorize: false, timestamp: true };
     const date = 1540145853 * 1000;
@@ -72,8 +72,8 @@ describe('Logger factory', () => {
 
   test('#factorizeLog factorizes logger message without timestamp', () => {
     // given
-    const res = { statusCode: 200 } as HttpResponse;
-    const req = { method: 'GET', url: '/api/v1' } as HttpRequest;
+    const res = createHttpResponse({ statusCode: 200 });
+    const req = createHttpRequest({ method: 'GET', url: '/api/v1' });
     const stamp = { value: req, timestamp: 1539031930521 };
 
     // when

@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { createWriteStream } from 'fs';
-import { HttpResponse } from '@marblejs/core';
+import { createHttpRequest, createHttpResponse } from '@marblejs/core/dist/+internal/testing';
 import { formatTime, getTimeDifferenceInMs, filterResponse, isNotSilent, writeToStream } from '../logger.util';
 
 describe('Logger util', () => {
@@ -30,14 +30,30 @@ describe('Logger util', () => {
     expect(timeDifference).toBe(2000 - 1000);
   });
 
-  test('#filterResponse filters request by given predicate function', () => {
+  test('#filterResponse filters response by given predicate function', () => {
     // given
-    const res = { status: 404 } as any as HttpResponse;
+    const req = createHttpRequest({ url: '/bar' });
+    const res = createHttpResponse({ statusCode: 404 });
     const predicate = res => res.status < 400;
 
     // when
-    const resultWithPredicateFunction = filterResponse({ filter: predicate })(res);
-    const resultWithoutPredicateFunction = filterResponse({})(res);
+    const resultWithPredicateFunction = filterResponse({ filter: predicate })({ req, res });
+    const resultWithoutPredicateFunction = filterResponse({})({ req, res });
+
+    // then
+    expect(resultWithPredicateFunction).toEqual(false);
+    expect(resultWithoutPredicateFunction).toEqual(true);
+  });
+
+  test('#filterResponse filters request by given predicate function', () => {
+    // given
+    const req = createHttpRequest({ url: '/bar' });
+    const res = createHttpResponse({ statusCode: 404 });
+    const predicate = (res, req) => req.url.includes('/foo');
+
+    // when
+    const resultWithPredicateFunction = filterResponse({ filter: predicate })({ req, res });
+    const resultWithoutPredicateFunction = filterResponse({})({ req, res });
 
     // then
     expect(resultWithPredicateFunction).toEqual(false);
@@ -46,14 +62,16 @@ describe('Logger util', () => {
 
   test('#isNotSilent checks if options "silent" flag is set', () => {
     // given
+    const req = createHttpRequest();
+    const res = createHttpResponse();
     const optsSilent = isNotSilent({ silent: true });
     const optsNotSilent = isNotSilent({ silent: false });
     const optsWithoutSilent = isNotSilent({});
 
     // then
-    expect(optsSilent()).toEqual(false);
-    expect(optsNotSilent()).toEqual(true);
-    expect(optsWithoutSilent()).toEqual(true);
+    expect(optsSilent({ req, res })).toEqual(false);
+    expect(optsNotSilent({ req, res })).toEqual(true);
+    expect(optsWithoutSilent({ req, res })).toEqual(true);
   });
 
   test('#writeToStream writes to stream passed data chunk', () => {

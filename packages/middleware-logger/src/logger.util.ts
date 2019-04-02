@@ -1,15 +1,14 @@
 import { WriteStream } from 'fs';
 import { fromNullable } from 'fp-ts/lib/Option';
-import { HttpResponse } from '@marblejs/core';
 import { compose } from '@marblejs/core/dist/+internal';
-import { LoggerOptions } from './logger.model';
+import { LoggerOptions, LoggerCtx } from './logger.model';
 
-export const isNotSilent = (opts: LoggerOptions) => () =>
+export const isNotSilent = (opts: LoggerOptions) => (ctx: LoggerCtx) =>
   !opts.silent;
 
-export const filterResponse = (opts: LoggerOptions) => (res: HttpResponse) =>
+export const filterResponse = (opts: LoggerOptions) => (ctx: LoggerCtx) =>
   fromNullable(opts.filter)
-    .map(filter => filter(res))
+    .map(filter => filter(ctx.res, ctx.req))
     .getOrElse(true);
 
 export const writeToStream = (stream: WriteStream, chunk: string) =>
