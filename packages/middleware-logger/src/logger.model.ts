@@ -1,10 +1,15 @@
 import { WriteStream } from 'fs';
-import { HttpResponse } from '@marblejs/core';
+import { HttpResponse, HttpRequest } from '@marblejs/core';
+
+export type LoggerCtx = {
+  req: HttpRequest;
+  res: HttpResponse;
+};
 
 export interface LoggerOptions {
   silent?: boolean;
   stream?: WriteStream;
-  filter?: (req: HttpResponse) => boolean;
+  filter?: (res: HttpResponse, req: HttpRequest) => boolean;
 }
 
 export interface LogParams {
