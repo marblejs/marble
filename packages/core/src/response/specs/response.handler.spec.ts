@@ -1,6 +1,9 @@
+import * as path from 'path';
+import * as fs from 'fs';
 import { HttpRequest, HttpResponse, HttpStatus } from '../../http.interface';
 import { handleResponse } from '../response.handler';
 import { DEFAULT_HEADERS } from '../responseHeaders.factory';
+import { ContentType } from '../../+internal';
 
 const createMockResponse = () => ({
   writeHead: jest.fn(),
@@ -54,6 +57,20 @@ describe('Response handler', () => {
   it('sets stringified response if object body is provided', () => {
     handle({ body: { foo: 'bar' } });
     expect(response.end).toHaveBeenCalledWith(JSON.stringify({ foo: 'bar' }));
+  });
+
+  it('pipes body stream to response', () => {
+    // given
+    const pathToFile = path.resolve(__dirname, '../../../../../assets/media', 'audio.mp3');
+    const body = fs.createReadStream(pathToFile);
+    const headers = { 'Content-Type': ContentType.AUDIO_MPEG };
+
+    // when
+    jest.spyOn(body, 'pipe').mockImplementation(jest.fn);
+    handle({ body, headers });
+
+    // then
+    expect(body.pipe).toHaveBeenCalledWith(response);
   });
 
   it('returns immediately if response was finished', done => {
