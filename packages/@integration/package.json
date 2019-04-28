@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
+<<<<<<< HEAD
     "@marblejs/core": "^2.3.1",
     "@marblejs/middleware-body": "^2.3.1",
     "@marblejs/middleware-cors": "^2.3.1",
@@ -28,6 +29,15 @@
     "@marblejs/middleware-logger": "^2.3.1",
     "@marblejs/middleware-multipart": "^2.3.1",
     "@marblejs/websockets": "^2.3.1",
+=======
+    "@marblejs/core": "^2.1.0",
+    "@marblejs/middleware-body": "^2.1.0",
+    "@marblejs/middleware-cors": "^2.1.0",
+    "@marblejs/middleware-io": "^2.1.0",
+    "@marblejs/middleware-logger": "^2.1.0",
+    "@marblejs/websockets": "^2.1.0",
+    "@marblejs/messaging": "^2.1.0",
+>>>>>>> feat(messaging): transport - rmq.strategy (WIP)
     "@types/node": "^10.1.2",
     "rxjs": "^6.3.3",
     "typescript": "~3.0.3"
