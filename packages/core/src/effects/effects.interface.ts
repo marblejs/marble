@@ -5,13 +5,14 @@ export interface EffectLike {
   (input$: Observable<any>, ...args: any[]): Observable<any>;
 }
 
-export interface Effect<I, O, C, E extends Error = Error> {
-  (input$: Observable<I>, client: C, meta: EffectMetadata<E>): Observable<O>;
+export interface Effect<I, O, Client, Err extends Error = Error, Initiator = any> {
+  (input$: Observable<I>, client: Client, meta: EffectMetadata<Err, Initiator>): Observable<O>;
 }
 
-export interface EffectMetadata<T extends Error = Error> {
+export interface EffectMetadata<Err extends Error = Error, Initiator = any> {
   ask: ContextProvider;
   scheduler: SchedulerLike;
-  error?: T;
+  error?: Err;
+  initiator?: Initiator;
   [key: string]: any;
 }

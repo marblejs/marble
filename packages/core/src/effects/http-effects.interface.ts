@@ -26,8 +26,9 @@ export interface HttpOutputEffect<T extends HttpEffectResponse = HttpEffectRespo
   extends HttpEffect<T, HttpEffectResponse> {}
 
 export interface HttpEffect<
-  T = HttpRequest,
-  U = HttpEffectResponse,
-  V = HttpResponse,
-  W extends Error = Error,
-> extends Effect<T, U, V, W> {}
+  I = HttpRequest,
+  O = HttpEffectResponse,
+  Client = HttpResponse,
+  Err extends Error = Error,
+  Initiator = HttpRequest,
+> extends Effect<I, O, Client, Err, Initiator> {}
