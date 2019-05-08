@@ -44,7 +44,7 @@ export const httpListener = ({
         takeWhile(() => !res.finished),
         mergeMap(resolveRouting(routing, defaultMetadata)(res)),
         defaultIfEmpty(defaultResponse),
-        mergeMap(out => output$(of(out), res, defaultMetadata)),
+        mergeMap(out => output$(of(out), res, createEffectMetadata({ ...defaultMetadata, initiator: req }))),
         tap(res.send),
         catchError(error =>
           error$(of(req), res, createEffectMetadata({ ...defaultMetadata, error })).pipe(
