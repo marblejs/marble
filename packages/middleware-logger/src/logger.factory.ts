@@ -14,9 +14,13 @@ const colorizeStatusCode = (statusCode: number): string =>
     ? chalk.yellow(statusCode.toString())
     : chalk.green(statusCode.toString());
 
+export const prepareLogString = (opts: LogParams) =>
+  !!opts.timestamp
+    ? `${opts.timestamp} ${opts.method} ${opts.url} ${opts.statusCode} ${opts.time}`
+    : `${opts.method} ${opts.url} ${opts.statusCode} ${opts.time}`;
+
 export const factorizeLog =
-  (res: HttpResponse, stamp: Timestamp<HttpRequest>) =>
-  (opts: LogFactorizerOptions = {}) => {
+  (res: HttpResponse, stamp: Timestamp<HttpRequest>) => (opts: LogFactorizerOptions = {}) => {
     const { method, url } = stamp.value;
     const now = Date.now();
 
@@ -32,8 +36,3 @@ export const factorizeLog =
 
     return prepareLogString({ timestamp, method, url, statusCode, time });
   };
-
-export const prepareLogString = (opts: LogParams) =>
-  !!opts.timestamp
-    ? `${opts.timestamp} ${opts.method} ${opts.url} ${opts.statusCode} ${opts.time}`
-    : `${opts.method} ${opts.url} ${opts.statusCode} ${opts.time}`;

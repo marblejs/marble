@@ -1,9 +1,9 @@
 import { WriteStream } from 'fs';
+import { compose } from 'fp-ts/lib/function';
 import { fromNullable } from 'fp-ts/lib/Option';
-import { compose } from '@marblejs/core/dist/+internal';
 import { LoggerOptions, LoggerCtx } from './logger.model';
 
-export const isNotSilent = (opts: LoggerOptions) => (ctx: LoggerCtx) =>
+export const isNotSilent = (opts: LoggerOptions) => (_: LoggerCtx) =>
   !opts.silent;
 
 export const filterResponse = (opts: LoggerOptions) => (ctx: LoggerCtx) =>

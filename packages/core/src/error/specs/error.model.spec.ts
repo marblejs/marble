@@ -27,7 +27,11 @@ describe('Error model', () => {
     });
 
     // when
-    Error.prepareStackTrace!(error, []);
+    if (!Error.prepareStackTrace) {
+      return fail('Error.prepareStackTrace is not defined');
+    }
+
+    Error.prepareStackTrace(error, []);
 
     // then
     expect(error.name).toBe('CoreError');

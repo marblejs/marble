@@ -53,6 +53,14 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   const providedTransformer: EventTransformer<any, any> = eventTransformer || jsonTransformer;
 
   const handleIncomingMessage: HandleIncomingMessage = (client, ask) => () => {
+    const eventSubject$ = new Subject<any>();
+    const incomingEventSubject$ = new Subject<WS.WebSocketData>();
+    const defaultMetadata = createEffectMetadata({ ask });
+    const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
+    const middlewares$ = combinedMiddlewares(decodedEvent$, client, defaultMetadata);
+    const effects$ = combinedEffects(eventSubject$, client, defaultMetadata);
+    const effectsOutput$ = output$(effects$, client, defaultMetadata);
+
     const subscribeMiddlewares = (input$: Observable<any>) =>
       input$.subscribe(
         event => eventSubject$.next(event),
@@ -65,6 +73,9 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
         error => handleEffectsError(defaultMetadata, client, providedError$)(error),
       );
 
+    let middlewaresSub = subscribeMiddlewares(middlewares$);
+    let effectsSub = subscribeEffects(effectsOutput$);
+
     const onMessage = (event: WS.WebSocketData) => {
       if (middlewaresSub.closed) { middlewaresSub = subscribeMiddlewares(middlewares$); }
       if (effectsSub.closed) { effectsSub = subscribeEffects(effects$); }
@@ -76,17 +87,6 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
       middlewaresSub.unsubscribe();
       effectsSub.unsubscribe();
     };
-
-    const defaultMetadata = createEffectMetadata({ ask });
-    const incomingEventSubject$ = new Subject<WS.WebSocketData>();
-    const eventSubject$ = new Subject<any>();
-    const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
-    const middlewares$ = combinedMiddlewares(decodedEvent$, client, defaultMetadata);
-    const effects$ = combinedEffects(eventSubject$, client, defaultMetadata);
-    const effectsOutput$ = output$(effects$, client, defaultMetadata);
-
-    let middlewaresSub = subscribeMiddlewares(middlewares$);
-    let effectsSub = subscribeEffects(effectsOutput$);
 
     client.on('message', onMessage);
     client.once('close', onClose);

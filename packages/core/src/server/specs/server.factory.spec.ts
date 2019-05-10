@@ -118,7 +118,10 @@ describe('#createServer', () => {
     expect(marbleServer.info).toBeDefined();
     expect(marbleServer.info.routing).toBeInstanceOf(Array);
     expect(marbleServer.info.routing[0].path).toEqual('');
-    expect(marbleServer.info.routing[0].methods.GET!.effect).toBeDefined();
+    expect(
+      marbleServer.info.routing[0].methods.GET &&
+      marbleServer.info.routing[0].methods.GET.effect
+    ).toBeDefined();
   });
 
   test(`emits server events`, (done) => {

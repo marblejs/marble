@@ -16,6 +16,32 @@ type RouteEffectSpec = Partial<RouteEffect>;
 
 type Arity<A, B> = (a: A) => B;
 
+const route =
+  new IxBuilder<Ready, Empty, RouteEffectSpec>({});
+
+const matchPath = (path: string) => ichainCurry((spec: RouteEffectSpec) =>
+  new IxBuilder<Empty, PathApplied, RouteEffectSpec>({ ...spec, path }));
+
+const matchType = (method: HttpMethod) => ichainCurry((spec: RouteEffectSpec) =>
+  new IxBuilder<PathApplied, TypeApplied, RouteEffectSpec>({ ...spec, method }));
+
+const use = (middleware: HttpMiddlewareEffect) => ichainCurry((spec: RouteEffectSpec) =>
+  new IxBuilder<TypeApplied | MiddlewareApplied, MiddlewareApplied, RouteEffectSpec>({
+    ...spec,
+    middleware: spec.middleware
+      ? combineMiddlewares(spec.middleware, middleware)
+      : middleware
+  }));
+
+const useEffect = (effect: HttpEffect) => ichainCurry((spec: RouteEffectSpec) =>
+  new IxBuilder<TypeApplied | MiddlewareApplied, EffectApplied, RouteEffectSpec>({ ...spec, effect }));
+
+const applyMeta = (meta: Record<string, any>) => ichainCurry((spec: RouteEffectSpec) =>
+  new IxBuilder<EffectApplied | MetaApplied, MetaApplied, RouteEffectSpec>({
+    ...spec,
+    meta: { ...spec.meta, ...meta },
+  }));
+
 function pipe<A, B>(
   f1: Arity<A, B>
 ): RouteEffect;
@@ -92,41 +118,12 @@ function pipe<A, B, C, D, E, F, G, H, I, J, K> (
   f10: Arity<J, K>,
 ): RouteEffect;
 function pipe(
-  ...fns: Array<Arity<
-    IxBuilder<any, any, any>,
-    IxBuilder<any, any, any>
-  >>
+  ...fns: Arity<IxBuilder<any, any, any>, IxBuilder<any, any, any>>[]
 ): RouteEffect {
   return fns.reduce(
     (prevFn, nextFn) => value => nextFn(prevFn(value)),
     value => value,
   )(route).run();
 }
-
-const route =
-  new IxBuilder<Ready, Empty, RouteEffectSpec>({});
-
-const matchPath = (path: string) => ichainCurry((spec: RouteEffectSpec) =>
-  new IxBuilder<Empty, PathApplied, RouteEffectSpec>({ ...spec, path }));
-
-const matchType = (method: HttpMethod) => ichainCurry((spec: RouteEffectSpec) =>
-  new IxBuilder<PathApplied, TypeApplied, RouteEffectSpec>({ ...spec, method }));
-
-const use = (middleware: HttpMiddlewareEffect) => ichainCurry((spec: RouteEffectSpec) =>
-  new IxBuilder<TypeApplied | MiddlewareApplied, MiddlewareApplied, RouteEffectSpec>({
-    ...spec,
-    middleware: spec.middleware
-      ? combineMiddlewares(spec.middleware, middleware)
-      : middleware
-  }));
-
-const useEffect = (effect: HttpEffect) => ichainCurry((spec: RouteEffectSpec) =>
-  new IxBuilder<TypeApplied | MiddlewareApplied, EffectApplied, RouteEffectSpec>({ ...spec, effect }));
-
-const applyMeta = (meta: Record<string, any>) => ichainCurry((spec: RouteEffectSpec) =>
-  new IxBuilder<EffectApplied | MetaApplied, MetaApplied, RouteEffectSpec>({
-    ...spec,
-    meta: { ...spec.meta, ...meta },
-  }));
 
 export const r = { matchPath, matchType, use, useEffect, applyMeta, pipe };

@@ -48,8 +48,8 @@ describe('#handleServerBrokenConnections', () => {
       server.clients[1].isAlive = false; // dead client
     }, HEART_BEAT_INTERVAL + 100);
 
-    scheduler.schedule(() =>
-      server.emit('close'),
+    scheduler.schedule(
+      () => server.emit('close'),
       HEART_BEAT_INTERVAL * 2 + 100
     );
 

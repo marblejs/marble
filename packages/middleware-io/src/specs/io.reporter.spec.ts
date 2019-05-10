@@ -17,7 +17,7 @@ describe('#defaultReporter', () => {
         t.number,
         (age): age is t.Branded<number, NumberAdultBrand> => age >= 18,
         'NumberAdult'
-        ),
+      ),
       roles: t.array(t.union([
         t.literal('ADMIN'),
         t.literal('GUEST'),
@@ -96,7 +96,6 @@ describe('#defaultReporter', () => {
     expect(reporterResult).toEqual([
       {
         path: 'user',
-        // tslint:disable-next-line:max-line-length
         expected: '{ id: string, firstName: string, lastName: string, age: NumberAdult, roles: Array<("ADMIN" | "GUEST")> }',
         got: undefined,
       },

@@ -35,7 +35,7 @@ describe('#fromReadableStream', () => {
     const errorToThrow = new Error('test-error');
 
     fromReadableStream(stream).subscribe(
-      (buffer: Buffer) => {
+      (_: Buffer) => {
         fail(`Error should be thrown`);
         done();
       },

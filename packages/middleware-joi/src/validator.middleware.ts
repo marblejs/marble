@@ -30,7 +30,6 @@ const validateSource = (rules: Map<string, any>, options: Joi.ValidationOptions)
 export const validator$ = <TBody = any, TParams = any, TQuery = any>
   (schema: Partial<Schema<TBody, TParams, TQuery>>, options: Joi.ValidationOptions = {}) =>
   (req$: Observable<HttpRequest>) => {
-    // tslint:disable-next-line:max-line-length
     console.warn('Deprecation warning: @marblejs/middleware-joi is deprecated since v2.0. Use @marblejs/middlware-io instead.');
 
     const result = Joi.validate(schema, SchemaValidator);

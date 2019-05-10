@@ -1,6 +1,6 @@
 {
   "name": "marblejs",
-  "version": "2.0.0",
+  "version": "2.1.1",
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "postinstall": "yarn clean && yarn build && sleep 5s && yarn test",
@@ -8,7 +8,7 @@
     "postbuild": "rimraf packages/**/*.spec.js packages/**/*.spec.d.ts",
     "benchmark": "make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
-    "lint": "lerna run lint",
+    "lint": "eslint ./packages/**/src --ext .ts",
     "pretest": "yarn lint",
     "test": "yarn test:unit && yarn test:integration",
     "test:unit": "SCOPE=unit jest --expand --coverage --detectOpenHandles",
@@ -45,7 +45,7 @@
     "Reactive"
   ],
   "authors": [
-    "Józef Flakus"
+    "Józef Flakus <jozef.flakus@jflakus.com>"
   ],
   "license": "MIT",
   "bugs": {
@@ -57,8 +57,11 @@
   },
   "devDependencies": {
     "@types/jest": "~23.3.10",
-    "@types/supertest": "^2.0.7",
     "@types/node": "^10.12.15",
+    "@types/supertest": "^2.0.7",
+    "@typescript-eslint/eslint-plugin": "^1.7.0",
+    "@typescript-eslint/parser": "^1.7.0",
+    "eslint": "^5.16.0",
     "husky": "^0.14.0",
     "jest": "~23.6.0",
     "lerna": "~3.10.7",
@@ -68,7 +71,6 @@
     "supertest": "^3.0.0",
     "ts-jest": "~23.10.5",
     "ts-loader": "^5.0.0",
-    "tslint": "~5.11.0",
     "typescript": "~3.4.1"
   },
   "workspaces": [

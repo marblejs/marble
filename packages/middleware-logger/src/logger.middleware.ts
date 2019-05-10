@@ -16,7 +16,6 @@ export const logger$ = (opts: LoggerOptions = {}): HttpMiddlewareEffect => (req$
  * [#3] use logger$ instead,
  */
 export const loggerWithOpts$ = (opts: LoggerOptions = {}): HttpMiddlewareEffect => (req$, res, meta) => {
-  // tslint:disable-next-line:max-line-length
   console.warn('Deprecation warning: loggerWithOpts$ is deprecated since v2.0 and will be removed in v3.0. Use logger$ instead.');
   return logger$(opts)(req$, res, meta);
 };

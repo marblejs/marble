@@ -1,15 +1,15 @@
 import { TestScheduler } from 'rxjs/testing';
 import { EffectMetadata, EffectLike } from '../../effects/effects.interface';
 
-type MarbleFlow = [string, { [marble: string]: any; } | undefined];
+type MarbleFlow = [string, { [marble: string]: any } | undefined];
 type MarbleDependencies = { client?: any; meta?: Partial<EffectMetadata> };
 
-export namespace Marbles {
-  const deepEquals = (actual: any, expected: any) => expect(actual).toEqual(expected);
+export const Marbles = {
+  deepEquals: (actual: any, expected: any) => expect(actual).toEqual(expected),
 
-  export const createTestScheduler = () => new TestScheduler(deepEquals);
+  createTestScheduler: () => new TestScheduler(Marbles.deepEquals),
 
-  export const assertEffect = (
+  assertEffect: (
     effect: EffectLike,
     marbleflow: [MarbleFlow, MarbleFlow],
     dependencies: MarbleDependencies = {},
@@ -17,7 +17,7 @@ export namespace Marbles {
     const [initStream, initValues] = marbleflow[0];
     const [expectedStream, expectedValues] = marbleflow[1];
 
-    const scheduler = createTestScheduler();
+    const scheduler = Marbles.createTestScheduler();
     const stream$ = scheduler.createColdObservable(initStream, initValues);
 
     scheduler
@@ -25,5 +25,5 @@ export namespace Marbles {
       .toBe(expectedStream, expectedValues);
 
     scheduler.flush();
-  };
+  },
 }

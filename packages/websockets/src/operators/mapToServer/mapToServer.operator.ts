@@ -7,10 +7,10 @@ import { MarbleWebSocketServer } from '../../websocket.interface';
 
 export type UpgradeEvent = ReturnType<typeof ServerEvent.upgrade>;
 
-type WebSocketServerCollection = Array<{
-  path: string,
-  server: Option<MarbleWebSocketServer>,
-}>;
+type WebSocketServerCollection = {
+  path: string;
+  server: Option<MarbleWebSocketServer>;
+}[];
 
 const isWebSocketUpgrade = ({ request }: UpgradeEvent['payload']) =>
   request.headers.upgrade === 'websocket';
@@ -26,12 +26,12 @@ export const mapToServer = (...servers: WebSocketServerCollection) => {
       map(event => event.payload),
       filter(isWebSocketUpgrade),
       mergeMap(({ request, socket, head }) => from(mappedCollection).pipe(
-        filter(({ pathToMatch }) => pathToMatch.test(request.url!)),
+        filter(({ pathToMatch }) => pathToMatch.test(request.url || '')),
         tap(({ server }) =>
           server.map(server => server.handleUpgrade(request, socket, head, (ws) =>
             server.emit(ServerEventType.CONNECTION, ws, request)
-          ),
-        )),
+          )),
+        ),
         mapTo(true),
         toArray(),
         filter(matchedResults => !matchedResults.includes(true)),
