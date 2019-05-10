@@ -5,8 +5,8 @@ import { ContextProvider } from '../context/context.factory';
 
 export const createEffectMetadata = <Scheduler extends SchedulerLike, Err extends Error, Initiator = any>(
   metadata: {
-    ask: ContextProvider,
-    scheduler?: Scheduler,
+    ask: ContextProvider;
+    scheduler?: Scheduler;
     error?: Err;
     initiator?: Initiator;
   },

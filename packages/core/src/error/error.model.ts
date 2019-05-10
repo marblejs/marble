@@ -23,8 +23,8 @@ export class CoreError extends ExtendableError {
   constructor(
     public readonly message: string,
     options: {
-      stackTraceFactory: (message: string, stack: NodeJS.CallSite[]) => string,
-      context: any,
+      stackTraceFactory: (message: string, stack: NodeJS.CallSite[]) => string;
+      context: any;
     }
   ) {
     super(ErrorType.CORE_ERROR, message);

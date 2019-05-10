@@ -6,8 +6,6 @@ export const TEST_CONFIG = {
   HOST: '127.0.0.1',
 };
 
-export type WebSocketsTestBed = typeof createWebSocketsTestBed;
-
 const createServer = (host: string, port: number) => (cb: () => void) =>
   http.createServer().listen(port, host, cb);
 
@@ -47,3 +45,5 @@ export const createWebSocketsTestBed = (clientsCount = 1, host = TEST_CONFIG.HOS
     getServer,
   };
 };
+
+export type WebSocketsTestBed = typeof createWebSocketsTestBed;

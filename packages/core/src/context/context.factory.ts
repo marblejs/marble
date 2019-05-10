@@ -10,11 +10,11 @@ const setoidContextToken: Setoid<ContextToken> = { equals: ordContextToken.equal
 
 export interface Context extends Map<ContextToken, R.Reader<any, any> | any> {}
 
-export interface ContextProvider { <T>(token: ContextToken<T>): Option<T>; }
+export interface ContextProvider { <T>(token: ContextToken<T>): Option<T> }
 
 export interface ContextReader extends R.Reader<Context, any> {}
 
-export interface ContextEagerReader { (ctx: Context): any; }
+export interface ContextEagerReader { (ctx: Context): any }
 
 export type ContextDependency = ContextReader | ContextEagerReader;
 

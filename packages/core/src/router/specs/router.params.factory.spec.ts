@@ -21,9 +21,11 @@ describe('#factorizeRegExpWithParams', () => {
     const match = regExp.exec('/foo/test1/bar/test2/baz');
 
     // then
+    if (!match) return fail('regExp is not matched');
+
     expect(parameters).toEqual([ 'param1', 'param2' ]);
-    expect(match![1]).toEqual('test1');
-    expect(match![2]).toEqual('test2');
+    expect(match[1]).toEqual('test1');
+    expect(match[2]).toEqual('test2');
   });
 
   test('factorizes path with connected parameters as a one', () => {

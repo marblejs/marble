@@ -16,9 +16,9 @@ export type ExtractType<T> =
   T extends Joi.StringSchema ? string :
   T extends Joi.DateSchema ? Date :
   T extends Joi.ObjectSchema<infer U> ?
-    U extends null ? Record<string, any> : { [K in keyof U]: ExtractType<U[K]> } :
+  U extends null ? Record<string, any> : { [K in keyof U]: ExtractType<U[K]> } :
   T extends Joi.ArraySchema<infer U> ?
-    U extends null ? any[] : U[] :
+  U extends null ? any[] : U[] :
   unknown;
 
 declare module 'joi' {

@@ -12,5 +12,5 @@ export interface ValidatedEvent<T = unknown, V extends EventType = EventType> {
 }
 
 export type EventsUnion<A extends {
-  [eventCreator: string]:  (...args: any[]) => any & { type?: string },
+  [eventCreator: string]:  (...args: any[]) => any & { type?: string };
 }> = ReturnType<A[keyof A]>;

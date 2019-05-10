@@ -122,20 +122,17 @@ describe('JWT factory', () => {
 
   test('#generateExpirationInHours creates timestamp for JWT expiration date', () => {
     // given
-    // tslint:disable-next-line:variable-name
-    const time_22h_40m = 1537562461868;
-    // tslint:disable-next-line:variable-name
-    const time_23h_40m = 1537566061;
-    // tslint:disable-next-line:variable-name
-    const time_24_40 = 1537569661;
+    const time22h40m = 1537562461868;
+    const time23h40m = 1537566061;
+    const time24h40m = 1537569661;
 
     // when
-    spyOn(Date, 'now').and.returnValue(time_22h_40m);
+    spyOn(Date, 'now').and.returnValue(time22h40m);
     const timestampWithDefault = generateExpirationInHours();
     const timestampFor2h = generateExpirationInHours(2);
 
     // then
-    expect(timestampWithDefault).toEqual(time_23h_40m);
-    expect(timestampFor2h).toEqual(time_24_40);
+    expect(timestampWithDefault).toEqual(time23h40m);
+    expect(timestampFor2h).toEqual(time24h40m);
   });
 });

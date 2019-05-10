@@ -3,8 +3,7 @@ import { Marbles, ContentType } from '@marblejs/core/dist/+internal';
 import * as qs from 'qs';
 import { of } from 'rxjs';
 import { bodyParser$ } from '../body.middleware';
-
-const MockReq = require('mock-req');
+import * as MockReq from 'mock-req';
 
 describe('bodyParser$ middleware', () => {
   const context = createContext();

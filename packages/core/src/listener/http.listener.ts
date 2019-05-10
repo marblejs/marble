@@ -32,7 +32,7 @@ export const httpListener = ({
   output$ = out$ => out$,
 }: HttpListenerConfig) =>
   ask<Context>().map(ctx => {
-    const requestSubject$ = new Subject<{ req: HttpRequest; res: HttpResponse; }>();
+    const requestSubject$ = new Subject<{ req: HttpRequest; res: HttpResponse }>();
     const combinedMiddlewares = combineMiddlewares(...middlewares);
     const routing = factorizeRouting(effects);
     const defaultMetadata = createEffectMetadata({ ask: lookup(ctx) });

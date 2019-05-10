@@ -10,5 +10,6 @@ export const use = <I, O>
   (middleware: MiddlewareLike<I, O>, client?: any, meta?: EffectMetadata) =>
   (source$: Observable<I>) =>
     source$.pipe(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       mergeMap(req => middleware(of(req), client!, meta!) as Observable<O>)
     );

@@ -98,7 +98,6 @@ describe('API integration', () => {
       .send({ user: { id: 'test_id' } })
       .expect(200, { data: { user: { id: 'test_id' } } }));
 
-  // tslint:disable-next-line:max-line-length
   test(`parses POST ${ContentType.APPLICATION_X_WWW_FORM_URLENCODED} body and echoes back for secured route: /api/v1/user`, async () =>
     request(server)
       .post('/api/v1/user')

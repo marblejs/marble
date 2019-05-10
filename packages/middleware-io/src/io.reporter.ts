@@ -28,8 +28,7 @@ const getErrorMessage = (value: any, context: t.Context): ReporterResult => ({
 const failure = (errors: t.ValidationError[]): ReporterResult[] =>
   errors.map(error => getErrorMessage(error.value, error.context));
 
-const success = () =>
-  new Array();
+const success = () => [];
 
 export const defaultReporter: Reporter<ReporterResult[]> = {
   report: validation => validation.fold(failure, success),
