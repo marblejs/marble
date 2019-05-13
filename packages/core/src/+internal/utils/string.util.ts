@@ -1,3 +1,4 @@
+import * as uuid from 'uuid';
 import { fromNullable } from 'fp-ts/lib/Option';
 
 export const isString = (value: any): value is string =>
@@ -18,3 +19,5 @@ export const stringify = (value: any): string =>
   typeof value === 'function'
     ? (value.displayName || value.name)
     : JSON.stringify(value);
+
+export const createUuid = () => uuid.v4();

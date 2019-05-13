@@ -1,16 +1,16 @@
-import { Transport, TransportServer } from './transport.interface';
-import { createRmqStrategy } from './strategies/rmq.strategy';
+import { Transport, TransportLayer } from './transport.interface';
+import { createAmqpStrategy } from './strategies/amqp.strategy';
 
 // @TODO
 import { createTcpStrategy } from './strategies/tcp.strategy';
 import { createNatsStrategy } from './strategies/nats.strategy';
 
-export const provideTransportServer = (transport: Transport, transportOptions: any): Promise<TransportServer> => {
+export const provideTransportLayer = (transport: Transport, transportOptions: any): Promise<TransportLayer> => {
   switch (transport) {
-    case Transport.RMQ:
-      return createRmqStrategy(transportOptions);
+    case Transport.AMQP:
+      return createAmqpStrategy(transportOptions);
     default:
       // @TODO
-      return createRmqStrategy(transportOptions);
+      return createAmqpStrategy(transportOptions);
   }
 };

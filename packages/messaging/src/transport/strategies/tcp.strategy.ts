@@ -1,6 +1,6 @@
-import { TransportServer } from '../transport.interface';
+import { TransportLayer } from '../transport.interface';
 
-export const createTcpStrategy = (): TransportServer => {
+export const createTcpStrategy = (): TransportLayer => {
   // @TODO
   return {} as any;
 };
