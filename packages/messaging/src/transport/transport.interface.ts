@@ -16,9 +16,9 @@ export interface TransportLayer {
 
 export interface TransportLayerConnection {
   sendMessage: (channel: string, message: TransportMessage<Buffer>, opts?: TransportLayerSendOpts) => Observable<any>;
-  consumeMessage: () => void;
-  consumeResponse: () => void;
-  close: () => Observable<any>;
+  consumeMessage: () => Promise<any>;
+  consumeResponse: () => Promise<any>;
+  close: () => Promise<any>;
   error$: Observable<Error>;
   message$: Observable<TransportMessage<Buffer>>;
   response$: Observable<TransportMessage<Buffer>>;

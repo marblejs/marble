@@ -1,4 +1,4 @@
-import { EMPTY, Subject, from, fromEvent } from 'rxjs';
+import { EMPTY, Subject, fromEvent } from 'rxjs';
 import { map, share, filter } from 'rxjs/operators';
 import { Channel, Connection, ConsumeMessage, Options } from 'amqplib';
 import { TransportLayer, TransportLayerSendOpts, TransportMessage } from '../transport.interface';
@@ -37,21 +37,21 @@ export const createAmqpStrategy = async (options: RmqStrategyOptions): Promise<T
     } as TransportMessage<Buffer>))
   );
 
-  const consumeMessage = (channelInstance: Channel) => () => {
+  const consumeMessage = (channelInstance: Channel) => () => Promise.resolve(
     channelInstance.consume(
       options.queue,
       msg => msg && msgSubject$.next(msg),
       { noAck: true },
-    );
-  };
+    ),
+  );
 
-  const consumeResponse = (channelInstance: Channel) => () => {
+  const consumeResponse = (channelInstance: Channel) => () => Promise.resolve(
     channelInstance.consume(
       responseQueue,
       res => res && resSubject$.next(res),
       { noAck: true },
-    );
-  };
+    ),
+  );
 
   const sendMessage = (channelInstance: Channel) => (
     queue: string,
@@ -75,8 +75,8 @@ export const createAmqpStrategy = async (options: RmqStrategyOptions): Promise<T
     }
   };
 
-  const close = (connection: Connection) => () =>
-    from(connection.close());
+  const close = (connection: Connection) => (channelInstance: Channel) => () =>
+    Promise.resolve(channelInstance.close().then(() => connection.close()))
 
   const error$ = (connection: Connection) =>
     fromEvent<Error>(connection, 'error');
@@ -86,14 +86,14 @@ export const createAmqpStrategy = async (options: RmqStrategyOptions): Promise<T
     const connection = await amqplib.connect(options.host);
     const channel = await connection.createChannel();
 
-    channel.assertQueue(options.queue, options.queueOptions);
-    channel.assertQueue(responseQueue);
+    await channel.assertQueue(options.queue, options.queueOptions);
+    await channel.assertQueue(responseQueue);
 
     return {
       sendMessage: sendMessage(channel),
       consumeMessage: consumeMessage(channel),
       consumeResponse: consumeResponse(channel),
-      close: close(connection),
+      close: close(connection)(channel),
       error$: error$(connection),
       response$,
       message$,

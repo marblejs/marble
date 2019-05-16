@@ -1,6 +1,6 @@
 import { reader } from '@marblejs/core';
 import { from, Observable } from 'rxjs';
-import { mergeMap, take, map, tap } from 'rxjs/operators';
+import { mergeMap, take, map, tap, mapTo } from 'rxjs/operators';
 import {
   Transport,
   TransportMessage,
@@ -32,6 +32,7 @@ export const messagingClient = (config: MessagingClientConfig = {}) => {
         { data: msgTransformer.encode(msg as any) },
         { type: 'emit' },
       )),
+      mapTo(true),
       take(1),
     );
 
@@ -42,6 +43,7 @@ export const messagingClient = (config: MessagingClientConfig = {}) => {
         { data: msgTransformer.encode(msg as any) },
         { type: 'publish' },
       )),
+      mapTo(true),
       take(1),
     );
 
@@ -57,6 +59,12 @@ export const messagingClient = (config: MessagingClientConfig = {}) => {
       take(1),
     );
 
+  const close = (conn$: Observable<TransportLayerConnection>) => () =>
+    conn$.pipe(
+      mergeMap(conn => conn.close()),
+      take(1),
+    );
+
   return reader.map(() => {
     const transportLayer = provideTransportLayer(transport, options);
     const conn$ = from(transportLayer).pipe(
@@ -68,6 +76,7 @@ export const messagingClient = (config: MessagingClientConfig = {}) => {
       emit: emit(conn$),
       send: send(conn$),
       publish: publish(conn$),
+      close: close(conn$),
     } as MessagingClient;
   });
 };
