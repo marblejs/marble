@@ -4,7 +4,9 @@
   "description": "Marble.js integration tests",
   "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node --project tsconfig.json src/index.ts",
+    "start:http": "ts-node --project tsconfig.json src/http/index.ts",
+    "start:messaging:server": "ts-node --project tsconfig.json src/messaging/server.ts",
+    "start:messaging:client": "ts-node --project tsconfig.json src/messaging/client.ts",
     "watch:dev": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec yarn start",
     "test": "jest --config ../../jest.config.js",
     "clean": "rimraf dist"
@@ -21,7 +23,6 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-<<<<<<< HEAD
     "@marblejs/core": "^2.3.1",
     "@marblejs/middleware-body": "^2.3.1",
     "@marblejs/middleware-cors": "^2.3.1",
@@ -29,21 +30,13 @@
     "@marblejs/middleware-logger": "^2.3.1",
     "@marblejs/middleware-multipart": "^2.3.1",
     "@marblejs/websockets": "^2.3.1",
-=======
-    "@marblejs/core": "^2.1.0",
-    "@marblejs/middleware-body": "^2.1.0",
-    "@marblejs/middleware-cors": "^2.1.0",
-    "@marblejs/middleware-io": "^2.1.0",
-    "@marblejs/middleware-logger": "^2.1.0",
-    "@marblejs/websockets": "^2.1.0",
-    "@marblejs/messaging": "^2.1.0",
->>>>>>> feat(messaging): transport - rmq.strategy (WIP)
     "@types/node": "^10.1.2",
     "rxjs": "^6.3.3",
     "typescript": "~3.0.3"
   },
   "devDependencies": {
     "nodemon": "^1.17.3",
-    "ts-node": "^7.0.1"
+    "ts-node": "^7.0.1",
+    "concurrently": "^4.1.0"
   }
 }

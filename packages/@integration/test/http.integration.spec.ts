@@ -1,7 +1,7 @@
 import * as request from 'supertest';
 import { HttpStatus } from '@marblejs/core';
 import { ContentType } from '@marblejs/core/dist/+internal';
-import { server as marbleServer } from '../src';
+import { server as marbleServer } from '../src/http';
 
 const { server } = marbleServer;
 
