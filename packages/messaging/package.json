@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/messaging",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Messaging module for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,7 +9,6 @@
     "watch": "tsc -w",
     "build": "tsc",
     "clean": "rimraf dist",
-    "lint": "tslint --config ../../tslint.json --project ./",
     "test": "jest --config ../../jest.config.js"
   },
   "files": [
