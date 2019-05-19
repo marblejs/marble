@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start:http": "ts-node --project tsconfig.json src/http/index.ts",
+    "start:websockets": "ts-node --project tsconfig.json src/websockets/http.server.ts",
     "start:messaging:server": "ts-node --project tsconfig.json src/messaging/server.ts",
     "start:messaging:client": "ts-node --project tsconfig.json src/messaging/client.ts",
     "watch:dev": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec yarn start",

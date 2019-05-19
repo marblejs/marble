@@ -7,8 +7,8 @@ import { streamFileTo } from '@marblejs/middleware-multipart/dist/multipart.util
 import { readFile } from '@marblejs/core/dist/+internal';
 import { map, mergeMap } from 'rxjs/operators';
 
-const STATIC_PATH = path.resolve(__dirname, '../../../../assets');
-const TMP_PATH = path.resolve(__dirname, '../../../../tmp');
+const STATIC_PATH = path.resolve(__dirname, '../../../../../assets');
+const TMP_PATH = path.resolve(__dirname, '../../../../../tmp');
 
 const getFileValidator$ = requestValidator$({
   params: t.type({ dir: t.string })

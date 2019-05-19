@@ -1,10 +1,9 @@
 import { r, HttpError, HttpStatus, combineRoutes, use, switchToProtocol } from '@marblejs/core';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError } from 'rxjs';
-import { map, mergeMap, tap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 import { user$ } from './user.effects';
 import { static$ } from './static.effects';
-import { WsServerToken } from '../tokens';
 
 const rootValiadtor$ = requestValidator$({
   params: t.type({
@@ -18,13 +17,10 @@ const rootValiadtor$ = requestValidator$({
 const root$ = r.pipe(
   r.matchPath('/'),
   r.matchType('GET'),
-  r.useEffect((req$, _, { ask }) => req$.pipe(
+  r.useEffect(req$ => req$.pipe(
     use(rootValiadtor$),
     map(req => req.params.version),
     map(version => `API version: ${version}`),
-    tap(message => ask(WsServerToken).map(server =>
-      server.sendBroadcastResponse({ type: 'ROOT', payload: message })),
-    ),
     map(message => ({ body: message })),
   )));
 
