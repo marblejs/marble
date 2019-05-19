@@ -1,6 +1,6 @@
 import { reader } from '@marblejs/core';
 import { from, Observable } from 'rxjs';
-import { mergeMap, take, map, tap, mapTo } from 'rxjs/operators';
+import { mergeMap, take, map, mapTo } from 'rxjs/operators';
 import {
   Transport,
   TransportMessage,
@@ -25,9 +25,9 @@ export const messagingClient = (config: MessagingClientConfig = {}) => {
     options = {},
   } = config;
 
-  const emit = (conn$: Observable<TransportLayerConnection>) => <T>(msg: T) =>
-    conn$.pipe(
-      mergeMap(conn => conn.sendMessage(
+  const emit = (conn: Promise<TransportLayerConnection>) => <T>(msg: T) =>
+    from(conn).pipe(
+      mergeMap(c => c.sendMessage(
         options.queue,
         { data: msgTransformer.encode(msg as any) },
         { type: 'emit' },
@@ -36,9 +36,9 @@ export const messagingClient = (config: MessagingClientConfig = {}) => {
       take(1),
     );
 
-  const publish = (conn$: Observable<TransportLayerConnection>) => <T>(msg: T) =>
-    conn$.pipe(
-      mergeMap(conn => conn.sendMessage(
+  const publish = (conn: Promise<TransportLayerConnection>) => <T>(msg: T) =>
+    from(conn).pipe(
+      mergeMap(c => c.sendMessage(
         options.queue,
         { data: msgTransformer.encode(msg as any) },
         { type: 'publish' },
@@ -47,9 +47,9 @@ export const messagingClient = (config: MessagingClientConfig = {}) => {
       take(1),
     );
 
-  const send = (conn$: Observable<TransportLayerConnection>) => <T, U>(msg: T): Observable<U> =>
-    conn$.pipe(
-      mergeMap(conn => conn.sendMessage(
+  const send = (conn: Promise<TransportLayerConnection>) => <T, U>(msg: T): Observable<U> =>
+    from(conn).pipe(
+      mergeMap(c => c.sendMessage(
         options.queue,
         { data: msgTransformer.encode(msg as any), correlationId: createUuid() },
         { type: 'send' }
@@ -59,24 +59,23 @@ export const messagingClient = (config: MessagingClientConfig = {}) => {
       take(1),
     );
 
-  const close = (conn$: Observable<TransportLayerConnection>) => () =>
-    conn$.pipe(
-      mergeMap(conn => conn.close()),
+  const close = (conn: Promise<TransportLayerConnection>) => () =>
+    from(conn).pipe(
+      mergeMap(c => c.close()),
       take(1),
     );
 
   return reader.map(() => {
     const transportLayer = provideTransportLayer(transport, options);
-    const conn$ = from(transportLayer).pipe(
-      mergeMap(server => server.connect()),
-      tap(conn => conn.consumeResponse()),
-    );
+    const conn = transportLayer
+      .then(server => server.connect())
+      .then(server => server.consumeResponse().then(() => server));
 
     return {
-      emit: emit(conn$),
-      send: send(conn$),
-      publish: publish(conn$),
-      close: close(conn$),
+      emit: emit(conn),
+      send: send(conn),
+      publish: publish(conn),
+      close: close(conn),
     } as MessagingClient;
   });
 };
