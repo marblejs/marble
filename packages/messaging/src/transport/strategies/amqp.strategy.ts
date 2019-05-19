@@ -1,4 +1,4 @@
-import { EMPTY, Subject, fromEvent } from 'rxjs';
+import { Subject, fromEvent, of } from 'rxjs';
 import { map, share, filter } from 'rxjs/operators';
 import { Channel, Connection, ConsumeMessage, Options } from 'amqplib';
 import { TransportLayer, TransportLayerSendOpts, TransportMessage } from '../transport.interface';
@@ -63,15 +63,13 @@ export const createAmqpStrategy = async (options: RmqStrategyOptions): Promise<T
     switch (opts.type) {
       case 'publish':
         channelInstance.assertExchange(queue, 'fanout', { durable: false });
-        channelInstance.publish(queue, '', msg.data);
-        return EMPTY;
+        return of(channelInstance.publish(queue, '', msg.data));
       case 'send':
         channelInstance.prefetch(1);
         channelInstance.sendToQueue(queue, msg.data, { correlationId, replyTo: responseQueue });
         return response$.pipe(filter(m => m.correlationId === correlationId));
       default:
-        channelInstance.sendToQueue(queue, msg.data, { replyTo, correlationId });
-        return EMPTY;
+        return of(channelInstance.sendToQueue(queue, msg.data, { replyTo, correlationId }));
     }
   };
 
