@@ -1,6 +1,6 @@
-import { reader } from '@marblejs/core';
-import { from, Observable } from 'rxjs';
-import { mergeMap, take, map, mapTo } from 'rxjs/operators';
+import { reader, HttpServerEventStreamToken, matchEvent, ServerEvent } from '@marblejs/core';
+import { from, Observable, EMPTY } from 'rxjs';
+import { mergeMap, take, map, mapTo, mergeMapTo } from 'rxjs/operators';
 import {
   Transport,
   TransportMessage,
@@ -65,11 +65,20 @@ export const messagingClient = (config: MessagingClientConfig = {}) => {
       take(1),
     );
 
-  return reader.map(() => {
+  return reader.map(ask => {
     const transportLayer = provideTransportLayer(transport, options);
     const conn = transportLayer
       .then(server => server.connect())
       .then(server => server.consumeResponse().then(() => server));
+
+    ask(HttpServerEventStreamToken).map(serverEvent$ =>
+      serverEvent$.pipe(
+        matchEvent(ServerEvent.close),
+        take(1),
+        mergeMapTo(conn),
+        mergeMap(conn => conn.close()),
+      ),
+    ).getOrElse(EMPTY).subscribe();
 
     return {
       emit: emit(conn),

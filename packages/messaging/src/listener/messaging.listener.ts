@@ -1,13 +1,12 @@
 import {
   reader,
-  ContextReader,
   ContextProvider,
   combineMiddlewares,
   combineEffects,
   createEffectMetadata,
 } from '@marblejs/core';
-import { from, Observable, Subscription } from 'rxjs';
-import { map, mergeMap, publish, withLatestFrom, tap } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { map, publish, withLatestFrom } from 'rxjs/operators';
 import {
   Transport,
   TransportMessage,
@@ -75,14 +74,15 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     effectsSub = subscribeEffects(message$);
   };
 
-  return (): ContextReader => reader.map(ask => {
+  return () => reader.map(ask => {
     const transportLayer = provideTransportLayer(transport, options);
 
-    from(transportLayer)
-      .pipe(
-        mergeMap(server => server.connect()),
-        tap(conn => conn.consumeMessage()),
-      )
-      .subscribe(conn => handleConnection(conn, ask));
+    return transportLayer
+      .then(server => server.connect())
+      .then(conn => conn.consumeMessage().then(() => conn))
+      .then(conn => {
+        handleConnection(conn, ask);
+        return conn;
+      });
   });
 };
