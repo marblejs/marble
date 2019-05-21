@@ -1,4 +1,4 @@
-import { createContext, matchEvent, use } from '@marblejs/core';
+import { matchEvent, use, createContext } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { messagingListener, Transport, MsgEffect, MsgMiddlewareEffect } from '@marblejs/messaging';
 import { map, tap } from 'rxjs/operators';
@@ -21,7 +21,7 @@ const fibonacci$: MsgEffect = event$ =>
     map(payload => ({ type: 'FIB_RESULT', payload })),
   );
 
-messagingListener({
+const listener = messagingListener({
   effects: [
     fibonacci$,
   ],
@@ -34,4 +34,10 @@ messagingListener({
     queue: 'test_queue',
     queueOptions: { durable: false },
   },
-})().run(createContext());
+});
+
+export const server = listener();
+
+if (process.env.NODE_ENV !== 'test') {
+  server.run(createContext());
+}

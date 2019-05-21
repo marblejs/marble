@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  marble-rabbit:
+    container_name: "marble-rabbit"
+    hostname: rabbit
+    image: "rabbitmq:management"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    tty: true

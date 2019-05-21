@@ -16,9 +16,11 @@ git:
 install:
   - npm i -g yarn
   - npm i -g codecov
-  - yarn
 
 script:
+  - yarn
+
+after_success:
   - codecov
 
 branches:

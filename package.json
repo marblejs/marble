@@ -14,7 +14,7 @@
     "unlink:all": "lerna exec -- yarn unlink",
     "test": "yarn test:unit && yarn test:integration",
     "test:unit": "SCOPE=unit jest --expand --coverage --detectOpenHandles",
-    "test:integration": "SCOPE=integration jest --expand --detectOpenHandles",
+    "test:integration": "SCOPE=integration ./scripts/run-integration-tests.sh",
     "test:watch": "jest --expand --onlyChanged --watch",
     "clean": "lerna run clean",
     "purge": "yarn clean && rimraf node_modules",

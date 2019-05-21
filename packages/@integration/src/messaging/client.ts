@@ -30,8 +30,8 @@ const fib$ = r.pipe(
   r.useEffect((req$, _, { ask }) => req$.pipe(
     mapTo(ask(ClientToken)),
     mergeMap(client => forkJoin(
-      client.map(c => c.send({ type: 'FIB', payload: 42 })).getOrElse(of({})),
-      client.map(c => c.send({ type: 'FIB', payload: 42 })).getOrElse(of({})),
+      client.map(c => c.send({ type: 'FIB', payload: 10 })).getOrElse(of({})),
+      client.map(c => c.send({ type: 'FIB', payload: 10 })).getOrElse(of({})),
     )),
     map(body => ({ body })),
   )),
@@ -58,4 +58,6 @@ export const server = createServer({
   ),
 });
 
-server.run();
+server.run(
+  process.env.NODE_ENV !== 'test'
+);
