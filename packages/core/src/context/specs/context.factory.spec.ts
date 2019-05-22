@@ -124,6 +124,7 @@ describe('#reader', () => {
     const dependency2 = reader.map(ask => ask(token1).map(v => v + '_1').getOrElse(''));
     const dependency3 = reader.map(ask => ask(token2).map(v => v + '_2').getOrElse(''));
 
+    // when
     const context = registerAll([
       bindTo(token1)(dependency1),
       bindTo(token2)(ctx => dependency2.run(ctx)),
@@ -134,5 +135,23 @@ describe('#reader', () => {
     expect(lookup(context)(token1)).toEqual(some('test'));
     expect(lookup(context)(token2)).toEqual(some('test_1'));
     expect(lookup(context)(token3)).toEqual(some('test_1_2'));
+  });
+
+  test('asks context for lazy reader dependency and bootstraps it only once', () => {
+    // given
+    const spy = jest.fn();
+    const token = createContextToken<string>();
+    const dependency = reader.map(() => { spy(); return 'test'; });
+
+    // when
+    const context = registerAll([
+      bindTo(token)(dependency),
+    ])(createContext());
+
+    // then
+    expect(lookup(context)(token)).toEqual(some('test'));
+    expect(lookup(context)(token)).toEqual(some('test'));
+    expect(lookup(context)(token)).toEqual(some('test'));
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });
