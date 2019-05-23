@@ -43,11 +43,15 @@ export const registerAll = (boundDependencies: BoundDependency<any, any>[]) => (
   );
 
 export const lookup = (context: Context) => <T>(token: ContextToken<T>): Option<T> =>
-  M.lookup(ordContextToken)(token, context).map(dependency =>
-    isReader(dependency)
-      ? dependency.run(context)
-      : dependency
-  );
+  M.lookup(ordContextToken)(token, context).map(dependency => {
+    if (!isReader(dependency)) {
+      return dependency;
+    }
+
+    const boostrapedDependency = dependency.run(context);
+    context.set(token, boostrapedDependency);
+    return boostrapedDependency;
+  });
 
 export const bindTo =
   <T>(token: ContextToken<T>) =>
