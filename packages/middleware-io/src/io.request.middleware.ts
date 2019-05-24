@@ -34,7 +34,12 @@ export const requestValidator$ = <TBody extends Schema, TParams extends Schema, 
             queryValidator$(of(req.query as any)),
             headersValidator$(of(req.headers as any)),
           ).pipe(
-            map(([body, params, query]) => req as HttpRequest<typeof body, typeof params, typeof query>),
+            map(([body, params, query]) => {
+              req.body = body;
+              req.params = params;
+              req.query = query;
+              return req as HttpRequest<typeof body, typeof params, typeof query>;
+            }),
             catchError((error: IOError) => throwError(
               new HttpError(error.message, HttpStatus.BAD_REQUEST, error.data, error.context),
             )),
