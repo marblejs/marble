@@ -1,6 +1,6 @@
 import * as http from 'http';
 import * as WebSocket from 'ws';
-import { Subject, of, Observable } from 'rxjs';
+import { Subject, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   combineEffects,
@@ -19,12 +19,12 @@ import { EventTransformer } from '../transformer/transformer.inteface';
 import { handleResponse, handleBroadcastResponse } from '../response/ws-response.handler';
 import { handleEffectsError } from '../error/ws-error.handler';
 import { provideErrorEffect } from '../error/ws-error.provider';
+import { WebSocketConnectionError } from '../error/ws-error.model';
 
-type HandleIncomingMessage =
-  (client: WS.MarbleWebSocketClient, contextProvider: ContextProvider) =>
-  () => void;
+type HandleMessage =
+  (client: WS.MarbleWebSocketClient, contextProvider: ContextProvider) => void;
 
-type HandleIncomingConnection =
+type HandleConnection =
   (server: WS.MarbleWebSocketServer, contextProvider: ContextProvider) =>
   (client: WS.WebSocketClient, request: http.IncomingMessage) =>  void;
 
@@ -52,7 +52,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   const providedError$ = provideErrorEffect(error$, eventTransformer);
   const providedTransformer: EventTransformer<any, any> = eventTransformer || jsonTransformer;
 
-  const handleIncomingMessage: HandleIncomingMessage = (client, ask) => () => {
+  const handleMessage: HandleMessage = (client, ask) => {
     const eventSubject$ = new Subject<any>();
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
     const defaultMetadata = createEffectMetadata({ ask });
@@ -92,29 +92,36 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     client.once('close', onClose);
   };
 
-  const handleIncomingConnection: HandleIncomingConnection = (server, ask) => (client, req) => {
-    const request$ = of(req);
-    const defaultMetadata = createEffectMetadata({ ask });
+  const handleConnection: HandleConnection = (server, ask) => (client) => {
     const extendedClient = WSHelper.extendClientWith({
       sendResponse: handleResponse(client, providedTransformer),
       sendBroadcastResponse: handleBroadcastResponse(server, providedTransformer),
       isAlive: true,
     })(client);
 
-    connection$(request$, extendedClient, defaultMetadata).subscribe(
-      handleIncomingMessage(extendedClient, ask),
-      WSHelper.handleClientValidationError(extendedClient),
-    );
-
+    handleMessage(extendedClient, ask);
     WSHelper.handleClientBrokenConnection(extendedClient).subscribe();
   };
 
-  return (serverOptions: WebSocket.ServerOptions = { noServer: true }): ContextReader => reader.map(ask => {
-    const webSocketServer = WSHelper.createWebSocketServer(serverOptions);
+  const verifyClient = (ask: ContextProvider): WebSocket.VerifyClientCallbackAsync  => (info, callback) => {
+    connection$(of(info.req), undefined, createEffectMetadata({ ask }))
+      .pipe(map(Boolean))
+      .subscribe(
+        isVerified => callback(isVerified),
+        (error: WebSocketConnectionError) => callback(false, error.status, error.message),
+      );
+  };
+
+  return (serverOptions: WebSocket.ServerOptions = {}): ContextReader => reader.map(ask => {
+    const webSocketServer = WSHelper.createWebSocketServer({
+      noServer: true,
+      verifyClient: verifyClient(ask),
+      ...serverOptions,
+    });
     const sendBroadcastResponse = handleBroadcastResponse(webSocketServer, providedTransformer);
     const extendedWebSocketServer = WSHelper.extendServerWith({ sendBroadcastResponse })(webSocketServer);
 
-    extendedWebSocketServer.on('connection', handleIncomingConnection(extendedWebSocketServer, ask));
+    extendedWebSocketServer.on('connection', handleConnection(extendedWebSocketServer, ask));
     WSHelper.handleServerBrokenConnections(extendedWebSocketServer).subscribe();
 
     return extendedWebSocketServer;

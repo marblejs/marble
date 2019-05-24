@@ -1,6 +1,6 @@
-import { EventError, createContext } from '@marblejs/core';
-import { throwError, fromEvent, forkJoin } from 'rxjs';
-import { tap, map, mergeMap, first, toArray, take } from 'rxjs/operators';
+import { EventError, createContext, HttpStatus } from '@marblejs/core';
+import { throwError, fromEvent, forkJoin, merge } from 'rxjs';
+import { tap, map, mergeMap, first, toArray, take, mergeMapTo } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.listener';
 import { WsEffect, WsMiddlewareEffect, WsConnectionEffect } from '../../effects/ws-effects.interface';
 import { WebSocketConnectionError } from '../../error/ws-error.model';
@@ -170,25 +170,55 @@ describe('WebSocket listener', () => {
         });
     });
 
-    test('triggers connection error', done => {
+    test('passes connection', done => {
       // given
-      const error = new WebSocketConnectionError('Unauthorized', 4000);
-      const connection$: WsConnectionEffect = req$ => req$.pipe(mergeMap(() => throwError(error)));
+      const connection$: WsConnectionEffect = req$ => req$;
       const webSocketServer = webSocketListener({ connection$ });
-      const targetClient = testBed.getClient(0);
+      const targetClient1 = testBed.getClient(0);
+      const targetClient2 = testBed.getClient(1);
       const server = testBed.getServer();
       const context = createContext();
 
       // when
       webSocketServer({ server }).run(context);
-      targetClient.once('open', () => targetClient.send('test'));
 
       // then
-      targetClient.once('close', (status, message) => {
-        expect(status).toEqual(error.status);
-        expect(message).toEqual(error.message);
-        done();
-      });
+      merge(
+        fromEvent(targetClient1, 'open'),
+        fromEvent(targetClient2, 'open'),
+      )
+      .pipe(take(2), toArray())
+      .subscribe(() => done());
+    });
+
+    test('triggers connection error', done => {
+      // given
+      const error = new WebSocketConnectionError('Unauthorized', HttpStatus.UNAUTHORIZED);
+      const connection$: WsConnectionEffect = req$ => req$.pipe(mergeMapTo(throwError(error)));
+      const webSocketServer = webSocketListener({ connection$ });
+      const targetClient1 = testBed.getClient(0);
+      const targetClient2 = testBed.getClient(1);
+      const server = testBed.getServer();
+      const context = createContext();
+
+      // when
+      webSocketServer({ server }).run(context);
+
+      // then
+      merge(
+        fromEvent(targetClient1, 'unexpected-response'),
+        fromEvent(targetClient2, 'unexpected-response'),
+      )
+      .pipe(take(2), toArray())
+      .subscribe(
+        (data) => {
+          expect(data[0][1].statusCode).toEqual(error.status);
+          expect(data[1][1].statusCode).toEqual(error.status);
+          expect(data[0][1].statusMessage).toEqual(error.message);
+          expect(data[1][1].statusMessage).toEqual(error.message);
+          done();
+        },
+      );
     });
   });
 
