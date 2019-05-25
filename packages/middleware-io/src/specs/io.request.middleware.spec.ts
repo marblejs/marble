@@ -41,6 +41,42 @@ describe('#requestValidator$', () => {
     );
   });
 
+  test('updates values when valid', done => {
+    // given
+    const numberFromString = new t.Type<number, string, unknown>(
+      'NumberFromStringCodec',
+      t.number.is,
+      (u: unknown, c: t.Context) => {
+        const validation = t.string.validate(u, c);
+
+        if (validation.isLeft() || u === '') { return t.failure(u, c); }
+
+        const s = validation.value;
+        const n = Number(s);
+        return isNaN(n) ? t.failure(s, c) : t.success(n);
+      },
+      (n: number) => n.toString()
+    );
+
+    const schema = t.type({ test: numberFromString });
+    const input = createHttpRequest({ url: '/', query: { test: '1' } });
+
+    // when
+    const stream$ = requestValidator$({ query: schema })(of(input));
+
+    // then
+    stream$.subscribe(
+      outgoingData => {
+        expect(outgoingData.query.test).toBe(1);
+        done();
+      },
+      (error: HttpError) => {
+        fail(error.data);
+        done();
+      },
+    );
+  });
+
   test('throws HttpError error if incoming data are not valid', done => {
     // given
     const defaultSchema = t.type({ test: t.string });
