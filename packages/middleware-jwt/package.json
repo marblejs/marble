@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-jwt",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "JWT middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -38,8 +38,8 @@
     "jsonwebtoken": "^8.3.0"
   },
   "devDependencies": {
-    "@marblejs/core": "^2.1.1",
-    "@marblejs/middleware-body": "^2.1.1"
+    "@marblejs/core": "^2.2.0",
+    "@marblejs/middleware-body": "^2.2.0"
   },
   "publishConfig": {
     "access": "public"

@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/integration",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Marble.js integration tests",
   "main": "src/index.ts",
   "scripts": {
@@ -21,12 +21,12 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "@marblejs/core": "^2.1.1",
-    "@marblejs/middleware-body": "^2.1.1",
-    "@marblejs/middleware-cors": "^2.1.1",
-    "@marblejs/middleware-io": "^2.1.1",
-    "@marblejs/middleware-logger": "^2.1.1",
-    "@marblejs/websockets": "^2.1.1",
+    "@marblejs/core": "^2.2.0",
+    "@marblejs/middleware-body": "^2.2.0",
+    "@marblejs/middleware-cors": "^2.2.0",
+    "@marblejs/middleware-io": "^2.2.0",
+    "@marblejs/middleware-logger": "^2.2.0",
+    "@marblejs/websockets": "^2.2.0",
     "@types/node": "^10.1.2",
     "rxjs": "^6.3.3",
     "typescript": "~3.0.3"
