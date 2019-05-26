@@ -3,12 +3,13 @@ import { iif, throwError, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { add$ } from './effects/calculator.ws-effects';
 import { logger$ } from './middlewares/logger.ws-middleware';
+import { HttpStatus } from '@marblejs/core';
 
 const connection$: WsConnectionEffect = req$ =>
   req$.pipe(
     mergeMap(req => iif(
       () => req.headers.upgrade !== 'websocket',
-      throwError(new WebSocketConnectionError('Unauthorized', 4000)),
+      throwError(new WebSocketConnectionError('Unauthorized', HttpStatus.UNAUTHORIZED)),
       of(req),
     )),
   );

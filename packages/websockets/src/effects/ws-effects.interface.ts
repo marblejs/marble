@@ -15,7 +15,7 @@ export interface WsErrorEffect<
 
 export interface WsConnectionEffect<
   T extends http.IncomingMessage = http.IncomingMessage
-> extends WsEffect<T, T, MarbleWebSocketClient> {}
+> extends WsEffect<T, T, undefined> {}
 
 export interface WsOutputEffect<
   T extends Event = Event
