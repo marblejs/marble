@@ -1,7 +1,6 @@
-import { WriteStream } from 'fs';
 import { compose } from 'fp-ts/lib/function';
 import { fromNullable } from 'fp-ts/lib/Option';
-import { LoggerOptions, LoggerCtx } from './logger.model';
+import { LoggerOptions, LoggerCtx, WritableLike } from './logger.model';
 
 export const isNotSilent = (opts: LoggerOptions) => (_: LoggerCtx) =>
   !opts.silent;
@@ -11,8 +10,8 @@ export const filterResponse = (opts: LoggerOptions) => (ctx: LoggerCtx) =>
     .map(filter => filter(ctx.res, ctx.req))
     .getOrElse(true);
 
-export const writeToStream = (stream: WriteStream, chunk: string) =>
-  stream.write(`${chunk}\n\n`);
+export const writeToStream = (writable: WritableLike, chunk: string) =>
+  writable.write(`${chunk}\n\n`);
 
 export const formatTime = (timeInMms: number) =>
   timeInMms > 1000

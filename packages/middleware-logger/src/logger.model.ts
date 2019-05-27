@@ -1,5 +1,8 @@
-import { WriteStream } from 'fs';
 import { HttpResponse, HttpRequest } from '@marblejs/core';
+
+export type WritableLike = {
+  write: (chunk: any) => void;
+}
 
 export type LoggerCtx = {
   req: HttpRequest;
@@ -8,7 +11,7 @@ export type LoggerCtx = {
 
 export interface LoggerOptions {
   silent?: boolean;
-  stream?: WriteStream;
+  stream?: WritableLike;
   filter?: (res: HttpResponse, req: HttpRequest) => boolean;
 }
 
