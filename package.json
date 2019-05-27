@@ -17,7 +17,7 @@
     "clean": "lerna run clean",
     "purge": "yarn clean && rimraf node_modules",
     "prepublishOnly": "yarn clean && yarn build && yarn test",
-    "publish": "lerna publish --no-push",
+    "publish": "lerna publish --no-push --force-publish=*",
     "publish:canary:minor": "lerna publish --no-push --npm-tag next --canary minor --preid dev --force-publish=* --npm-client npm",
     "publish:canary:major": "lerna publish --no-push --npm-tag next --canary major --preid next --force-publish=* --npm-client npm",
     "precommit": "lint-staged"
