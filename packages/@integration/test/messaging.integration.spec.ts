@@ -1,9 +1,8 @@
 import * as request from 'supertest';
 import { server as httpServer } from '../src/messaging/client';
-import { server as messagingServer } from '../src/messaging/server';
-import { createContext } from '@marblejs/core';
+import { microservice as messagingServer } from '../src/messaging/server';
 
-const microservice = messagingServer.run(createContext());
+const microservice = messagingServer.run();
 
 beforeAll(() => microservice);
 
@@ -17,4 +16,4 @@ describe('messaging integration', () => {
       ]));
 });
 
-afterAll(() => microservice.then(s => s.close()));
+afterAll(() => microservice.then(con => con.close()));

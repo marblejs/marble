@@ -8,30 +8,26 @@ import {
 import { Observable, Subscription } from 'rxjs';
 import { map, publish, withLatestFrom } from 'rxjs/operators';
 import {
-  Transport,
   TransportMessage,
   TransportMessageTransformer,
   TransportLayerConnection,
+  TransportLayer,
 } from '../transport/transport.interface';
-import { provideTransportLayer } from '../transport/transport.provider';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect } from '../effects/messaging-effects.interface';
+import { TransportLayerToken } from '../server/messaging.server.tokens';
 
 export interface MessagingListenerConfig {
   effects?: MsgEffect<any, any>[];
   middlewares?: MsgMiddlewareEffect<any, any>[];
-  transport?: Transport;
   msgTransformer?: TransportMessageTransformer<any>;
-  options?: any; // @TODO
 }
 
 export const messagingListener = (config: MessagingListenerConfig = {}) => {
   const {
     effects = [],
     middlewares = [],
-    transport = Transport.TCP,
     msgTransformer = jsonTransformer,
-    options = {},
   } = config;
 
   const handleConnection = (conn: TransportLayerConnection, ask: ContextProvider) => {
@@ -74,15 +70,21 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     effectsSub = subscribeEffects(message$);
   };
 
-  return () => reader.map(ask => {
-    const transportLayer = provideTransportLayer(transport, options);
+  const listen = (transportLayer: Promise<TransportLayer>, ask: ContextProvider) => async () => {
+    const layer = await transportLayer;
+    const conn = await layer.connect();
+    await conn.consumeMessage();
+    await handleConnection(conn, ask);
+    return conn;
+  };
 
-    return transportLayer
-      .then(server => server.connect())
-      .then(conn => conn.consumeMessage().then(() => conn))
-      .then(conn => {
-        handleConnection(conn, ask);
-        return conn;
-      });
+  return reader.map(ask => {
+    const transportLayer = ask(TransportLayerToken)
+      .map(async layer => await layer)
+      .getOrElse(undefined as unknown as Promise<TransportLayer>);
+
+    return {
+      listen: listen(transportLayer, ask),
+    }
   });
 };

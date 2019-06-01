@@ -1,18 +1,10 @@
 import { Subject, fromEvent, of } from 'rxjs';
 import { map, share, filter } from 'rxjs/operators';
-import { Channel, Connection, ConsumeMessage, Options } from 'amqplib';
+import { Channel, Connection, ConsumeMessage } from 'amqplib';
 import { TransportLayer, TransportLayerSendOpts, TransportMessage } from '../transport.interface';
+import { AmqpStrategyOptions } from './amqp.strategy.interface';
 
-interface RmqStrategyOptions {
-  host: string;
-  queue: string;
-  queueOptions?: Options.AssertQueue;
-  socketOptions?: any;
-  prefetchCount?: number;
-  isGlobalPrefetchCount?: boolean;
-}
-
-export const createAmqpStrategy = async (options: RmqStrategyOptions): Promise<TransportLayer> => {
+export const createAmqpStrategy = async (options: AmqpStrategyOptions): Promise<TransportLayer> => {
   const msgSubject$ = new Subject<ConsumeMessage>();
   const resSubject$ = new Subject<ConsumeMessage>();
   const responseQueue = options.queue + '__response';
@@ -88,6 +80,7 @@ export const createAmqpStrategy = async (options: RmqStrategyOptions): Promise<T
     await channel.assertQueue(responseQueue);
 
     return {
+      channel: options.queue,
       sendMessage: sendMessage(channel),
       consumeMessage: consumeMessage(channel),
       consumeResponse: consumeResponse(channel),

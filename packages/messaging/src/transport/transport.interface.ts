@@ -19,6 +19,7 @@ export interface TransportLayerConnection {
   consumeMessage: () => Promise<any>;
   consumeResponse: () => Promise<any>;
   close: () => Promise<any>;
+  channel: string;
   error$: Observable<Error>;
   message$: Observable<TransportMessage<Buffer>>;
   response$: Observable<TransportMessage<Buffer>>;
