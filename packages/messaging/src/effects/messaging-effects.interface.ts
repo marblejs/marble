@@ -1,6 +1,7 @@
 import { Effect, Event } from '@marblejs/core';
+import { TransportLayerConnection } from '../transport/transport.interface';
 
-type MsgClient = any; // @TODO
+type MsgClient = TransportLayerConnection;
 
 export interface MsgMiddlewareEffect<
   I = Event,
