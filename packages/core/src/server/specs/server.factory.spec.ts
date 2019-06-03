@@ -53,7 +53,7 @@ describe('#createServer', () => {
       expect(server.listening).toBe(true);
       done();
     });
-  });
+  }, 10000);
 
   test('creates http server and starts listening without specified port and hostname', done => {
     // given

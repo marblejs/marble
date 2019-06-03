@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@marblejs/serverless - AWS Proxy integration POST / returns 200 1`] = `
+Object {
+  "body": "{\\"test\\":\\"value\\"}",
+  "context": Object {
+    "awsRequestId": "c482b12a-38bb-48bf-83a7-d7d8576dd442",
+    "callbackWaitsForEmptyEventLoop": true,
+    "functionName": "sample-lambda-1234567890AB",
+    "functionVersion": "1",
+    "invokedFunctionArn": "arn:aws:lambda:eu-central-1:123456789012:function:sample-lambda-1234567890AB:latest",
+    "logGroupName": "/aws/lambda/sample-lambda-1234567890AB",
+    "logStreamName": "2019/06/01/[latest]d89065cfaf354bd2ba025b5860ecb67e",
+    "memoryLimitInMB": "128",
+  },
+  "event": Object {
+    "httpMethod": "POST",
+    "isBase64Encoded": false,
+    "multiValueHeaders": Object {
+      "Accept": Array [
+        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      ],
+      "Accept-Encoding": Array [
+        "br, gzip, deflate",
+      ],
+      "Accept-Language": Array [
+        "pl-pl",
+      ],
+      "CloudFront-Forwarded-Proto": Array [
+        "https",
+      ],
+      "CloudFront-Is-Desktop-Viewer": Array [
+        "true",
+      ],
+      "CloudFront-Is-Mobile-Viewer": Array [
+        "false",
+      ],
+      "CloudFront-Is-SmartTV-Viewer": Array [
+        "false",
+      ],
+      "CloudFront-Is-Tablet-Viewer": Array [
+        "false",
+      ],
+      "CloudFront-Viewer-Country": Array [
+        "PL",
+      ],
+      "Content-Type": Array [
+        "text/plain",
+      ],
+      "Host": Array [
+        "1234567890.execute-api.eu-central-1.amazonaws.com",
+      ],
+      "User-Agent": Array [
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.1 Safari/605.1.15",
+      ],
+      "Via": Array [
+        "2.0 3095e870e1a1a1b03178e40ab1872de5.cloudfront.net (CloudFront)",
+      ],
+      "X-Amz-Cf-Id": Array [
+        "Y25j7-itoeNCvCMwAt5YVWgDduoALWzQ_eL8dYb4-u2M5HC4VTyfeA==",
+      ],
+      "X-Amzn-Trace-Id": Array [
+        "Root=1-5cf2885f-fa32290824a86664bc211d02",
+      ],
+      "X-Forwarded-For": Array [
+        "127.0.0.1, 70.132.34.142",
+      ],
+      "X-Forwarded-Port": Array [
+        "443",
+      ],
+      "X-Forwarded-Proto": Array [
+        "https",
+      ],
+    },
+    "multiValueQueryStringParameters": null,
+    "path": "/",
+    "pathParameters": null,
+    "queryStringParameters": null,
+    "requestContext": Object {
+      "accountId": "534774995974",
+      "apiId": "1234567890",
+      "domainName": "1234567890.execute-api.eu-central-1.amazonaws.com",
+      "domainPrefix": "1234567890",
+      "extendedRequestId": "amo-8HzPliAFgHg=",
+      "httpMethod": "POST",
+      "identity": Object {
+        "accessKey": null,
+        "accountId": null,
+        "caller": null,
+        "cognitoAuthenticationProvider": null,
+        "cognitoAuthenticationType": null,
+        "cognitoIdentityId": null,
+        "cognitoIdentityPoolId": null,
+        "principalOrgId": null,
+        "sourceIp": "127.0.0.1",
+        "user": null,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.1 Safari/605.1.15",
+        "userArn": null,
+      },
+      "path": "/Prod/",
+      "protocol": "HTTP/1.1",
+      "requestId": "a17a92fe-8477-11e9-b7d2-51d9bcca17bd",
+      "requestTime": "01/Jun/2019:14:14:55 +0000",
+      "requestTimeEpoch": 1559398495665,
+      "resourceId": "lm3hfkkof6",
+      "resourcePath": "/",
+      "stage": "Prod",
+    },
+    "resource": "/",
+    "stageVariables": null,
+  },
+}
+`;
