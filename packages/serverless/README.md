@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# @marblejs/serverless-aws-lambda
+# @marblejs/serverless
 
 AWS Lambda serverless proxy for [Marble.js](https://github.com/marblejs/marble). Based on work of [@mflorence99](https://github.com/mflorence99/aws-serverless-marblejs).
 
@@ -26,7 +26,7 @@ import { createLambda, ProxyType } from '@marblejs/severless';
 import httpListener from './httpListener';
 
 export = createLambda({
-  app: httpListener, // Your app goes here
+  httpListener, // Your app goes here
   type: ProxyType.AWS, // Currently we support only AWS Lambda with API Gateway
   proxyOptions: { // Optional configuration for specified ProxyType
     binaryMimeTypes: ['application/octet-stream'], 

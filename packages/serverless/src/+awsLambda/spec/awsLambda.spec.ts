@@ -1,7 +1,7 @@
-import { createHandler } from './awsLambda.setup';
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { createLambda } from '../../handler';
 import { httpListener } from '@marblejs/core';
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import { createHandler } from './awsLambda.setup';
+import { createLambda } from '../../handler';
 
 describe('@marblejs/serverless - AWS Proxy integration', () => {
   let handler;
@@ -43,14 +43,16 @@ describe('@marblejs/serverless - AWS Proxy integration', () => {
       httpMethod: 'GET',
       path: '/chunked-transfer',
     }, {});
+
     expect(response.statusCode).toBe(200);
     expect(response.multiValueHeaders).toBeDefined();
+    // TODO Extract it to a separate method in proxy helpers (is already done in upcoming PR)
     const getHeader = (key: string) =>
       response.multiValueHeaders &&
       response.multiValueHeaders[key] &&
       response.multiValueHeaders[key][0];
     expect(getHeader('content-type')).toBe('application/json');
-    expect(getHeader('content-length')).toBe('15');
+    expect(getHeader('Content-Length')).toBe('15');
     expect(JSON.parse(response.body)).toEqual({ key: 'value' });
   });
 });

@@ -1,14 +1,14 @@
-import { EffectFactory, HttpEffectResponse, httpListener } from '@marblejs/core';
-import { map } from 'rxjs/operators';
+import { HttpEffectResponse, httpListener, r } from '@marblejs/core';
+import { map, mapTo } from 'rxjs/operators';
 import { createLambda, ProxyType } from '../../';
 import { awsApiGatewayMiddleware$ } from '../awsLambda.middleware';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { Readable } from 'stream';
 
-const effect$ = EffectFactory
-  .matchPath('/')
-  .matchType('POST')
-  .use(req$ => req$.pipe(
+const effect$ = r.pipe(
+  r.matchPath('/'),
+  r.matchType('POST'),
+  r.useEffect(req$ => req$.pipe(
     map((req): HttpEffectResponse => ({
       status: 200,
       body: {
@@ -18,13 +18,14 @@ const effect$ = EffectFactory
         context: req.apiGatewayContext,
       },
     }))
-  ));
+  )),
+);
 
-const chunkedTransferEncodingEffect$ = EffectFactory
-  .matchPath('/chunked-transfer')
-  .matchType('GET')
-  .use(req$ => req$.pipe(
-    map((): HttpEffectResponse => ({
+const chunkedTransferEncodingEffect$ = r.pipe(
+  r.matchPath('/chunked-transfer'),
+  r.matchType('GET'),
+  r.useEffect(req$ => req$.pipe(
+    mapTo(({
       status: 200,
       headers: {
         'transfer-encoding': 'chunked',
@@ -36,7 +37,8 @@ const chunkedTransferEncodingEffect$ = EffectFactory
         }
       }),
     }))
-  ));
+  ))
+);
 
 const app = httpListener({
   middlewares: [

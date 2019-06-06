@@ -1,4 +1,5 @@
 import { AwsLambdaProxy } from '../awsLambdaProxy';
+import { AwsLambdaHeaders } from '../awsLambda.types';
 
 describe('@marblejs/serverless - AWS Proxy', () => {
   let proxy: AwsLambdaProxy;
@@ -6,6 +7,7 @@ describe('@marblejs/serverless - AWS Proxy', () => {
   beforeEach(() => {
     proxy = new AwsLambdaProxy(() => void 0);
   });
+
   afterEach(() => {
     proxy.close();
   });
@@ -34,8 +36,8 @@ describe('@marblejs/serverless - AWS Proxy', () => {
       path: '/',
       body: undefined,
       headers: {
-        'x-apigateway-context': '%7B%7D',
-        'x-apigateway-event': '%7B%22httpMethod%22%3A%22GET%22%2C%22path%22%3A%22%2F%22%7D',
+        [AwsLambdaHeaders.AWSLAMBDA_CONTEXT]: '%7B%7D',
+        [AwsLambdaHeaders.APIGATEWAY_EVENT]: '%7B%22httpMethod%22%3A%22GET%22%2C%22path%22%3A%22%2F%22%7D',
       },
     });
   });
@@ -56,13 +58,30 @@ describe('@marblejs/serverless - AWS Proxy', () => {
       path: '/',
       body: Buffer.from('test'),
       headers: {
-        'x-apigateway-context': '%7B%7D',
-        'x-apigateway-event': '%7B%22httpMethod%22%3A%22GET%22%2C%22path%22%3A%22%2F%22%2C%22isBase64Encoded%22%3Atrue%7D',
+        [AwsLambdaHeaders.AWSLAMBDA_CONTEXT]: '%7B%7D',
+        [AwsLambdaHeaders.APIGATEWAY_EVENT]: '%7B%22httpMethod%22%3A%22GET%22%2C%22path%22%3A%22%2F%22%2C%22isBase64Encoded%22%3Atrue%7D',
       },
     });
   });
 
   test('#normalizeResponse() ', async () => {
-
+    const body = JSON.stringify({ test: 'json body' });
+    const normalizedResponse = await Promise.resolve(proxy.normalizeResponse({
+      statusMessage: 'OK',
+      statusCode: 200,
+      body: Buffer.from(body),
+      headers: {
+        'Content-Type': ['application/json'],
+      },
+    }));
+    expect(normalizedResponse).toEqual({
+      multiValueHeaders: {
+        'Content-Type': ['application/json'],
+        'Content-Length': ['20'],
+      },
+      statusCode: 200,
+      body,
+      isBase64Encoded: false,
+    });
   });
 });

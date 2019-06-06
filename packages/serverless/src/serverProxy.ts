@@ -1,16 +1,17 @@
-import { createServer, IncomingMessage, OutgoingMessage, request, Server } from 'http';
+import { createServer, IncomingMessage, OutgoingHttpHeaders, OutgoingMessage, request, Server } from 'http';
 import { makeSocketPath, normalizeHeaders } from './serverProxy.helpers';
+import { HttpMethod } from '@marblejs/core';
 
 type Resolver<T> = (result: T | Promise<T>) => void;
 
 export type ServerApp = (req: IncomingMessage, res: OutgoingMessage) => void;
 
 export interface ServerProxyRequest {
-  method: string;
+  method: HttpMethod;
   path: string;
   host?: string;
   protocol?: string;
-  headers?: Record<string, string>;
+  headers?: OutgoingHttpHeaders;
   body?: Buffer;
 }
 
@@ -23,7 +24,7 @@ export interface ServerProxyResponse {
 
 export abstract class ServerProxy<ProxyRequest, ProxyResponse> {
   private readonly server: Server;
-  private listening: boolean = false;
+  private listening = false;
   private socketPath: string;
 
   constructor(
@@ -95,7 +96,7 @@ export abstract class ServerProxy<ProxyRequest, ProxyResponse> {
         response
           .on('data', chunk => bufferChunks.push(chunk))
           .on('end', () => {
-            let { statusCode, statusMessage, headers } = response;
+            const { statusCode, statusMessage, headers } = response;
 
             resolve(this.normalizeResponse({
               statusCode,

@@ -3,7 +3,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { HttpStatus } from '@marblejs/core';
 import { ServerApp, ServerProxy, ServerProxyRequest, ServerProxyResponse } from '../serverProxy';
 import { defaultAwsLambdaProxyOptions } from './awsLambdaProxy.options';
-import { AwsLambdaProxyOptions } from './awsLambda.types';
+import { AwsLambdaHeaders, AwsLambdaProxyOptions } from './awsLambda.types';
+import { HttpMethod } from '@marblejs/core';
 
 interface ApiGatewayRequest {
   event: APIGatewayProxyEvent;
@@ -18,35 +19,36 @@ export class AwsLambdaProxy extends ServerProxy<ApiGatewayRequest, APIGatewayPro
     this.options = Object.assign({}, defaultAwsLambdaProxyOptions, options);
   }
 
-  normalizeError(error: Error): Promise<APIGatewayProxyResult> | APIGatewayProxyResult {
+  normalizeError(error: Error): APIGatewayProxyResult {
     console.log(error);
     return { body: error.message, headers: {}, statusCode: HttpStatus.BAD_GATEWAY };
   }
 
-  normalizeRequest(proxyRequest: ApiGatewayRequest): ServerProxyRequest | Promise<ServerProxyRequest> {
+  normalizeRequest(proxyRequest: ApiGatewayRequest): ServerProxyRequest {
     const { event, context } = proxyRequest;
     const { body, headers, ...eventRest } = event;
     return {
       path: url.format({ pathname: event.path, query: event.queryStringParameters }),
       headers: {
         ...headers,
-        'x-apigateway-event': encodeURIComponent(JSON.stringify(eventRest)),
-        'x-apigateway-context': encodeURIComponent(JSON.stringify(context)),
+        [AwsLambdaHeaders.APIGATEWAY_EVENT]: encodeURIComponent(JSON.stringify(eventRest)),
+        [AwsLambdaHeaders.AWSLAMBDA_CONTEXT]: encodeURIComponent(JSON.stringify(context)),
       },
-      method: event.httpMethod,
+      method: event.httpMethod as HttpMethod,
       body: body ? Buffer.from(body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined,
     };
   }
 
-  normalizeResponse(serverProxyResponse: ServerProxyResponse): Promise<APIGatewayProxyResult> | APIGatewayProxyResult {
+  normalizeResponse(serverProxyResponse: ServerProxyResponse): APIGatewayProxyResult {
     const { headers, body, statusCode } = serverProxyResponse;
     const { binaryMimeTypes } = this.options;
 
     if (headers['transfer-encoding'] && headers['transfer-encoding'].includes('chunked')) {
       delete headers['transfer-encoding'];
     }
-    if (body && !headers['content-length']) {
-      headers['content-length'] = [String(Buffer.byteLength(body))];
+    // TODO Use getHeaderByKey from proxy utils that will be available in upcoming PR
+    if (body && !headers['Content-Length']) {
+      headers['Content-Length'] = [String(Buffer.byteLength(body))];
     }
 
     const contentType = headers['content-type'] && headers['content-type'][0]
@@ -55,7 +57,7 @@ export class AwsLambdaProxy extends ServerProxy<ApiGatewayRequest, APIGatewayPro
     const isBase64Encoded = binaryMimeTypes.includes(contentType);
     return {
       body: body.toString(isBase64Encoded ? 'base64' : 'utf8'),
-      statusCode: statusCode || 200,
+      statusCode: statusCode || HttpStatus.OK,
       multiValueHeaders: headers,
       isBase64Encoded,
     };
