@@ -24,13 +24,22 @@ export const normalizeHeaders = (
       }
       return headers;
     }, {});
-  for(const key in headers){
-    if(!headers[key].length){
+  for (const key in headers) {
+    if (!headers[key].length) {
       delete headers[key];
     }
   }
   return headers;
 };
 
-export const getHeaderContent = (header: undefined | string | string[]) =>
-  header && JSON.parse(decodeURIComponent(typeof header === 'string' ? header : header[0]));
+type MaybeArray<T> = T | T[];
+
+export const getHeaderByKey = (
+  headers: Record<string, MaybeArray<number | string | boolean | undefined>> | undefined = {},
+  key: string,
+) => {
+  const lowercaseKey = key.toLowerCase();
+  const foundKey = Object.keys(headers).find(key => key.toLowerCase() === lowercaseKey);
+  const header = foundKey && headers[foundKey];
+  return header && String(Array.isArray(header) ? header[0] : header);
+};

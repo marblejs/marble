@@ -4,6 +4,7 @@ import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { bodyFactory } from './responseBody.factory';
 import { headersFactory } from './responseHeaders.factory';
 import { isStream } from '../+internal/utils';
+import { applyMetadata } from '../+internal/testing';
 
 export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effect: HttpEffectResponse) => {
   if (res.finished) { return EMPTY; }
@@ -15,6 +16,8 @@ export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effe
 
   const bodyFactoryWithHeaders = bodyFactory(headers);
   const body = bodyFactoryWithHeaders(effect.body);
+
+  applyMetadata(req, res);
 
   if (isStream(body)) {
     res.writeHead(status, headers);

@@ -5,6 +5,7 @@ import { EffectMetadata } from '../effects/effects.interface';
 import { HttpEffectResponse } from '../effects/http-effects.interface';
 import { RouteMatched, Routing, RoutingItem } from './router.interface';
 import { queryParamsFactory } from './router.query.factory';
+
 export { RoutingItem };
 
 export const findRoute = (
@@ -13,7 +14,7 @@ export const findRoute = (
   method: HttpMethod
 ): RouteMatched | undefined => {
   for (let i = 0; i < routing.length; ++i) {
-    const { regExp, methods } = routing[i];
+    const { regExp, methods, path } = routing[i];
     const match = url.match(regExp);
 
     if (!match) { continue; }
@@ -31,7 +32,7 @@ export const findRoute = (
       }
     }
 
-    return { middleware, effect, params };
+    return { middleware, effect, params, path };
   }
   return undefined;
 };
@@ -41,15 +42,16 @@ export const resolveRouting =
   (res: HttpResponse) =>
   (req: HttpRequest): Observable<HttpEffectResponse> => {
     if (res.finished) { return EMPTY; }
+    req.meta = {};
 
     const [urlPath, urlQuery] = req.url.split('?');
     const preparedUrlPath = (urlPath + '/').replace(/\/\/+/g, '/');
     const routeMatched = findRoute(routing, preparedUrlPath, req.method);
-
     if (!routeMatched) { return EMPTY; }
 
     req.query = queryParamsFactory(urlQuery);
     req.params = routeMatched.params;
+    req.meta.path = routeMatched.path;
 
     const middleware = routeMatched.middleware;
 

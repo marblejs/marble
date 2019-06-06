@@ -41,8 +41,8 @@ describe('#findRoute', () => {
     const invalidRoute2 = findRoute(routing, '/group/nested/foo', 'TEST' as HttpMethod);
 
     // then
-    expect(validRoute1).toEqual({ effect: e3$, params: {} });
-    expect(validRoute2).toEqual({ effect: e3$, params: {} });
+    expect(validRoute1).toEqual({ effect: e3$, params: {}, path: '/group/nested/foo' });
+    expect(validRoute2).toEqual({ effect: e3$, params: {}, path: '/group/nested/foo' });
     expect(invalidRoute1).toBeUndefined();
     expect(invalidRoute2).toBeUndefined();
   });
@@ -63,7 +63,8 @@ describe('#findRoute', () => {
     // then
     expect(route).toEqual({
       effect: e$,
-      params: { param: 'nested' }
+      params: { param: 'nested' },
+      path: '/group/:param/foo',
     });
   });
 
@@ -94,6 +95,7 @@ describe('#findRoute', () => {
       effect: e2$,
       middleware: undefined,
       params: {},
+      path: '/group'
     });
     expect(route2).toBeUndefined();
   });
@@ -116,7 +118,7 @@ describe('#resolveRouting', () => {
   test('resolves found effect', done => {
     // given
     const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
-    const expectedMachingResult: RouteMatched = { effect: effect$, params: {} };
+    const expectedMachingResult: RouteMatched = { effect: effect$, params: {}, path: '/' };
     const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
     const res = {} as HttpResponse;
 
@@ -190,7 +192,7 @@ describe('#resolveRouting', () => {
     const middleware$: HttpMiddlewareEffect = req$ => req$.pipe(tap(req => req.test = 'test' ));
     const effect$: HttpEffect = req$ => req$.pipe(map(req => ({ body: req.test }) ));
 
-    const expectedMachingResult: RouteMatched = { middleware: middleware$, effect: effect$, params: {} };
+    const expectedMachingResult: RouteMatched = { middleware: middleware$, effect: effect$, params: {}, path: '/' };
     const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
     const res = {} as HttpResponse;
 

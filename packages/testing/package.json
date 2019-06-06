@@ -1,14 +1,15 @@
 {
-  "name": "@marblejs/serverless",
+  "name": "@marblejs/testing",
   "version": "2.2.2",
-  "description": "Run Marble.js as a serverless function",
+  "description": "Test Marble.js API and document it",
   "keywords": [
-    "aws",
-    "lambda",
-    "serverless",
+    "test",
+    "api",
     "marble.js",
-    "amazon",
-    "function"
+    "generate",
+    "docs",
+    "openapi",
+    "swagger"
   ],
   "author": "Krzysztof Miemiec <krzysztof.miemiec@gmail.com>",
   "homepage": "https://github.com/marblejs/marble/tree/master/packages/serverless#readme",
@@ -25,12 +26,13 @@
     "@marblejs/core": "^2.2.2"
   },
   "dependencies": {
-    "@marblejs/proxy": "^2.2.2"
+    "@marblejs/proxy": "^2.2.2",
+    "openapi-schema-validator": "^3.0.3",
+    "generate-schema": "^2.6.0"
   },
   "devDependencies": {
     "@marblejs/core": "^2.2.2",
-    "@types/aws-lambda": "^8.10.26",
-    "@types/node": "^12.0.4"
+    "@marblejs/middleware-body": "^2.2.2"
   },
   "repository": {
     "type": "git",

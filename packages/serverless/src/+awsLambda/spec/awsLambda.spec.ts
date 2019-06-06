@@ -1,7 +1,8 @@
 import { httpListener } from '@marblejs/core';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { createHandler } from './awsLambda.setup';
+import { createHandler } from './awsLambda.spec-setup';
 import { createLambda } from '../../handler';
+import { getHeaderByKey } from '@marblejs/proxy';
 
 describe('@marblejs/serverless - AWS Proxy integration', () => {
   let handler;
@@ -46,13 +47,8 @@ describe('@marblejs/serverless - AWS Proxy integration', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.multiValueHeaders).toBeDefined();
-    // TODO Extract it to a separate method in proxy helpers (is already done in upcoming PR)
-    const getHeader = (key: string) =>
-      response.multiValueHeaders &&
-      response.multiValueHeaders[key] &&
-      response.multiValueHeaders[key][0];
-    expect(getHeader('content-type')).toBe('application/json');
-    expect(getHeader('Content-Length')).toBe('15');
+    expect(getHeaderByKey(response.multiValueHeaders, 'Content-Type')).toBe('application/json');
+    expect(getHeaderByKey(response.multiValueHeaders, 'Content-Length')).toBe('15');
     expect(JSON.parse(response.body)).toEqual({ key: 'value' });
   });
 });

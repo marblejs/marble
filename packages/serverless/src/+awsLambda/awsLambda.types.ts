@@ -1,5 +1,8 @@
+import { Logger } from '@marblejs/proxy';
+
 export interface AwsLambdaProxyOptions {
   binaryMimeTypes: string[];
+  logger: Logger;
 }
 
 export enum AwsLambdaHeaders {
