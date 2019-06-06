@@ -10,7 +10,7 @@ import {
 import { EventEmitter } from 'events';
 
 interface HttpRequestMockParams {
-  url: string;
+  url?: string;
   body?: any;
   params?: RouteParameters;
   query?: QueryParameters;
@@ -30,15 +30,17 @@ export interface HttpServerMocks {
   on?: jest.Mock;
 }
 
-export const createHttpRequest = (data: HttpRequestMockParams = { url: '/' }) => ({
-  ...data,
-  url: data.url,
-  body: data.body,
-  params: data.params || {},
-  query: data.query || {},
-  headers: data.headers || {},
-  method: data.method || 'GET',
-}) as HttpRequest;
+export const createHttpRequest = (data?: HttpRequestMockParams) => Object.assign(
+  {},
+  {
+    url: '/',
+    method: 'GET',
+    headers: {},
+    query: {},
+    params: {},
+  },
+  data,
+) as HttpRequest;
 
 export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
   new class extends EventEmitter {

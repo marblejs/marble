@@ -7,7 +7,6 @@ describe('#switchToProtocol operator', () => {
   test(`responds with ${HttpStatus.SWITCHING_PROTOCOLS} status if protocol is supported`, () => {
     // given
     const incomingWebsocketReq = createHttpRequest({
-      url: '/',
       headers: {
         upgrade: 'websocket',
         connection: 'upgrade',
@@ -17,7 +16,6 @@ describe('#switchToProtocol operator', () => {
       status: HttpStatus.SWITCHING_PROTOCOLS,
     };
     const incomingHttpReq = createHttpRequest({
-      url: '/',
       headers: {
         upgrade: 'http2',
         connection: 'upgrade',

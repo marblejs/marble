@@ -3,7 +3,7 @@ import { defaultError$ } from '../error.effect';
 import { HttpError } from '../error.model';
 
 describe('defaultError$', () => {
-  const incomingRequest = createHttpRequest({ url: '/' });
+  const incomingRequest = createHttpRequest();
   const client = createHttpResponse();
 
   test('maps HttpError', () => {

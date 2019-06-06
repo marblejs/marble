@@ -7,7 +7,6 @@ describe('@marblejs/serverless - AWS API Gateway Middleware', () => {
   test('extracts headers from request', async () => {
     const request = await awsApiGatewayMiddleware$()(
       of(createHttpRequest({
-        url: 'ignored',
         headers: {
           [AwsLambdaHeaders.AWSLAMBDA_CONTEXT]: ['%7B%22context%22%3A0%7D'],
           [AwsLambdaHeaders.APIGATEWAY_EVENT]: '%7B%22event%22%3A1%7D',

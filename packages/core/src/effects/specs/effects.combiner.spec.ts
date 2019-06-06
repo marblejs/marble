@@ -9,8 +9,8 @@ describe('#combineMiddlewares', () => {
     const a$: HttpMiddlewareEffect = req$ => req$.pipe(tap(req => { req.test = 1; }));
     const b$: HttpMiddlewareEffect = req$ => req$.pipe(tap(req => { req.test = req.test + 1; }));
     const c$: HttpMiddlewareEffect = req$ => req$.pipe(tap(req => { req.test = req.test + 1; }));
-    const incomingRequest = createHttpRequest({ url: '/' });
-    const outgoingRequest = createHttpRequest({ url: '/', test: 3 });
+    const incomingRequest = createHttpRequest();
+    const outgoingRequest = createHttpRequest({ test: 3 });
 
     // when
     const middlewares$ = combineMiddlewares(a$, b$, c$);
@@ -24,8 +24,8 @@ describe('#combineMiddlewares', () => {
 
   test('returns stream even if middlewares are not provided', () => {
     // given
-    const incomingRequest = createHttpRequest({ url: '/' });
-    const outgoingRequest = createHttpRequest({ url: '/' });
+    const incomingRequest = createHttpRequest();
+    const outgoingRequest = createHttpRequest();
 
     // when
     const middlewares$ = combineMiddlewares();
