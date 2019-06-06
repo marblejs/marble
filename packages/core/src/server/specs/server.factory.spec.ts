@@ -48,7 +48,9 @@ describe('#createServer', () => {
       hostname,
       httpListener: app,
     }).run();
-
+    server.on('error', error => {
+      console.error(error);
+    });
     server.on('listening', () => {
       expect(server.listening).toBe(true);
       done();
