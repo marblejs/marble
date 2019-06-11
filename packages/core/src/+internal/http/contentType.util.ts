@@ -1,3 +1,5 @@
+import { HttpHeaders } from '../../http.interface';
+
 export enum ContentType {
   APPLICATION = 'application/*',
   APPLICATION_RTF = 'application/rtf',
@@ -33,3 +35,10 @@ export enum ContentType {
   FONT_WOFF2 = 'font/woff2',
   MULTIPART_FORM_DATA = 'multipart/form-data',
 }
+
+export const getContentType = (headers: HttpHeaders): string => {
+  const contentType = headers['content-type'] || headers['Content-Type'];
+  return contentType
+    ? Array.isArray(contentType) ? contentType[0] : String(contentType)
+    : '';
+};

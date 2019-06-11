@@ -23,7 +23,8 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@marblejs/core": "^2.2.2"
+    "@marblejs/core": "^2.2.2",
+    "@marblejs/middleware-body": "^2.2.2"
   },
   "dependencies": {
     "@marblejs/proxy": "^2.2.2",

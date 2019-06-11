@@ -60,10 +60,8 @@ describe('@marblejs/proxy - Server Proxy', () => {
       method: true,
     } as any);
 
-    const errorMessage = 'The "method" argument must be of type string. Received type boolean';
-    expect(logger.message(-1)).toContain(errorMessage);
+    expect(logger.message(-1)).toContain('TypeError');
     expect(response.code).toEqual(HttpStatus.BAD_GATEWAY);
-    expect(response.body).toEqual(errorMessage);
 
     proxy.close();
   });

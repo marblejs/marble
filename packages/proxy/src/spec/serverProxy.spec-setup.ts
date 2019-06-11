@@ -17,7 +17,8 @@ export interface MyResponse {
 export class MyProxy extends ServerProxy<MyRequest, MyResponse> {
 
   constructor(app: ServerApp, logger: Logger) {
-    super(app, logger);
+    super(app);
+    this.log = logger;
   }
 
   normalizeError(error: Error): MyResponse {

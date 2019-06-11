@@ -1,24 +1,13 @@
-import { getHeaderByKey, ServerApp, ServerProxy, ServerProxyRequest, ServerProxyResponse } from '@marblejs/proxy';
+import { ServerApp, ServerProxy, ServerProxyRequest, ServerProxyResponse } from '@marblejs/proxy';
 import { HttpStatus } from '@marblejs/core';
+import { getContentType } from '@marblejs/core/dist/+internal';
 import { defaultTestProxyOptions, TestProxyOptions, TestRequest, TestResponse } from './testProxy.options';
-
-const normalizeBody = (contentType: string, body: any): Buffer => {
-  if (body === undefined || Buffer.isBuffer(body)) {
-    return body;
-  }
-  if (typeof body === 'object') {
-    if (contentType.match(/application\/.*json/)) {
-      return Buffer.from(JSON.stringify(body));
-    }
-  }
-  return Buffer.from(String(body));
-};
 
 export class TestProxy extends ServerProxy<TestRequest, TestResponse> {
   private options: TestProxyOptions;
 
   constructor(app: ServerApp, options?: TestProxyOptions) {
-    super(app, () => void 0);
+    super(app);
     this.options = Object.assign({}, defaultTestProxyOptions, options);
   }
 
@@ -48,7 +37,7 @@ export class TestProxy extends ServerProxy<TestRequest, TestResponse> {
       host,
       protocol,
       headers,
-      body: normalizeBody(String(getHeaderByKey(headers, 'Content-Type')), body),
+      body: this.options.bodyFactory(headers)(body),
       method,
       path
     };
@@ -59,11 +48,19 @@ export class TestProxy extends ServerProxy<TestRequest, TestResponse> {
       headers,
       statusCode,
       statusMessage,
+      body,
     } = serverProxyResponse;
+
+    let parsedBody: any = undefined;
+    try {
+      parsedBody = body && this.options.bodyParser(getContentType(headers))(body);
+    } catch {
+      // Ignore body parser errors
+    }
 
     return {
       headers,
-      body: this.options.bodyParser(serverProxyResponse),
+      body: parsedBody,
       statusCode,
       statusMessage,
     };

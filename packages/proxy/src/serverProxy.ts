@@ -24,13 +24,14 @@ export interface ServerProxyResponse {
 }
 
 export abstract class ServerProxy<ProxyRequest, ProxyResponse> {
+  /* istanbul ignore next */
+  protected log: Logger = () => void 0;
   private readonly server: Server;
   private listening = false;
   private socketPath: string;
 
   constructor(
     private app: ServerApp,
-    private log: Logger,
   ) {
     this.socketPath = makeSocketPath();
     this.server = createServer(this.app);

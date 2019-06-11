@@ -1,14 +1,18 @@
 import { HttpHeaders } from '../http.interface';
-import { ContentType, isStream } from '../+internal';
+import { ContentType, getContentType, isStream } from '../+internal';
 
-export const bodyFactory = (headers: HttpHeaders) => (body: any) => {
+export type ResponseBodyFactory = (headers: HttpHeaders) => (body: any) => any;
+
+export const bodyFactory: ResponseBodyFactory = headers => body => {
   if (isStream(body)) {
     return body;
   }
   
-  switch (headers['Content-Type']) {
+  switch (getContentType(headers)) {
     case ContentType.APPLICATION_JSON:
       return JSON.stringify(body);
+    case ContentType.TEXT_PLAIN:
+      return String(body);
     default:
       return body;
   }

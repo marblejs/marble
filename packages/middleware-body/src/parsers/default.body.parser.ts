@@ -1,20 +1,24 @@
-import { ContentType } from '@marblejs/core/dist/+internal';
+import { ContentType, getContentType } from '@marblejs/core/dist/+internal';
 import { RequestBodyParser } from '../body.model';
 import { jsonParser } from './json.body.parser';
 import { textParser } from './text.body.parser';
 import { rawParser } from './raw.body.parser';
 import { urlEncodedParser } from './url.body.parser';
 
-export const defaultParser: RequestBodyParser = req => body => {
-  switch (req.headers['content-type']) {
+export const defaultParser: RequestBodyParser = reqOrContentType => body => {
+  const contentType = typeof reqOrContentType === 'string'
+    ? reqOrContentType
+    : getContentType(reqOrContentType.headers);
+
+  switch (contentType) {
     case ContentType.APPLICATION_JSON:
-      return jsonParser(req)(body);
+      return jsonParser(reqOrContentType)(body);
     case ContentType.APPLICATION_X_WWW_FORM_URLENCODED:
-      return urlEncodedParser(req)(body);
+      return urlEncodedParser(reqOrContentType)(body);
     case ContentType.APPLICATION_OCTET_STREAM:
-      return rawParser(req)(body);
+      return rawParser(reqOrContentType)(body);
     case ContentType.TEXT_PLAIN:
-      return textParser(req)(body);
+      return textParser(reqOrContentType)(body);
     default:
       return undefined;
   }

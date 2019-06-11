@@ -18,6 +18,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "peerDependencies": {
+    "@marblejs/middleware-body": "^2.2.2"
+  },
   "devDependencies": {
     "@types/node": "^12.0.4",
     "@marblejs/core": "^2.2.2",

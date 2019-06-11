@@ -13,9 +13,10 @@ interface ApiGatewayRequest {
 export class AwsLambdaProxy extends ServerProxy<ApiGatewayRequest, APIGatewayProxyResult> {
   options: AwsLambdaProxyOptions;
 
-  constructor(serverApp: ServerApp, options: Partial<AwsLambdaProxyOptions> = {}) {
-    super(serverApp, options.logger || defaultAwsLambdaProxyOptions.logger);
+  constructor(serverApp: ServerApp, options?: Partial<AwsLambdaProxyOptions>) {
+    super(serverApp);
     this.options = Object.assign({}, defaultAwsLambdaProxyOptions, options);
+    this.log = this.options.logger;
   }
 
   normalizeError(error: Error): APIGatewayProxyResult {
