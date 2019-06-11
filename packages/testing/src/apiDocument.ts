@@ -29,7 +29,7 @@ export class ApiDocument {
 
   generate(): OpenAPI.Document {
     return {
-      openapi: "3.0.2",
+      openapi: '3.0.2',
       info: {
         title: this.name,
         version: this.version,
