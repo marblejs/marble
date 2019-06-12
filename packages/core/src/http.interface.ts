@@ -12,6 +12,7 @@ export interface HttpRequest<
   body: TBody;
   params: TParams;
   query: TQuery;
+  meta: Record<string, any>;
   [key: string]: any;
 }
 

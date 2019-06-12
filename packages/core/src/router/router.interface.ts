@@ -45,6 +45,7 @@ export interface RouteMatched {
   middleware?: HttpMiddlewareEffect | undefined;
   effect: HttpEffect;
   params: Record<string, string>;
+  path: string;
 }
 
 export type Routing = RoutingItem[];

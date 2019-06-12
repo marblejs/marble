@@ -1,11 +1,6 @@
+import { binaryMimeTypes } from '@marblejs/proxy';
+
 export const defaultAwsLambdaProxyOptions = {
-  binaryMimeTypes: [
-    'application/octet-stream',
-    'font/eot',
-    'font/opentype',
-    'font/otf',
-    'image/gif',
-    'image/jpeg',
-    'image/png',
-  ],
+  binaryMimeTypes,
+  logger: console.log,
 };

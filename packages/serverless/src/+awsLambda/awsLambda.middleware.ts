@@ -1,7 +1,9 @@
 import { map } from 'rxjs/operators';
 import { HttpMiddlewareEffect } from '@marblejs/core';
-import { getHeaderContent } from '../serverProxy.helpers';
 import { AwsLambdaHeaders } from './awsLambda.types';
+
+const getHeaderContent = (header: undefined | string | string[]) =>
+  header && JSON.parse(decodeURIComponent(typeof header === 'string' ? header : header[0]));
 
 export const awsApiGatewayMiddleware$ = (): HttpMiddlewareEffect => (req$) => req$.pipe(
   map(req => {

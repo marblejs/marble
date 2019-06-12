@@ -1,10 +1,11 @@
 import { createServer, IncomingMessage, OutgoingHttpHeaders, OutgoingMessage, request, Server } from 'http';
 import { makeSocketPath, normalizeHeaders } from './serverProxy.helpers';
-import { HttpMethod } from '@marblejs/core';
+import { HttpMethod, HttpStatus } from '@marblejs/core';
 
 type Resolver<T> = (result: T | Promise<T>) => void;
 
 export type ServerApp = (req: IncomingMessage, res: OutgoingMessage) => void;
+export type Logger = (message: string) => void;
 
 export interface ServerProxyRequest {
   method: HttpMethod;
@@ -16,38 +17,40 @@ export interface ServerProxyRequest {
 }
 
 export interface ServerProxyResponse {
-  statusCode?: number;
+  statusCode: number;
   statusMessage?: string;
-  body: Buffer;
+  body?: Buffer;
   headers: Record<string, string[]>;
 }
 
 export abstract class ServerProxy<ProxyRequest, ProxyResponse> {
+  /* istanbul ignore next */
+  protected log: Logger = () => void 0;
   private readonly server: Server;
   private listening = false;
   private socketPath: string;
 
   constructor(
-    private app: ServerApp
+    private app: ServerApp,
   ) {
     this.socketPath = makeSocketPath();
     this.server = createServer(this.app);
     this.server
       .on('close', () => {
         this.listening = false;
-        console.log(this.logTag, 'closed');
+        this.logWithTag('closed');
       })
       .on('error', (error: NodeJS.ErrnoException) => {
+        this.logWithTag(error.toString());
         if (error.code === 'EADDRINUSE') {
           this.socketPath = makeSocketPath();
           this.server.close(() => this.startServer());
           return;
         }
-        console.log(this.logTag, error.toString());
       })
       .on('listening', () => {
         this.listening = true;
-        console.log(this.logTag, 'listening');
+        this.logWithTag('listening');
       });
   }
 
@@ -73,16 +76,18 @@ export abstract class ServerProxy<ProxyRequest, ProxyResponse> {
     });
   }
 
-  private get logTag(): string {
-    return `ServerProxy ${this.socketPath}`;
+  /** Emits an error to server for testing purposes */
+  emitError(error: Error) {
+    this.server.emit('error', error);
+  }
+
+  private logWithTag(message: string): void {
+    this.log(`[ServerProxy ${this.socketPath}] ${message}`);
   }
 
   private sendToServer(serverProxyRequest: ServerProxyRequest, resolve: Resolver<ProxyResponse>) {
     try {
       const { headers = {}, body, host, path, method, protocol } = serverProxyRequest;
-      if (body) {
-        headers['Content-Type'] = headers['Content-Type'] || 'text/plain; charset=utf-8';
-      }
       const req = request({
         headers,
         path,
@@ -91,12 +96,16 @@ export abstract class ServerProxy<ProxyRequest, ProxyResponse> {
         protocol,
         socketPath: this.socketPath,
       }, (response: IncomingMessage) => {
-        response.headers = normalizeHeaders(response.headers);
         const bufferChunks: any[] = [];
         response
           .on('data', chunk => bufferChunks.push(chunk))
           .on('end', () => {
-            const { statusCode, statusMessage, headers } = response;
+            /* istanbul ignore next: Status code is always present in Marble, but TS requires to specify default */
+            const {
+              statusCode = HttpStatus.OK,
+              statusMessage,
+              headers,
+            } = response;
 
             resolve(this.normalizeResponse({
               statusCode,
@@ -111,6 +120,7 @@ export abstract class ServerProxy<ProxyRequest, ProxyResponse> {
       }
       req.end();
     } catch (error) {
+      this.logWithTag(error.toString());
       resolve(this.normalizeError(error));
     }
   };

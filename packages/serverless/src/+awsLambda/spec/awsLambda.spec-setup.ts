@@ -54,5 +54,7 @@ const app = httpListener({
 export const createHandler = () => createLambda({
   httpListener: app,
   type: ProxyType.AWS,
-  proxyOptions: {},
+  proxyOptions: {
+    logger: () => void 0,
+  },
 });

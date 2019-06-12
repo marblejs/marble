@@ -1,17 +1,14 @@
 {
-  "name": "@marblejs/serverless",
+  "name": "@marblejs/proxy",
   "version": "2.2.2",
-  "description": "Run Marble.js as a serverless function",
+  "description": "A generic proxy server for Marble.js",
   "keywords": [
-    "aws",
-    "lambda",
-    "serverless",
     "marble.js",
-    "amazon",
-    "function"
+    "proxy",
+    "server"
   ],
   "author": "Krzysztof Miemiec <krzysztof.miemiec@gmail.com>",
-  "homepage": "https://github.com/marblejs/marble/tree/master/packages/serverless#readme",
+  "homepage": "https://github.com/marblejs/marble/tree/master/packages/proxy#readme",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,15 +19,12 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@marblejs/core": "^2.2.2"
-  },
-  "dependencies": {
-    "@marblejs/proxy": "^2.2.2"
+    "@marblejs/middleware-body": "^2.2.2"
   },
   "devDependencies": {
+    "@types/node": "^12.0.4",
     "@marblejs/core": "^2.2.2",
-    "@types/aws-lambda": "^8.10.26",
-    "@types/node": "^12.0.4"
+    "@marblejs/middleware-body": "^2.2.2"
   },
   "repository": {
     "type": "git",

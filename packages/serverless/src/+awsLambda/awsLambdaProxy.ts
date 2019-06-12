@@ -1,10 +1,9 @@
 import * as url from 'url';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { HttpStatus } from '@marblejs/core';
-import { ServerApp, ServerProxy, ServerProxyRequest, ServerProxyResponse } from '../serverProxy';
+import { HttpMethod, HttpStatus } from '@marblejs/core';
+import { getHeaderByKey, ServerApp, ServerProxy, ServerProxyRequest, ServerProxyResponse } from '@marblejs/proxy';
 import { defaultAwsLambdaProxyOptions } from './awsLambdaProxy.options';
 import { AwsLambdaHeaders, AwsLambdaProxyOptions } from './awsLambda.types';
-import { HttpMethod } from '@marblejs/core';
 
 interface ApiGatewayRequest {
   event: APIGatewayProxyEvent;
@@ -17,6 +16,7 @@ export class AwsLambdaProxy extends ServerProxy<ApiGatewayRequest, APIGatewayPro
   constructor(serverApp: ServerApp, options?: Partial<AwsLambdaProxyOptions>) {
     super(serverApp);
     this.options = Object.assign({}, defaultAwsLambdaProxyOptions, options);
+    this.log = this.options.logger;
   }
 
   normalizeError(error: Error): APIGatewayProxyResult {
@@ -46,18 +46,15 @@ export class AwsLambdaProxy extends ServerProxy<ApiGatewayRequest, APIGatewayPro
     if (headers['transfer-encoding'] && headers['transfer-encoding'].includes('chunked')) {
       delete headers['transfer-encoding'];
     }
-    // TODO Use getHeaderByKey from proxy utils that will be available in upcoming PR
     if (body && !headers['Content-Length']) {
       headers['Content-Length'] = [String(Buffer.byteLength(body))];
     }
 
-    const contentType = headers['content-type'] && headers['content-type'][0]
-      ? headers['content-type'][0].split(';')[0]
-      : '';
-    const isBase64Encoded = binaryMimeTypes.includes(contentType);
+    const contentType = getHeaderByKey(headers, 'content-type') || '';
+    const isBase64Encoded = binaryMimeTypes.includes(contentType.split(';')[0]);
     return {
-      body: body.toString(isBase64Encoded ? 'base64' : 'utf8'),
-      statusCode: statusCode || HttpStatus.OK,
+      body: body ? body.toString(isBase64Encoded ? 'base64' : 'utf8') : '',
+      statusCode,
       multiValueHeaders: headers,
       isBase64Encoded,
     };

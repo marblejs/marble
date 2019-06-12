@@ -15,6 +15,18 @@ describe('Response body factory', () => {
     expect(factorizedBody).toEqual(JSON.stringify(body));
   });
 
+  it('#bodyFactory factorizes body for plain text', () => {
+    // given
+    const headers = { 'Content-Type': ContentType.TEXT_PLAIN };
+    const bodies = [33, 'test', false];
+
+    // when
+    const factorizedBodies = bodies.map(bodyFactory(headers));
+
+    // then
+    expect(factorizedBodies).toEqual(bodies.map(String));
+  });
+
   it(`#bodyFactory doesn't factorize body`, () => {
     // given
     const headers = { 'Content-Type': ContentType.AUDIO };

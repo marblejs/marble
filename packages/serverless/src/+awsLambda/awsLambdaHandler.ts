@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
-import { ServerApp } from '../serverProxy';
+import { ServerApp } from '@marblejs/proxy';
 import { AwsLambdaProxy } from './awsLambdaProxy';
 import { AwsLambdaProxyOptions } from './awsLambda.types';
 

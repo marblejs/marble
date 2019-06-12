@@ -8,11 +8,11 @@ const config = {
   coverageDirectory: './coverage/',
   coveragePathIgnorePatterns: [
     'dist',
-    'testing',
+    '\\+internal/testing',
     '@integration',
-    'spec-util.ts$',
-    'integration.spec.ts$',
-    'integration.ts$'
+    '\\.spec-(util|setup)\\.ts$',
+    '\\.spec\\.ts$',
+    'integration\\.ts$'
   ],
   collectCoverageFrom : ['packages/**/*.ts'],
   moduleFileExtensions: [

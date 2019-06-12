@@ -10,6 +10,8 @@
     "watch": "lerna run --parallel --stream watch",
     "lint": "eslint ./packages/**/src --ext .ts",
     "pretest": "yarn lint",
+    "link:all": "lerna exec -- yarn link",
+    "unlink:all": "lerna exec -- yarn unlink",
     "test": "yarn test:unit && yarn test:integration",
     "test:unit": "SCOPE=unit jest --expand --coverage --detectOpenHandles",
     "test:integration": "SCOPE=integration jest --expand --detectOpenHandles",
