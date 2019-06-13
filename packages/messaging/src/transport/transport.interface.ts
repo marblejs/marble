@@ -18,11 +18,13 @@ export interface TransportLayerConnection {
   sendMessage: (channel: string, message: TransportMessage<Buffer>, opts?: TransportLayerSendOpts) => Observable<any>;
   consumeMessage: () => Promise<any>;
   consumeResponse: () => Promise<any>;
+  ack: (msg: any) => void;
   close: () => Promise<any>;
   channel: string;
   error$: Observable<Error>;
   message$: Observable<TransportMessage<Buffer>>;
   response$: Observable<TransportMessage<Buffer>>;
+  close$: Observable<any>;
 }
 
 export interface TransportLayerSendOpts {

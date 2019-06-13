@@ -5,8 +5,8 @@ import {
   combineEffects,
   createEffectMetadata,
 } from '@marblejs/core';
-import { Observable, Subscription } from 'rxjs';
-import { map, publish, withLatestFrom } from 'rxjs/operators';
+import { Observable, Subscription, Subject, merge } from 'rxjs';
+import { map, publish, withLatestFrom, takeUntil } from 'rxjs/operators';
 import {
   TransportMessage,
   TransportMessageTransformer,
@@ -14,12 +14,13 @@ import {
   TransportLayer,
 } from '../transport/transport.interface';
 import { jsonTransformer } from '../transport/transport.transformer';
-import { MsgEffect, MsgMiddlewareEffect } from '../effects/messaging-effects.interface';
+import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
 import { TransportLayerToken } from '../server/messaging.server.tokens';
 
 export interface MessagingListenerConfig {
   effects?: MsgEffect<any, any>[];
   middlewares?: MsgMiddlewareEffect<any, any>[];
+  error$?: MsgErrorEffect;
   msgTransformer?: TransportMessageTransformer<any>;
 }
 
@@ -27,12 +28,14 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
   const {
     effects = [],
     middlewares = [],
+    error$ = (msg$ => msg$) as MsgErrorEffect,
     msgTransformer = jsonTransformer,
   } = config;
 
   const handleConnection = (conn: TransportLayerConnection, ask: ContextProvider) => {
     let effectsSub: Subscription;
 
+    const errorSubject = new Subject<Error>();
     const combinedEffects = combineEffects(...effects);
     const combinedMiddlewares = combineMiddlewares(...middlewares);
     const defaultMetadata = createEffectMetadata({ ask });
@@ -49,8 +52,16 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
       map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
     );
 
-    const subscribeEffects = (input$: Observable<TransportMessage<any>>) =>
-      input$.subscribe(
+    error$(merge(
+      errorSubject.asObservable(),
+      conn.error$,
+    ), conn, defaultMetadata)
+      .pipe(takeUntil(conn.close$))
+      .subscribe();
+
+    const subscribeEffects = (input$: Observable<TransportMessage<any>>) => input$
+      .pipe(takeUntil(conn.close$))
+      .subscribe(
         msg => {
           if (msg.replyTo) {
             conn.sendMessage(msg.replyTo, {
@@ -59,10 +70,10 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
               raw: msg.raw,
             });
           }
+          conn.ack(msg.raw);
         },
         error => {
-          // @TODO: handle errors
-          console.error(error);
+          errorSubject.next(error);
           if (effectsSub.closed) { effectsSub = subscribeEffects(message$); }
         },
       );
