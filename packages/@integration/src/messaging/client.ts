@@ -9,9 +9,11 @@ import {
   ServerEvent,
   httpListener,
   HttpServerEffect,
+  use,
 } from '@marblejs/core';
 import { merge, of, forkJoin } from 'rxjs';
-import { tap, map, mapTo, mergeMap } from 'rxjs/operators';
+import { tap, map, mergeMap } from 'rxjs/operators';
+import { requestValidator$, t } from '@marblejs/middleware-io';
 
 const ClientToken = createContextToken<MessagingClient>();
 
@@ -24,14 +26,26 @@ const client = messagingClient({
   },
 });
 
+const rootValiadtor$ = requestValidator$({
+  params: t.type({
+    number: t.string,
+  }),
+});
+
 const fib$ = r.pipe(
-  r.matchPath('/fib'),
+  r.matchPath('/fib/:number'),
   r.matchType('GET'),
   r.useEffect((req$, _, { ask }) => req$.pipe(
-    mapTo(ask(ClientToken)),
-    mergeMap(client => forkJoin(
-      client.map(c => c.send({ type: 'FIB', payload: 10 })).getOrElse(of({})),
-      client.map(c => c.send({ type: 'FIB', payload: 10 })).getOrElse(of({})),
+    use(rootValiadtor$),
+    map(req => Number(req.params.number)),
+    mergeMap(number => of(ask(ClientToken)).pipe(
+      mergeMap(client => forkJoin(
+        client.map(c => c.send({ type: 'FIB', payload: number + 0 })).getOrElse(of({})),
+        client.map(c => c.send({ type: 'FIB', payload: number + 1 })).getOrElse(of({})),
+        client.map(c => c.send({ type: 'FIB', payload: number + 2 })).getOrElse(of({})),
+        client.map(c => c.send({ type: 'FIB', payload: number + 3 })).getOrElse(of({})),
+        client.map(c => c.send({ type: 'FIB', payload: number + 4 })).getOrElse(of({})),
+      )),
     )),
     map(body => ({ body })),
   )),
@@ -45,7 +59,7 @@ const listening$: HttpServerEffect = event$ =>
   );
 
 export const server = createServer({
-  port: 1337,
+  port: Number(process.env.PORT) || 1337,
   httpListener: httpListener({
     middlewares: [logger$()],
     effects: [fib$],
