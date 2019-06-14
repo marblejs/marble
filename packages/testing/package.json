@@ -17,7 +17,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist/"
+    "dist/",
+    "openApi.reporter.js"
   ],
   "publishConfig": {
     "access": "public"
@@ -28,8 +29,8 @@
   },
   "dependencies": {
     "@marblejs/proxy": "^2.2.2",
-    "openapi-schema-validator": "^3.0.3",
-    "generate-schema": "^2.6.0"
+    "generate-schema": "^2.6.0",
+    "openapi-schema-validator": "^3.0.3"
   },
   "devDependencies": {
     "@marblejs/core": "^2.2.2",

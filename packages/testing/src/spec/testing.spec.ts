@@ -1,5 +1,7 @@
 import { createMarble } from './server.spec-setup';
-import { ApiCollection, createTestApi, Endpoint } from '../';
+import { ApiCollection } from '../apiCollection';
+import { createTestApi } from '../testApi';
+import { EndpointData } from '../testing.types';
 import { HttpMethodType, HttpStatus } from '@marblejs/core';
 import { ApiDocument } from '../apiDocument';
 import OpenAPIValidator from 'openapi-schema-validator';
@@ -78,13 +80,12 @@ describe('@marblejs/testing - TestApi', () => {
 
     testApi.finish();
 
-    expect(collection.endpoints).toEqual([
-      {
-        path: '/people/:name',
-        method: 'GET',
-        responses: [responseOk, responseNotFound],
-      } as Endpoint
-    ]);
+    expect(collection.endpoints).toHaveLength(1);
+    expect(collection.endpoints[0].data).toEqual({
+      path: '/people/:name',
+      method: 'GET',
+      responses: [responseOk.data, responseNotFound.data],
+    } as EndpointData);
   });
 
   test('generates valid OpenAPI 3 documentation based on test requests', async () => {

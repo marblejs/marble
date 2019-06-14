@@ -1,6 +1,5 @@
 import { TestProxy } from './testProxy';
 import { BoundDependency, createContext, HttpHeaders, httpListener, HttpMethod, registerAll } from '@marblejs/core';
-import { setTestingMode } from '@marblejs/core/dist/+internal/testing';
 import { TestProxyOptions } from './testProxy.options';
 import { ApiRequest, Bodyless } from './apiRequest';
 
@@ -16,7 +15,7 @@ export class TestApi {
   private defaultHost?: string;
 
   constructor(private proxy: TestProxy) {
-    setTestingMode(true);
+    process.env.MARBLE_TESTING_METADATA_ON = 'true';
   }
 
   useHeaders(headers: HttpHeaders) {
@@ -83,7 +82,6 @@ export class TestApi {
   }
 
   finish() {
-    setTestingMode(false);
     this.proxy.close();
   }
 }
