@@ -7,11 +7,6 @@ export interface TestingMetadata {
 }
 
 export const TESTING_HEADER = 'X-Marble-Testing';
-let testingEnabled = false;
-
-export const setTestingMode = (enabled: boolean) => {
-  testingEnabled = enabled;
-};
 
 export const stripMetadataHeader = (headers: HttpHeaders): TestingMetadata => {
   const key = TESTING_HEADER.toLowerCase();
@@ -24,7 +19,7 @@ export const setMetadataHeader = (response: HttpResponse, meta: TestingMetadata)
   response.setHeader(TESTING_HEADER, encodeURIComponent(JSON.stringify(meta)));
 
 export const applyMetadata = (req: HttpRequest, res: HttpResponse) => {
-  if (!testingEnabled) {
+  if (!process.env.MARBLE_TESTING_METADATA_ON) {
     return;
   }
   const { meta, params, query } = req;
