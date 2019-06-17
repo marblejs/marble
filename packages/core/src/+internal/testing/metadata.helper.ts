@@ -1,9 +1,12 @@
 import { HttpHeaders, HttpRequest, HttpResponse } from '../../http.interface';
+import { JSONSchema7 } from 'json-schema';
 
 export interface TestingMetadata {
   path: string;
-  params: Record<string, any>;
-  query: Record<string, any>;
+  body?: JSONSchema7;
+  headers?: JSONSchema7;
+  params?: JSONSchema7;
+  query?: JSONSchema7;
 }
 
 export const TESTING_HEADER = 'X-Marble-Testing';
@@ -15,19 +18,15 @@ export const stripMetadataHeader = (headers: HttpHeaders): TestingMetadata => {
   return JSON.parse(decodeURIComponent(header as string));
 };
 
+export const isTestingMetadataOn = () => process.env.MARBLE_TESTING_METADATA_ON === 'true';
+
 export const setMetadataHeader = (response: HttpResponse, meta: TestingMetadata) =>
   response.setHeader(TESTING_HEADER, encodeURIComponent(JSON.stringify(meta)));
 
 export const applyMetadata = (req: HttpRequest, res: HttpResponse) => {
-  if (!process.env.MARBLE_TESTING_METADATA_ON) {
+  if (!isTestingMetadataOn()) {
     return;
   }
-  const { meta, params, query } = req;
-  const testingMetadata: TestingMetadata = {
-    path: meta.path,
-    params: params as any,
-    query: query as any,
-  };
 
-  setMetadataHeader(res, testingMetadata);
+  setMetadataHeader(res, req.meta as any);
 };

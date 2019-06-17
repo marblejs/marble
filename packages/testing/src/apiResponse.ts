@@ -27,11 +27,11 @@ export class ApiResponse {
     return this.response.statusCode;
   }
 
-  get responseHeaders(): HttpHeaders {
+  get headers(): HttpHeaders {
     return this.response.headers;
   }
 
-  get responseBody(): any {
+  get body(): any {
     return this.response.body;
   }
 
@@ -56,6 +56,13 @@ export class ApiResponse {
       res: response,
       req: request,
     };
+  }
+
+  expectStatus(statusCode: number): this {
+    if(this.status!==statusCode){
+      throw new Error(`Unexpected status code ${this.status} in API Response. Expected ${statusCode}.`);
+    }
+    return this;
   }
 
   collect(apiCollection: ApiCollection): this {

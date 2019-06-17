@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@types/qs": "^6.5.1",
+    "@types/json-schema": "^7.0.3",
     "@types/uuid": "^3.4.4",
     "chalk": "~2.4.1",
     "file-type": "^8.0.0",

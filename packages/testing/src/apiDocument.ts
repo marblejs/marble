@@ -11,6 +11,7 @@ export class ApiDocument {
       .useSecurityScheme(primary.securityScheme)
       .describe(primary.description);
 
+    document.generationOptions = primary.generationOptions;
     document.collections = join(
       data.map(d => d.collections),
       (d1, d2) => d1.name === d2.name,
@@ -97,6 +98,7 @@ export class ApiDocument {
       description: this.description,
       servers: this.servers,
       securityScheme: this.securityScheme,
+      generationOptions: this.generationOptions,
       collections: this.collections.map(collection => collection.serialize()),
     };
   }

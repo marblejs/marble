@@ -16,6 +16,7 @@ interface HttpRequestMockParams {
   query?: QueryParameters;
   headers?: HttpHeaders;
   method?: HttpMethod;
+  meta?: Record<string, any>;
   [key: string]: any;
 }
 
@@ -38,6 +39,7 @@ export const createHttpRequest = (data?: HttpRequestMockParams) => Object.assign
     headers: {},
     query: {},
     params: {},
+    meta: {},
   },
   data,
 ) as HttpRequest;

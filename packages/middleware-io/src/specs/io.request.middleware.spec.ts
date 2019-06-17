@@ -16,7 +16,6 @@ describe('#requestValidator$', () => {
       query: { test: 'test' },
       headers: { 'content-type': 'application/json' },
     });
-
     // when
     const stream$ = requestValidator$({
       body: defaultSchema,
@@ -41,6 +40,67 @@ describe('#requestValidator$', () => {
     );
   });
 
+  test('applies JSON schema when testing is enabled', done => {
+    // given
+    process.env.MARBLE_TESTING_METADATA_ON = 'true';
+    const defaultSchema = t.type({ test: t.string });
+    const headersSchema = t.type({ 'content-type': t.literal('application/json') });
+    const input = createHttpRequest({
+      url: '/',
+      body: { test: 'test' },
+      params: { test: 'test' },
+      query: { test: 'test' },
+      headers: { 'content-type': 'application/json' },
+    });
+
+    // when
+    const stream$ = requestValidator$({
+      body: defaultSchema,
+      params: defaultSchema,
+      query: defaultSchema,
+      headers: headersSchema,
+    })(of(input));
+
+    // then
+    stream$.subscribe(
+      outgoingData => {
+        delete process.env.MARBLE_TESTING_METADATA_ON;
+        expect(outgoingData.meta).toEqual({
+            body: {
+              properties: { test: { type: 'string' } },
+              required: ['test'],
+              type: 'object',
+              additionalProperties: true,
+            },
+            headers: {
+              properties: { 'content-type': { const: 'application/json' } },
+              required: ['content-type'],
+              type: 'object',
+              additionalProperties: true
+            },
+            params: {
+              properties: { test: { type: 'string' } },
+              required: ['test'],
+              type: 'object',
+              additionalProperties: true,
+            },
+            query: {
+              properties: { test: { type: 'string' } },
+              required: ['test'],
+              type: 'object',
+              additionalProperties: true,
+            },
+          }
+        );
+        done();
+      },
+      (error: HttpError) => {
+        fail(error.data);
+        done();
+      },
+    );
+  });
+
   test('updates values when valid', done => {
     // given
     const numberFromString = new t.Type<number, string, unknown>(
@@ -49,7 +109,9 @@ describe('#requestValidator$', () => {
       (u: unknown, c: t.Context) => {
         const validation = t.string.validate(u, c);
 
-        if (validation.isLeft() || u === '') { return t.failure(u, c); }
+        if (validation.isLeft() || u === '') {
+          return t.failure(u, c);
+        }
 
         const s = validation.value;
         const n = Number(s);
@@ -106,12 +168,14 @@ describe('#requestValidator$', () => {
       (error: HttpError) => {
         expect(error.message).toEqual('Validation error');
         expect(error.status).toEqual(HttpStatus.BAD_REQUEST);
-        expect(error.context).toEqual('headers'),
-        expect(error.data).toEqual([{
-          expected: '"application/json"',
-          got: '"text/plain"',
-          path: 'content-type',
-        }]);
+        expect(error.context).toEqual('headers');
+        expect(error.data).toEqual([
+          {
+            expected: '"application/json"',
+            got: '"text/plain"',
+            path: 'content-type',
+          }
+        ]);
         done();
       },
     );

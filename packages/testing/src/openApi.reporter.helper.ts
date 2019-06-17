@@ -13,12 +13,17 @@ const writeFile = util.promisify(fs.writeFile);
 const collect = (body: string): Promise<void> => new Promise((resolve, reject) => {
   const port = process.env.MARBLE_TESTING_PORT;
   if (!port) {
-    return;
+    // Don't fail if port is not present, just warn and skip it
+    console.warn('MARBLE_TESTING_PORT not found.' +
+      'If you are running tests using Jest, add @marble/testing/openApi.reporter.js to reporters in your jest.config.',
+    );
+    return resolve();
   }
   const req = http.request({
       method: 'POST',
       hostname: 'localhost',
       port,
+      timeout: 1500,
       path: '/',
       headers: { 'Content-Type': 'application/json' },
     }, res => res.statusCode !== HttpStatus.OK
@@ -27,10 +32,9 @@ const collect = (body: string): Promise<void> => new Promise((resolve, reject) =
   );
   req.write(body);
   req.end();
-  setTimeout(() => reject(new Error(`Timeout reporting to @marblejs/testing on port ${port}.`)), 1500);
 });
 
-export const saveDocumentationChunk = async (location: string, apiDocument: ApiDocument): Promise<void> => {
+export const collectDocumentation = async (location: string, apiDocument: ApiDocument): Promise<void> => {
   const data = JSON.stringify(apiDocument.serialize());
   await collect(data);
 };

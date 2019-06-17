@@ -1,8 +1,10 @@
 import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
 import { Observable, forkJoin, of, throwError } from 'rxjs';
-import { mergeMap, map, catchError } from 'rxjs/operators';
+import { mergeMap, map, catchError, tap } from 'rxjs/operators';
 import { Schema, ValidatorOptions, validator$ } from './io.middleware';
 import { IOError } from './io.error';
+import { isTestingMetadataOn } from '@marblejs/core/dist/+internal/testing';
+import { ioTypeToJsonSchema } from './io.json-schema';
 
 interface RequestSchema<TBody extends Schema, TParams extends Schema, TQuery extends Schema> {
   body: TBody;
@@ -27,6 +29,16 @@ export const requestValidator$ = <TBody extends Schema, TParams extends Schema, 
 
     return (req$: Observable<HttpRequest>) =>
       req$.pipe(
+        tap(req => {
+          if(isTestingMetadataOn()){
+            Object.assign(req.meta, {
+              body: ioTypeToJsonSchema(schema.body),
+              params: ioTypeToJsonSchema(schema.params),
+              query: ioTypeToJsonSchema(schema.query),
+              headers: ioTypeToJsonSchema(schema.headers),
+            });
+          }
+        }),
         mergeMap(req =>
           forkJoin(
             bodyValidator$(of(req.body as any)),
