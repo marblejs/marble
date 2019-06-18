@@ -1,5 +1,4 @@
 import { OpenAPIV3 } from 'openapi-types';
-import { generateJsonSchema } from './schema.helper';
 import { getContentType } from '@marblejs/core/dist/+internal';
 import { getHeaderByKey } from '@marblejs/proxy';
 import { EndpointResponse, GenerationOptions } from './testing.types';
@@ -8,21 +7,29 @@ export const generateParameters = (
   generationOptions: GenerationOptions,
   { metadata }: EndpointResponse,
 ): Record<string, OpenAPIV3.ParameterObject> => {
-  const { params = {}, query = {} } = metadata;
+  const {
+    params = {},
+    query = {},
+    headers = {},
+  } = metadata;
   return [
-    ...Object.entries(params).map(([key, value]) => ({
+    ...Object.entries(params.properties || {}).map(([key, schema]) => ({
       name: key,
       in: 'path',
-      example: value,
       required: true,
-      schema: { type: 'string' }, // TODO get type from io-ts
+      schema,
     })),
-    ...Object.entries(query).map(([key, value]) => ({
+    ...Object.entries(query.properties || {}).map(([key, schema]) => ({
       name: key,
       in: 'query',
-      example: value,
-      required: false,
-      schema: { type: 'string' }, // TODO get type from io-ts
+      required: (query.required || []).includes(key),
+      schema,
+    })),
+    ...Object.entries(headers.properties || {}).map(([key, schema]) => ({
+      name: key,
+      in: 'headers',
+      required: (headers.required || []).includes(key),
+      schema,
     })),
   ].reduce((result, entry) => {
     result[entry.in + '-' + entry.name] = entry;
@@ -32,16 +39,15 @@ export const generateParameters = (
 
 export const generateRequestBody = (
   generationOptions: GenerationOptions,
-  { req }: EndpointResponse,
+  { req, metadata }: EndpointResponse,
 ): OpenAPIV3.RequestBodyObject | undefined => {
-  const { body, headers } = req;
-  const schema = generateJsonSchema(body); // TODO get type from io-ts
-  delete schema['$schema'];
-  return body ? {
+  const { body: schema } = metadata as any;
+  const { body: example, headers } = req;
+  return example ? {
     content: {
       [getContentType(headers) || '']: {
         schema,
-        example: body,
+        example,
       },
     },
   } : undefined;
@@ -55,7 +61,11 @@ export const generateResponse = (
   return {
     description,
     headers: Object.keys(headers)
-      .filter(header => !generationOptions.skippedResponseHeaders.includes(header))
+      .filter(header => {
+        debugger;
+        return !generationOptions.skippedResponseHeaders
+          .find(h => h.toLowerCase() === header.toLowerCase());
+      })
       .reduce((result, key) => {
         const value = getHeaderByKey(headers, key);
         result[key] = {

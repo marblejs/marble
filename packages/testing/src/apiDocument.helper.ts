@@ -8,7 +8,7 @@ interface Group<T> {
   elements: OneOrMore<T>;
 }
 
-const isArrayOfArrays = <T>(data: T[]|T[][]): data is T[][] => Array.isArray(data[0]);
+const isArrayOfArrays = <T>(data: T[] | T[][]): data is T[][] => Array.isArray(data[0]);
 const flattenArrayOfArrays = <T>(data: T[][]) => data.reduce((result, elements) => {
   result.push(...elements);
   return result;
@@ -29,10 +29,10 @@ const flattenArrayOfArrays = <T>(data: T[][]) => data.reduce((result, elements) 
  * ```
  */
 export const join = <T, R>(elements: T[] | T[][], matcher: Matcher<T>, deserialize: Deserializer<T, R>): R[] => {
-  if(!elements.length){
+  if (!elements.length) {
     return [];
   }
-  if(isArrayOfArrays(elements)){
+  if (isArrayOfArrays(elements)) {
     elements = flattenArrayOfArrays(elements);
   }
   const groups: Group<T>[] = [];

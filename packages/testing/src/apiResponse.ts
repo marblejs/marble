@@ -27,11 +27,11 @@ export class ApiResponse {
     return this.response.statusCode;
   }
 
-  get responseHeaders(): HttpHeaders {
+  get headers(): HttpHeaders {
     return this.response.headers;
   }
 
-  get responseBody(): any {
+  get body(): any {
     return this.response.body;
   }
 

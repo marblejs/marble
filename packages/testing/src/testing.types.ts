@@ -35,5 +35,6 @@ export interface DocumentData {
   servers: OpenAPIV3.ServerObject[];
   securityScheme?: OpenAPIV3.SecuritySchemeObject;
   description: string;
+  generationOptions: GenerationOptions;
   collections: CollectionData[];
 }

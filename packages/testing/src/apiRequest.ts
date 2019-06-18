@@ -7,6 +7,9 @@ export type Bodyless = true;
 
 export class ApiRequest<IsBodyless = false> {
   public readonly request: TestRequest;
+  public readonly expectations: {
+    status?: number;
+  } = {};
 
   constructor(private proxy: TestProxy, method: HttpMethod, path: string) {
     this.request = {
@@ -41,7 +44,17 @@ export class ApiRequest<IsBodyless = false> {
     return this as any;
   }
 
+  expect(statusCode: number): this {
+    this.expectations.status = statusCode;
+    return this;
+  }
+
   async send() {
-    return new ApiResponse(this.request, await this.proxy.handle(this.request));
+    const { status } = this.expectations;
+    const response = new ApiResponse(this.request, await this.proxy.handle(this.request));
+    if (status && status !== response.status) {
+      throw new Error(`Unexpected status code ${response.status} in API Response. Expected ${status}.`);
+    }
+    return response;
   }
 }
