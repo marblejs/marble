@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import { ioTypeToJsonSchema, withJsonSchema } from '../io.json-schema';
+import { ioTypeToJsonSchema, mergeJsonObjects, withJsonSchema } from '../io.json-schema';
 import { JSONSchema7 } from 'json-schema';
 
 const customIntegerStringType = () => new t.Type<number, string, unknown>(
@@ -18,37 +18,37 @@ const customIntegerStringSchema: JSONSchema7 = {
 };
 
 describe('#ioTypeToJsonSchema', () => {
-  it('supports t.string conversion', () => {
+  test('supports t.string conversion', () => {
     expect(ioTypeToJsonSchema(t.string)).toEqual({ type: 'string' });
   });
 
-  it('supports t.number conversion', () => {
+  test('supports t.number conversion', () => {
     expect(ioTypeToJsonSchema(t.number)).toEqual({ type: 'number' });
   });
 
-  it('supports t.int conversion', () => {
+  test('supports t.int conversion', () => {
     expect(ioTypeToJsonSchema(t.Int)).toEqual({ type: 'integer' });
   });
 
-  it('supports t.boolean conversion', () => {
+  test('supports t.boolean conversion', () => {
     expect(ioTypeToJsonSchema(t.boolean)).toEqual({ type: 'boolean' });
   });
 
-  it('supports t.array conversion', () => {
+  test('supports t.array conversion', () => {
     expect(ioTypeToJsonSchema(t.array(t.string))).toEqual({
       type: 'array',
       items: { type: 'string' },
     });
   });
 
-  it('supports t.record conversion', () => {
+  test('supports t.record conversion', () => {
     expect(ioTypeToJsonSchema(t.record(t.string, t.number))).toEqual({
       type: 'object',
       additionalProperties: { type: 'number' },
     });
   });
 
-  it('supports t.keyof conversion', () => {
+  test('supports t.keyof conversion', () => {
     expect(ioTypeToJsonSchema(t.keyof({
       a: null,
       b: null,
@@ -58,22 +58,22 @@ describe('#ioTypeToJsonSchema', () => {
     });
   });
 
-  it('supports t.undefined conversion', () => {
+  test('supports t.undefined conversion', () => {
     expect(ioTypeToJsonSchema(t.type({
       requiredProp: t.string,
       optionalProp: t.union([t.undefined, t.string]),
     }))).toEqual({
       type: 'object',
       properties: {
-        requiredProp: {type: 'string' },
-        optionalProp: { anyOf: [{type: 'string'}]},
+        requiredProp: { type: 'string' },
+        optionalProp: { anyOf: [{ type: 'string' }] },
       },
       additionalProperties: true,
       required: ['requiredProp'],
     });
   });
 
-  it('supports t.interface conversion', () => {
+  test('supports t.interface conversion', () => {
     expect(ioTypeToJsonSchema(t.interface({
       name: t.string,
       age: t.number,
@@ -88,7 +88,7 @@ describe('#ioTypeToJsonSchema', () => {
     });
   });
 
-  it('supports t.exact(t.interface) conversion', () => {
+  test('supports t.exact(t.interface) conversion', () => {
     expect(ioTypeToJsonSchema(t.exact(t.interface({
       name: t.string,
       age: t.number,
@@ -103,7 +103,7 @@ describe('#ioTypeToJsonSchema', () => {
     });
   });
 
-  it('supports t.partial conversion', () => {
+  test('supports t.partial conversion', () => {
     expect(ioTypeToJsonSchema(t.partial({
       name: t.string,
       age: t.number,
@@ -117,17 +117,17 @@ describe('#ioTypeToJsonSchema', () => {
     });
   });
 
-  it('supports t.literal conversion', () => {
+  test('supports t.literal conversion', () => {
     expect(ioTypeToJsonSchema(t.literal(30))).toEqual({ const: 30 });
     expect(ioTypeToJsonSchema(t.literal(true))).toEqual({ const: true });
     expect(ioTypeToJsonSchema(t.literal('test'))).toEqual({ const: 'test' });
   });
 
-  it('supports t.null conversion', () => {
+  test('supports t.null conversion', () => {
     expect(ioTypeToJsonSchema(t.null)).toEqual({ type: 'null' });
   });
 
-  it('supports t.tuple conversion', () => {
+  test('supports t.tuple conversion', () => {
     expect(ioTypeToJsonSchema(t.tuple([
       t.string, t.number, t.boolean,
     ]))).toEqual({
@@ -138,7 +138,7 @@ describe('#ioTypeToJsonSchema', () => {
     });
   });
 
-  it('supports t.union conversion', () => {
+  test('supports t.union conversion', () => {
     expect(ioTypeToJsonSchema(t.union([
       t.string, t.number, t.boolean,
     ]))).toEqual({
@@ -150,7 +150,7 @@ describe('#ioTypeToJsonSchema', () => {
     });
   });
 
-  it('supports optimized t.union of t.literal conversion', () => {
+  test('supports optimized t.union of t.literal conversion', () => {
     expect(ioTypeToJsonSchema(t.union([
       t.literal('abc'), t.literal('def'), t.literal('ghi'),
     ]))).toEqual({
@@ -158,7 +158,7 @@ describe('#ioTypeToJsonSchema', () => {
     });
   });
 
-  it('supports t.intersection conversion', () => {
+  test('supports t.intersection conversion', () => {
     expect(ioTypeToJsonSchema(t.intersection([
       t.interface({
         a: t.number,
@@ -174,16 +174,16 @@ describe('#ioTypeToJsonSchema', () => {
     });
   });
 
-  it('supports custom JsonSchema added to custom type', () => {
+  test('supports custom JsonSchema added to custom type', () => {
     const integerString = withJsonSchema(customIntegerStringType(), customIntegerStringSchema);
     expect(ioTypeToJsonSchema(integerString)).toEqual(customIntegerStringSchema);
   });
 
-  it('returns undefined if passed type is undefined', () => {
+  test('returns undefined if passed type is undefined', () => {
     expect(ioTypeToJsonSchema(undefined)).toBe(undefined);
   });
 
-  it('throws an error on unknown io-ts type', () => {
+  test('throws an error on unknown io-ts type', () => {
     expect(() => ioTypeToJsonSchema({
       _tag: 'this is not a valid type'
     } as any)).toThrow('Unsupported type');
@@ -191,7 +191,7 @@ describe('#ioTypeToJsonSchema', () => {
 });
 
 describe('#withJsonSchema', () => {
-  it('adds custom metadata to io-ts type', () => {
+  test('adds custom metadata to io-ts type', () => {
     const integerString = customIntegerStringType();
 
     expect((integerString as any)._tag).toBeUndefined();
@@ -199,5 +199,53 @@ describe('#withJsonSchema', () => {
 
     expect(integerString).toHaveProperty('_tag', 'CustomJsonSchemaType');
     expect(integerString).toHaveProperty('jsonSchema', customIntegerStringSchema);
+  });
+});
+
+describe('#mergeJsonObjects', () => {
+  const object1: JSONSchema7 = {
+    type: 'object',
+    properties: {
+      test: { type: 'string' },
+      test2: { type: 'number' },
+    },
+    required: ['test2'],
+  };
+
+  const object2: JSONSchema7 = {
+    type: 'object',
+    properties: {
+      test3: { type: 'boolean' },
+      test4: { type: 'boolean' },
+    },
+    required: ['test3'],
+  };
+
+  test('merges properties and requires of objects', () => {
+    expect(mergeJsonObjects(
+      object1,
+      object2,
+    )).toEqual({
+      type: 'object',
+      properties: {
+        test: { type: 'string' },
+        test2: { type: 'number' },
+        test3: { type: 'boolean' },
+        test4: { type: 'boolean' },
+      },
+      required: ['test2', 'test3'],
+    });
+  });
+  test('handles undefined objects', () => {
+    expect(mergeJsonObjects(undefined, undefined)).toBeUndefined();
+  });
+  test('handles mixed values', () => {
+    expect(mergeJsonObjects(
+      undefined,
+      { type: 'object' },
+      object1,
+      { type: 'object' },
+      undefined,
+    )).toEqual(object1);
   });
 });

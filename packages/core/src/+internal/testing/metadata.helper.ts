@@ -2,7 +2,7 @@ import { HttpHeaders, HttpRequest, HttpResponse } from '../../http.interface';
 import { JSONSchema7 } from 'json-schema';
 
 export interface TestingMetadata {
-  path: string;
+  path?: string;
   body?: JSONSchema7;
   headers?: JSONSchema7;
   params?: JSONSchema7;
@@ -28,5 +28,5 @@ export const applyMetadata = (req: HttpRequest, res: HttpResponse) => {
     return;
   }
 
-  setMetadataHeader(res, req.meta as any);
+  setMetadataHeader(res, { ...req.meta });
 };

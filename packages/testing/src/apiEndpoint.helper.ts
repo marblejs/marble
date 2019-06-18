@@ -64,7 +64,7 @@ export const generateResponse = (
       .filter(header => {
         debugger;
         return !generationOptions.skippedResponseHeaders
-          .find(h => h.toLowerCase() === header.toLowerCase())
+          .find(h => h.toLowerCase() === header.toLowerCase());
       })
       .reduce((result, key) => {
         const value = getHeaderByKey(headers, key);

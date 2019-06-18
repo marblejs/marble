@@ -161,6 +161,17 @@ const filterTree = <T>(element: T, matcher: (value: any) => boolean): T | undefi
   return matcher(element) ? element : undefined;
 };
 
+export const mergeJsonObjects = (...schemas: (JSONSchema7 | undefined)[]): JSONSchema7 | undefined => {
+  const filteredSchemas = schemas.filter(Boolean) as JSONSchema7[];
+  const result: JSONSchema7 = filteredSchemas[0];
+  for (const schema of filteredSchemas.slice(1)) {
+    const { properties, required } = schema;
+    result.properties = { ...result.properties, ...properties };
+    result.required = [...(result.required || []), ...(required || [])];
+  }
+  return result;
+};
+
 export const ioTypeToJsonSchema = (ioType: t.Any | undefined): JSONSchema7 | undefined => {
   if (!ioType) {
     return undefined;

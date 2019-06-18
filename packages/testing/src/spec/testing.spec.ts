@@ -28,7 +28,7 @@ describe('@marblejs/testing - TestApi', () => {
     expect(response.failed).toBe(false);
     expect(response.succeeded).toBe(true);
     expect(response.status).toBe(HttpStatus.OK);
-    expect(response.responseBody).toEqual({
+    expect(response.body).toEqual({
       firstName: 'Cathy',
       lastName: 'Scott',
       email: 'cathy.scott98@example.com',
@@ -36,7 +36,7 @@ describe('@marblejs/testing - TestApi', () => {
       address: '2059 W Craig Rd',
       phone: '(700)-354-2326',
     });
-    expect(response.responseHeaders).toMatchObject({
+    expect(response.headers).toMatchObject({
       'content-type': ['application/json'],
     });
 

@@ -58,13 +58,6 @@ export class ApiResponse {
     };
   }
 
-  expectStatus(statusCode: number): this {
-    if(this.status!==statusCode){
-      throw new Error(`Unexpected status code ${this.status} in API Response. Expected ${statusCode}.`);
-    }
-    return this;
-  }
-
   collect(apiCollection: ApiCollection): this {
     apiCollection.add(this);
     return this;
