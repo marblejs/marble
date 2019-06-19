@@ -73,7 +73,7 @@ describe('#requestValidator$', () => {
               additionalProperties: true,
             },
             headers: {
-              properties: { 'content-type': { const: 'application/json' } },
+              properties: { 'content-type': { enum: ['application/json'] } },
               required: ['content-type'],
               type: 'object',
               additionalProperties: true

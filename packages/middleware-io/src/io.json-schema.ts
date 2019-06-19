@@ -56,7 +56,7 @@ const IoTypes: Record<IoTag, IoConverter> = {
 
   [IoTag.NULL]: () => ({ type: 'null' }),
 
-  [IoTag.LITERAL]: (type: t.LiteralType<any>) => ({ const: type.value }),
+  [IoTag.LITERAL]: (type: t.LiteralType<any>) => ({ enum: [type.value] }),
 
   [IoTag.UNION]: (type: t.UnionType<t.Any[]>) =>
     type.types.every(element => getTag(element) === IoTag.LITERAL)
