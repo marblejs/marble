@@ -118,9 +118,9 @@ describe('#ioTypeToJsonSchema', () => {
   });
 
   test('supports t.literal conversion', () => {
-    expect(ioTypeToJsonSchema(t.literal(30))).toEqual({ const: 30 });
-    expect(ioTypeToJsonSchema(t.literal(true))).toEqual({ const: true });
-    expect(ioTypeToJsonSchema(t.literal('test'))).toEqual({ const: 'test' });
+    expect(ioTypeToJsonSchema(t.literal(30))).toEqual({ enum: [30] });
+    expect(ioTypeToJsonSchema(t.literal(true))).toEqual({ enum: [true] });
+    expect(ioTypeToJsonSchema(t.literal('test'))).toEqual({ enum: ['test'] });
   });
 
   test('supports t.null conversion', () => {
