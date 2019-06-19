@@ -1,9 +1,9 @@
 import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/core';
 import { of, throwError, iif } from 'rxjs';
-import { catchError, map, switchMap, tap, mapTo } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, mapTo, mergeMap } from 'rxjs/operators';
 import { defaultParser } from './parsers';
 import { RequestBodyParser } from './body.model';
-import { matchType, getBody, hasBody } from './body.util';
+import { matchType, getBody, hasBody, isMultipart } from './body.util';
 
 const PARSEABLE_METHODS = ['POST', 'PUT', 'PATCH'];
 
@@ -21,8 +21,10 @@ export const bodyParser$ = ({
       () =>
         PARSEABLE_METHODS.includes(req.method)
         && !hasBody(req)
+        && !isMultipart(req)
         && matchType(type)(req),
-      getBody(req).pipe(
+      of(req).pipe(
+        mergeMap(getBody),
         map(parser(req)),
         tap(body => req.body = body),
         mapTo(req),
