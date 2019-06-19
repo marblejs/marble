@@ -1,0 +1,53 @@
+{
+  "name": "@marblejs/middleware-multipart",
+  "version": "2.2.2",
+  "description": "A multipart/form-data middleware for Marble.js",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start": "yarn watch",
+    "watch": "tsc -w",
+    "build": "tsc",
+    "test": "jest --config ../../jest.config.js",
+    "clean": "rimraf dist"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "marble.js",
+    "multipart",
+    "middleware",
+    "http",
+    "rxjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "yarn": ">= 1.7.0",
+    "npm": ">= 5.0.0"
+  },
+  "author": "marblejs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "homepage": "https://github.com/marblejs/marble#readme",
+  "dependencies": {
+    "busboy": "~0.3.1",
+    "@types/busboy": "^0.2.3"
+  },
+  "peerDependencies": {
+    "@marblejs/core": "^2.1.0",
+    "rxjs": "^6.3.3"
+  },
+  "devDependencies": {
+    "@marblejs/core": "^2.2.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
