@@ -49,5 +49,6 @@
   },
   "bugs": {
     "url": "https://github.com/marblejs/marble/issues"
-  }
+  },
+  "private": true
 }
