@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-logger",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Logger middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -37,7 +37,7 @@
     "chalk": "^2.4.1"
   },
   "devDependencies": {
-    "@marblejs/core": "^2.2.2",
+    "@marblejs/core": "^2.2.3",
     "@types/chalk": "^2.2.0"
   },
   "publishConfig": {

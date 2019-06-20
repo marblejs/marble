@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/core",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Reactive Node APIs made easy",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -34,8 +34,8 @@
     "rxjs": "^6.3.3"
   },
   "dependencies": {
-    "@types/qs": "^6.5.1",
     "@types/json-schema": "^7.0.3",
+    "@types/qs": "^6.5.1",
     "@types/uuid": "^3.4.4",
     "chalk": "~2.4.1",
     "file-type": "^8.0.0",
