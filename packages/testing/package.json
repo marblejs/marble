@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/testing",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Test Marble.js API and document it",
   "keywords": [
     "test",
@@ -28,13 +28,13 @@
     "@marblejs/middleware-body": "^2.2.2"
   },
   "dependencies": {
-    "@marblejs/proxy": "^2.2.2",
+    "@marblejs/proxy": "^2.2.3",
     "generate-schema": "^2.6.0",
     "openapi-schema-validator": "^3.0.3"
   },
   "devDependencies": {
-    "@marblejs/core": "^2.2.2",
-    "@marblejs/middleware-body": "^2.2.2"
+    "@marblejs/core": "^2.2.3",
+    "@marblejs/middleware-body": "^2.2.3"
   },
   "repository": {
     "type": "git",
