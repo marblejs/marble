@@ -5,7 +5,7 @@ import { fromEvent, Observable, of, throwError, merge, iif } from 'rxjs';
 import { mapTo, map, mergeMap, takeUntil, toArray, tap, mergeMapTo, take, ignoreElements } from 'rxjs/operators';
 import { Readable } from 'stream';
 import { FileIncomingData, ParserOpts } from './multipart.interface';
-import { setRequestData, isFieldnameParseable } from './multipart.util';
+import { setRequestData, shouldParseFieldname } from './multipart.util';
 
 type FileEvent = [string, NodeJS.ReadableStream, string, string, string];
 
@@ -23,7 +23,7 @@ export const parseFile = (req: HttpRequest) => (opts: ParserOpts) => (event$: Ob
     takeUntil(finish$),
     map(([ fieldname, file, filename, encoding, mimetype ]) => ({ fieldname, file, filename, encoding, mimetype })),
     mergeMap(data => iif(
-      () => !isFieldnameParseable(opts.files)(data.fieldname),
+      () => !shouldParseFieldname(opts.files)(data.fieldname),
       throwError(new HttpError(`File "${data.fieldname}" is not acceptable`, HttpStatus.PRECONDITION_FAILED)),
       of(data),
     )),

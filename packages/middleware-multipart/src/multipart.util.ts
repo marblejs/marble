@@ -4,13 +4,13 @@ import { FileIncomingData } from './multipart.interface';
 
 type ComputedFileData = Partial<{ buffer: Buffer; destination: any; size: number }>;
 
-export const isProperMethod = (req: HttpRequest): boolean =>
+const isProperMethod = (req: HttpRequest): boolean =>
   ['POST', 'PUT'].includes(req.method);
 
-export const isMultipart = (req: HttpRequest): boolean =>
+const isMultipart = (req: HttpRequest): boolean =>
   getContentType(req.headers).includes('multipart/');
 
-export const isFieldnameParseable = (files: string[] | undefined) => (fieldname: string) =>
+export const shouldParseFieldname = (files: string[] | undefined) => (fieldname: string) =>
   !!files ? files.includes(fieldname) : true;
 
 export const shouldParseMultipart = (req: HttpRequest) =>
