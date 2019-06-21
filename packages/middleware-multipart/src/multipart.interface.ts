@@ -6,7 +6,7 @@ export interface File {
   size?: number;
   encoding: string;
   mimetype: string;
-  filename: string;
+  filename?: string;
   fieldname: string;
 }
 
