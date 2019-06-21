@@ -1,2 +1,3 @@
 export * from './multipart.middleware';
-export { StreamHandler } from './multipart.parser';
+export * from './multipart.interface';
+export { StreamHandler, ParserOpts } from './multipart.parser';

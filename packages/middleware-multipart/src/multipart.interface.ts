@@ -8,6 +8,6 @@ export interface File {
   fieldname: string;
 }
 
-export interface WithFile {
-  file: Record<string, File>;
+export interface WithFile<T extends string = string> {
+  file: Record<T, File>;
 }

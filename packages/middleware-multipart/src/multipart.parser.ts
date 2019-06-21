@@ -1,7 +1,7 @@
 import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
 import { isNonNullable } from '@marblejs/core/dist/+internal/utils';
 import { fromReadableStream } from '@marblejs/core/dist/+internal/observable';
-import { fromEvent, Observable, of, throwError, merge } from 'rxjs';
+import { fromEvent, Observable, of, throwError, merge, iif } from 'rxjs';
 import { mapTo, map, mergeMap, takeUntil, toArray, tap, catchError, buffer, mergeMapTo, take, ignoreElements } from 'rxjs/operators';
 import * as Busboy from 'busboy';
 import { Readable } from 'stream';
@@ -18,11 +18,19 @@ type FileData = {
   mimetype: string;
 };
 
+interface StreamHandlerOutput {
+  destination: any;
+  size?: number;
+}
+
 export interface StreamHandler {
-  (opts: FileData): Promise<{ destination: any }> | Observable<{ destination: any }>;
+  (opts: FileData):
+    | Promise<StreamHandlerOutput>
+    | Observable<StreamHandlerOutput>;
 }
 
 export interface ParserOpts {
+  files?: string[];
   stream?: StreamHandler;
   maxFileSize?: number;
   maxFileCount?: number;
@@ -41,15 +49,21 @@ const parseFile = (req: HttpRequest) => (opts: ParserOpts) => (event$: Observabl
   event$.pipe(
     takeUntil(finish$),
     map(([ fieldname, file, filename, encoding, mimetype ]) => ({ fieldname, file, filename, encoding, mimetype })),
-    mergeMap((data) => merge(fileSizeLimit(data, opts.maxFileSize), of(data))),
+    mergeMap(data => iif(
+      () => !!opts.files ? !opts.files.includes(data.fieldname) : false,
+      throwError(new HttpError(`File "${data.fieldname}" is not acceptable`, HttpStatus.PRECONDITION_FAILED)),
+      of(data),
+    )),
+    mergeMap(data => merge(fileSizeLimit(data, opts.maxFileSize), of(data))),
     mergeMap(data => isNonNullable(opts.stream)
       ? of(data).pipe(
           mergeMap(opts.stream),
           catchError(error => throwError(new HttpError(error.message, HttpStatus.INTERNAL_SERVER_ERROR))),
-          tap(({ destination }) => {
+          tap(({ destination, size }) => {
             req.file = {
               ...req.file || {},
               [data.fieldname]: {
+                size,
                 destination,
                 encoding: data.encoding,
                 mimetype: data.mimetype,
@@ -69,12 +83,12 @@ const parseFile = (req: HttpRequest) => (opts: ParserOpts) => (event$: Observabl
             req.file = {
               ...req.file || {},
               [data.fieldname]: {
+                size: Buffer.byteLength(buffer),
                 buffer,
                 encoding: data.encoding,
                 mimetype: data.mimetype,
                 filename: data.filename,
                 fieldname: data.fieldname,
-                size: Buffer.byteLength(buffer),
               },
             };
           }),
