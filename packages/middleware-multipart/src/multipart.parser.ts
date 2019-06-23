@@ -6,7 +6,7 @@ import { ParserOpts } from './multipart.interface';
 import { parseField } from './multipart.parser.field';
 import { parseFile } from './multipart.parser.file';
 
-export const parseMultipart = (opts: ParserOpts = {}) => (req: HttpRequest): Observable<HttpRequest> => {
+export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observable<HttpRequest> => {
   const busboy = new Busboy({
     headers: req.headers,
     limits: {
@@ -40,7 +40,7 @@ export const parseMultipart = (opts: ParserOpts = {}) => (req: HttpRequest): Obs
   );
 
   return of(req).pipe(
-    tap(() => req.pipe(busboy)),
+    tap(req => req.pipe(busboy)),
     mergeMapTo(merge(
       parseFile$,
       parseField$,

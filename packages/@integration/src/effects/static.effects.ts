@@ -2,23 +2,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { r, combineRoutes, use } from '@marblejs/core';
 import { requestValidator$, t } from '@marblejs/middleware-io';
-import { multipart$, StreamHandler } from '@marblejs/middleware-multipart';
+import { multipart$ } from '@marblejs/middleware-multipart';
+import { streamFileTo } from '@marblejs/middleware-multipart/dist/multipart.util';
 import { readFile } from '@marblejs/core/dist/+internal';
-import { of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 
 const STATIC_PATH = path.resolve(__dirname, '../../../../assets');
 const TMP_PATH = path.resolve(__dirname, '../../../../tmp');
-
-const streamFileTo = (basePath: string): StreamHandler => {
-  if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath); }
-
-  return ({ file, fieldname }) => {
-    const destination = path.join(basePath, path.basename(fieldname));
-    file.pipe(fs.createWriteStream(destination));
-    return of({ destination });
-  };
-}
 
 const getFileValidator$ = requestValidator$({
   params: t.type({ dir: t.string })

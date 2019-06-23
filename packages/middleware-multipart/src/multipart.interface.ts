@@ -28,9 +28,7 @@ interface StreamHandlerOutput {
 }
 
 export interface StreamHandler {
-  (opts: FileIncomingData):
-    | Promise<StreamHandlerOutput>
-    | Observable<StreamHandlerOutput>;
+  (opts: FileIncomingData): Promise<StreamHandlerOutput> | Observable<StreamHandlerOutput>;
 }
 
 export interface ParserOpts {

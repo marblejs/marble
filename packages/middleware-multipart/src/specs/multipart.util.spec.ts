@@ -1,6 +1,9 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
-import { shouldParseFieldname, shouldParseMultipart, setRequestData } from '../multipart.util';
+import { shouldParseFieldname, shouldParseMultipart, setRequestData, streamFileTo } from '../multipart.util';
 import { FileIncomingData } from '../multipart.interface';
+import { from } from 'rxjs';
 
 test('#shouldParseFieldname checks if given fieldname can be parsed by middleware', () => {
   expect(shouldParseFieldname(undefined)('test')).toEqual(true);
@@ -65,4 +68,67 @@ test('#setRequestData sets file related request data', () => {
       fieldname: incomingFile.fieldname,
     },
   })
+});
+
+describe('#streamFileTo', async () => {
+  const TMP_PATH = path.resolve(__dirname, '../../../../tmp');
+  const uploadFilePath = path.resolve(__dirname, '../../README.md');
+  const savedFilePath = path.resolve(TMP_PATH, 'data_field');
+  const file = fs.createReadStream(uploadFilePath) as NodeJS.ReadableStream;
+
+  afterEach(() => fs.rmdirSync(TMP_PATH));
+
+  test('streams file to given path ', async () => {
+    if (fs.existsSync(TMP_PATH)) { fs.rmdirSync(TMP_PATH); }
+
+    const response = await from(streamFileTo(TMP_PATH)({
+      file,
+      fieldname: 'data_field',
+      filename: 'README.md',
+      mimetype: 'text/markdown',
+      encoding: '7bit',
+    })).toPromise();
+
+    expect(response.destination).toEqual(savedFilePath);
+    expect(fs.readFileSync(savedFilePath)).toBeDefined();
+
+    fs.unlinkSync(savedFilePath);
+  });
+
+  test('streams file to given path ', async () => {
+    const response = await from(streamFileTo(TMP_PATH)({
+      file,
+      fieldname: 'data_field',
+      filename: 'README.md',
+      mimetype: 'text/markdown',
+      encoding: '7bit',
+    })).toPromise();
+
+    expect(response.destination).toEqual(savedFilePath);
+    expect(fs.readFileSync(savedFilePath)).toBeDefined();
+
+    fs.unlinkSync(savedFilePath);
+  });
+
+  test('creates folder if it doesn not exist ', async () => {
+    // given
+    if (fs.existsSync(TMP_PATH)) { fs.rmdirSync(TMP_PATH); }
+
+    // when
+    streamFileTo(TMP_PATH);
+
+    // then
+    expect(fs.existsSync(TMP_PATH)).toEqual(true);
+  });
+
+  test('does not create folder if exists ', async () => {
+    // given
+    if (!fs.existsSync(TMP_PATH)) { fs.mkdirSync(TMP_PATH); }
+
+    // when
+    streamFileTo(TMP_PATH);
+
+    // then
+    expect(fs.existsSync(TMP_PATH)).toEqual(true);
+  });
 });
