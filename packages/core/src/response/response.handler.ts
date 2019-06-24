@@ -1,3 +1,4 @@
+import * as url from 'url';
 import { EMPTY } from 'rxjs';
 import { HttpEffectResponse } from '../effects/http-effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
@@ -10,8 +11,9 @@ export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effe
   if (res.finished) { return EMPTY; }
 
   const status = effect.status || HttpStatus.OK;
+  const path = url.parse(req.url).pathname || '';
 
-  const headersFactoryWithData = headersFactory({ body: effect.body, path: req.url, status });
+  const headersFactoryWithData = headersFactory({ body: effect.body, path, status });
   const headers = headersFactoryWithData(effect.headers);
 
   const bodyFactoryWithHeaders = bodyFactory(headers);

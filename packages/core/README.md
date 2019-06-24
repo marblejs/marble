@@ -5,18 +5,21 @@
 </p>
 
 <p align="center">
-<a href="https://www.npmjs.com/package/@marblejs/core">
-  <img src="https://travis-ci.com/marblejs/marble.svg?branch=master" alt="Travis-CI status" height="18">
-</a>
-<a href="https://badge.fury.io/js/%40marblejs%2Fcore">
-  <img src="https://badge.fury.io/js/%40marblejs%2Fcore.svg" alt="npm version" height="18">
-</a>
-<a href="https://codecov.io/gh/marblejs/marble?branch=master">
-  <img src="https://codecov.io/gh/marblejs/marble/coverage.svg?branch=master" alt="Codecov coverage" height="18">
-</a>
-<a href="https://lernajs.io">
-  <img src="https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg" alt="Maintained with lerna" height="18">
-</a>
+  <a href="https://www.npmjs.com/package/@marblejs/core">
+    <img src="https://travis-ci.com/marblejs/marble.svg?branch=master" alt="Travis-CI status" height="18">
+  </a>
+  <a href="https://badge.fury.io/js/%40marblejs%2Fcore">
+    <img src="https://badge.fury.io/js/%40marblejs%2Fcore.svg" alt="npm version" height="18">
+  </a>
+  <a href="https://codecov.io/gh/marblejs/marble?branch=master">
+    <img src="https://codecov.io/gh/marblejs/marble/coverage.svg?branch=master" alt="Codecov coverage" height="18">
+  </a>
+  <a href="https://lernajs.io">
+    <img src="https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg" alt="Maintained with lerna" height="18">
+  </a>
+  <a href="https://gitter.im/marblejs/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
+    <img src="https://badges.gitter.im/marblejs/community.svg" alt="Gitter" height="18">
+  </a>
 </p>
 
 <p align="center">

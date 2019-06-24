@@ -61,4 +61,16 @@ describe('#queryParamsFactory', () => {
     // then
     expect(params).toEqual(expectedParamsObj);
   });
+
+  test('parses URL like parameter', () => {
+    // given
+    const exampleURL = 'user=test%40test.com';
+    const expectedParamsObj = { user: 'test@test.com' };
+
+    // when
+    const params = queryParamsFactory(exampleURL);
+
+    // then
+    expect(params).toEqual(expectedParamsObj);
+  })
 });

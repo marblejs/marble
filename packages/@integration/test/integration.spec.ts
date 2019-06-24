@@ -71,6 +71,15 @@ describe('API integration', () => {
         expect(body).toHaveLength(3);
       }));
 
+  test(`GET returns 200 with Content-Type=application/json: /api/v1/user?email=test%40test.com`, async () =>
+    request(server)
+      .get('/api/v1/user?email=test%40test.com')
+      .set('Authorization', 'Bearer FAKE')
+      .expect(200)
+      .then(({ header }) => {
+        expect(header['content-type']).toBe(ContentType.APPLICATION_JSON);
+      }));
+
   test('GET returns single object: /api/v1/user/10', async () =>
     request(server)
       .get('/api/v1/user/10')

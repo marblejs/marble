@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/proxy",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "A generic proxy server for Marble.js",
   "keywords": [
     "marble.js",
@@ -22,8 +22,8 @@
     "@marblejs/middleware-body": "^2.2.2"
   },
   "devDependencies": {
-    "@marblejs/core": "^2.2.2",
-    "@marblejs/middleware-body": "^2.2.2",
+    "@marblejs/core": "^2.2.3",
+    "@marblejs/middleware-body": "^2.2.3",
     "@types/node": "^12.0.4"
   },
   "repository": {
@@ -39,5 +39,6 @@
   },
   "bugs": {
     "url": "https://github.com/marblejs/marble/issues"
-  }
+  },
+  "private": true
 }
