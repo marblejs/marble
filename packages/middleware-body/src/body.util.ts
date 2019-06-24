@@ -6,6 +6,9 @@ import { map, toArray } from 'rxjs/operators';
 export const matchType = (type: string[]) => (req: HttpRequest) =>
   !!typeIs.is(getContentType(req.headers), type);
 
+export const isMultipart = (req: HttpRequest): boolean =>
+  getContentType(req.headers).includes('multipart/')
+
 export const hasBody = (req: HttpRequest): boolean =>
   req.body !== undefined && req.body !== null;
 

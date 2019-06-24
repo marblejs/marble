@@ -36,21 +36,19 @@ describe('#createServer', () => {
     }
   });
 
-  test('creates http server and starts listening to given port', done => {
+  test('creates http server and starts listening', done => {
     // given
-    const port = 1337;
     const hostname = '127.0.0.1';
     const app = httpListener({ effects: [] });
 
     // when
     server = createServer({
-      port,
       hostname,
       httpListener: app,
     }).run();
-    server.on('error', error => {
-      console.error(error);
-    });
+
+    server.on('error', console.error);
+
     server.on('listening', () => {
       expect(server.listening).toBe(true);
       done();

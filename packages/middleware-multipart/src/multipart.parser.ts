@@ -1,0 +1,53 @@
+import * as Busboy from 'busboy';
+import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
+import { fromEvent, Observable, of, throwError, merge } from 'rxjs';
+import { mapTo, mergeMap, tap, buffer, mergeMapTo } from 'rxjs/operators';
+import { ParserOpts } from './multipart.interface';
+import { parseField } from './multipart.parser.field';
+import { parseFile } from './multipart.parser.file';
+
+export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observable<HttpRequest> => {
+  const busboy = new Busboy({
+    headers: req.headers,
+    limits: {
+      fileSize: opts.maxFileSize,
+      files: opts.maxFileCount,
+      fields: opts.maxFieldCount,
+      fieldSize: opts.maxFieldSize,
+    },
+  });
+
+  const parseFile$ = parseFile(req)(opts)(
+    fromEvent(busboy, 'file'),
+    fromEvent(busboy, 'finish'),
+  );
+
+  const parseField$ = parseField(req)(
+    fromEvent(busboy, 'field'),
+    fromEvent(busboy, 'finish'),
+  );
+
+  const filesLimit$ = fromEvent(busboy, 'filesLimit').pipe(
+    mergeMap(() => throwError(
+      new HttpError(`Reached max files count limit [${opts.maxFileCount}]`, HttpStatus.PRECONDITION_FAILED),
+    )),
+  );
+
+  const fieldsLimit$ = fromEvent(busboy, 'fieldsLimit').pipe(
+    mergeMap(() => throwError(
+      new HttpError(`Reached max fields count limit [${opts.maxFieldCount}]`, HttpStatus.PRECONDITION_FAILED),
+    )),
+  );
+
+  return of(req).pipe(
+    tap(req => req.pipe(busboy)),
+    mergeMapTo(merge(
+      parseFile$,
+      parseField$,
+      filesLimit$,
+      fieldsLimit$,
+    )),
+    buffer(fromEvent(busboy, 'finish')),
+    mapTo(req),
+  );
+}

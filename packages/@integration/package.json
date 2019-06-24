@@ -26,6 +26,7 @@
     "@marblejs/middleware-cors": "^2.2.3",
     "@marblejs/middleware-io": "^2.2.3",
     "@marblejs/middleware-logger": "^2.2.3",
+    "@marblejs/middleware-multipart": "^2.2.3",
     "@marblejs/websockets": "^2.2.3",
     "@types/node": "^10.1.2",
     "rxjs": "^6.3.3",
