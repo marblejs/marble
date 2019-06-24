@@ -19,7 +19,7 @@ export interface FileIncomingData {
 };
 
 export interface WithFile<T extends string = string> {
-  file: Record<T, File>;
+  files: Record<T, File>;
 }
 
 interface StreamHandlerOutput {

@@ -57,7 +57,7 @@ test('#setRequestData sets file related request data', () => {
   setRequestData(incomingHttpRequest)(incomingFile)(computedFileData);
 
   // then
-  expect(incomingHttpRequest.file).toEqual({
+  expect(incomingHttpRequest.files).toEqual({
     'image_1': {
       size: bufferedDataLength,
       buffer: bufferedData,

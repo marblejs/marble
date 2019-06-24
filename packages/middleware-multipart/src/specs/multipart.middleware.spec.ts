@@ -14,7 +14,7 @@ const memoryMultipart$ = r.pipe(
   r.useEffect(req$ => req$.pipe(
     use(multipart$()),
     map(req => ({ body: {
-      file: req.file,
+      files: req.files,
       fields: req.body,
     }}))
   )));
@@ -29,7 +29,7 @@ const memoryWithOptionsMultipart$ = r.pipe(
       maxFileSize: 20,
     })),
     map(req => ({ body: {
-      file: req.file,
+      files: req.files,
       fields: req.body,
     }}))
   )));
@@ -42,7 +42,7 @@ const filesystemMultipart$ = r.pipe(
       stream: streamFileTo(TMP_PATH),
     })),
     map(req => ({ body: {
-      file: req.file,
+      files: req.files,
       fields: req.body,
     }}))
   )));
@@ -67,13 +67,13 @@ describe('multipart$', () => {
       .expect(200)
       .then(({ body }) => {
         // data_field
-        expect(body.file.data_field.size).toEqual(Buffer.byteLength(data));
-        expect(body.file.data_field.destination).toBeUndefined();
-        expect(body.file.data_field.filename).toBeUndefined();
-        expect(body.file.data_field.encoding).toEqual('7bit');
-        expect(body.file.data_field.mimetype).toEqual('application/octet-stream');
-        expect(body.file.data_field.fieldname).toEqual('data_field');
-        expect(data.equals(Buffer.from(body.file.data_field.buffer))).toBe(true);
+        expect(body.files.data_field.size).toEqual(Buffer.byteLength(data));
+        expect(body.files.data_field.destination).toBeUndefined();
+        expect(body.files.data_field.filename).toBeUndefined();
+        expect(body.files.data_field.encoding).toEqual('7bit');
+        expect(body.files.data_field.mimetype).toEqual('application/octet-stream');
+        expect(body.files.data_field.fieldname).toEqual('data_field');
+        expect(data.equals(Buffer.from(body.files.data_field.buffer))).toBe(true);
 
         // field_1, field_2
         expect(body.fields.field_1).toEqual('test_1');
@@ -94,13 +94,13 @@ describe('multipart$', () => {
       .expect(200)
       .then(({ body }) => {
         // data_field
-        expect(body.file.data_field.size).toBeUndefined();
-        expect(body.file.data_field.destination).toEqual(savedFilePath);
-        expect(body.file.data_field.filename).toEqual('README.md');
-        expect(body.file.data_field.encoding).toEqual('7bit');
-        expect(body.file.data_field.mimetype).toEqual('text/markdown');
-        expect(body.file.data_field.fieldname).toEqual('data_field');
-        expect(body.file.data_field.buffer).toBeUndefined();
+        expect(body.files.data_field.size).toBeUndefined();
+        expect(body.files.data_field.destination).toEqual(savedFilePath);
+        expect(body.files.data_field.filename).toEqual('README.md');
+        expect(body.files.data_field.encoding).toEqual('7bit');
+        expect(body.files.data_field.mimetype).toEqual('text/markdown');
+        expect(body.files.data_field.fieldname).toEqual('data_field');
+        expect(body.files.data_field.buffer).toBeUndefined();
         expect(fs.readFileSync(savedFilePath)).toBeDefined();
 
         // field_1, field_2

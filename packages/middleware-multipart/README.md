@@ -40,7 +40,7 @@ const effect$ = r.pipe(
   r.useEffect(req$ => req$.pipe(
     use(multipart$()),
     map(req => ({ body: {
-      file: req.file['image_1'],  // file information
+      files: req.files['image_1'],  // file information
       body: req.body,             // all incoming body fields
     }}))
   )));
@@ -66,7 +66,7 @@ const effect$ = r.pipe(
       files: ['image_1'],
     })),
     map(req => ({ body: {
-      file: req.file['image_1'],  // file information
+      files: req.files['image_1'],  // file information
       body: req.body,             // all incoming body fields
     }}))
   )));

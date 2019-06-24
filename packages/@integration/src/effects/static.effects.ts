@@ -24,7 +24,7 @@ const postFile$ = r.pipe(
     })),
     map(req => ({
       body: {
-        file: req.file,
+        file: req.files,
         body: req.body,
       },
     }))

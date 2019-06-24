@@ -23,8 +23,8 @@ export const setRequestData =
   (req: HttpRequest) =>
   (incomingFile: FileIncomingData) =>
   ({ buffer, destination, size }: ComputedFileData) => {
-    req.file = {
-      ...req.file || {},
+    req.files = {
+      ...req.files || {},
       [incomingFile.fieldname]: {
         size,
         buffer,
