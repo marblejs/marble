@@ -11,7 +11,7 @@ AWS Lambda serverless proxy for [Marble.js](https://github.com/marblejs/marble).
 ## Installation
 
 ```
-$ npm i @marblejs/serverless-aws-lambda
+$ npm i @marblejs/serverless
 ```
 Requires `@marblejs/core` to be installed.
 
