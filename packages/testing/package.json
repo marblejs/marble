@@ -1,0 +1,54 @@
+{
+  "name": "@marblejs/testing",
+  "version": "2.2.3",
+  "description": "Test Marble.js API and document it",
+  "keywords": [
+    "test",
+    "api",
+    "marble.js",
+    "generate",
+    "docs",
+    "openapi",
+    "swagger"
+  ],
+  "author": "Krzysztof Miemiec <krzysztof.miemiec@gmail.com>",
+  "homepage": "https://github.com/marblejs/marble/tree/master/packages/serverless#readme",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "openApi.reporter.js"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@marblejs/core": "^2.2.2",
+    "@marblejs/middleware-body": "^2.2.2"
+  },
+  "dependencies": {
+    "@marblejs/proxy": "^2.2.3",
+    "generate-schema": "^2.6.0",
+    "openapi-schema-validator": "^3.0.3"
+  },
+  "devDependencies": {
+    "@marblejs/core": "^2.2.3",
+    "@marblejs/middleware-body": "^2.2.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "scripts": {
+    "start": "yarn watch",
+    "watch": "tsc -w",
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "test": "jest --config ../../jest.config.js"
+  },
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "private": true
+}
