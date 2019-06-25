@@ -2,16 +2,16 @@ import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
 import { isNonNullable } from '@marblejs/core/dist/+internal/utils';
 import { fromReadableStream } from '@marblejs/core/dist/+internal/observable';
 import { fromEvent, Observable, of, throwError, merge, iif } from 'rxjs';
-import { mapTo, map, mergeMap, takeUntil, toArray, tap, mergeMapTo, take, ignoreElements } from 'rxjs/operators';
+import { mapTo, map, mergeMap, takeUntil, toArray, tap, mergeMapTo, ignoreElements } from 'rxjs/operators';
 import { Readable } from 'stream';
 import { FileIncomingData, ParserOpts } from './multipart.interface';
 import { setRequestData, shouldParseFieldname } from './multipart.util';
 
 type FileEvent = [string, NodeJS.ReadableStream, string, string, string];
 
-const fileSizeLimit = (maxBytes: number | undefined) => (data: FileIncomingData) =>
+const fileSizeLimit = (maxBytes: number | undefined) => (data: FileIncomingData) => (finish$: Observable<any>) =>
   fromEvent(data.file, 'limit').pipe(
-    take(1),
+    takeUntil(finish$),
     mergeMapTo(throwError(
       new HttpError(`Reached file size limit for "${data.fieldname}" [${maxBytes} bytes]`, HttpStatus.PRECONDITION_FAILED),
     )),
@@ -27,7 +27,7 @@ export const parseFile = (req: HttpRequest) => (opts: ParserOpts) => (event$: Ob
       throwError(new HttpError(`File "${data.fieldname}" is not acceptable`, HttpStatus.PRECONDITION_FAILED)),
       of(data),
     )),
-    mergeMap(data => merge(fileSizeLimit(opts.maxFileSize)(data), of(data))),
+    mergeMap(data => merge(fileSizeLimit(opts.maxFileSize)(data)(finish$), of(data))),
     mergeMap(data => isNonNullable(opts.stream)
       ? of(data).pipe(
           mergeMap(opts.stream),
