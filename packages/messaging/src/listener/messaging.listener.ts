@@ -59,23 +59,28 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
       .pipe(takeUntil(conn.close$))
       .subscribe();
 
+
+    const onSubscribeEffectsOutput = (conn: TransportLayerConnection) => (msg: TransportMessage<any>) => {
+      if (msg.replyTo) {
+        conn.sendMessage(msg.replyTo, {
+          data: msgTransformer.encode(msg.data),
+          correlationId: msg.correlationId,
+          raw: msg.raw,
+        });
+      }
+      conn.ack(msg.raw);
+    }
+
+    const onSubscribeEffectsError = (errorSubject: Subject<Error>) => (error: Error) => {
+      errorSubject.next(error);
+      if (effectsSub.closed) { effectsSub = subscribeEffects(message$); }
+    }
+
     const subscribeEffects = (input$: Observable<TransportMessage<any>>) => input$
       .pipe(takeUntil(conn.close$))
       .subscribe(
-        msg => {
-          if (msg.replyTo) {
-            conn.sendMessage(msg.replyTo, {
-              data: msgTransformer.encode(msg.data),
-              correlationId: msg.correlationId,
-              raw: msg.raw,
-            });
-          }
-          conn.ack(msg.raw);
-        },
-        error => {
-          errorSubject.next(error);
-          if (effectsSub.closed) { effectsSub = subscribeEffects(message$); }
-        },
+        onSubscribeEffectsOutput(conn),
+        onSubscribeEffectsError(errorSubject),
       );
 
     effectsSub = subscribeEffects(message$);
