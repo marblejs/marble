@@ -120,12 +120,13 @@ export abstract class ServerProxy<ProxyRequest, ProxyResponse> {
 
       if (body) {
         if (isStream(body)) {
-          body.pipe(req);
+          return body.pipe(req);
         } else {
           req.write(body);
-          req.end();
         }
       }
+
+      return req.end();
     } catch (error) {
       this.logWithTag(error.toString());
       resolve(this.normalizeError(error));
