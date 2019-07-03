@@ -32,6 +32,7 @@ export const parseFile = (req: HttpRequest) => (opts: ParserOpts) => (event$: Ob
       ? of(data).pipe(
           mergeMap(opts.stream),
           tap(setRequestData(req)(data)),
+          tap(() => data.file.resume()),
           mapTo(data),
         )
       : of(data).pipe(
@@ -41,6 +42,7 @@ export const parseFile = (req: HttpRequest) => (opts: ParserOpts) => (event$: Ob
           map(chunks => ({ buffer: Buffer.concat(chunks) })),
           map(({ buffer }) => ({ buffer, size: Buffer.byteLength(buffer) })),
           tap(setRequestData(req)(data)),
+          tap(() => data.file.resume()),
           mapTo(data),
         ),
     ),
