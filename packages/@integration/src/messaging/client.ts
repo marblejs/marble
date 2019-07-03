@@ -18,7 +18,7 @@ import { requestValidator$, t } from '@marblejs/middleware-io';
 const ClientToken = createContextToken<MessagingClient>();
 
 const client = messagingClient({
-  transport: Transport.TCP,
+  transport: Transport.AMQP,
   options: {
     host: 'amqp://localhost:5672',
     queue: 'test_queue',
