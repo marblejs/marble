@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/testing",
-  "version": "2.2.3",
+  "version": "2.3.1",
   "description": "Test Marble.js API and document it",
   "keywords": [
     "test",

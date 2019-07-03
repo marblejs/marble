@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/proxy",
-  "version": "2.2.3",
+  "version": "2.3.1",
   "description": "A generic proxy server for Marble.js",
   "keywords": [
     "marble.js",

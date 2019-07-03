@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/serverless",
-  "version": "2.2.3",
+  "version": "2.3.1",
   "description": "Run Marble.js as a serverless function",
   "keywords": [
     "aws",
