@@ -4,6 +4,8 @@ import { HttpHeaders, HttpMethod } from '@marblejs/core';
 import { stripMetadataHeader, TestingMetadata } from '@marblejs/core/dist/+internal';
 import { EndpointResponse } from './testing.types';
 
+const formatJson = (object: any) => JSON.stringify(object, null, 2);
+
 export class ApiResponse {
   public description = '';
   public metadata: TestingMetadata;
@@ -12,7 +14,17 @@ export class ApiResponse {
     public readonly request: TestRequest,
     public readonly response: TestResponse,
   ) {
-    this.metadata = stripMetadataHeader(response.headers);
+    try {
+      this.metadata = stripMetadataHeader(response.headers);
+    } catch {
+      this.metadata = {};
+      throw new Error(
+        `Failed getting internal Marble metadata from response:\n` +
+        `${request.method} ${request.path} - ${response.statusCode}: ${response.statusMessage}\n` +
+        `headers: ${formatJson(response.headers)}\n` +
+        `body: ${formatJson(response.body)}`,
+      );
+    }
   }
 
   get method(): HttpMethod {

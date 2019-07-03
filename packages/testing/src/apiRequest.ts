@@ -53,7 +53,11 @@ export class ApiRequest<IsBodyless = false> {
     const { status } = this.expectations;
     const response = new ApiResponse(this.request, await this.proxy.handle(this.request));
     if (status && status !== response.status) {
-      throw new Error(`Unexpected status code ${response.status} in API Response. Expected ${status}.`);
+      throw new Error(
+        `Unexpected status code ${response.status} in API Response. Expected ${status}.\n`+
+        `headers: ${JSON.stringify(response.headers, null, 2)}\n`+
+        `body: ${JSON.stringify(response.body, null, 2)}`
+      );
     }
     return response;
   }

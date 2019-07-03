@@ -1,6 +1,8 @@
 import { createServer, IncomingMessage, OutgoingHttpHeaders, OutgoingMessage, request, Server } from 'http';
 import { makeSocketPath, normalizeHeaders } from './serverProxy.helpers';
 import { HttpMethod, HttpStatus } from '@marblejs/core';
+import { isStream } from '@marblejs/core/dist/+internal';
+import { Readable } from 'stream';
 
 type Resolver<T> = (result: T | Promise<T>) => void;
 
@@ -13,7 +15,7 @@ export interface ServerProxyRequest {
   host?: string;
   protocol?: string;
   headers?: OutgoingHttpHeaders;
-  body?: Buffer;
+  body?: Buffer | Readable;
 }
 
 export interface ServerProxyResponse {
@@ -116,7 +118,11 @@ export abstract class ServerProxy<ProxyRequest, ProxyResponse> {
           });
       }).on('error', error => resolve(this.normalizeError(error)));
       if (body) {
-        req.write(body);
+        if(isStream(body)){
+          body.pipe(req);
+        } else {
+          req.write(body);
+        }
       }
       req.end();
     } catch (error) {
