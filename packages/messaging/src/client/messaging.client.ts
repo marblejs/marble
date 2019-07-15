@@ -21,7 +21,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
   const emit = (conn: Promise<TransportLayerConnection>) => <T>(msg: T) =>
     from(conn).pipe(
       mergeMap(c => c.sendMessage(
-        c.channel,
+        c.getChannel(),
         { data: msgTransformer.encode(msg as any) },
         { type: 'emit' },
       )),
@@ -32,7 +32,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
   const publish = (conn: Promise<TransportLayerConnection>) => <T>(msg: T) =>
     from(conn).pipe(
       mergeMap(c => c.sendMessage(
-        c.channel,
+        c.getChannel(),
         { data: msgTransformer.encode(msg as any) },
         { type: 'publish' },
       )),
@@ -43,7 +43,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
   const send = (conn: Promise<TransportLayerConnection>) => <T, U>(msg: T): Observable<U> =>
     from(conn).pipe(
       mergeMap(c => c.sendMessage(
-        c.channel,
+        c.getChannel(),
         { data: msgTransformer.encode(msg as any), correlationId: createUuid() },
         { type: 'send' }
       )),
@@ -60,24 +60,22 @@ export const messagingClient = (config: MessagingClientConfig) => {
 
   return reader.map(ask => {
     const transportLayer = provideTransportLayer(transport, options);
-    const conn = transportLayer
-      .then(server => server.connect())
-      .then(server => server.consumeResponse().then(() => server));
+    const connection = transportLayer.connect().then(conn => conn.consumeResponse());
 
     ask(HttpServerEventStreamToken).map(serverEvent$ =>
       serverEvent$.pipe(
         matchEvent(ServerEvent.close),
         take(1),
-        mergeMapTo(conn),
+        mergeMapTo(connection),
         mergeMap(conn => conn.close()),
       ),
     ).getOrElse(EMPTY).subscribe();
 
     return {
-      emit: emit(conn),
-      send: send(conn),
-      publish: publish(conn),
-      close: close(conn),
+      emit: emit(connection),
+      send: send(connection),
+      publish: publish(connection),
+      close: close(connection),
     } as MessagingClient;
   });
 };

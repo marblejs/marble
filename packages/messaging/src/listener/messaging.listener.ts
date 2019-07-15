@@ -86,18 +86,15 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     effectsSub = subscribeEffects(message$);
   };
 
-  const listen = (transportLayer: Promise<TransportLayer>, ask: ContextProvider) => async () => {
-    const layer = await transportLayer;
-    const conn = await layer.connect();
-    await conn.consumeMessage();
-    await handleConnection(conn, ask);
-    return conn;
+  const listen = (transportLayer: TransportLayer, ask: ContextProvider) => async () => {
+    const connection = await transportLayer.connect();
+    await connection.consumeMessage();
+    await handleConnection(connection, ask);
+    return connection;
   };
 
   return reader.map(ask => {
-    const transportLayer = ask(TransportLayerToken)
-      .map(async layer => await layer)
-      .getOrElse(undefined as unknown as Promise<TransportLayer>);
+    const transportLayer = ask(TransportLayerToken).getOrElse(undefined as unknown as TransportLayer);
 
     return {
       listen: listen(transportLayer, ask),

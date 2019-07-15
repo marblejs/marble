@@ -5,7 +5,7 @@ import { createAmqpStrategy } from './strategies/amqp.strategy';
 import { createTcpStrategy } from './strategies/tcp.strategy';
 import { createNatsStrategy } from './strategies/nats.strategy';
 
-export const provideTransportLayer = (transport: Transport, transportOptions: any): Promise<TransportLayer> => {
+export const provideTransportLayer = (transport: Transport, transportOptions: any): TransportLayer => {
   switch (transport) {
     case Transport.AMQP:
       return createAmqpStrategy(transportOptions);
