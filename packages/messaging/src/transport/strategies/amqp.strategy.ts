@@ -1,43 +1,15 @@
-import { Subject, fromEvent, of } from 'rxjs';
-import { map, share, filter } from 'rxjs/operators';
-import { Channel, Connection, ConsumeMessage, Replies } from 'amqplib';
-import { TransportLayer, TransportLayerSendOpts, TransportMessage, TransportLayerConnection } from '../transport.interface';
+import { Subject, fromEvent, from } from 'rxjs';
+import { map, filter, take, mergeMap, mapTo } from 'rxjs/operators';
+import { Channel, Connection, ConsumeMessage } from 'amqplib';
+import { TransportLayer, TransportMessage, TransportLayerConnection } from '../transport.interface';
 import { AmqpStrategyOptions } from './amqp.strategy.interface';
 
 class AmqpStrategyConnection implements TransportLayerConnection {
-  private msgSubject$ = new Subject<ConsumeMessage>();
-  private resSubject$ = new Subject<ConsumeMessage>();
-
   constructor(
     private connection: Connection,
     private channel: Channel,
-    private responseQueue: Replies.AssertQueue,
     private options: AmqpStrategyOptions,
   ) {}
-
-  get message$() {
-    return this.msgSubject$.asObservable().pipe(
-      share(),
-      map(message => ({
-        data: message.content,
-        replyTo: message.properties.replyTo,
-        correlationId: message.properties.correlationId,
-        raw: message,
-      } as TransportMessage<Buffer>))
-    );
-  }
-
-  get response$() {
-    return this.resSubject$.asObservable().pipe(
-      share(),
-      map(message => ({
-        data: message.content,
-        replyTo: message.properties.replyTo,
-        correlationId: message.properties.correlationId,
-        raw: message,
-      } as TransportMessage<Buffer>))
-    );
-  }
 
   get close$() {
     return fromEvent(this.connection, 'close');
@@ -47,39 +19,60 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     return fromEvent<Error>(this.connection, 'error');
   }
 
-  consumeMessage = async () => {
-    await this.channel.consume(
+  consumeMessage = () => {
+    const msgSubject$ = new Subject<ConsumeMessage>();
+
+    this.channel.consume(
       this.options.queue,
-      msg => msg && this.msgSubject$.next(msg),
+      msg => msg && msgSubject$.next(msg),
     );
-    return this;
+
+    return msgSubject$.asObservable().pipe(
+      map(message => ({
+        data: message.content,
+        replyTo: message.properties.replyTo,
+        correlationId: message.properties.correlationId,
+        raw: message,
+      } as TransportMessage<Buffer>))
+    );
   }
 
-  consumeResponse = async () => {
-    await this.channel.consume(
-      this.responseQueue.queue,
-      res => res && this.resSubject$.next(res),
+  sendMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
+    const { correlationId, data } = msg;
+    const resSubject$ = new Subject<ConsumeMessage>();
+    const replyQueue = await this.channel.assertQueue('', { exclusive: true });
+
+    const consumer = await this.channel.consume(
+      replyQueue.queue,
+      res => res && resSubject$.next(res),
       { noAck: true },
     );
-    return this;
-  }
 
-  sendMessage = (queue: string, msg: TransportMessage<Buffer>, opts: TransportLayerSendOpts = {}) => {
-    const { correlationId, replyTo } = msg;
+    this.channel.sendToQueue(queue, data, { correlationId, replyTo: replyQueue.queue });
 
-    switch (opts.type) {
-      case 'publish':
-        this.channel.assertExchange(queue, 'fanout', { durable: false });
-        return of(this.channel.publish(queue, '', msg.data));
-      case 'send':
-        this.channel.sendToQueue(queue, msg.data, { correlationId, replyTo: this.responseQueue.queue });
-        return this.response$.pipe(filter(m => m.correlationId === correlationId));
-      default:
-        return of(this.channel.sendToQueue(queue, msg.data, { replyTo, correlationId }));
-    }
+    return resSubject$.asObservable().pipe(
+      filter(raw => raw.properties.correlationId === correlationId),
+      take(1),
+      mergeMap(raw => from(this.channel.cancel(consumer.consumerTag)).pipe(
+        mapTo(({
+          data: raw.content,
+          replyTo: raw.properties.replyTo,
+          correlationId: raw.properties.correlationId,
+          raw,
+        } as TransportMessage<Buffer>)),
+      )),
+    ).toPromise();
   };
 
-  ack = (msg: any) => this.channel.ack(msg);
+  emitMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
+    const { correlationId, data, replyTo } = msg;
+    return Promise.resolve(this.channel.sendToQueue(queue, data, {
+      replyTo,
+      correlationId,
+    }));
+  };
+
+  ack = (msg: TransportMessage) => this.channel.ack(msg.raw);
 
   getChannel = () => this.options.queue;
 
@@ -101,12 +94,10 @@ class AmqpStrategy implements TransportLayer {
 
     await channel.prefetch(1);
     await channel.assertQueue(queue, queueOptions);
-    const responseQueue = await channel.assertQueue('', { exclusive: true });
 
     return new AmqpStrategyConnection(
       connection,
       channel,
-      responseQueue,
       this.options,
     );
   }

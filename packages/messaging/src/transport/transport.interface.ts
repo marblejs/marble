@@ -15,20 +15,14 @@ export interface TransportLayer {
 }
 
 export interface TransportLayerConnection {
-  sendMessage: (channel: string, message: TransportMessage<Buffer>, opts?: TransportLayerSendOpts) => Observable<any>;
-  consumeMessage: () => Promise<TransportLayerConnection>;
-  consumeResponse: () => Promise<TransportLayerConnection>;
-  ack: (msg: any) => void;
+  sendMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<any>;
+  emitMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<any>;
+  consumeMessage: () => Observable<TransportMessage<Buffer>>;
+  ack: (msg: TransportMessage<any>) => void;
   close: () => Promise<any>;
   getChannel(): string;
   error$: Observable<Error>;
-  message$: Observable<TransportMessage<Buffer>>;
-  response$: Observable<TransportMessage<Buffer>>;
   close$: Observable<any>;
-}
-
-export interface TransportLayerSendOpts {
-  type?: 'publish' | 'send' | 'emit';
 }
 
 export interface TransportMessageTransformer<T> {

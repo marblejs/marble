@@ -40,7 +40,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     const combinedMiddlewares = combineMiddlewares(...middlewares);
     const defaultMetadata = createEffectMetadata({ ask });
 
-    const message$ = conn.message$.pipe(
+    const message$ = conn.consumeMessage().pipe(
       map(msg => ({ ...msg, data: msgTransformer.decode(msg.data) } as TransportMessage<any>)),
       publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), conn, defaultMetadata).pipe(
         withLatestFrom(msg$),
@@ -62,13 +62,13 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
 
     const onSubscribeEffectsOutput = (conn: TransportLayerConnection) => (msg: TransportMessage<any>) => {
       if (msg.replyTo) {
-        conn.sendMessage(msg.replyTo, {
+        conn.emitMessage(msg.replyTo, {
           data: msgTransformer.encode(msg.data),
           correlationId: msg.correlationId,
           raw: msg.raw,
         });
       }
-      conn.ack(msg.raw);
+      conn.ack(msg);
     }
 
     const onSubscribeEffectsError = (errorSubject: Subject<Error>) => (error: Error) => {
@@ -88,8 +88,9 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
 
   const listen = (transportLayer: TransportLayer, ask: ContextProvider) => async () => {
     const connection = await transportLayer.connect();
-    await connection.consumeMessage();
-    await handleConnection(connection, ask);
+
+    handleConnection(connection, ask);
+
     return connection;
   };
 

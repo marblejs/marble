@@ -20,21 +20,9 @@ export const messagingClient = (config: MessagingClientConfig) => {
 
   const emit = (conn: Promise<TransportLayerConnection>) => <T>(msg: T) =>
     from(conn).pipe(
-      mergeMap(c => c.sendMessage(
+      mergeMap(c => c.emitMessage(
         c.getChannel(),
         { data: msgTransformer.encode(msg as any) },
-        { type: 'emit' },
-      )),
-      mapTo(true),
-      take(1),
-    );
-
-  const publish = (conn: Promise<TransportLayerConnection>) => <T>(msg: T) =>
-    from(conn).pipe(
-      mergeMap(c => c.sendMessage(
-        c.getChannel(),
-        { data: msgTransformer.encode(msg as any) },
-        { type: 'publish' },
       )),
       mapTo(true),
       take(1),
@@ -45,7 +33,6 @@ export const messagingClient = (config: MessagingClientConfig) => {
       mergeMap(c => c.sendMessage(
         c.getChannel(),
         { data: msgTransformer.encode(msg as any), correlationId: createUuid() },
-        { type: 'send' }
       )),
       map(m => m as TransportMessage<Buffer>),
       map(m => msgTransformer.decode(m.data) as U),
@@ -60,7 +47,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
 
   return reader.map(ask => {
     const transportLayer = provideTransportLayer(transport, options);
-    const connection = transportLayer.connect().then(conn => conn.consumeResponse());
+    const connection = transportLayer.connect();
 
     ask(HttpServerEventStreamToken).map(serverEvent$ =>
       serverEvent$.pipe(
@@ -74,7 +61,6 @@ export const messagingClient = (config: MessagingClientConfig) => {
     return {
       emit: emit(connection),
       send: send(connection),
-      publish: publish(connection),
       close: close(connection),
     } as MessagingClient;
   });
