@@ -15,7 +15,7 @@ import {
 } from '../transport/transport.interface';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
-import { TransportLayerToken } from '../server/messaging.server.tokens';
+import { TransportLayerToken } from './messaging.server.tokens';
 
 export interface MessagingListenerConfig {
   effects?: MsgEffect<any, any>[];

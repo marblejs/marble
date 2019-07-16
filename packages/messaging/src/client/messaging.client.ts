@@ -1,11 +1,7 @@
 import { reader, HttpServerEventStreamToken, matchEvent, ServerEvent } from '@marblejs/core';
 import { from, Observable, EMPTY } from 'rxjs';
 import { mergeMap, take, map, mapTo, mergeMapTo } from 'rxjs/operators';
-import {
-  Transport,
-  TransportMessage,
-  TransportLayerConnection,
-} from '../transport/transport.interface';
+import { TransportMessage, TransportLayerConnection } from '../transport/transport.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MessagingClient, MessagingClientConfig } from './messaging.client.interface';
@@ -13,9 +9,9 @@ import { createUuid } from '@marblejs/core/dist/+internal/utils';
 
 export const messagingClient = (config: MessagingClientConfig) => {
   const {
-    transport = Transport.TCP,
+    transport,
+    options,
     msgTransformer = jsonTransformer,
-    options = {},
   } = config;
 
   const emit = (conn: Promise<TransportLayerConnection>) => <T>(msg: T) =>

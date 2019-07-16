@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@marblejs/core": "^2.1.0",
+    "@marblejs/middleware-io": "^2.1.0",
     "amqplib": "^0.5.3",
     "@types/amqplib": "^0.5.11"
   },

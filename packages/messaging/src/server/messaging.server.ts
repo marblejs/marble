@@ -1,14 +1,13 @@
 import { createContext, registerAll, bindTo } from '@marblejs/core';
 import { CreateMicroserviceConfig } from './messaging.server.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
-import { Transport } from '../transport/transport.interface';
 import { TransportLayerToken } from './messaging.server.tokens';
 
 export const createMicroservice = (config: CreateMicroserviceConfig) => {
   const {
-    options = {},
+    options,
+    transport,
     dependencies = [],
-    transport = Transport.AMQP,
     messagingListener,
   } = config;
 

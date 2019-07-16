@@ -18,6 +18,10 @@ describe('#messagingClient', () => {
 
     const runClient = () => messagingClient(clientOptions).run(createContext());
     const runServer = () => createAmqpStrategy(clientOptions.options).connect();
+    const createMessage = (data: any, correlationId?: string): TransportMessage<Buffer> => ({
+      data: Buffer.from(JSON.stringify(data)),
+      correlationId: correlationId,
+    });
 
     test('emits event to consumer', async done => {
       const client = runClient();
@@ -40,11 +44,8 @@ describe('#messagingClient', () => {
       const server = await runServer();
 
       server.consumeMessage().subscribe(async msg => {
-        const count = String(Number(msg.data.toString()) + 1);
-        const response: TransportMessage<Buffer> = {
-          data: Buffer.from(count),
-          correlationId: msg.correlationId,
-        };
+        const count = Number(msg.data.toString()) + 1;
+        const response = createMessage(count, msg.correlationId);
 
         await server.emitMessage(msg.replyTo || '', response);
         server.ack(msg);
