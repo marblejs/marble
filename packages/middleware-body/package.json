@@ -37,7 +37,8 @@
     "@types/qs": "^6.5.1",
     "@types/type-is": "~1.6.2",
     "qs": "^6.6.0",
-    "type-is": "~1.6.16"
+    "type-is": "~1.6.16",
+    "fp-ts": "1.15.0"
   },
   "devDependencies": {
     "@marblejs/core": "^2.3.1"

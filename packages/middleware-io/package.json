@@ -35,7 +35,8 @@
   },
   "dependencies": {
     "@types/json-schema": "^7.0.3",
-    "io-ts": "1.8.5"
+    "io-ts": "1.8.5",
+    "fp-ts": "1.15.0"
   },
   "devDependencies": {
     "@marblejs/core": "^2.3.1"

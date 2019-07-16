@@ -35,7 +35,8 @@
   },
   "dependencies": {
     "@types/jsonwebtoken": "^7.2.8",
-    "jsonwebtoken": "^8.3.0"
+    "jsonwebtoken": "^8.3.0",
+    "fp-ts": "1.15.0"
   },
   "devDependencies": {
     "@marblejs/core": "^2.3.1",

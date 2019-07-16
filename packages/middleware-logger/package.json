@@ -34,7 +34,8 @@
     "rxjs": "^6.3.3"
   },
   "dependencies": {
-    "chalk": "^2.4.1"
+    "chalk": "^2.4.1",
+    "fp-ts": "1.15.0"
   },
   "devDependencies": {
     "@marblejs/core": "^2.3.1",

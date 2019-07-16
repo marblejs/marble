@@ -44,7 +44,8 @@
   },
   "dependencies": {
     "@types/joi": "^14.0.0",
-    "joi": "~14.3.0"
+    "joi": "~14.3.0",
+    "fp-ts": "1.15.0"
   },
   "devDependencies": {
     "@marblejs/core": "^2.3.1",
