@@ -40,7 +40,10 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   sendMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
     const { correlationId, data } = msg;
     const resSubject$ = new Subject<ConsumeMessage>();
-    const replyQueue = await this.channel.assertQueue('', { exclusive: true });
+    const replyQueue = await this.channel.assertQueue('', {
+      exclusive: true,
+      autoDelete: true,
+    });
 
     const consumer = await this.channel.consume(
       replyQueue.queue,
@@ -48,7 +51,10 @@ class AmqpStrategyConnection implements TransportLayerConnection {
       { noAck: true },
     );
 
-    this.channel.sendToQueue(queue, data, { correlationId, replyTo: replyQueue.queue });
+    this.channel.sendToQueue(queue, data, {
+      correlationId,
+      replyTo: replyQueue.queue,
+    });
 
     return resSubject$.asObservable().pipe(
       filter(raw => raw.properties.correlationId === correlationId),
