@@ -10,7 +10,7 @@ export interface MsgMiddlewareEffect<
 
 export interface MsgErrorEffect<
   Err extends Error = Error,
-> extends MsgEffect<Err, any, MsgClient, Err> {}
+> extends MsgEffect<Event, Event, MsgClient, Err> {}
 
 export interface MsgEffect<
   I = Event,

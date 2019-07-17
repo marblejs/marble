@@ -1,12 +1,12 @@
-import { matchEvent, use } from '@marblejs/core';
+import { Event, matchEvent, use } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, mergeMapTo } from 'rxjs/operators';
 import { createMicroservice } from './messaging.server';
 import { messagingListener } from './messaging.server.listener';
 import { Transport, TransportMessage } from '../transport/transport.interface';
 import { createAmqpStrategy } from '../transport/strategies/amqp.strategy';
-import { MsgEffect } from '../effects/messaging.effects.interface';
-import { Subject } from 'rxjs';
+import { MsgEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
+import { Subject, throwError } from 'rxjs';
 
 describe('messagingServer', () => {
 
@@ -17,14 +17,16 @@ describe('messagingServer', () => {
       queueOptions: { durable: false },
     };
 
-    const microservice = (effect?: MsgEffect) => createMicroservice({
-      options,
-      transport: Transport.AMQP,
-      messagingListener: messagingListener(effect ? { effects: [effect] } : undefined),
-    });
+    const runServer = (effect$?: MsgEffect, error$?: MsgErrorEffect) =>
+      createMicroservice({
+        options,
+        transport: Transport.AMQP,
+        messagingListener: messagingListener(effect$ ? { effects: [effect$], error$ } : undefined),
+      }).run();
 
-    const runServer = (effect?: MsgEffect) => microservice(effect).run();
-    const runClient = () => createAmqpStrategy(options).connect();
+    const runClient = () =>
+      createAmqpStrategy(options).connect();
+
     const createMessage = (data: any): TransportMessage<Buffer> => ({
       data: Buffer.from(JSON.stringify(data)),
     });
@@ -52,6 +54,7 @@ describe('messagingServer', () => {
 
     test('emits event to consumer', async done => {
       const eventSubject = new Subject();
+
       const event$: MsgEffect = event$ =>
         event$.pipe(
           matchEvent('EVENT_TEST'),
@@ -69,6 +72,34 @@ describe('messagingServer', () => {
 
       eventSubject.subscribe(event => {
         expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
+        setTimeout(() => server.close().then(done), 1000);
+      });
+    });
+
+    test('reacts to thrown error', async done => {
+      const expectedMessage = { type: 'EVENT_TEST' };
+      const expectedError = new Error('test_error');
+      const errorSubject = new Subject<[Event, Error | undefined]>();
+
+      const event$: MsgEffect = event$ =>
+        event$.pipe(
+          matchEvent('EVENT_TEST'),
+          mergeMapTo(throwError(expectedError)),
+        );
+
+      const error$: MsgErrorEffect = (event$, _, { error }) =>
+        event$.pipe(
+          tap(e => errorSubject.next([e, error])),
+        );
+
+      const server = await runServer(event$, error$);
+      const client = await runClient();
+
+      await client.emitMessage(options.queue, createMessage(expectedMessage));
+
+      errorSubject.subscribe(data => {
+        expect(data[0]).toEqual(expectedMessage);
+        expect(data[1]).toEqual(expectedError);
         setTimeout(() => server.close().then(done), 1000);
       });
     });

@@ -5,8 +5,8 @@ import {
   combineEffects,
   createEffectMetadata,
 } from '@marblejs/core';
-import { Observable, Subscription, Subject, merge } from 'rxjs';
-import { map, publish, withLatestFrom, takeUntil } from 'rxjs/operators';
+import { Observable, Subscription, Subject, of } from 'rxjs';
+import { map, publish, withLatestFrom, takeUntil, catchError, mergeMap } from 'rxjs/operators';
 import {
   TransportMessage,
   TransportMessageTransformer,
@@ -42,23 +42,20 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
 
     const message$ = conn.consumeMessage().pipe(
       map(msg => ({ ...msg, data: msgTransformer.decode(msg.data) } as TransportMessage<any>)),
-      publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), conn, defaultMetadata).pipe(
-        withLatestFrom(msg$),
-      )),
-      map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-      publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), conn, defaultMetadata).pipe(
-        withLatestFrom(msg$),
-      )),
-      map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
+      mergeMap(msg => of(msg).pipe(
+        publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), conn, defaultMetadata).pipe(
+          withLatestFrom(msg$),
+        )),
+        map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
+        publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), conn, defaultMetadata).pipe(
+          withLatestFrom(msg$),
+        )),
+        map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
+        catchError(error => error$(of(msg.data), conn, createEffectMetadata({ ask, error })).pipe(
+          map(data => ({ ...msg, data } as TransportMessage<any>)),
+        )),
+      ))
     );
-
-    error$(merge(
-      errorSubject.asObservable(),
-      conn.error$,
-    ), conn, defaultMetadata)
-      .pipe(takeUntil(conn.close$))
-      .subscribe();
-
 
     const onSubscribeEffectsOutput = (conn: TransportLayerConnection) => (msg: TransportMessage<any>) => {
       if (msg.replyTo) {
