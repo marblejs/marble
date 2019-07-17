@@ -4,5 +4,10 @@
   "useWorkspaces": true,
   "packages": [
     "packages/*"
-  ]
+  ],
+  "command": {
+    "publish": {
+      "allowBranch": ["master", "feat/*"]
+    }
+  }
 }
