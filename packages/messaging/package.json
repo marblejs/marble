@@ -42,6 +42,6 @@
     "@types/amqplib": "^0.5.11"
   },
   "publishConfig": {
-    "access": "private"
+    "access": "public"
   }
 }
