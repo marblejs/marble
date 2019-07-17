@@ -1,4 +1,4 @@
-import { reader, HttpServerEventStreamToken, matchEvent, ServerEvent } from '@marblejs/core';
+import { reader, serverEvent$, matchEvent, ServerEvent } from '@marblejs/core';
 import { from, Observable, EMPTY } from 'rxjs';
 import { mergeMap, take, map, mapTo, mergeMapTo } from 'rxjs/operators';
 import { TransportMessage, TransportLayerConnection } from '../transport/transport.interface';
@@ -45,7 +45,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
     const transportLayer = provideTransportLayer(transport, options);
     const connection = transportLayer.connect();
 
-    ask(HttpServerEventStreamToken).map(serverEvent$ =>
+    ask(serverEvent$).map(serverEvent$ =>
       serverEvent$.pipe(
         matchEvent(ServerEvent.close),
         take(1),
