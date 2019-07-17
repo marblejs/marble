@@ -21,6 +21,11 @@ For the latest updates, documentation, change log, and release information visit
 
 ## Usage
 
+In order to use **AMQP** transport protocol you have to install the following libraries:
+```
+- amqplib
+```
+
 Consumer code:
 ```typescript
 import {
