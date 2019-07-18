@@ -1,4 +1,4 @@
-import { reader, serverEvent$, matchEvent, ServerEvent } from '@marblejs/core';
+import { reader, serverEvent$, matchEvent, ServerEvent, AllServerEvents } from '@marblejs/core';
 import { from, Observable, EMPTY } from 'rxjs';
 import { mergeMap, take, map, mapTo, mergeMapTo } from 'rxjs/operators';
 import { TransportMessage, TransportLayerConnection } from '../transport/transport.interface';
@@ -41,18 +41,22 @@ export const messagingClient = (config: MessagingClientConfig) => {
       take(1),
     );
 
+  const teardownOnClose$ = (conn: Promise<TransportLayerConnection>) => (event$: Observable<AllServerEvents>) =>
+    event$.pipe(
+      matchEvent(ServerEvent.close),
+      take(1),
+      mergeMapTo(conn),
+      mergeMap(conn => conn.close()),
+    );
+
   return reader.map(ask => {
     const transportLayer = provideTransportLayer(transport, options);
     const connection = transportLayer.connect();
 
-    ask(serverEvent$).map(serverEvent$ =>
-      serverEvent$.pipe(
-        matchEvent(ServerEvent.close),
-        take(1),
-        mergeMapTo(connection),
-        mergeMap(conn => conn.close()),
-      ),
-    ).getOrElse(EMPTY).subscribe();
+    ask(serverEvent$)
+      .map(teardownOnClose$(connection))
+      .getOrElse(EMPTY)
+      .subscribe();
 
     return {
       emit: emit(connection),
