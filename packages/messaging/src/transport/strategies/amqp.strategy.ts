@@ -25,6 +25,7 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     this.channel.consume(
       this.options.queue,
       msg => msg && msgSubject$.next(msg),
+      { noAck: true },
     );
 
     return msgSubject$.asObservable().pipe(
@@ -77,8 +78,6 @@ class AmqpStrategyConnection implements TransportLayerConnection {
       correlationId,
     }));
   };
-
-  ack = (msg: TransportMessage) => this.channel.ack(msg.raw);
 
   getChannel = () => this.options.queue;
 
