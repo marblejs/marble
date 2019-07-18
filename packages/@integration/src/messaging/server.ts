@@ -1,6 +1,15 @@
 import { matchEvent, use } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { createMicroservice, messagingListener, Transport, MsgEffect, MsgMiddlewareEffect } from '@marblejs/messaging';
+import {
+  createMicroservice,
+  messagingListener,
+  Transport,
+  MsgEffect,
+  MsgMiddlewareEffect,
+  MsgServerEffect,
+  ServerEvent,
+} from '@marblejs/messaging';
+import { merge } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 const fibonacci = (n: number): number =>
@@ -21,6 +30,13 @@ const fibonacci$: MsgEffect = event$ =>
     map(payload => ({ type: 'FIB_RESULT', payload })),
   );
 
+const listening$: MsgServerEffect = event$ =>
+  event$.pipe(
+    matchEvent(ServerEvent.listening),
+    map(event => event.payload),
+    tap(({ host, channel }) => console.log(`Server running @ ${host} for queue "${channel}" 🚀`)),
+  );
+
 export const microservice = createMicroservice({
   transport: Transport.AMQP,
   options: {
@@ -33,6 +49,9 @@ export const microservice = createMicroservice({
     middlewares: [log$],
   }),
   dependencies: [],
+  event$: (...args) => merge(
+    listening$(...args),
+  ),
 });
 
 if (process.env.NODE_ENV !== 'test') {

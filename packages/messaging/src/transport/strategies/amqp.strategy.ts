@@ -90,6 +90,13 @@ class AmqpStrategyConnection implements TransportLayerConnection {
 class AmqpStrategy implements TransportLayer {
   constructor(private options: AmqpStrategyOptions) {}
 
+  get config() {
+    return ({
+      host: this.options.host,
+      channel: this.options.queue,
+    });
+  }
+
   async connect() {
     const { host, queue, queueOptions } = this.options;
 

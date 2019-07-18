@@ -18,3 +18,6 @@ export interface MsgEffect<
   Client = MsgClient,
   Err extends Error = Error,
 > extends Effect<I, O, Client, Err> {}
+
+export interface MsgServerEffect<T extends Event = Event>
+  extends MsgEffect<T, any, undefined> {}

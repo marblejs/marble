@@ -12,6 +12,12 @@ export enum Transport {
 
 export interface TransportLayer {
   connect: () => Promise<TransportLayerConnection>;
+  config: TransportLayerConfig;
+}
+
+export interface TransportLayerConfig {
+  host: string;
+  channel: string;
 }
 
 export interface TransportLayerConnection {

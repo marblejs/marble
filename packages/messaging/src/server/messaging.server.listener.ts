@@ -6,7 +6,7 @@ import {
   createEffectMetadata,
 } from '@marblejs/core';
 import { Observable, Subscription, Subject, of } from 'rxjs';
-import { map, publish, withLatestFrom, takeUntil, catchError, mergeMap } from 'rxjs/operators';
+import { map, publish, withLatestFrom, takeUntil, catchError, mergeMap, take } from 'rxjs/operators';
 import {
   TransportMessage,
   TransportMessageTransformer,
@@ -15,7 +15,8 @@ import {
 } from '../transport/transport.interface';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
-import { TransportLayerToken } from './messaging.server.tokens';
+import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
+import { AllServerEvents, ServerEvent } from './messaging.server.events';
 
 export interface MessagingListenerConfig {
   effects?: MsgEffect<any, any>[];
@@ -32,7 +33,11 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     msgTransformer = jsonTransformer,
   } = config;
 
-  const handleConnection = (conn: TransportLayerConnection, ask: ContextProvider) => {
+  const handleConnection = (
+    conn: TransportLayerConnection,
+    serverEventsSubject: Subject<AllServerEvents>,
+    ask: ContextProvider,
+  ) => {
     let effectsSub: Subscription;
 
     const errorSubject = new Subject<Error>();
@@ -79,13 +84,20 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
         onSubscribeEffectsError(errorSubject),
       );
 
+    conn.close$
+      .pipe(take(1))
+      .subscribe(() => serverEventsSubject.next(ServerEvent.close()));
+
     effectsSub = subscribeEffects(message$);
   };
 
   const listen = (transportLayer: TransportLayer, ask: ContextProvider) => async () => {
+    const { host, channel } = transportLayer.config;
+    const serverEventsSubject = ask(ServerEventsToken).getOrElse(undefined as unknown as Subject<AllServerEvents>);
     const connection = await transportLayer.connect();
 
-    handleConnection(connection, ask);
+    handleConnection(connection, serverEventsSubject, ask);
+    serverEventsSubject.next(ServerEvent.listening(host, channel));
 
     return connection;
   };

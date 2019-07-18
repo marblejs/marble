@@ -5,4 +5,5 @@ export * from './effects/messaging.effects.interface';
 export * from './server/messaging.server';
 export * from './server/messaging.server.interface';
 export * from './server/messaging.server.tokens';
+export * from './server/messaging.server.events';
 export { messagingListener } from './server/messaging.server.listener';
