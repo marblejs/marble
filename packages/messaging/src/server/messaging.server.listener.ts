@@ -88,6 +88,10 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
       .pipe(take(1))
       .subscribe(() => serverEventsSubject.next(ServerEvent.close()));
 
+    conn.error$
+      .pipe(takeUntil(conn.close$))
+      .subscribe(error => serverEventsSubject.next(ServerEvent.error(error)));
+
     effectsSub = subscribeEffects(message$);
   };
 

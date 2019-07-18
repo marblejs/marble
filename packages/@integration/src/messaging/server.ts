@@ -37,6 +37,13 @@ const listening$: MsgServerEffect = event$ =>
     tap(({ host, channel }) => console.log(`Server running @ ${host} for queue "${channel}" 🚀`)),
   );
 
+const error$: MsgServerEffect = event$ =>
+  event$.pipe(
+    matchEvent(ServerEvent.error),
+    map(event => event.payload),
+    tap(({ error }) => console.error(error)),
+  );
+
 export const microservice = createMicroservice({
   transport: Transport.AMQP,
   options: {
@@ -51,6 +58,7 @@ export const microservice = createMicroservice({
   dependencies: [],
   event$: (...args) => merge(
     listening$(...args),
+    error$(...args),
   ),
 });
 
