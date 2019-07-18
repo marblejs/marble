@@ -65,7 +65,6 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
           raw: msg.raw,
         });
       }
-      conn.ack(msg);
     }
 
     const onSubscribeEffectsError = (errorSubject: Subject<Error>) => (error: Error) => {

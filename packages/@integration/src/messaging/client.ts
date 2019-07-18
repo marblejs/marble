@@ -11,7 +11,7 @@ import {
   HttpServerEffect,
   use,
 } from '@marblejs/core';
-import { merge, of, forkJoin } from 'rxjs';
+import { merge, of, forkJoin, EMPTY } from 'rxjs';
 import { tap, map, mergeMap } from 'rxjs/operators';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 
@@ -31,6 +31,17 @@ const rootValiadtor$ = requestValidator$({
     number: t.string,
   }),
 });
+
+const test$ = r.pipe(
+  r.matchPath('/test'),
+  r.matchType('GET'),
+  r.useEffect((req$, _, { ask }) => req$.pipe(
+    mergeMap(() => ask(ClientToken)
+      .map(client => client.emit({ type: 'TEST' }))
+      .getOrElse(EMPTY)),
+    map(() => ({ body: 'OK' })),
+  )),
+);
 
 const fib$ = r.pipe(
   r.matchPath('/fib/:number'),
@@ -62,7 +73,7 @@ export const server = createServer({
   port: Number(process.env.PORT) || 1337,
   httpListener: httpListener({
     middlewares: [logger$()],
-    effects: [fib$],
+    effects: [test$, fib$],
   }),
   dependencies: [
     bindTo(ClientToken)(client.run),

@@ -29,7 +29,6 @@ describe('#messagingClient', () => {
 
       server.consumeMessage().subscribe(async msg => {
         expect(msg.data.toString()).toEqual(JSON.stringify({ test: 'test' }));
-        server.ack(msg);
         await server.close();
         done();
       });
@@ -48,7 +47,6 @@ describe('#messagingClient', () => {
         const response = createMessage(count, msg.correlationId);
 
         await server.emitMessage(msg.replyTo || '', response);
-        server.ack(msg);
         await server.close();
       });
 
