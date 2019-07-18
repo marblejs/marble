@@ -2,17 +2,9 @@
 
 RABBITMQ_CONTAINER=marble-rabbit
 
-function wait_for_rabbit () {
-  until docker exec $RABBITMQ_CONTAINER rabbitmqctl cluster_status > /dev/null 2>&1
-  do
-    sleep 2
-    echo "Waiting for rabbitmq..."
-  done
-}
-
 docker-compose -f docker-compose.yml up -d
 
-wait_for_rabbit
+node scripts/wait.js
 
 if [ "$SCOPE" == "unit" ]; then
   jest --expand --coverage --detectOpenHandles
