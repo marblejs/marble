@@ -11,7 +11,7 @@ const waitForRabbitMq = async () => {
     await amqplib.connect('amqp://localhost:5672');
     process.exit();
   } catch(err) {
-    log(' -- Waiting for RabbitMQ to by ready...');
+    log(' -- Waiting for RabbitMQ to be ready...');
     setTimeout(() => waitForRabbitMq(), 5 * SECOND);
   }
 }
