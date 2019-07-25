@@ -45,16 +45,15 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     const errorSubject = new Subject<Error>();
     const combinedEffects = combineEffects(...effects);
     const combinedMiddlewares = combineMiddlewares(...middlewares);
-    const defaultMetadata = createEffectMetadata({ ask });
 
     const message$ = conn.consumeMessage().pipe(
       map(msg => ({ ...msg, data: msgTransformer.decode(msg.data) } as TransportMessage<any>)),
       mergeMap(msg => of(msg).pipe(
-        publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), conn, defaultMetadata).pipe(
+        publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), conn, createEffectMetadata({ ask, initiator: msg })).pipe(
           withLatestFrom(msg$),
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), conn, defaultMetadata).pipe(
+        publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), conn, createEffectMetadata({ ask, initiator: msg })).pipe(
           withLatestFrom(msg$),
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),

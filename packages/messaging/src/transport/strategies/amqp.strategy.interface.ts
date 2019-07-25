@@ -10,7 +10,6 @@ export interface AmqpStrategyOptions {
   host: string;
   queue: string;
   queueOptions?: Options.AssertQueue;
-  socketOptions?: any;
   prefetchCount?: number;
-  isGlobalPrefetchCount?: boolean;
+  expectAck?: boolean;
 }

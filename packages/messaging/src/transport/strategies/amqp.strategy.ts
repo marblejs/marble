@@ -25,7 +25,9 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     this.channel.consume(
       this.options.queue,
       msg => msg && msgSubject$.next(msg),
-      { noAck: true },
+      { noAck: this.options.expectAck !== undefined
+        ? !this.options.expectAck
+        : true },
     );
 
     return msgSubject$.asObservable().pipe(
@@ -79,6 +81,18 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     }));
   };
 
+  ackMessage = (message: TransportMessage<any> | undefined) => {
+    if (message) {
+      this.channel.ack(message.raw);
+    }
+  }
+
+  nackMessage = (message: TransportMessage<any> | undefined, resend = true) => {
+    if (message) {
+      this.channel.nack(message.raw, false , resend);
+    }
+  }
+
   getChannel = () => this.options.queue;
 
   close = async () => {
@@ -98,13 +112,13 @@ class AmqpStrategy implements TransportLayer {
   }
 
   async connect() {
-    const { host, queue, queueOptions } = this.options;
+    const { host, queue, queueOptions, prefetchCount } = this.options;
 
     const amqplib = await import('amqplib');
     const connection = await amqplib.connect(host);
     const channel = await connection.createChannel();
 
-    await channel.prefetch(1);
+    await channel.prefetch(prefetchCount || 1);
     await channel.assertQueue(queue, queueOptions);
 
     return new AmqpStrategyConnection(
