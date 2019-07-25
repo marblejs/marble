@@ -14,7 +14,7 @@ import {
   TransportLayer,
 } from '../transport/transport.interface';
 import { jsonTransformer } from '../transport/transport.transformer';
-import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
+import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
 import { AllServerEvents, ServerEvent } from './messaging.server.events';
 
@@ -22,6 +22,7 @@ export interface MessagingListenerConfig {
   effects?: MsgEffect<any, any>[];
   middlewares?: MsgMiddlewareEffect<any, any>[];
   error$?: MsgErrorEffect;
+  output$?: MsgOutputEffect;
   msgTransformer?: TransportMessageTransformer<any>;
 }
 
@@ -29,6 +30,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
   const {
     effects = [],
     middlewares = [],
+    output$ = (msg$ => msg$) as MsgOutputEffect,
     error$ = (msg$ => msg$) as MsgErrorEffect,
     msgTransformer = jsonTransformer,
   } = config;
@@ -53,6 +55,10 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
         publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), conn, defaultMetadata).pipe(
+          withLatestFrom(msg$),
+        )),
+        map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
+        publish(msg$ => output$(msg$.pipe(map(m => m.data)), conn, createEffectMetadata({ ask, initiator: msg })).pipe(
           withLatestFrom(msg$),
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),

@@ -8,6 +8,7 @@ import {
   MsgMiddlewareEffect,
   MsgServerEffect,
   ServerEvent,
+  MsgOutputEffect,
 } from '@marblejs/messaging';
 import { merge } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -44,6 +45,14 @@ const error$: MsgServerEffect = event$ =>
     tap(({ error }) => console.error(error)),
   );
 
+const output$: MsgOutputEffect = (event$, _, { initiator }) =>
+  event$.pipe(
+    tap(event => console.log(`processed ::`, event, initiator && {
+      replyTo: initiator.replyTo,
+      correlationId: initiator.correlationId,
+    })),
+  );
+
 export const microservice = createMicroservice({
   transport: Transport.AMQP,
   options: {
@@ -54,6 +63,7 @@ export const microservice = createMicroservice({
   messagingListener: messagingListener({
     effects: [fibonacci$],
     middlewares: [log$],
+    output$,
   }),
   dependencies: [],
   event$: (...args) => merge(
