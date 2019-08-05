@@ -63,6 +63,7 @@
     "@types/supertest": "^2.0.7",
     "@typescript-eslint/eslint-plugin": "^1.7.0",
     "@typescript-eslint/parser": "^1.7.0",
+    "@types/rimraf": "^2.0.2",
     "eslint": "^5.16.0",
     "husky": "^0.14.0",
     "jest": "~23.6.0",
