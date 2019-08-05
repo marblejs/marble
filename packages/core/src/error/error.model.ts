@@ -4,6 +4,7 @@ import { ExtendableError } from '../+internal/utils';
 
 export enum ErrorType {
   CORE_ERROR = 'CoreError',
+  CONTEXT_ERROR = 'ContextError',
   HTTP_ERROR = 'HttpError',
   EVENT_ERROR = 'EventError',
 }
@@ -30,6 +31,14 @@ export class CoreError extends ExtendableError {
     super(ErrorType.CORE_ERROR, message);
     Error.prepareStackTrace = (_, stack) => options.stackTraceFactory(message, stack);
     Error.captureStackTrace(this, options.context);
+  }
+}
+
+export class ContextError extends ExtendableError {
+  constructor(
+    public readonly message: string,
+  ) {
+    super(ErrorType.CONTEXT_ERROR, message);
   }
 }
 

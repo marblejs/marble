@@ -7,23 +7,27 @@ import {
   ServerEvent,
   httpListener,
   HttpServerEffect,
+  useContext,
 } from '@marblejs/core';
 import { mapToServer, MarbleWebSocketServer } from '@marblejs/websockets';
 import { logger$ } from '@marblejs/middleware-logger';
 import { merge } from 'rxjs';
-import { tap, map, mapTo } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
 import { websocketsServer } from './websockets.server';
 
-export const WsServerToken = createContextToken<MarbleWebSocketServer>();
+export const WsServerToken = createContextToken<MarbleWebSocketServer>('MarbleWebSocketServer');
 
 const root$ = r.pipe(
   r.matchPath('/'),
   r.matchType('GET'),
-  r.useEffect((req$, _, { ask }) => req$.pipe(
-    mapTo(ask(WsServerToken)),
-    tap(ws => ws.map(server => server.sendBroadcastResponse({ type: 'ROOT', payload: 'Hello' }))),
-    map(body => ({ body })),
-  )));
+  r.useEffect((req$, _, { ask }) => {
+    const wsServer = useContext(WsServerToken)(ask);
+
+    return req$.pipe(
+      tap(() => wsServer.sendBroadcastResponse({ type: 'ROOT', payload: 'Hello' })),
+      map(body => ({ body })),
+    );
+  }));
 
 const upgrade$: HttpServerEffect = (event$, _, { ask }) =>
   event$.pipe(

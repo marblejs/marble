@@ -4,6 +4,7 @@ import { CoreError } from './error.model';
 export type CoreErrorOptions = {
   contextMethod: string;
   contextPackage?: string;
+  offset?: number;
 };
 
 export const stringifyStackTrace = (stackTrace: NodeJS.CallSite[]) =>
@@ -12,7 +13,13 @@ export const stringifyStackTrace = (stackTrace: NodeJS.CallSite[]) =>
     .join('\n  ');
 
 export const coreErrorStackTraceFactory = (opts: CoreErrorOptions) => (message: string, stack: NodeJS.CallSite[]) => {
-  const [method, file, ...restStack] = stack;
+  const methodPointer = opts.offset || 0;
+  const method = stack[methodPointer];
+
+  const filePointer = methodPointer + 1;
+  const file   = stack[filePointer];
+
+  const restStack = stack.slice(filePointer, stack.length);
   const [line, col] = [file.getLineNumber() || 0, file.getColumnNumber() || 0];
   const packageName = opts.contextPackage || '@marblejs/core';
   const methodName = opts.contextMethod + ' : ' + (method.getMethodName() || '-');

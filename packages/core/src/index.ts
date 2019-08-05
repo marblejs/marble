@@ -14,6 +14,7 @@ export * from './http.interface';
 export * from './event/event.factory';
 export * from './event/event.interface';
 export * from './context/context.factory';
+export * from './context/context.hook';
 export * from './context/context.token.factory';
 export * from './server/server.event';
 export * from './server/server.interface';

@@ -15,7 +15,7 @@ import { merge, of, forkJoin, EMPTY } from 'rxjs';
 import { tap, map, mergeMap } from 'rxjs/operators';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 
-const ClientToken = createContextToken<MessagingClient>();
+const ClientToken = createContextToken<MessagingClient>('MessagingClient');
 
 const client = messagingClient({
   transport: Transport.AMQP,
