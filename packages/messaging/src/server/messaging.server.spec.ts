@@ -25,7 +25,7 @@ describe('messagingServer', () => {
       }).run();
 
     const runClient = () =>
-      createAmqpStrategy(options).connect();
+      createAmqpStrategy(options).connect({ isConsumer: false });
 
     const createMessage = (data: any): TransportMessage<Buffer> => ({
       data: Buffer.from(JSON.stringify(data)),
@@ -55,6 +55,11 @@ describe('messagingServer', () => {
     test('emits event to consumer', async done => {
       const eventSubject = new Subject();
 
+      eventSubject.subscribe(event => {
+        expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
+        setTimeout(() => server.close().then(done), 1000);
+      });
+
       const event$: MsgEffect = event$ =>
         event$.pipe(
           matchEvent('EVENT_TEST'),
@@ -68,18 +73,21 @@ describe('messagingServer', () => {
       const client = await runClient();
       const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
 
-      await client.emitMessage(options.queue, message);
+      const emitResult = await client.emitMessage(options.queue, message);
 
-      eventSubject.subscribe(event => {
-        expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
-        setTimeout(() => server.close().then(done), 1000);
-      });
+      expect(emitResult).toEqual(true);
     });
 
     test('reacts to thrown error', async done => {
       const expectedMessage = { type: 'EVENT_TEST' };
       const expectedError = new Error('test_error');
       const errorSubject = new Subject<[Event, Error | undefined]>();
+
+      errorSubject.subscribe(data => {
+        expect(data[0]).toEqual(expectedMessage);
+        expect(data[1]).toEqual(expectedError);
+        setTimeout(() => server.close().then(done), 1000);
+      });
 
       const event$: MsgEffect = event$ =>
         event$.pipe(
@@ -95,13 +103,9 @@ describe('messagingServer', () => {
       const server = await runServer(event$, error$);
       const client = await runClient();
 
-      await client.emitMessage(options.queue, createMessage(expectedMessage));
+      const emitResult = await client.emitMessage(options.queue, createMessage(expectedMessage));
 
-      errorSubject.subscribe(data => {
-        expect(data[0]).toEqual(expectedMessage);
-        expect(data[1]).toEqual(expectedError);
-        setTimeout(() => server.close().then(done), 1000);
-      });
+      expect(emitResult).toEqual(true);
     });
   });
 

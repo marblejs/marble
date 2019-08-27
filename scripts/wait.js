@@ -8,7 +8,8 @@ const log = msg => console.info(chalk.yellow(msg));
 
 const waitForRabbitMq = async () => {
   try {
-    await amqplib.connect('amqp://localhost:5672');
+    const conn = await amqplib.connect('amqp://localhost:5672');
+    const channel = await conn.createChannel();
     process.exit();
   } catch(err) {
     log(' -- Waiting for RabbitMQ to be ready...');

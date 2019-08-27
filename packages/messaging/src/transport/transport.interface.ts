@@ -11,7 +11,7 @@ export enum Transport {
 }
 
 export interface TransportLayer {
-  connect: () => Promise<TransportLayerConnection>;
+  connect: (opts: { isConsumer: boolean }) => Promise<TransportLayerConnection>;
   config: TransportLayerConfig;
 }
 
@@ -21,13 +21,13 @@ export interface TransportLayerConfig {
 }
 
 export interface TransportLayerConnection {
-  sendMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<any>;
+  sendMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<TransportMessage<Buffer>>;
   emitMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<any>;
-  consumeMessage: () => Observable<TransportMessage<Buffer>>;
   ackMessage: (message: TransportMessage<any> | undefined) => void;
   nackMessage: (message: TransportMessage<any> | undefined, resend?: boolean) => void;
   close: () => Promise<any>;
   getChannel(): string;
+  message$: Observable<TransportMessage<Buffer>>;
   error$: Observable<Error>;
   close$: Observable<any>;
 }

@@ -51,7 +51,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
 
   return reader.map(ask => {
     const transportLayer = provideTransportLayer(transport, options);
-    const connection = transportLayer.connect();
+    const connection = transportLayer.connect({ isConsumer: false });
 
     ask(serverEvent$)
       .map(teardownOnClose$(connection))

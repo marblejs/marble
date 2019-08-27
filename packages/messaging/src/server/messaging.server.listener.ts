@@ -46,7 +46,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     const combinedEffects = combineEffects(...effects);
     const combinedMiddlewares = combineMiddlewares(...middlewares);
 
-    const message$ = conn.consumeMessage().pipe(
+    const message$ = conn.message$.pipe(
       map(msg => ({ ...msg, data: msgTransformer.decode(msg.data) } as TransportMessage<any>)),
       mergeMap(msg => of(msg).pipe(
         publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), conn, createEffectMetadata({ ask, initiator: msg })).pipe(
@@ -103,7 +103,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
   const listen = (transportLayer: TransportLayer, ask: ContextProvider) => async () => {
     const { host, channel } = transportLayer.config;
     const serverEventsSubject = ask(ServerEventsToken).getOrElse(undefined as unknown as Subject<AllServerEvents>);
-    const connection = await transportLayer.connect();
+    const connection = await transportLayer.connect({ isConsumer: true });
 
     handleConnection(connection, serverEventsSubject, ask);
     serverEventsSubject.next(ServerEvent.listening(host, channel));

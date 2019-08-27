@@ -1,72 +1,77 @@
 import { Subject, fromEvent, from } from 'rxjs';
-import { map, filter, take, mergeMap, mapTo } from 'rxjs/operators';
-import { Channel, Connection, ConsumeMessage } from 'amqplib';
+import { map, filter, take, mergeMap, mapTo, first } from 'rxjs/operators';
+import { Channel, ConsumeMessage } from 'amqplib';
+import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import { TransportLayer, TransportMessage, TransportLayerConnection } from '../transport.interface';
 import { AmqpStrategyOptions } from './amqp.strategy.interface';
 
 class AmqpStrategyConnection implements TransportLayerConnection {
+  private closeSubject$ = new Subject();
+
   constructor(
-    private connection: Connection,
-    private channel: Channel,
+    private msgSubject$: Subject<ConsumeMessage>,
+    private connectionManager: AmqpConnectionManager,
+    private channelWrapper: ChannelWrapper,
     private options: AmqpStrategyOptions,
   ) {}
 
   get close$() {
-    return fromEvent(this.connection, 'close');
+    return this.closeSubject$.asObservable();
   }
 
   get error$() {
-    return fromEvent<Error>(this.connection, 'error');
+    return fromEvent<Error>(this.channelWrapper, 'error');
   }
 
-  consumeMessage = () => {
-    const msgSubject$ = new Subject<ConsumeMessage>();
-
-    this.channel.consume(
-      this.options.queue,
-      msg => msg && msgSubject$.next(msg),
-      { noAck: this.options.expectAck !== undefined
-        ? !this.options.expectAck
-        : true },
-    );
-
-    return msgSubject$.asObservable().pipe(
+  get message$() {
+    return this.msgSubject$.asObservable().pipe(
       map(message => ({
         data: message.content,
         replyTo: message.properties.replyTo,
         correlationId: message.properties.correlationId,
         raw: message,
-      } as TransportMessage<Buffer>))
+      } as TransportMessage<Buffer>)),
     );
   }
 
   sendMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
+    const replyToSubject = new Subject<string>();
+
     const { correlationId, data } = msg;
-    const resSubject$ = new Subject<ConsumeMessage>();
-    const replyQueue = await this.channel.assertQueue('', {
-      exclusive: true,
-      autoDelete: true,
-    });
+    const resSubject$ = new Subject<{ msg: ConsumeMessage; tag: string }>();
 
-    const consumer = await this.channel.consume(
-      replyQueue.queue,
-      res => res && resSubject$.next(res),
-      { noAck: true },
-    );
+    replyToSubject
+      .pipe(first())
+      .subscribe(async replyTo => {
+        await this.channelWrapper.sendToQueue(queue, data, {
+          correlationId,
+          replyTo,
+        });
+      });
 
-    this.channel.sendToQueue(queue, data, {
-      correlationId,
-      replyTo: replyQueue.queue,
+    await this.channelWrapper.addSetup(async (channel: Channel) => {
+      const replyQueue = await channel.assertQueue('', {
+        exclusive: true,
+        autoDelete: true,
+      });
+
+      const consumer = await channel.consume(
+        replyQueue.queue,
+        msg => msg && resSubject$.next({ msg, tag: consumer.consumerTag }),
+        { noAck: true },
+      );
+
+      replyToSubject.next(replyQueue.queue);
     });
 
     return resSubject$.asObservable().pipe(
-      filter(raw => raw.properties.correlationId === correlationId),
+      filter(raw => raw.msg.properties.correlationId === correlationId),
       take(1),
-      mergeMap(raw => from(this.channel.cancel(consumer.consumerTag)).pipe(
+      mergeMap(raw => from(this.channelWrapper.addSetup((channel: Channel) => channel.cancel(raw.tag))).pipe(
         mapTo(({
-          data: raw.content,
-          replyTo: raw.properties.replyTo,
-          correlationId: raw.properties.correlationId,
+          data: raw.msg.content,
+          replyTo: raw.msg.properties.replyTo,
+          correlationId: raw.msg.properties.correlationId,
           raw,
         } as TransportMessage<Buffer>)),
       )),
@@ -75,29 +80,30 @@ class AmqpStrategyConnection implements TransportLayerConnection {
 
   emitMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
     const { correlationId, data, replyTo } = msg;
-    return Promise.resolve(this.channel.sendToQueue(queue, data, {
+    return this.channelWrapper.sendToQueue(queue, data, {
       replyTo,
       correlationId,
-    }));
+    });
   };
 
   ackMessage = (message: TransportMessage<any> | undefined) => {
     if (message) {
-      this.channel.ack(message.raw);
+      this.channelWrapper.ack(message.raw);
     }
   }
 
   nackMessage = (message: TransportMessage<any> | undefined, resend = true) => {
     if (message) {
-      this.channel.nack(message.raw, false , resend);
+      this.channelWrapper.nack(message.raw, false , resend);
     }
   }
 
   getChannel = () => this.options.queue;
 
   close = async () => {
-    await this.channel.close();
-    await this.connection.close();
+    await this.channelWrapper.close();
+    await this.connectionManager.close();
+    this.closeSubject$.next();
   }
 }
 
@@ -111,19 +117,57 @@ class AmqpStrategy implements TransportLayer {
     });
   }
 
-  async connect() {
+  async connect(opts: { isConsumer: boolean }) {
     const { host, queue, queueOptions, prefetchCount } = this.options;
+    const msgSubject$ = new Subject<ConsumeMessage>();
 
-    const amqplib = await import('amqplib');
-    const connection = await amqplib.connect(host);
-    const channel = await connection.createChannel();
+    await import('amqplib');
 
-    await channel.prefetch(prefetchCount || 1);
-    await channel.assertQueue(queue, queueOptions);
+    const amqplib = await import('amqp-connection-manager');
+    const connectionManager = await amqplib.connect([host]);
+
+    const channelWrapper = connectionManager.createChannel({
+      json: false,
+      setup: async (channel: Channel) => {
+        await channel.prefetch(prefetchCount || 1);
+        await channel.assertQueue(queue, queueOptions);
+
+        if (opts.isConsumer) {
+          await channel.consume(
+            this.options.queue,
+            msg => msg && msgSubject$.next(msg),
+            { noAck: this.options.expectAck !== undefined
+              ? !this.options.expectAck
+              : true },
+          )
+        }
+      },
+    });
+
+    connectionManager.on('connect', () => {
+      console.log('connected');
+    });
+
+    connectionManager.on('disconnect', () => {
+      console.log('disconnected');
+    });
+
+    channelWrapper.on('connect', () => {
+      console.log('channel', 'connect');
+    });
+
+    channelWrapper.on('close', () => {
+      console.log('channel', 'close');
+    });
+
+    channelWrapper.on('error', () => {
+      console.log('channel', 'error');
+    });
 
     return new AmqpStrategyConnection(
-      connection,
-      channel,
+      msgSubject$,
+      connectionManager,
+      channelWrapper,
       this.options,
     );
   }
