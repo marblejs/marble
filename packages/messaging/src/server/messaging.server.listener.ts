@@ -106,7 +106,10 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     const connection = await transportLayer.connect({ isConsumer: true });
 
     handleConnection(connection, serverEventsSubject, ask);
-    serverEventsSubject.next(ServerEvent.listening(host, channel));
+
+    connection.status$
+      .pipe(takeUntil(connection.close$))
+      .subscribe(type => serverEventsSubject.next(ServerEvent.status(host,channel, type)));
 
     return connection;
   };

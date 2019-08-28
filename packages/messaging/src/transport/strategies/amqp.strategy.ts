@@ -1,9 +1,16 @@
-import { Subject, fromEvent, from } from 'rxjs';
+import { Subject, fromEvent, from, merge } from 'rxjs';
 import { map, filter, take, mergeMap, mapTo, first } from 'rxjs/operators';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import { TransportLayer, TransportMessage, TransportLayerConnection } from '../transport.interface';
 import { AmqpStrategyOptions } from './amqp.strategy.interface';
+
+export enum AmqpConnectionStatus {
+  CONNECTED = 'CONNECTED',
+  CHANNEL_CONNECTED = 'CHANNEL_CONNECTED',
+  CONNECTION_LOST = 'CONNECTION_LOST',
+  CHANNEL_CONNECTION_LOST = 'CHANNEL_CONNECTION_LOST',
+};
 
 class AmqpStrategyConnection implements TransportLayerConnection {
   private closeSubject$ = new Subject();
@@ -21,6 +28,22 @@ class AmqpStrategyConnection implements TransportLayerConnection {
 
   get error$() {
     return fromEvent<Error>(this.channelWrapper, 'error');
+  }
+
+  get status$() {
+    const connect$ = fromEvent(this.connectionManager, 'connect')
+      .pipe(mapTo(AmqpConnectionStatus.CONNECTED));
+
+    const connectChannel$ = fromEvent(this.channelWrapper, 'connect')
+      .pipe(mapTo(AmqpConnectionStatus.CHANNEL_CONNECTED));
+
+    const diconnect$ = fromEvent(this.connectionManager, 'disconnect')
+      .pipe(mapTo(AmqpConnectionStatus.CONNECTION_LOST));
+
+    const diconnectChannel$ = fromEvent(this.channelWrapper, 'close')
+      .pipe(mapTo(AmqpConnectionStatus.CHANNEL_CONNECTION_LOST));
+
+    return merge(connect$, connectChannel$, diconnect$, diconnectChannel$);
   }
 
   get message$() {
@@ -142,26 +165,6 @@ class AmqpStrategy implements TransportLayer {
           )
         }
       },
-    });
-
-    connectionManager.on('connect', () => {
-      console.log('connected');
-    });
-
-    connectionManager.on('disconnect', () => {
-      console.log('disconnected');
-    });
-
-    channelWrapper.on('connect', () => {
-      console.log('channel', 'connect');
-    });
-
-    channelWrapper.on('close', () => {
-      console.log('channel', 'close');
-    });
-
-    channelWrapper.on('error', () => {
-      console.log('channel', 'error');
     });
 
     return new AmqpStrategyConnection(

@@ -1,15 +1,15 @@
 import { createEvent, EventsUnion, Event  } from '@marblejs/core';
 
 export enum ServerEventType {
-  LISTENING = 'listening',
+  STATUS = 'status',
   CLOSE = 'close',
   ERROR = 'error',
 }
 
 export const ServerEvent = {
-  listening: createEvent(
-    ServerEventType.LISTENING,
-    (host: string, channel: string) => ({ host, channel }),
+  status: createEvent(
+    ServerEventType.STATUS,
+    (host: string, channel: string, type: string) => ({ host, channel, type }),
   ),
   close: createEvent(
     ServerEventType.CLOSE,
@@ -22,8 +22,8 @@ export const ServerEvent = {
 
 export type AllServerEvents = EventsUnion<typeof ServerEvent>;
 
-export function isListeningEvent(event: Event): event is ReturnType<typeof ServerEvent.listening> {
-  return event.type === ServerEventType.LISTENING;
+export function isStatusEvent(event: Event): event is ReturnType<typeof ServerEvent.status> {
+  return event.type === ServerEventType.STATUS;
 }
 
 export function isCloseEvent(event: Event): event is ReturnType<typeof ServerEvent.close> {

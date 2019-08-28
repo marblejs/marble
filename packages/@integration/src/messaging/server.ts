@@ -11,7 +11,7 @@ import {
   MsgOutputEffect,
 } from '@marblejs/messaging';
 import { merge } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, filter, distinctUntilChanged } from 'rxjs/operators';
 
 const fibonacci = (n: number): number =>
   n === 0 || n === 1
@@ -31,11 +31,22 @@ const fibonacci$: MsgEffect = event$ =>
     map(payload => ({ type: 'FIB_RESULT', payload })),
   );
 
-const listening$: MsgServerEffect = event$ =>
+const connect$: MsgServerEffect = event$ =>
   event$.pipe(
-    matchEvent(ServerEvent.listening),
+    matchEvent(ServerEvent.status),
     map(event => event.payload),
-    tap(({ host, channel }) => console.log(`Server running @ ${host} for queue "${channel}" 🚀`)),
+    distinctUntilChanged((p, c) => p.type === c.type),
+    filter(({ type }) => type === 'CONNECTED'),
+    tap(({ host, channel }) => console.log(`🚀 Connected consumer @ ${host} for queue "${channel}"`)),
+  );
+
+const disconnect$: MsgServerEffect = event$ =>
+  event$.pipe(
+    matchEvent(ServerEvent.status),
+    map(event => event.payload),
+    distinctUntilChanged((p, c) => p.type === c.type),
+    filter(({ type }) => type === 'CONNECTION_LOST'),
+    tap(({ host, channel }) => console.error(`💩 Cannot connect consumer @ ${host} for queue "${channel}"`)),
   );
 
 const error$: MsgServerEffect = event$ =>
@@ -67,7 +78,8 @@ export const microservice = createMicroservice({
   }),
   dependencies: [],
   event$: (...args) => merge(
-    listening$(...args),
+    connect$(...args),
+    disconnect$(...args),
     error$(...args),
   ),
 });

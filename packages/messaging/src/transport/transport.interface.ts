@@ -28,6 +28,7 @@ export interface TransportLayerConnection {
   close: () => Promise<any>;
   getChannel(): string;
   message$: Observable<TransportMessage<Buffer>>;
+  status$: Observable<string>;
   error$: Observable<Error>;
   close$: Observable<any>;
 }
