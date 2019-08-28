@@ -3,14 +3,7 @@ import { map, filter, take, mergeMap, mapTo, first } from 'rxjs/operators';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import { TransportLayer, TransportMessage, TransportLayerConnection } from '../transport.interface';
-import { AmqpStrategyOptions } from './amqp.strategy.interface';
-
-export enum AmqpConnectionStatus {
-  CONNECTED = 'CONNECTED',
-  CHANNEL_CONNECTED = 'CHANNEL_CONNECTED',
-  CONNECTION_LOST = 'CONNECTION_LOST',
-  CHANNEL_CONNECTION_LOST = 'CHANNEL_CONNECTION_LOST',
-};
+import { AmqpStrategyOptions, AmqpConnectionStatus } from './amqp.strategy.interface';
 
 class AmqpStrategyConnection implements TransportLayerConnection {
   private closeSubject$ = new Subject();

@@ -13,3 +13,10 @@ export interface AmqpStrategyOptions {
   prefetchCount?: number;
   expectAck?: boolean;
 }
+
+export enum AmqpConnectionStatus {
+  CONNECTED = 'CONNECTED',
+  CHANNEL_CONNECTED = 'CHANNEL_CONNECTED',
+  CONNECTION_LOST = 'CONNECTION_LOST',
+  CHANNEL_CONNECTION_LOST = 'CHANNEL_CONNECTION_LOST',
+};

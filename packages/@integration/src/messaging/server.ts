@@ -9,6 +9,7 @@ import {
   MsgServerEffect,
   ServerEvent,
   MsgOutputEffect,
+  AmqpConnectionStatus,
 } from '@marblejs/messaging';
 import { merge } from 'rxjs';
 import { map, tap, filter, distinctUntilChanged } from 'rxjs/operators';
@@ -36,7 +37,7 @@ const connect$: MsgServerEffect = event$ =>
     matchEvent(ServerEvent.status),
     map(event => event.payload),
     distinctUntilChanged((p, c) => p.type === c.type),
-    filter(({ type }) => type === 'CONNECTED'),
+    filter(({ type }) => type === AmqpConnectionStatus.CONNECTED),
     tap(({ host, channel }) => console.log(`🚀 Connected consumer @ ${host} for queue "${channel}"`)),
   );
 
@@ -45,7 +46,7 @@ const disconnect$: MsgServerEffect = event$ =>
     matchEvent(ServerEvent.status),
     map(event => event.payload),
     distinctUntilChanged((p, c) => p.type === c.type),
-    filter(({ type }) => type === 'CONNECTION_LOST'),
+    filter(({ type }) => type === AmqpConnectionStatus.CONNECTION_LOST),
     tap(({ host, channel }) => console.error(`💩 Cannot connect consumer @ ${host} for queue "${channel}"`)),
   );
 

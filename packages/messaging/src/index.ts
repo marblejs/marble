@@ -1,6 +1,7 @@
 export * from './client/messaging.client';
 export * from './client/messaging.client.interface';
 export * from './transport/transport.interface';
+export { AmqpConnectionStatus } from './transport/strategies/amqp.strategy.interface';
 export * from './effects/messaging.effects.interface';
 export * from './server/messaging.server';
 export * from './server/messaging.server.interface';
