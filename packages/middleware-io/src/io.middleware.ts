@@ -1,6 +1,7 @@
 import * as t from 'io-ts';
 import { Reporter } from 'io-ts/lib/Reporter';
-import { Either } from 'fp-ts/lib/Either';
+import * as E from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { Observable } from 'rxjs';
 import { map} from 'rxjs/operators';
 import { defaultReporter } from './io.reporter';
@@ -15,10 +16,13 @@ export interface ValidatorOptions {
 
 const validateError =
   (reporter: Reporter<any> = defaultReporter, context?: string) =>
-  (result: Either<t.Errors, any>) =>
-    result.getOrElseL(() => {
-      throw new IOError('Validation error', reporter.report(result), context);
-    });
+  (result: E.Either<t.Errors, any>) => pipe(
+    result,
+    E.fold(
+      () => { throw new IOError('Validation error', reporter.report(result), context); },
+      res => res,
+    )
+  );
 
 export const validator$ = <U extends Schema, T>
   (schema: U | undefined, options: ValidatorOptions = {}) => (i$: Observable<T>) =>

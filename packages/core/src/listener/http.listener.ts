@@ -1,5 +1,6 @@
 import { IncomingMessage, OutgoingMessage } from 'http';
-import { ask } from 'fp-ts/lib/Reader';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as R from 'fp-ts/lib/Reader';
 import { of, Subject } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, tap, takeWhile } from 'rxjs/operators';
 import { combineMiddlewares } from '../effects/effects.combiner';
@@ -11,7 +12,7 @@ import {
 } from '../effects/http-effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { handleResponse } from '../response/response.handler';
-import { RouteEffect, RouteEffectGroup } from '../router/router.interface';
+import { RouteEffect, RouteEffectGroup, RoutingItem } from '../router/router.interface';
 import { resolveRouting } from '../router/router.resolver';
 import { factorizeRouting } from '../router/router.factory';
 import { defaultError$ } from '../error/error.effect';
@@ -30,8 +31,9 @@ export const httpListener = ({
   effects,
   error$ = defaultError$,
   output$ = out$ => out$,
-}: HttpListenerConfig) =>
-  ask<Context>().map(ctx => {
+}: HttpListenerConfig) => pipe(
+  R.ask<Context>(),
+  R.map(ctx => {
     const requestSubject$ = new Subject<{ req: HttpRequest; res: HttpResponse }>();
     const combinedMiddlewares = combineMiddlewares(...middlewares);
     const routing = factorizeRouting(effects);
@@ -62,5 +64,9 @@ export const httpListener = ({
 
     httpServer.config = { routing };
 
-    return httpServer;
-  });
+    return httpServer as {
+      (req: IncomingMessage, res: OutgoingMessage): void;
+      config: { routing: RoutingItem[] };
+    };
+  }),
+);

@@ -5,6 +5,9 @@ import {
   combineEffects,
   createEffectMetadata,
 } from '@marblejs/core';
+import * as O from 'fp-ts/lib/Option';
+import * as R from 'fp-ts/lib/Reader';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { Observable, Subscription, Subject, of } from 'rxjs';
 import { map, publish, withLatestFrom, takeUntil, catchError, mergeMap, take } from 'rxjs/operators';
 import {
@@ -102,7 +105,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
 
   const listen = (transportLayer: TransportLayer, ask: ContextProvider) => async () => {
     const { host, channel } = transportLayer.config;
-    const serverEventsSubject = ask(ServerEventsToken).getOrElse(undefined as unknown as Subject<AllServerEvents>);
+    const serverEventsSubject = pipe(ask(ServerEventsToken), O.getOrElse(() => undefined as unknown as Subject<AllServerEvents>));
     const connection = await transportLayer.connect({ isConsumer: true });
 
     handleConnection(connection, serverEventsSubject, ask);
@@ -114,11 +117,11 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     return connection;
   };
 
-  return reader.map(ask => {
-    const transportLayer = ask(TransportLayerToken).getOrElse(undefined as unknown as TransportLayer);
+  return pipe(reader, R.map(ask => {
+    const transportLayer = pipe(ask(TransportLayerToken), O.getOrElse(() => undefined as unknown as TransportLayer));
 
     return {
       listen: listen(transportLayer, ask),
     }
-  });
+  }));
 };

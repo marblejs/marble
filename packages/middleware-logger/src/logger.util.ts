@@ -1,14 +1,16 @@
-import { compose } from 'fp-ts/lib/function';
-import { fromNullable } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { flow } from 'fp-ts/lib/function';
+import * as O from 'fp-ts/lib/Option';
 import { LoggerOptions, LoggerCtx, WritableLike } from './logger.model';
 
 export const isNotSilent = (opts: LoggerOptions) => (_: LoggerCtx) =>
   !opts.silent;
 
-export const filterResponse = (opts: LoggerOptions) => (ctx: LoggerCtx) =>
-  fromNullable(opts.filter)
-    .map(filter => filter(ctx.res, ctx.req))
-    .getOrElse(true);
+export const filterResponse = (opts: LoggerOptions) => (ctx: LoggerCtx) => pipe(
+  O.fromNullable(opts.filter),
+  O.map(filter => filter(ctx.res, ctx.req)),
+  O.getOrElse(() => true),
+);
 
 export const writeToStream = (writable: WritableLike, chunk: string) =>
   writable.write(`${chunk}\n\n`);
@@ -21,8 +23,8 @@ export const formatTime = (timeInMms: number) =>
 export const getTimeDifferenceInMs = (startTime: Date): number =>
   new Date().getTime() - startTime.getTime();
 
-export const factorizeTime = (timestamp: number) =>
-  compose(
-    formatTime,
-    getTimeDifferenceInMs
-  )(new Date(timestamp));
+export const factorizeTime = flow(
+  (t: number) => new Date(t),
+  getTimeDifferenceInMs,
+  formatTime,
+);

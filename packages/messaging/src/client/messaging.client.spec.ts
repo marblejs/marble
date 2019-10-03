@@ -16,7 +16,7 @@ describe('#messagingClient', () => {
       },
     };
 
-    const runClient = () => messagingClient(clientOptions).run(createContext());
+    const runClient = () => messagingClient(clientOptions)(createContext());
     const runServer = () => createAmqpStrategy(clientOptions.options).connect({ isConsumer: true });
     const createMessage = (data: any, correlationId?: string): TransportMessage<Buffer> => ({
       data: Buffer.from(JSON.stringify(data)),

@@ -17,7 +17,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     const context = createContext();
 
     // when
-    app({ server }).run(context);
+    app({ server })(context);
     targetClient.once('open', () => targetClient.send(event));
 
     // then
@@ -43,7 +43,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     };
 
     // when
-    app({ server }).run(context);
+    app({ server })(context);
     targetClient.once('open', () => targetClient.send(event));
 
     // then

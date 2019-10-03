@@ -6,7 +6,7 @@ import { createContext } from '@marblejs/core';
 const LOGIN_CREDENTIALS = { email: 'admin@admin.com', password: 'admin' };
 
 describe('@marblejs/middleware-jwt - HTTP integration', () => {
-  const httpServer = app.run(createContext());
+  const httpServer = app(createContext());
 
   test('POST /api/login returns token and verifies its correctness', async () =>
     request(httpServer)

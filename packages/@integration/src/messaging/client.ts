@@ -11,7 +11,9 @@ import {
   HttpServerEffect,
   use,
 } from '@marblejs/core';
-import { merge, of, forkJoin, EMPTY } from 'rxjs';
+import * as O from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { merge, of, forkJoin, EMPTY, Observable } from 'rxjs';
 import { tap, map, mergeMap } from 'rxjs/operators';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 
@@ -36,9 +38,10 @@ const test$ = r.pipe(
   r.matchPath('/test'),
   r.matchType('GET'),
   r.useEffect((req$, _, { ask }) => req$.pipe(
-    mergeMap(() => ask(ClientToken)
-      .map(client => client.emit({ type: 'TEST' }))
-      .getOrElse(EMPTY)),
+    mergeMap(() => pipe(
+      ask(ClientToken),
+      O.map(client => client.emit({ type: 'TEST' })),
+      O.getOrElse(() => EMPTY as Observable<boolean>))),
     map(() => ({ body: 'OK' })),
   )),
 );
@@ -51,11 +54,11 @@ const fib$ = r.pipe(
     map(req => Number(req.params.number)),
     mergeMap(number => of(ask(ClientToken)).pipe(
       mergeMap(client => forkJoin(
-        client.map(c => c.send({ type: 'FIB', payload: number + 0 })).getOrElse(of({})),
-        client.map(c => c.send({ type: 'FIB', payload: number + 1 })).getOrElse(of({})),
-        client.map(c => c.send({ type: 'FIB', payload: number + 2 })).getOrElse(of({})),
-        client.map(c => c.send({ type: 'FIB', payload: number + 3 })).getOrElse(of({})),
-        client.map(c => c.send({ type: 'FIB', payload: number + 4 })).getOrElse(of({})),
+        pipe(client, O.map(c => c.send({ type: 'FIB', payload: number + 0 })), O.getOrElse(() => of({} as unknown))),
+        pipe(client, O.map(c => c.send({ type: 'FIB', payload: number + 1 })), O.getOrElse(() => of({} as unknown))),
+        pipe(client, O.map(c => c.send({ type: 'FIB', payload: number + 2 })), O.getOrElse(() => of({} as unknown))),
+        pipe(client, O.map(c => c.send({ type: 'FIB', payload: number + 3 })), O.getOrElse(() => of({} as unknown))),
+        pipe(client, O.map(c => c.send({ type: 'FIB', payload: number + 4 })), O.getOrElse(() => of({} as unknown))),
       )),
     )),
     map(body => ({ body })),
@@ -76,7 +79,7 @@ export const server = createServer({
     effects: [test$, fib$],
   }),
   dependencies: [
-    bindTo(ClientToken)(client.run),
+    bindTo(ClientToken)(client),
   ],
   event$: (...args) => merge(
     listening$(...args),

@@ -4,7 +4,7 @@ import { app } from './bodyParser.integration';
 import { createContext } from '@marblejs/core';
 
 describe('@marblejs/middleware-body - integration', () => {
-  const httpServer = app.run(createContext());
+  const httpServer = app(createContext());
 
   describe('POST /default-parser', () => {
     test(`parses ${ContentType.APPLICATION_JSON} content-type`, async () =>

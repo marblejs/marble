@@ -20,7 +20,7 @@ export const createMicroservice = (config: CreateMicroserviceConfig) => {
   const boundTransportLayer = bindTo(TransportLayerToken)(() => transportLayer);
   const boundServerEvents = bindTo(ServerEventsToken)(() => serverEventSubject);
   const context = registerAll([ boundTransportLayer, boundServerEvents, ...dependencies ])(createContext());
-  const listenerWithContext = messagingListener.run(context);
+  const listenerWithContext = messagingListener(context);
 
   if (event$) {
     const serverEvent$ = serverEventSubject.asObservable().pipe(takeWhile(e => !isCloseEvent(e)));
@@ -30,5 +30,5 @@ export const createMicroservice = (config: CreateMicroserviceConfig) => {
 
   return {
     run: listenerWithContext.listen,
-  }
+  };
 };

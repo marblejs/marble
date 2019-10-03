@@ -24,7 +24,7 @@ describe('WebSocket listener', () => {
       const webSocketServer = webSocketListener({ effects: [echo$] });
 
       // when
-      webSocketServer({ server }).run(context);
+      webSocketServer({ server })(context);
       targetClient.once('open', () => targetClient.send(event));
 
       // then
@@ -46,7 +46,7 @@ describe('WebSocket listener', () => {
       const targetClient = testBed.getClient(0);
 
       // when
-      webSocketServer({ server }).run(context);
+      webSocketServer({ server })(context);
       targetClient.on('open', () => targetClient.send(event));
 
       // then
@@ -66,7 +66,7 @@ describe('WebSocket listener', () => {
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
       const server = testBed.getServer();
       const context = createContext();
-      const webSocketServer = webSocketListener({ effects: [echo$] })().run(context);
+      const webSocketServer = webSocketListener({ effects: [echo$] })()(context);
       const targetClient = testBed.getClient(0);
 
       // when
@@ -102,7 +102,7 @@ describe('WebSocket listener', () => {
       });
 
       // when
-      webSocketServer({ server }).run(context);
+      webSocketServer({ server })(context);
       targetClient.once('open', () => targetClient.send(incomingEvent));
 
       // then
@@ -125,7 +125,7 @@ describe('WebSocket listener', () => {
       const webSocketServer = webSocketListener();
 
       // when
-      webSocketServer({ server }).run(context);
+      webSocketServer({ server })(context);
       targetClient.once('open', () => {
         targetClient.send(incomingEvent);
         targetClient.send(incomingEvent);
@@ -154,7 +154,7 @@ describe('WebSocket listener', () => {
       const webSocketServer = webSocketListener({ effects: [effect$] });
 
       // when
-      webSocketServer({ server }).run(context);
+      webSocketServer({ server })(context);
       targetClient.once('open', () => {
         targetClient.send(incomingEvent);
         targetClient.send(incomingEvent);
@@ -180,7 +180,7 @@ describe('WebSocket listener', () => {
       const context = createContext();
 
       // when
-      webSocketServer({ server }).run(context);
+      webSocketServer({ server })(context);
 
       // then
       merge(
@@ -202,7 +202,7 @@ describe('WebSocket listener', () => {
       const context = createContext();
 
       // when
-      webSocketServer({ server }).run(context);
+      webSocketServer({ server })(context);
 
       // then
       merge(
@@ -211,7 +211,7 @@ describe('WebSocket listener', () => {
       )
       .pipe(take(2), toArray())
       .subscribe(
-        (data) => {
+        (data: any) => {
           expect(data[0][1].statusCode).toEqual(error.status);
           expect(data[1][1].statusCode).toEqual(error.status);
           expect(data[0][1].statusMessage).toEqual(error.message);
@@ -244,7 +244,7 @@ describe('WebSocket listener', () => {
       const context = createContext();
 
       // when
-      webSocketServer({ server }).run(context);
+      webSocketServer({ server })(context);
       targetClient.once('open', () => {
         targetClient.send(Buffer.from(decodedMessage));
       });

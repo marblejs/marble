@@ -1,5 +1,7 @@
 import * as http from 'http';
 import * as WebSocket from 'ws';
+import * as R from 'fp-ts/lib/Reader';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { Subject, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -112,7 +114,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
       );
   };
 
-  return (serverOptions: WebSocket.ServerOptions = {}): ContextReader => reader.map(ask => {
+  return (serverOptions: WebSocket.ServerOptions = {}): ContextReader => pipe(reader, R.map(ask => {
     const webSocketServer = WSHelper.createWebSocketServer({
       noServer: true,
       verifyClient: verifyClient(ask),
@@ -125,5 +127,5 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     WSHelper.handleServerBrokenConnections(extendedWebSocketServer).subscribe();
 
     return extendedWebSocketServer;
-  });
+  }));
 };
