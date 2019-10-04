@@ -49,7 +49,7 @@ const filesystemMultipart$ = r.pipe(
 
 const app = httpListener({
   effects: [memoryMultipart$, memoryWithOptionsMultipart$, filesystemMultipart$],
-}).run(createContext());
+})(createContext());
 
 afterEach(() => {
   if (fs.existsSync(TMP_PATH)) { fs.rmdirSync(TMP_PATH); }

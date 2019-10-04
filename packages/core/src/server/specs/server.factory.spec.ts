@@ -45,7 +45,7 @@ describe('#createServer', () => {
     server = createServer({
       hostname,
       httpListener: app,
-    }).run();
+    })();
 
     server.on('error', console.error);
 
@@ -60,24 +60,13 @@ describe('#createServer', () => {
     const app = httpListener({ effects: [] });
 
     // when
-    server = createServer({ httpListener: app }).run();
+    server = createServer({ httpListener: app })();
 
     // then
     server.on('listening', () => {
       expect(server.listening).toBe(true);
       done();
     });
-  });
-
-  test(`creates https server but doesn't start listening`, () => {
-    // given
-    const app = httpListener({ effects: [] });
-
-    // when
-    server = createServer({ httpListener: app }).run(false);
-
-    // then
-    expect(server.listening).toBe(false);
   });
 
   test('creates https server', done => {
@@ -92,7 +81,7 @@ describe('#createServer', () => {
     server = createServer({
       httpListener: app,
       options: { httpsOptions },
-    }).run();
+    })();
 
     // then
     setTimeout(() => {
@@ -111,20 +100,20 @@ describe('#createServer', () => {
 
     // when
     const marbleServer = createServer({ httpListener: app });
-    server = marbleServer.run();
+    server = marbleServer();
 
     // then
-    expect(marbleServer.server).toBeDefined();
-    expect(marbleServer.info).toBeDefined();
-    expect(marbleServer.info.routing).toBeInstanceOf(Array);
-    expect(marbleServer.info.routing[0].path).toEqual('');
+    expect(marbleServer.config).toBeDefined();
+    expect(marbleServer.config.server).toBeDefined();
+    expect(marbleServer.config.routing).toBeInstanceOf(Array);
+    expect(marbleServer.config.routing[0].path).toEqual('');
     expect(
-      marbleServer.info.routing[0].methods.GET &&
-      marbleServer.info.routing[0].methods.GET.effect
+      marbleServer.config.routing[0].methods.GET &&
+      marbleServer.config.routing[0].methods.GET.effect
     ).toBeDefined();
   });
 
-  test(`emits server events`, (done) => {
+  test(`emits server events`, done => {
     // given
     const app = httpListener({ effects: [] });
 
@@ -144,7 +133,7 @@ describe('#createServer', () => {
       ).pipe(
         tap(() => done()),
       ),
-    }).run();
+    })();
 
     server.emit(ServerEventType.ERROR);
     server.emit(ServerEventType.CLIENT_ERROR);

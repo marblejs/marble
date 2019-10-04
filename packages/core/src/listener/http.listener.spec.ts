@@ -47,7 +47,7 @@ describe('Http listener', () => {
     httpListener({
       middlewares: [middleware$],
       effects: [effect$],
-    }).run(context)(req, res);
+    })(context)(req, res);
 
     // then
     setTimeout(() => {
@@ -70,7 +70,7 @@ describe('Http listener', () => {
 
     httpListener({
       effects: [effect$],
-    }).run(context);
+    })(context);
 
     // then
     expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith(...[]);
@@ -96,7 +96,7 @@ describe('Http listener', () => {
       middlewares: [middleware$],
       effects: [effect$],
       error$,
-    }).run(context)(req, res);
+    })(context)(req, res);
 
     // then
     setTimeout(() => {

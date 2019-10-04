@@ -1,4 +1,5 @@
-import { Option } from 'fp-ts/lib/Option';
+import * as O from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { ServerEvent, ServerEventType } from '@marblejs/core';
 import * as pathToRegexp from 'path-to-regexp';
 import { Observable, from, EMPTY } from 'rxjs';
@@ -9,7 +10,7 @@ export type UpgradeEvent = ReturnType<typeof ServerEvent.upgrade>;
 
 type WebSocketServerCollection = {
   path: string;
-  server: Option<MarbleWebSocketServer>;
+  server: O.Option<MarbleWebSocketServer>;
 }[];
 
 const isWebSocketUpgrade = ({ request }: UpgradeEvent['payload']) =>
@@ -28,9 +29,9 @@ export const mapToServer = (...servers: WebSocketServerCollection) => {
       mergeMap(({ request, socket, head }) => from(mappedCollection).pipe(
         filter(({ pathToMatch }) => pathToMatch.test(request.url || '')),
         tap(({ server }) =>
-          server.map(server => server.handleUpgrade(request, socket, head, (ws) =>
+          pipe(server, O.map(server => server.handleUpgrade(request, socket, head, (ws) =>
             server.emit(ServerEventType.CONNECTION, ws, request)
-          )),
+          ))),
         ),
         mapTo(true),
         toArray(),

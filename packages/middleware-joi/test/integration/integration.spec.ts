@@ -3,7 +3,7 @@ import { createContext } from '@marblejs/core';
 import { server } from '../helpers/api.spec-util';
 
 describe('Joi middleware - Integration', () => {
-  const app = server().run(createContext());
+  const app = server()(createContext());
   const token = '181782881DB38D84';
 
   beforeEach(() => {

@@ -10,9 +10,10 @@ import {
   httpListener,
   HttpServerEffect,
   use,
+  useContext,
 } from '@marblejs/core';
-import { merge, of, forkJoin, EMPTY } from 'rxjs';
-import { tap, map, mergeMap } from 'rxjs/operators';
+import { merge, forkJoin } from 'rxjs';
+import { tap, map, mergeMap, mapTo } from 'rxjs/operators';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 
 const ClientToken = createContextToken<MessagingClient>('MessagingClient');
@@ -36,10 +37,8 @@ const test$ = r.pipe(
   r.matchPath('/test'),
   r.matchType('GET'),
   r.useEffect((req$, _, { ask }) => req$.pipe(
-    mergeMap(() => ask(ClientToken)
-      .map(client => client.emit({ type: 'TEST' }))
-      .getOrElse(EMPTY)),
-    map(() => ({ body: 'OK' })),
+    mergeMap(() => useContext(ClientToken)(ask).emit({ type: 'TEST' })),
+    mapTo(({ body: 'OK' })),
   )),
 );
 
@@ -49,15 +48,17 @@ const fib$ = r.pipe(
   r.useEffect((req$, _, { ask }) => req$.pipe(
     use(rootValiadtor$),
     map(req => Number(req.params.number)),
-    mergeMap(number => of(ask(ClientToken)).pipe(
-      mergeMap(client => forkJoin(
-        client.map(c => c.send({ type: 'FIB', payload: number + 0 })).getOrElse(of({})),
-        client.map(c => c.send({ type: 'FIB', payload: number + 1 })).getOrElse(of({})),
-        client.map(c => c.send({ type: 'FIB', payload: number + 2 })).getOrElse(of({})),
-        client.map(c => c.send({ type: 'FIB', payload: number + 3 })).getOrElse(of({})),
-        client.map(c => c.send({ type: 'FIB', payload: number + 4 })).getOrElse(of({})),
-      )),
-    )),
+    mergeMap(number => {
+      const client = useContext(ClientToken)(ask);
+
+      return forkJoin(
+        client.send({ type: 'FIB', payload: number + 0 }),
+        client.send({ type: 'FIB', payload: number + 1 }),
+        client.send({ type: 'FIB', payload: number + 2 }),
+        client.send({ type: 'FIB', payload: number + 3 }),
+        client.send({ type: 'FIB', payload: number + 4 }),
+      );
+    }),
     map(body => ({ body })),
   )),
 );
@@ -76,13 +77,13 @@ export const server = createServer({
     effects: [test$, fib$],
   }),
   dependencies: [
-    bindTo(ClientToken)(client.run),
+    bindTo(ClientToken)(client),
   ],
   event$: (...args) => merge(
     listening$(...args),
   ),
 });
 
-server.run(
-  process.env.NODE_ENV !== 'test'
-);
+if (process.env.NODE_ENV !== 'test') {
+  server();
+}

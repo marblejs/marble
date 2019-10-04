@@ -80,6 +80,6 @@
     "packages/*"
   ],
   "resolutions": {
-    "fp-ts": "1.15.0"
+    "fp-ts": "~2.1.0"
   }
 }

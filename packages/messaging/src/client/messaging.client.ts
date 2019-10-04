@@ -1,3 +1,6 @@
+import * as O from 'fp-ts/lib/Option';
+import * as R from 'fp-ts/lib/Reader';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { reader, serverEvent$, matchEvent, ServerEvent, AllServerEvents } from '@marblejs/core';
 import { from, Observable, EMPTY } from 'rxjs';
 import { mergeMap, take, map, mapTo, mergeMapTo } from 'rxjs/operators';
@@ -49,19 +52,20 @@ export const messagingClient = (config: MessagingClientConfig) => {
       mergeMap(conn => conn.close()),
     );
 
-  return reader.map(ask => {
+  return pipe(reader, R.map(ask => {
     const transportLayer = provideTransportLayer(transport, options);
     const connection = transportLayer.connect({ isConsumer: false });
 
-    ask(serverEvent$)
-      .map(teardownOnClose$(connection))
-      .getOrElse(EMPTY)
-      .subscribe();
+    pipe(
+      ask(serverEvent$),
+      O.map(teardownOnClose$(connection)),
+      O.getOrElse(() => EMPTY as Observable<any>),
+    ).subscribe();
 
     return {
       emit: emit(connection),
       send: send(connection),
       close: close(connection),
     } as MessagingClient;
-  });
+  }));
 };

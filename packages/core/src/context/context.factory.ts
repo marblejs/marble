@@ -1,61 +1,95 @@
 import * as R from 'fp-ts/lib/Reader';
 import * as M from 'fp-ts/lib/Map';
-import { Setoid } from 'fp-ts/lib/Setoid';
-import { Option } from 'fp-ts/lib/Option';
+import * as O from 'fp-ts/lib/Option';
+import * as E from 'fp-ts/lib/Eq';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { contramap, ordString, Ord } from 'fp-ts/lib/Ord';
 import { ContextToken } from './context.token.factory';
 
-const ordContextToken: Ord<ContextToken<any>> = contramap((t: ContextToken) => t._id, ordString);
-const setoidContextToken: Setoid<ContextToken> = { equals: ordContextToken.equals };
+const ordContextToken: Ord<ContextToken<any>> = contramap((t: ContextToken) => t._id)(ordString);
+const setoidContextToken: E.Eq<ContextToken> = { equals: ordContextToken.equals };
 
-export interface Context extends Map<ContextToken, R.Reader<any, any> | any> {}
+export interface Context extends Map<ContextToken, ContextDependency | any> {}
 
-export interface ContextProvider { <T>(token: ContextToken<T>): Option<T> }
+export interface ContextProvider { <T>(token: ContextToken<T>): O.Option<T> }
 
 export interface ContextReader extends R.Reader<Context, any> {}
 
-export interface ContextEagerReader { (ctx: Context): any }
+export enum ContextReaderTag {
+  EAGER_READER,
+  LAZY_READER,
+}
 
-export type ContextDependency = ContextReader | ContextEagerReader;
+export interface ContextEagerReader {
+  tag: ContextReaderTag.EAGER_READER;
+  eval: ContextReader;
+}
+
+export interface ContextLazyReader {
+  tag: ContextReaderTag.LAZY_READER;
+  eval: () => ContextReader;
+}
+
+export type ContextDependency = ContextEagerReader | ContextLazyReader;
 
 export interface BoundDependency<T, U extends ContextDependency = ContextDependency> {
   token: ContextToken<T>;
   dependency: U;
 }
 
-const isReader = (x: any): x is R.Reader<any, any> => !!x.run;
+const isEagerDependency = (x: any): x is ContextEagerReader => {
+  return x.eval && x.tag === ContextReaderTag.EAGER_READER;
+};
+
+const isLazyDependency = (x: any): x is ContextLazyReader => {
+  return x.eval && x.tag === ContextReaderTag.LAZY_READER;
+};
 
 export const createContext = () => M.empty;
 
-export const register = <T>(boundDependency: BoundDependency<T, any>) => (context: Context) =>
-  M.insert(setoidContextToken)(
+export const register = <T>(boundDependency: BoundDependency<T, ContextDependency>) => (context: Context): Context =>
+  M.insertAt(setoidContextToken)(
     boundDependency.token,
-    isReader(boundDependency.dependency)
-      ? boundDependency.dependency
-      : boundDependency.dependency(context),
-    context
-  );
+    isEagerDependency(boundDependency.dependency)
+      ? boundDependency.dependency.eval(context)
+      : boundDependency.dependency,
+  )(context);
 
-export const registerAll = (boundDependencies: BoundDependency<any, any>[]) => (context: Context) =>
+export const registerAll = (boundDependencies: BoundDependency<any, any>[]) => (context: Context): Context =>
   boundDependencies.reduce(
     (ctx, dependency) => register(dependency)(ctx),
     context,
   );
 
-export const lookup = (context: Context) => <T>(token: ContextToken<T>): Option<T> =>
-  M.lookup(ordContextToken)(token, context).map(dependency => {
-    if (!isReader(dependency)) {
+export const lookup = (context: Context) => <T>(token: ContextToken<T>): O.Option<T> => pipe(
+  M.lookup(ordContextToken)(token, context),
+  O.map(dependency => {
+    if (!dependency.eval) {
       return dependency;
     }
 
-    const boostrapedDependency = dependency.run(context);
+    const boostrapedDependency = isLazyDependency(dependency)
+      ? dependency.eval()(context)
+      : dependency.eval(context);
+
     context.set(token, boostrapedDependency);
     return boostrapedDependency;
-  });
+  }),
+);
 
-export const bindTo =
+export const bindLazilyTo =
   <T>(token: ContextToken<T>) =>
-  <U extends ContextDependency>(dependency: U): BoundDependency<T, U> =>
-    ({ token, dependency });
+  <U extends ContextReader>(dependency: U): BoundDependency<T, ContextLazyReader> =>
+    ({ token, dependency: { eval: () => dependency, tag: ContextReaderTag.LAZY_READER } });
 
-export const reader = R.ask<Context>().map(lookup);
+export const bindEagerlyTo =
+  <T>(token: ContextToken<T>) =>
+  <U extends ContextReader>(dependency: U): BoundDependency<T, ContextEagerReader> =>
+    ({ token, dependency: { eval: dependency, tag: ContextReaderTag.EAGER_READER } });
+
+export const bindTo = bindLazilyTo;
+
+export const reader = pipe(
+  R.ask<Context>(),
+  R.map(lookup),
+);

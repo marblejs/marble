@@ -4,7 +4,7 @@ import { app } from './io-http.integration';
 
 describe('@marblejs/middleware-io - HTTP integration', () => {
   test('POST / returns 200 with user object', async () => {
-    const httpServer = app.run(createContext());
+    const httpServer = app(createContext());
     const user = { id: 'id', name: 'name', age: 100 };
     return request(httpServer)
       .post('/')
@@ -13,7 +13,7 @@ describe('@marblejs/middleware-io - HTTP integration', () => {
   });
 
   test('POST / returns 400 with validation error object', async () => {
-    const httpServer = app.run(createContext());
+    const httpServer = app(createContext());
     const user = { id: 'id', name: 'name', age: '100' };
     return request(httpServer)
       .post('/')

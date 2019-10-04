@@ -1,6 +1,6 @@
 import {
   r,
-  bindTo,
+  bindEagerlyTo,
   createContextToken,
   createServer,
   matchEvent,
@@ -52,7 +52,7 @@ export const server = createServer({
     effects: [root$],
   }),
   dependencies: [
-    bindTo(WsServerToken)(websocketsServer.run),
+    bindEagerlyTo(WsServerToken)(websocketsServer),
   ],
   event$: (...args) => merge(
     listening$(...args),
@@ -60,6 +60,6 @@ export const server = createServer({
   ),
 });
 
-server.run(
-  process.env.NODE_ENV !== 'test'
-);
+if (process.env.NODE_ENV !== 'test') {
+  server();
+}
