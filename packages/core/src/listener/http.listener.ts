@@ -26,12 +26,17 @@ export interface HttpListenerConfig {
   output$?: HttpOutputEffect;
 }
 
+export interface HttpListener {
+  (req: IncomingMessage, res: OutgoingMessage): void;
+  config: { routing: RoutingItem[] };
+};
+
 export const httpListener = ({
   middlewares = [],
   effects,
   error$ = defaultError$,
   output$ = out$ => out$,
-}: HttpListenerConfig) => pipe(
+}: HttpListenerConfig): R.Reader<Context, HttpListener> => pipe(
   R.ask<Context>(),
   R.map(ctx => {
     const requestSubject$ = new Subject<{ req: HttpRequest; res: HttpResponse }>();
@@ -64,9 +69,6 @@ export const httpListener = ({
 
     httpServer.config = { routing };
 
-    return httpServer as {
-      (req: IncomingMessage, res: OutgoingMessage): void;
-      config: { routing: RoutingItem[] };
-    };
+    return httpServer;
   }),
 );
