@@ -12,10 +12,8 @@ import {
   use,
   useContext,
 } from '@marblejs/core';
-import * as O from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { merge, forkJoin, EMPTY, Observable } from 'rxjs';
-import { tap, map, mergeMap } from 'rxjs/operators';
+import { merge, forkJoin } from 'rxjs';
+import { tap, map, mergeMap, mapTo } from 'rxjs/operators';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 
 const ClientToken = createContextToken<MessagingClient>('MessagingClient');
@@ -39,11 +37,8 @@ const test$ = r.pipe(
   r.matchPath('/test'),
   r.matchType('GET'),
   r.useEffect((req$, _, { ask }) => req$.pipe(
-    mergeMap(() => pipe(
-      ask(ClientToken),
-      O.map(client => client.emit({ type: 'TEST' })),
-      O.getOrElse(() => EMPTY as Observable<boolean>))),
-    map(() => ({ body: 'OK' })),
+    mergeMap(() => useContext(ClientToken)(ask).emit({ type: 'TEST' })),
+    mapTo(({ body: 'OK' })),
   )),
 );
 
