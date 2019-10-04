@@ -72,7 +72,7 @@ export const lookup = (context: Context) => <T>(token: ContextToken<T>): O.Optio
   }),
 );
 
-export const bindTo =
+export const bindLazilyTo =
   <T>(token: ContextToken<T>) =>
   <U extends ContextReader>(dependency: U): BoundDependency<T, ContextLazyReader> =>
     ({ token, dependency: { eval: () => dependency, tag: 'LAZY_READER' } });
@@ -82,7 +82,7 @@ export const bindEagerlyTo =
   <U extends ContextReader>(dependency: U): BoundDependency<T, ContextEagerReader> =>
     ({ token, dependency: { eval: dependency, tag: 'EAGER_READER' } });
 
-export const bindLazilyTo = bindTo;
+export const bindTo = bindLazilyTo;
 
 export const reader = pipe(
   R.ask<Context>(),
