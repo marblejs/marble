@@ -4,6 +4,7 @@ import {
   combineMiddlewares,
   combineEffects,
   createEffectMetadata,
+  useContext,
 } from '@marblejs/core';
 import * as O from 'fp-ts/lib/Option';
 import * as R from 'fp-ts/lib/Reader';
@@ -118,7 +119,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
   };
 
   return pipe(reader, R.map(ask => {
-    const transportLayer = pipe(ask(TransportLayerToken), O.getOrElse(() => undefined as unknown as TransportLayer));
+    const transportLayer = useContext(TransportLayerToken)(ask);
 
     return {
       listen: listen(transportLayer, ask),

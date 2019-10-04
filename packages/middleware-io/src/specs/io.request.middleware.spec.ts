@@ -1,7 +1,6 @@
 import * as t from 'io-ts';
 import { of } from 'rxjs';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as E from 'fp-ts/lib/Either';
+import { isLeft, getOrElse } from 'fp-ts/lib/Either';
 import { HttpError, HttpStatus } from '@marblejs/core';
 import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
 import { requestValidator$ } from '../io.request.middleware';
@@ -111,11 +110,11 @@ describe('#requestValidator$', () => {
       (u: unknown, c: t.Context) => {
         const validation = t.string.validate(u, c);
 
-        if (pipe(validation, E.isLeft) || u === '') {
+        if (isLeft(validation) || u === '') {
           return t.failure(u, c);
         }
 
-        const s = pipe(validation, E.getOrElse(() => ''));
+        const s = getOrElse(() => '')(validation);
         const n = Number(s);
         return isNaN(n) ? t.failure(s, c) : t.success(n);
       },

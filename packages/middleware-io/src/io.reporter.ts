@@ -35,5 +35,5 @@ const failure = (errors: t.ValidationError[]): ReporterResult[] =>
 const success = () => [];
 
 export const defaultReporter: Reporter<ReporterResult[]> = {
-  report: validation => pipe(validation, E.fold(failure, success)),
+  report: E.fold(failure, success),
 };
