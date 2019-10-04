@@ -8,7 +8,7 @@ beforeAll(() => microservice);
 
 describe('messaging integration', () => {
   test('GET /fib returns 10, 11, 12, 13, 14 th fibonacci number', async () =>
-    request(httpServer.data.server)
+    request(httpServer.config.server)
       .get('/fib/10')
       .expect(200, [
         { type: 'FIB_RESULT', payload: 55 },

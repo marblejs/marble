@@ -103,13 +103,13 @@ describe('#createServer', () => {
     server = marbleServer();
 
     // then
-    expect(marbleServer.data).toBeDefined();
-    expect(marbleServer.data.server).toBeDefined();
-    expect(marbleServer.data.routing).toBeInstanceOf(Array);
-    expect(marbleServer.data.routing[0].path).toEqual('');
+    expect(marbleServer.config).toBeDefined();
+    expect(marbleServer.config.server).toBeDefined();
+    expect(marbleServer.config.routing).toBeInstanceOf(Array);
+    expect(marbleServer.config.routing[0].path).toEqual('');
     expect(
-      marbleServer.data.routing[0].methods.GET &&
-      marbleServer.data.routing[0].methods.GET.effect
+      marbleServer.config.routing[0].methods.GET &&
+      marbleServer.config.routing[0].methods.GET.effect
     ).toBeDefined();
   });
 

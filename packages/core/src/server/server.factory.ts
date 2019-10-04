@@ -31,7 +31,7 @@ export const createServer = (config: CreateServerConfig): Server => {
 
   const listen = () => server.listen(port, hostname);
 
-  listen.data = {
+  listen.config = {
     server,
     routing: httpListenerWithContext.config.routing,
   };

@@ -16,14 +16,14 @@ export interface CreateServerConfig {
 
 export interface Server {
   (): https.Server | http.Server;
-  data: ServerData;
+  config: ServerConfig;
 }
 
 export interface ServerOptions {
   httpsOptions?: https.ServerOptions;
 }
 
-export interface ServerData {
+export interface ServerConfig {
   server: https.Server | http.Server;
   routing: RoutingItem[];
 }
