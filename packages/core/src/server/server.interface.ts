@@ -15,15 +15,15 @@ export interface CreateServerConfig {
 }
 
 export interface Server {
-  run: (predicate?: boolean) => https.Server | http.Server;
-  server: https.Server | http.Server;
-  info: ServerInfo;
+  (): https.Server | http.Server;
+  data: ServerData;
 }
 
 export interface ServerOptions {
   httpsOptions?: https.ServerOptions;
 }
 
-export interface ServerInfo {
+export interface ServerData {
+  server: https.Server | http.Server;
   routing: RoutingItem[];
 }

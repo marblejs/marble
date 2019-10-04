@@ -3,7 +3,7 @@ import { HttpStatus } from '@marblejs/core';
 import { ContentType } from '@marblejs/core/dist/+internal';
 import { server as marbleServer } from '../src/http';
 
-const { server } = marbleServer;
+const { server } = marbleServer.data;
 
 describe('API integration', () => {
   test('POST returns 404 when route not found: /', async () =>

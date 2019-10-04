@@ -29,13 +29,12 @@ export const createServer = (config: CreateServerConfig): Server => {
     event$(serverEventSubject.pipe(takeWhile(e => !isCloseEvent(e))), server, metadata).subscribe();
   }
 
-  return {
-    run: (predicate = true) => predicate
-      ? server.listen(port, hostname)
-      : server,
+  const listen = () => server.listen(port, hostname);
+
+  listen.data = {
     server,
-    info: {
-      routing: httpListenerWithContext.config.routing,
-    },
+    routing: httpListenerWithContext.config.routing,
   };
+
+  return listen;
 };
