@@ -18,8 +18,8 @@ import {
   isClientErrorEvent,
   isRequestEvent,
 } from '../server.event';
-import { EffectFactory } from '../../effects/effects.factory';
 import { EventEmitter } from 'events';
+import { r } from '../../router/router.ixbuilder';
 
 describe('#createServer', () => {
   let server: https.Server | http.Server;
@@ -30,46 +30,39 @@ describe('#createServer', () => {
 
   afterEach(done => {
     if (server) {
-      server.close(() => done());
+      server.close(done);
     } else {
       done();
     }
   });
 
-  test('creates http server and starts listening', done => {
+  test('creates http server and starts listening', async () => {
     // given
     const hostname = '127.0.0.1';
     const app = httpListener({ effects: [] });
 
     // when
-    server = createServer({
+    server = await createServer({
       hostname,
       httpListener: app,
     })();
 
-    server.on('error', console.error);
-
-    server.on('listening', () => {
-      expect(server.listening).toBe(true);
-      done();
-    });
+    // then
+    expect(server.listening).toBe(true);
   });
 
-  test('creates http server and starts listening without specified port and hostname', done => {
+  test('creates http server and starts listening without specified port and hostname', async () => {
     // given
     const app = httpListener({ effects: [] });
 
     // when
-    server = createServer({ httpListener: app })();
+    server = await createServer({ httpListener: app })();
 
     // then
-    server.on('listening', () => {
-      expect(server.listening).toBe(true);
-      done();
-    });
+    expect(server.listening).toBe(true);
   });
 
-  test('creates https server', done => {
+  test('creates https server', async () => {
     // given
     const app = httpListener({ effects: [] });
     const httpsOptions: https.ServerOptions = {
@@ -78,29 +71,26 @@ describe('#createServer', () => {
     };
 
     // when
-    server = createServer({
+    server = await createServer({
       httpListener: app,
       options: { httpsOptions },
     })();
 
     // then
-    setTimeout(() => {
-      expect(server.listening).toBe(true);
-      server.close(done);
-    }, 100);
+    expect(server.listening).toBe(true);
   });
 
-  test('returns server and routing', () => {
+  test('returns server and routing', async () => {
     // given
-    const effect$ = EffectFactory
-      .matchPath('/')
-      .matchType('GET')
-      .use(req$ => req$.pipe(mapTo({ status: 200 })));
+    const effect$ = r.pipe(
+      r.matchPath('/'),
+      r.matchType('GET'),
+      r.useEffect(req$ => req$.pipe(mapTo({ status: 200 }))));
     const app = httpListener({ effects: [effect$] });
 
     // when
     const marbleServer = createServer({ httpListener: app });
-    server = marbleServer();
+    server = await marbleServer();
 
     // then
     expect(marbleServer.config).toBeDefined();
@@ -113,12 +103,12 @@ describe('#createServer', () => {
     ).toBeDefined();
   });
 
-  test(`emits server events`, done => {
+  test(`emits server events`, async done => {
     // given
     const app = httpListener({ effects: [] });
 
     // then
-    server = createServer({
+    server = await createServer({
       httpListener: app,
       event$: event$ => forkJoin(
         event$.pipe(filter(isErrorEvent), take(1)),

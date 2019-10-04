@@ -29,11 +29,15 @@ export const createServer = (config: CreateServerConfig): Server => {
     event$(serverEventSubject.pipe(takeWhile(e => !isCloseEvent(e))), server, metadata).subscribe();
   }
 
-  const listen = () => server.listen(port, hostname);
+  const listen = () => new Promise<https.Server | http.Server>((resolve, reject) => {
+    const runningServer = server.listen(port, hostname);
+    runningServer.once('listening', () => resolve(runningServer));
+    runningServer.once('error', error => reject(error));
+  });
 
   listen.config = {
+    ...httpListenerWithContext.config,
     server,
-    routing: httpListenerWithContext.config.routing,
   };
 
   return listen;
