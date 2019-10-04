@@ -15,13 +15,18 @@ export interface ContextProvider { <T>(token: ContextToken<T>): O.Option<T> }
 
 export interface ContextReader extends R.Reader<Context, any> {}
 
+export enum ContextReaderTag {
+  EAGER_READER,
+  LAZY_READER,
+}
+
 export interface ContextEagerReader {
-  tag: 'EAGER_READER';
+  tag: ContextReaderTag.EAGER_READER;
   eval: ContextReader;
 }
 
 export interface ContextLazyReader {
-  tag: 'LAZY_READER';
+  tag: ContextReaderTag.LAZY_READER;
   eval: () => ContextReader;
 }
 
@@ -33,11 +38,11 @@ export interface BoundDependency<T, U extends ContextDependency = ContextDepende
 }
 
 const isEagerDependency = (x: any): x is ContextEagerReader => {
-  return x.eval && x.tag === 'EAGER_READER';
+  return x.eval && x.tag === ContextReaderTag.EAGER_READER;
 };
 
 const isLazyDependency = (x: any): x is ContextLazyReader => {
-  return x.eval && x.tag === 'LAZY_READER';
+  return x.eval && x.tag === ContextReaderTag.LAZY_READER;
 };
 
 export const createContext = () => M.empty;
@@ -75,12 +80,12 @@ export const lookup = (context: Context) => <T>(token: ContextToken<T>): O.Optio
 export const bindLazilyTo =
   <T>(token: ContextToken<T>) =>
   <U extends ContextReader>(dependency: U): BoundDependency<T, ContextLazyReader> =>
-    ({ token, dependency: { eval: () => dependency, tag: 'LAZY_READER' } });
+    ({ token, dependency: { eval: () => dependency, tag: ContextReaderTag.LAZY_READER } });
 
 export const bindEagerlyTo =
   <T>(token: ContextToken<T>) =>
   <U extends ContextReader>(dependency: U): BoundDependency<T, ContextEagerReader> =>
-    ({ token, dependency: { eval: dependency, tag: 'EAGER_READER' } });
+    ({ token, dependency: { eval: dependency, tag: ContextReaderTag.EAGER_READER } });
 
 export const bindTo = bindLazilyTo;
 

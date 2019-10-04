@@ -4,16 +4,17 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import * as R from 'fp-ts/lib/Reader';
 import * as O from 'fp-ts/lib/Option';
 import {
-  Context,
   createContext,
   bindTo,
+  bindLazilyTo,
+  bindEagerlyTo,
   register,
   registerAll,
   reader,
   lookup,
+  Context,
   ContextReader,
-  bindEagerlyTo,
-  bindLazilyTo,
+  ContextReaderTag,
 } from '../context.factory';
 import { createContextToken } from '../context.token.factory';
 
@@ -29,20 +30,22 @@ describe('#bindTo', () => {
 
     // then
     expect(boundDependency.token).toBe(Token);
+    expect(boundDependency.dependency.tag).toEqual(ContextReaderTag.LAZY_READER);
     expect(boundDependency.dependency.eval()(context)).toEqual('test');
   });
 
-  test('binds lazy singleton to token', () => {
+  test('binds value to token', () => {
     // given
-    const singleton: ContextReader = _ => 'test';
+    const valueReader: ContextReader = _ => 'test';
     const Token = createContextToken<typeof reader>();
 
     // when
-    const boundDependency = bindTo(Token)(singleton);
+    const boundDependency = bindTo(Token)(valueReader);
 
     // then
     expect(boundDependency.token).toBe(Token);
-    expect(boundDependency.dependency.eval()).toEqual(singleton);
+    expect(boundDependency.dependency.tag).toEqual(ContextReaderTag.LAZY_READER);
+    expect(boundDependency.dependency.eval()).toEqual(valueReader);
   });
 });
 
@@ -92,7 +95,7 @@ describe('#registerAll', () => {
 });
 
 describe('#reader', () => {
-  test('asks context for a reader dependency', () => {
+  test('asks context for a lazy reader dependency', () => {
     // given
     const token1 = createContextToken<string>();
     const token2 = createContextToken<string>();
@@ -122,19 +125,26 @@ describe('#reader', () => {
 
   test('asks context for a eager reader dependency', () => {
     // given
+    const executionOrder: number[] = [];
+    const spy1 = jest.fn(() => executionOrder.push(1));
+    const spy2 = jest.fn(() => executionOrder.push(2));
+    const spy3 = jest.fn(() => executionOrder.push(3));
     const token1 = createContextToken<string>();
     const token2 = createContextToken<string>();
     const token3 = createContextToken<string>();
 
     const dependency1 = pipe(reader, R.map(() => {
+      spy1();
       return 'test';
     }));
 
     const dependency2 = pipe(reader, R.map(ask => {
+      spy2();
       return pipe(ask(token1), O.map(v => v + '_1'), O.getOrElse(() => ''));
     }));
 
     const dependency3 = pipe(reader, R.map(ask => {
+      spy3();
       return pipe(ask(token2), O.map(v => v + '_2'), O.getOrElse(() => ''));
     }));
 
@@ -149,6 +159,7 @@ describe('#reader', () => {
     expect(lookup(context)(token1)).toEqual(some('test'));
     expect(lookup(context)(token2)).toEqual(some('test_1'));
     expect(lookup(context)(token3)).toEqual(some('test_1_2'));
+    expect(executionOrder).toEqual([2, 1, 3]);
   });
 
   test('asks context for a lazy reader dependency and bootstraps it only once', () => {
