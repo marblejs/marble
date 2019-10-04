@@ -1,7 +1,9 @@
+import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { flow } from 'fp-ts/lib/function';
-import * as O from 'fp-ts/lib/Option';
 import { LoggerOptions, LoggerCtx, WritableLike } from './logger.model';
+
+export const getDateFromTimestamp = (t: number) => new Date(t);
 
 export const isNotSilent = (opts: LoggerOptions) => (_: LoggerCtx) =>
   !opts.silent;
@@ -20,11 +22,11 @@ export const formatTime = (timeInMms: number) =>
     ? `${timeInMms / 1000}s`
     : `${timeInMms}ms`;
 
-export const getTimeDifferenceInMs = (startTime: Date): number =>
-  new Date().getTime() - startTime.getTime();
+export const getTimeDifferenceInMs = (startDate: Date): number =>
+  new Date().getTime() - startDate.getTime();
 
 export const factorizeTime = flow(
-  (t: number) => new Date(t),
+  getDateFromTimestamp,
   getTimeDifferenceInMs,
   formatTime,
 );
