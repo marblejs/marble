@@ -1,4 +1,3 @@
-import * as http from 'http';
 import {
   HttpRequest,
   HttpResponse,
@@ -48,10 +47,3 @@ export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
   new class extends EventEmitter {
     statusCode = data.statusCode;
   } as any as HttpResponse;
-
-export const mockHttpServer = (mocks: HttpServerMocks = {}) =>
-  jest.spyOn(http, 'createServer').mockImplementation(jest.fn(() => ({
-    listen: mocks.listen || jest.fn(),
-    close: mocks.close || jest.fn(callback => callback()),
-    on: mocks.on || jest.fn(),
-  })));

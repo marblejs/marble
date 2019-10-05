@@ -15,7 +15,7 @@ export interface CreateServerConfig {
 }
 
 export interface Server {
-  (): https.Server | http.Server;
+  (): Promise<https.Server | http.Server>;
   config: ServerConfig;
 }
 
