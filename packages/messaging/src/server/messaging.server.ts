@@ -28,7 +28,5 @@ export const createMicroservice = (config: CreateMicroserviceConfig) => {
     event$(serverEvent$, undefined, metadata).subscribe();
   }
 
-  return {
-    run: listenerWithContext.listen,
-  };
+  return listenerWithContext.listen;
 };

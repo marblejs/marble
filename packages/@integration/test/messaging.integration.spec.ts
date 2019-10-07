@@ -2,7 +2,7 @@ import * as request from 'supertest';
 import { server as httpServer } from '../src/messaging/client';
 import { microservice as messagingServer } from '../src/messaging/server';
 
-const microservice = messagingServer.run();
+const microservice = messagingServer();
 
 beforeAll(() => microservice);
 

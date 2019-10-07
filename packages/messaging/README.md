@@ -55,7 +55,7 @@ export const microservice = createMicroservice({
   }),
 });
 
-microservice.run();
+microservice();
 ```
 
 Messaging client supports two communication patterns:
