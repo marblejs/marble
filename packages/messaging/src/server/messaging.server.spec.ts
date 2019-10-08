@@ -22,7 +22,7 @@ describe('messagingServer', () => {
         options,
         transport: Transport.AMQP,
         messagingListener: messagingListener(effect$ ? { effects: [effect$], error$ } : undefined),
-      }).run();
+      })();
 
     const runClient = () =>
       createAmqpStrategy(options).connect({ isConsumer: false });
