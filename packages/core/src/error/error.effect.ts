@@ -1,4 +1,4 @@
-import { map, mapTo } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { HttpErrorEffect } from '../effects/http-effects.interface';
 import { HttpStatus } from '../http.interface';
 import { HttpError, isHttpError } from './error.model';
@@ -18,10 +18,9 @@ const errorFactory = (status: HttpStatus, error: Error) =>
     ? { error: { status, message: error.message, data: error.data, context: error.context } }
     : { error: { status, message: error.message } };
 
-export const defaultError$: HttpErrorEffect<HttpError> = (req$, _, meta) => req$
-  .pipe(
-    mapTo(meta.error || defaultHttpError),
-    map(error => {
+export const defaultError$: HttpErrorEffect<HttpError> = req$ =>
+  req$.pipe(
+    map(({ error = defaultHttpError }) => {
       const status = getStatusCode(error);
       const body = errorFactory(status, error);
       return { status, body };
