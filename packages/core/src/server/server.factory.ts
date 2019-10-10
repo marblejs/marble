@@ -25,8 +25,8 @@ export const createServer = (config: CreateServerConfig): Server => {
   subscribeServerEvents(hostname || DEFAULT_HOSTNAME)(serverEventSubject)(server);
 
   if (event$) {
-    const metadata = createEffectMetadata({ ask: lookup(context) });
-    event$(serverEventSubject.pipe(takeWhile(e => !isCloseEvent(e))), server, metadata).subscribe();
+    const metadata = createEffectMetadata({ ask: lookup(context), client: server });
+    event$(serverEventSubject.pipe(takeWhile(e => !isCloseEvent(e))), metadata).subscribe();
   }
 
   const listen = () => new Promise<https.Server | http.Server>((resolve, reject) => {

@@ -38,10 +38,8 @@ export const findRoute = (
 };
 
 export const resolveRouting =
-  (routing: Routing, metadata: EffectMetadata) =>
-  (res: HttpResponse) =>
-  (req: HttpRequest): Observable<HttpEffectResponse> => {
-    if (res.finished) { return EMPTY; }
+  (routing: Routing, metadata: EffectMetadata<HttpResponse>) => (req: HttpRequest): Observable<HttpEffectResponse> => {
+    if (metadata.client.finished) { return EMPTY; }
     req.meta = {};
 
     const [urlPath, urlQuery] = req.url.split('?');
@@ -56,9 +54,9 @@ export const resolveRouting =
     const middleware = routeMatched.middleware;
 
     return middleware
-      ? middleware(of(req), res, metadata).pipe(
-          takeWhile(() => !res.finished),
-          mergeMap(req => routeMatched.effect(of(req), res, metadata))
+      ? middleware(of(req), metadata).pipe(
+          takeWhile(() => !metadata.client.finished),
+          mergeMap(req => routeMatched.effect(of(req), metadata))
         )
-      : routeMatched.effect(of(req), res, metadata);
+      : routeMatched.effect(of(req), metadata);
   };

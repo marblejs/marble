@@ -1,15 +1,10 @@
 import { Observable, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { EffectMetadata } from '../../effects/effects.interface';
-
-interface MiddlewareLike<I, O> {
-  (i$: Observable<I>, client: any, meta: any): Observable<O>;
-}
+import { EffectMetadata, EffectMiddlewareLike } from '../../effects/effects.interface';
 
 export const use = <I, O>
-  (middleware: MiddlewareLike<I, O>, client?: any, meta?: EffectMetadata) =>
-  (source$: Observable<I>) =>
+  (middleware: EffectMiddlewareLike<I, O>, meta?: EffectMetadata<any>) =>
+  (source$: Observable<I>): Observable<O> =>
     source$.pipe(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      mergeMap(req => middleware(of(req), client!, meta!) as Observable<O>)
+      mergeMap(req => middleware(of(req),  meta))
     );
