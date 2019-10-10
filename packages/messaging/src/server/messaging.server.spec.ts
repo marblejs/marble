@@ -95,9 +95,10 @@ describe('messagingServer', () => {
           mergeMapTo(throwError(expectedError)),
         );
 
-      const error$: MsgErrorEffect = (event$, _, { error }) =>
+      const error$: MsgErrorEffect = event$ =>
         event$.pipe(
-          tap(e => errorSubject.next([e, error])),
+          tap(({ event, error }) => errorSubject.next([event, error])),
+          map(({ event }) => event),
         );
 
       const server = await runServer(event$, error$);

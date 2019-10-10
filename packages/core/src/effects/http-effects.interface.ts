@@ -16,19 +16,21 @@ export interface HttpMiddlewareEffect<
   O extends HttpRequest = HttpRequest,
 > extends HttpEffect<I, O> {}
 
-export interface HttpErrorEffect<T extends Error = HttpError>
-  extends HttpEffect<HttpRequest, HttpEffectResponse, HttpResponse, T> {}
+export interface HttpErrorEffect<
+  Err extends Error = HttpError,
+> extends HttpEffect<{ req: HttpRequest; error: Err }, HttpEffectResponse, HttpResponse> {}
 
-export interface HttpServerEffect<T extends Event = Event>
-  extends HttpEffect<T, any, http.Server | https.Server> {}
+export interface HttpServerEffect<
+  Ev extends Event = Event
+> extends HttpEffect<Ev, any, http.Server | https.Server> {}
 
-export interface HttpOutputEffect<T extends HttpEffectResponse = HttpEffectResponse>
-  extends HttpEffect<T, HttpEffectResponse> {}
+export interface HttpOutputEffect<
+  Req extends HttpRequest = HttpRequest,
+  Res extends HttpEffectResponse = HttpEffectResponse
+> extends HttpEffect<{ req: Req; res: Res }, HttpEffectResponse> {}
 
 export interface HttpEffect<
   I = HttpRequest,
   O = HttpEffectResponse,
   Client = HttpResponse,
-  Err extends Error = Error,
-  Initiator = HttpRequest,
-> extends Effect<I, O, Client, Err, Initiator> {}
+> extends Effect<I, O, Client> {}

@@ -9,6 +9,11 @@ export const handleEffectsError = <IncomingError extends EventError>(
   error$: WsErrorEffect<IncomingError, any, any> | undefined,
 ) => (error: IncomingError) => {
   if (error$) {
-    error$(of(error.event), client, { ...metadata, error }).subscribe(client.sendResponse);
+    const input$ = of({
+      event: error.event,
+      error,
+    });
+
+    error$(input$, client, metadata).subscribe(client.sendResponse);
   }
 };

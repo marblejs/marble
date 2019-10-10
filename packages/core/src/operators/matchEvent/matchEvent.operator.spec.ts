@@ -6,7 +6,7 @@ import { Event } from '../../event/event.interface';
 import { ServerEventType, ServerEvent, AllServerEvents, } from '../../server/server.event';
 
 describe('#matchEvent operator', () => {
-  test(`matches incoming string Event`, () => {
+  test(`matches string Event`, () => {
     // given
     const event1: Event = { type: 'TEST_EVENT_1', payload: 1 };
     const event2: Event = { type: 'TEST_EVENT_2', payload: 2 };
@@ -28,7 +28,7 @@ describe('#matchEvent operator', () => {
     ]);
   });
 
-  test(`matches incoming object Event`, () => {
+  test(`matches object Event`, () => {
     // given
     const event1: Event = { type: 'TEST_EVENT_1', payload: 1 };
     const event2: Event = { type: 'TEST_EVENT_2', payload: 2 };
@@ -50,7 +50,7 @@ describe('#matchEvent operator', () => {
     ]);
   });
 
-  test(`matches incoming EventCreator`, () => {
+  test(`matches EventCreator`, () => {
     // given
     const listenEvent: Event = { type: ServerEventType.LISTENING, payload: { port: 80, host: 'localhost' } };
     const closeEvent: Event = { type: ServerEventType.CLOSE, payload: {} };
@@ -67,6 +67,26 @@ describe('#matchEvent operator', () => {
     Marbles.assertEffect(listen$, [
       ['-a-b-c---', { a: closeEvent, b: listenEvent, c: errorEvent }],
       ['---b-----', { b: listenEvent.payload }],
+    ]);
+  });
+
+  test(`matches EventCreator collection`, () => {
+    // given
+    const listenEvent: Event = { type: ServerEventType.LISTENING, payload: { port: 80, host: 'localhost' } };
+    const closeEvent: Event = { type: ServerEventType.CLOSE, payload: {} };
+    const errorEvent: Event = { type: ServerEventType.ERROR, payload: {} };
+
+    // when
+    const listen$ = (event$: Observable<AllServerEvents>) =>
+      event$.pipe(
+        matchEvent(ServerEvent.listening, ServerEvent.error),
+        map(event => event.payload),
+      );
+
+    // then
+    Marbles.assertEffect(listen$, [
+      ['-a-b-c---', { a: closeEvent, b: listenEvent, c: errorEvent }],
+      ['---b-c---', { b: listenEvent.payload, c: errorEvent.payload }],
     ]);
   });
 });
