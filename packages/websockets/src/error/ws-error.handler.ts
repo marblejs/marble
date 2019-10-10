@@ -4,8 +4,7 @@ import { MarbleWebSocketClient } from '../websocket.interface';
 import { WsErrorEffect } from '../effects/ws-effects.interface';
 
 export const handleEffectsError = <IncomingError extends EventError>(
-  metadata: EffectMetadata,
-  client: MarbleWebSocketClient,
+  metadata: EffectMetadata<MarbleWebSocketClient>,
   error$: WsErrorEffect<IncomingError, any, any> | undefined,
 ) => (error: IncomingError) => {
   if (error$) {
@@ -14,6 +13,6 @@ export const handleEffectsError = <IncomingError extends EventError>(
       error,
     });
 
-    error$(input$, client, metadata).subscribe(client.sendResponse);
+    error$(input$, metadata).subscribe(metadata.client.sendResponse);
   }
 };

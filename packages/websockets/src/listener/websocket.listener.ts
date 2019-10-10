@@ -57,22 +57,22 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   const handleMessage: HandleMessage = (client, ask) => {
     const eventSubject$ = new Subject<any>();
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
-    const defaultMetadata = createEffectMetadata({ ask });
+    const metadata = createEffectMetadata({ ask, client });
     const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
-    const middlewares$ = combinedMiddlewares(decodedEvent$, client, defaultMetadata);
-    const effects$ = combinedEffects(eventSubject$, client, defaultMetadata);
-    const effectsOutput$ = output$(effects$, client, defaultMetadata);
+    const middlewares$ = combinedMiddlewares(decodedEvent$, metadata);
+    const effects$ = combinedEffects(eventSubject$, metadata);
+    const effectsOutput$ = output$(effects$, metadata);
 
     const subscribeMiddlewares = (input$: Observable<any>) =>
       input$.subscribe(
         event => eventSubject$.next(event),
-        error => handleEffectsError(defaultMetadata, client, providedError$)(error),
+        error => handleEffectsError(metadata, providedError$)(error),
       );
 
     const subscribeEffects = (input$: Observable<any>) =>
       input$.subscribe(
         event => client.sendResponse(event),
-        error => handleEffectsError(defaultMetadata, client, providedError$)(error),
+        error => handleEffectsError(metadata, providedError$)(error),
       );
 
     let middlewaresSub = subscribeMiddlewares(middlewares$);
@@ -106,7 +106,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   };
 
   const verifyClient = (ask: ContextProvider): WebSocket.VerifyClientCallbackAsync  => (info, callback) => {
-    connection$(of(info.req), undefined, createEffectMetadata({ ask }))
+    connection$(of(info.req), createEffectMetadata({ ask, client: undefined }))
       .pipe(map(Boolean))
       .subscribe(
         isVerified => callback(isVerified),

@@ -4,37 +4,43 @@ import { handleEffectsError } from '../ws-error.handler';
 import { MarbleWebSocketClient } from '../../websocket.interface';
 import { WsErrorEffect } from '../../effects/ws-effects.interface';
 
+const createMockClient = (): MarbleWebSocketClient =>
+  ({ sendResponse: jest.fn() }) as any;
+
 describe('#handleEffectsError', () => {
-  let defaultMetadata: EffectMetadata;
+  let metadata: EffectMetadata<MarbleWebSocketClient>;
 
   beforeEach(() => {
-    defaultMetadata = createEffectMetadata({ ask: lookup(createContext()) });
+    metadata = createEffectMetadata({
+      ask: lookup(createContext()),
+      client: createMockClient(),
+    });
   });
 
   test('handles error if error$ is defined', () => {
     // given
-    const client = { sendResponse: jest.fn() } as any as MarbleWebSocketClient;
     const error = new EventError({ type: 'EVENT' }, '');
-    const error$: WsErrorEffect = event$ => event$.pipe(
-      mapTo({ type: error.event.type, error: {} }),
-    );
+    const error$: WsErrorEffect = event$ =>
+      event$.pipe(
+        mapTo({ type: error.event.type, error: {} }),
+      );
 
     // when
-    handleEffectsError(defaultMetadata, client, error$)(error);
+    handleEffectsError(metadata, error$)(error);
 
     // then
-    expect(client.sendResponse).toHaveBeenCalled();
+    expect(metadata.client.sendResponse).toHaveBeenCalled();
   });
 
   test('does nothing if error$ is undefined', () => {
     // given
-    const client = { sendResponse: jest.fn() } as any as MarbleWebSocketClient;
     const error = new EventError({ type: 'EVENT' }, '');
+    const error$ = undefined;
 
     // when
-    handleEffectsError(defaultMetadata, client, undefined)(error);
+    handleEffectsError(metadata, error$)(error);
 
     // then
-    expect(client.sendResponse).not.toHaveBeenCalled();
+    expect(metadata.client.sendResponse).not.toHaveBeenCalled();
   });
 });
