@@ -1,13 +1,14 @@
-import { HttpRequest, HttpResponse, createContext, createEffectMetadata, lookup } from '@marblejs/core';
-import { Marbles, ContentType } from '@marblejs/core/dist/+internal';
+import { HttpRequest, createContext, createEffectMetadata, lookup } from '@marblejs/core';
+import { Marbles, ContentType, createHttpResponse } from '@marblejs/core/dist/+internal';
 import * as qs from 'qs';
 import { of } from 'rxjs';
 import { bodyParser$ } from '../body.middleware';
 import * as MockReq from 'mock-req';
 
 describe('bodyParser$ middleware', () => {
+  const client = createHttpResponse();
   const context = createContext();
-  const effectMeta = createEffectMetadata({ ask: lookup(context) });
+  const meta = createEffectMetadata({ ask: lookup(context), client });
 
   beforeEach(() => {
     spyOn(console, 'log').and.stub();
@@ -31,8 +32,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_JSON },
     });
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, meta);
 
     http$.subscribe(data => {
       expect(data.body).toEqual({ test: 'test' });
@@ -49,8 +49,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED },
     });
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, meta);
     const body = {
       test: 'test',
       'test-2': 'test-2',
@@ -72,8 +71,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED },
     });
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, meta);
     const body = {
       test1: 'field=with=equals&and&ampersands',
       test2: 'field=with=equals&and&ampersands',
@@ -94,8 +92,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED },
     });
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, meta);
     const body = {
       children: [
         { bar: 'foo', foo: 'bar' },
@@ -120,8 +117,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_OCTET_STREAM },
     });
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, meta);
 
     http$.subscribe(data => {
       expect(data.body).toEqual(new Buffer(message));
@@ -138,8 +134,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.TEXT_PLAIN },
     });
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, meta);
 
     http$.subscribe(data => {
       expect(data.body).toEqual('test');
@@ -156,8 +151,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_JSON },
     });
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, meta);
 
     http$.subscribe(
       () => {
@@ -181,8 +175,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.TEXT_PLAIN },
     });
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, meta);
 
     http$.subscribe(
       () => {
@@ -206,8 +199,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.AUDIO_MPEG },
     });
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
-    const http$ = bodyParser$()(req$, res, effectMeta);
+    const http$ = bodyParser$()(req$, meta);
 
     http$.subscribe(data => {
       expect(data.body).toBeUndefined();
