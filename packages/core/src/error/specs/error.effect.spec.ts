@@ -3,11 +3,12 @@ import { defaultError$ } from '../error.effect';
 import { HttpError } from '../error.model';
 
 describe('defaultError$', () => {
-  const incomingRequest = createHttpRequest();
+  const req = createHttpRequest();
   const client = createHttpResponse();
 
   test('maps HttpError', () => {
     const error = new HttpError('test-message', 400);
+    const incomingRequest = { req, error };
     const outgoingResponse = {
       status: 400,
       body: { error: {
@@ -19,11 +20,12 @@ describe('defaultError$', () => {
     Marbles.assertEffect(defaultError$, [
       ['-a-', { a: incomingRequest }],
       ['-a-', { a: outgoingResponse }],
-    ], { client, meta: { error } });
+    ], { client });
   });
 
   test('maps other errors', () => {
     const error = new Error('test-message');
+    const incomingRequest = { req, error };
     const outgoingResponse = {
       status: 500,
       body: { error: {
@@ -39,6 +41,8 @@ describe('defaultError$', () => {
   });
 
   test('maps to "Internal server error" if "error" is not provided', () => {
+    const error = undefined;
+    const incomingRequest = { req, error };
     const outgoingResponse = {
       status: 500,
       body: { error: {
