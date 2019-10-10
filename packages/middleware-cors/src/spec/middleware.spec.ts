@@ -1,53 +1,35 @@
-import { HttpMethod, HttpRequest, HttpResponse, createEffectMetadata, lookup, createContext } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
-
 import { cors$, CORSOptions } from '../middleware';
 import { of } from 'rxjs';
-
-export const createMockResponse = () =>
-  (({
-    writeHead: jest.fn(),
-    setHeader: jest.fn(),
-    getHeader: jest.fn(),
-    end: jest.fn(),
-  } as unknown) as HttpResponse);
-
-export const createMockRequest = (
-  method: HttpMethod = 'GET',
-  headers: any = { origin: 'fake-origin' },
-) =>
-  (({
-    method,
-    headers: { ...headers },
-  } as unknown) as HttpRequest);
-
-const context = createContext();
-const metadata = createEffectMetadata({ ask: lookup(context) });
+import { createMockRequest, createMockMetadata } from '../util';
 
 describe('CORS middleware', () => {
   test('pass through non CORS requests', () => {
+    // given
     const request = createMockRequest('OPTIONS', { origin: null });
+    const meta = createMockMetadata();
 
+    // when
     const middleware$ = cors$();
 
+    // then
     Marbles.assertEffect(middleware$, [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
-    ]);
-
+    ], { meta });
   });
 
   test('handle CORS preflight request', done => {
     expect.assertions(1);
 
     const request = createMockRequest('OPTIONS', { origin: 'fake-origin' });
+    const metadata = createMockMetadata();
     const request$ = of(request);
-    const response = createMockResponse();
 
     const middleware$ = cors$();
 
-    middleware$(request$, response, metadata).subscribe(() => {
-      expect(response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
+    middleware$(request$, metadata).subscribe(() => {
+      expect(metadata.client.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
       done();
     });
   });
@@ -56,8 +38,8 @@ describe('CORS middleware', () => {
     expect.assertions(3);
 
     const request = createMockRequest('GET', { origin: 'fake-origin' });
+    const metadata = createMockMetadata();
     const request$ = of(request);
-    const response = createMockResponse();
     const options: CORSOptions = {
       origin: 'fake-origin',
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -70,10 +52,10 @@ describe('CORS middleware', () => {
 
     const middleware$ = cors$(options);
 
-    middleware$(request$, response, metadata).subscribe(() => {
-      expect(response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
-      expect(response.setHeader).toBeCalledWith('Access-Control-Allow-Credentials', 'true');
-      expect(response.setHeader).toBeCalledWith('Access-Control-Expose-Headers', 'X-Header, X-Custom-Header');
+    middleware$(request$, metadata).subscribe(() => {
+      expect(metadata.client.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
+      expect(metadata.client.setHeader).toBeCalledWith('Access-Control-Allow-Credentials', 'true');
+      expect(metadata.client.setHeader).toBeCalledWith('Access-Control-Expose-Headers', 'X-Header, X-Custom-Header');
       done();
     });
   });

@@ -1,3 +1,5 @@
+import { HttpResponse, HttpMethod, HttpRequest, createEffectMetadata, createContext, lookup } from '@marblejs/core';
+
 export const capitalize = (str: string): string =>
   str
     .split('-')
@@ -6,3 +8,25 @@ export const capitalize = (str: string): string =>
 
 export const isString = (str: any): boolean =>
   typeof str === 'string' || str instanceof String;
+
+
+export const createMockResponse = () => (({
+  writeHead: jest.fn(),
+  setHeader: jest.fn(),
+  getHeader: jest.fn(),
+  end: jest.fn(),
+} as unknown) as HttpResponse);
+
+export const createMockRequest = (
+  method: HttpMethod = 'GET',
+  headers: any = { origin: 'fake-origin' },
+) => (({
+  method,
+  headers: { ...headers },
+} as unknown) as HttpRequest);
+
+export const createMockMetadata = () => {
+  const context = createContext();
+  const client = createMockResponse();
+  return createEffectMetadata({ ask: lookup(context), client });
+};

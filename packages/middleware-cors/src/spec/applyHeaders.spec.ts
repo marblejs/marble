@@ -1,5 +1,5 @@
 import { AccessControlHeader, applyHeaders, ConfiguredHeader } from '../applyHeaders';
-import { createMockResponse } from './middleware.spec';
+import { createMockResponse } from '../util';
 
 describe('applyHeaders', () => {
   test('should handle many methods correctly', done => {
