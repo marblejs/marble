@@ -1,4 +1,4 @@
-import { EventError, EffectMetadata, createContext, createEffectMetadata, lookup } from '@marblejs/core';
+import { EventError, EffectContext, createContext, createEffectContext, lookup } from '@marblejs/core';
 import { mapTo } from 'rxjs/operators';
 import { handleEffectsError } from '../ws-error.handler';
 import { MarbleWebSocketClient } from '../../websocket.interface';
@@ -8,10 +8,10 @@ const createMockClient = (): MarbleWebSocketClient =>
   ({ sendResponse: jest.fn() }) as any;
 
 describe('#handleEffectsError', () => {
-  let metadata: EffectMetadata<MarbleWebSocketClient>;
+  let ctx: EffectContext<MarbleWebSocketClient>;
 
   beforeEach(() => {
-    metadata = createEffectMetadata({
+    ctx = createEffectContext({
       ask: lookup(createContext()),
       client: createMockClient(),
     });
@@ -26,10 +26,10 @@ describe('#handleEffectsError', () => {
       );
 
     // when
-    handleEffectsError(metadata, error$)(error);
+    handleEffectsError(ctx, error$)(error);
 
     // then
-    expect(metadata.client.sendResponse).toHaveBeenCalled();
+    expect(ctx.client.sendResponse).toHaveBeenCalled();
   });
 
   test('does nothing if error$ is undefined', () => {
@@ -38,9 +38,9 @@ describe('#handleEffectsError', () => {
     const error$ = undefined;
 
     // when
-    handleEffectsError(metadata, error$)(error);
+    handleEffectsError(ctx, error$)(error);
 
     // then
-    expect(metadata.client.sendResponse).not.toHaveBeenCalled();
+    expect(ctx.client.sendResponse).not.toHaveBeenCalled();
   });
 });

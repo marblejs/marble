@@ -1,10 +1,10 @@
 import { of } from 'rxjs';
-import { EventError, EffectMetadata } from '@marblejs/core';
+import { EventError, EffectContext } from '@marblejs/core';
 import { MarbleWebSocketClient } from '../websocket.interface';
 import { WsErrorEffect } from '../effects/ws-effects.interface';
 
 export const handleEffectsError = <IncomingError extends EventError>(
-  metadata: EffectMetadata<MarbleWebSocketClient>,
+  ctx: EffectContext<MarbleWebSocketClient>,
   error$: WsErrorEffect<IncomingError, any, any> | undefined,
 ) => (error: IncomingError) => {
   if (error$) {
@@ -13,6 +13,6 @@ export const handleEffectsError = <IncomingError extends EventError>(
       error,
     });
 
-    error$(input$, metadata).subscribe(metadata.client.sendResponse);
+    error$(input$, ctx).subscribe(ctx.client.sendResponse);
   }
 };

@@ -22,7 +22,7 @@ const DEFAULT_OPTIONS: CORSOptions = {
   optionsSuccessStatus: HttpStatus.NO_CONTENT,
 };
 
-export const cors$ = (options: CORSOptions = {}): HttpMiddlewareEffect => (req$, metadata) => {
+export const cors$ = (options: CORSOptions = {}): HttpMiddlewareEffect => (req$, ctx) => {
   options = { ...DEFAULT_OPTIONS, ...options };
 
   return req$.pipe(
@@ -33,10 +33,10 @@ export const cors$ = (options: CORSOptions = {}): HttpMiddlewareEffect => (req$,
       }
 
       if (req.method === 'OPTIONS') {
-        configurePreflightResponse(req, metadata.client, options);
-        metadata.client.end();
+        configurePreflightResponse(req, ctx.client, options);
+        ctx.client.end();
       } else {
-        configureResponse(req, metadata.client, options);
+        configureResponse(req, ctx.client, options);
       }
     }),
   );

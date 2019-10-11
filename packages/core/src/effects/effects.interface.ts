@@ -10,10 +10,10 @@ export interface EffectMiddlewareLike<I, O> {
 }
 
 export interface Effect<I, O, Client> {
-  (input$: Observable<I>, meta: EffectMetadata<Client>): Observable<O>;
+  (input$: Observable<I>, ctx: EffectContext<Client>): Observable<O>;
 }
 
-export interface EffectMetadata<T, U extends SchedulerLike = SchedulerLike> {
+export interface EffectContext<T, U extends SchedulerLike = SchedulerLike> {
   ask: ContextProvider;
   scheduler: U;
   client: T;

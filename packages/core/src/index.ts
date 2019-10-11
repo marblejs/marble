@@ -5,7 +5,7 @@ export { HttpError, CoreError, EventError } from './error/error.model';
 export { combineRoutes } from './router/router.combiner';
 export { r } from './router/router.ixbuilder';
 export { combineEffects, combineMiddlewares } from './effects/effects.combiner';
-export { createEffectMetadata } from './effects/effectsMetadata.factory';
+export { createEffectContext } from './effects/effectsContext.factory';
 export * from './effects/effects.interface';
 export * from './effects/http-effects.interface';
 export * from './router/router.interface';

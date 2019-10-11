@@ -3,7 +3,7 @@ import {
   HttpError,
   HttpStatus,
   createContext,
-  createEffectMetadata,
+  createEffectContext,
   lookup,
 } from '@marblejs/core';
 import { createHttpResponse } from '@marblejs/core/dist/+internal/testing/http.helper';
@@ -25,7 +25,7 @@ describe('JWT middleware', () => {
   let factoryModule;
   const client = createHttpResponse();
   const context = createContext();
-  const meta = createEffectMetadata({ ask: lookup(context), client });
+  const ctx = createEffectContext({ ask: lookup(context), client });
 
   beforeEach(() => {
     jest.unmock('../jwt.util.ts');
@@ -51,7 +51,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, meta);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 
     // then
     middleware$.subscribe(
@@ -80,7 +80,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => throwError(expectedError));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, meta);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 
     // then
     middleware$.subscribe(
@@ -110,7 +110,7 @@ describe('JWT middleware', () => {
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, meta);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 
     // then
     middleware$.subscribe(

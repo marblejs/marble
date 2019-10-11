@@ -1,11 +1,11 @@
 import { mapTo, tap, map } from 'rxjs/operators';
 import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
-import { EffectMetadata } from '../../effects/effects.interface';
+import { EffectContext } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
 import { createContext } from '../../context/context.factory';
-import { createEffectMetadata } from '../../effects/effectsMetadata.factory';
+import { createEffectContext } from '../../effects/effectsContext.factory';
 import { lookup } from '../../context/context.factory';
 import { createHttpResponse } from '../../+internal';
 
@@ -105,7 +105,7 @@ describe('#findRoute', () => {
 describe('#resolveRouting', () => {
   let router;
   let queryFactory;
-  let metadata: EffectMetadata<HttpResponse>;
+  let effectContext: EffectContext<HttpResponse>;
   const context = createContext();
 
   beforeEach(() => {
@@ -113,7 +113,7 @@ describe('#resolveRouting', () => {
     jest.unmock('../router.query.factory');
     router = require('../router.resolver.ts');
     queryFactory = require('../router.query.factory');
-    metadata = createEffectMetadata({
+    effectContext = createEffectContext({
       ask: lookup(context),
       client: createHttpResponse(),
     });
@@ -128,7 +128,7 @@ describe('#resolveRouting', () => {
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);
     queryFactory.queryParamsFactory = jest.fn(() => ({}));
-    const resolvedRoute = resolveRouting([], metadata)(req);
+    const resolvedRoute = resolveRouting([], effectContext)(req);
 
     // then
     resolvedRoute.subscribe(effect => {
@@ -145,7 +145,7 @@ describe('#resolveRouting', () => {
 
     // when
     router.findRoute = jest.fn(() => undefined);
-    const resolvedRoute = resolveRouting([], metadata)(req);
+    const resolvedRoute = resolveRouting([], effectContext)(req);
 
     // then
     resolvedRoute.subscribe(
@@ -167,10 +167,10 @@ describe('#resolveRouting', () => {
   test('returns empty stream if response has been finished', done => {
     // given
     const req = {} as HttpRequest;
-    metadata.client.finished = true;
+    effectContext.client.finished = true;
 
     // when
-    const resolvedRoute = resolveRouting([], metadata)(req);
+    const resolvedRoute = resolveRouting([], effectContext)(req);
 
     // then
     resolvedRoute.subscribe(
@@ -200,7 +200,7 @@ describe('#resolveRouting', () => {
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);
     queryFactory.queryParamsFactory = jest.fn(() => ({}));
-    const resolvedRoute = resolveRouting([], metadata)(req);
+    const resolvedRoute = resolveRouting([], effectContext)(req);
 
     // then
     resolvedRoute.subscribe(effect => {

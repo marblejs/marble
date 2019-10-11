@@ -1,11 +1,11 @@
 import { Marbles, createHttpRequest, createHttpResponse } from '@marblejs/core/dist/+internal';
 import { logger$, loggerWithOpts$ } from '../logger.middleware';
-import { createEffectMetadata, createContext, lookup } from '@marblejs/core';
+import { createEffectContext, createContext, lookup } from '@marblejs/core';
 
-const createMockMetadata = () => {
+const createMockEffectContext = () => {
   const context = createContext();
   const client = createHttpResponse();
-  return createEffectMetadata({ ask: lookup(context), client });
+  return createEffectContext({ ask: lookup(context), client });
 };
 
 describe('logger$', () => {
@@ -17,32 +17,32 @@ describe('logger$', () => {
   });
 
   test('reacts to 200 status on the console', () => {
-    const meta = createMockMetadata();
+    const ctx = createMockEffectContext();
     const request = createHttpRequest({ url: '/', method: 'GET' });
 
-    meta.client.statusCode = 200;
+    ctx.client.statusCode = 200;
 
     Marbles.assertEffect(logger$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
-    ], { meta });
+    ], { ctx });
 
-    meta.client.emit('finish');
+    ctx.client.emit('finish');
     expect(console.info).toHaveBeenCalled();
   });
 
   test('reacts to 400 status on the console', () => {
-    const meta = createMockMetadata();
+    const ctx = createMockEffectContext();
     const request = createHttpRequest({ url: '/test', method: 'POST' });
 
-    meta.client.statusCode = 403;
+    ctx.client.statusCode = 403;
 
     Marbles.assertEffect(logger$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
-    ], { meta });
+    ], { ctx });
 
-    meta.client.emit('finish');
+    ctx.client.emit('finish');
     expect(console.info).toHaveBeenCalled();
   });
 
@@ -51,19 +51,19 @@ describe('logger$', () => {
 describe('loggerWithOpts$', () => {
 
   test('reacts to 200 status on the console', () => {
-    const meta = createMockMetadata();
+    const ctx = createMockEffectContext();
     const request = createHttpRequest({ url: '/', method: 'GET' });
 
-    meta.client.statusCode = 200;
+    ctx.client.statusCode = 200;
 
     spyOn(console, 'info').and.stub();
 
     Marbles.assertEffect(loggerWithOpts$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
-    ], { meta });
+    ], { ctx });
 
-    meta.client.emit('finish');
+    ctx.client.emit('finish');
     expect(console.info).toHaveBeenCalled();
   });
 

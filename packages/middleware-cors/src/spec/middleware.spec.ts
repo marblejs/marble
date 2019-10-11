@@ -1,13 +1,13 @@
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { cors$, CORSOptions } from '../middleware';
 import { of } from 'rxjs';
-import { createMockRequest, createMockMetadata } from '../util';
+import { createMockRequest, createMockEffectContext } from '../util';
 
 describe('CORS middleware', () => {
   test('pass through non CORS requests', () => {
     // given
     const request = createMockRequest('OPTIONS', { origin: null });
-    const meta = createMockMetadata();
+    const ctx = createMockEffectContext();
 
     // when
     const middleware$ = cors$();
@@ -16,20 +16,20 @@ describe('CORS middleware', () => {
     Marbles.assertEffect(middleware$, [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
-    ], { meta });
+    ], { ctx });
   });
 
   test('handle CORS preflight request', done => {
     expect.assertions(1);
 
     const request = createMockRequest('OPTIONS', { origin: 'fake-origin' });
-    const metadata = createMockMetadata();
+    const ctx = createMockEffectContext();
     const request$ = of(request);
 
     const middleware$ = cors$();
 
-    middleware$(request$, metadata).subscribe(() => {
-      expect(metadata.client.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
+    middleware$(request$, ctx).subscribe(() => {
+      expect(ctx.client.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
       done();
     });
   });
@@ -38,7 +38,7 @@ describe('CORS middleware', () => {
     expect.assertions(3);
 
     const request = createMockRequest('GET', { origin: 'fake-origin' });
-    const metadata = createMockMetadata();
+    const ctx = createMockEffectContext();
     const request$ = of(request);
     const options: CORSOptions = {
       origin: 'fake-origin',
@@ -52,10 +52,10 @@ describe('CORS middleware', () => {
 
     const middleware$ = cors$(options);
 
-    middleware$(request$, metadata).subscribe(() => {
-      expect(metadata.client.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
-      expect(metadata.client.setHeader).toBeCalledWith('Access-Control-Allow-Credentials', 'true');
-      expect(metadata.client.setHeader).toBeCalledWith('Access-Control-Expose-Headers', 'X-Header, X-Custom-Header');
+    middleware$(request$, ctx).subscribe(() => {
+      expect(ctx.client.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
+      expect(ctx.client.setHeader).toBeCalledWith('Access-Control-Allow-Credentials', 'true');
+      expect(ctx.client.setHeader).toBeCalledWith('Access-Control-Expose-Headers', 'X-Header, X-Custom-Header');
       done();
     });
   });

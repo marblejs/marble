@@ -17,7 +17,7 @@ import { resolveRouting } from '../router/router.resolver';
 import { factorizeRouting } from '../router/router.factory';
 import { defaultError$ } from '../error/error.effect';
 import { Context, lookup } from '../context/context.factory';
-import { createEffectMetadata } from '../effects/effectsMetadata.factory';
+import { createEffectContext } from '../effects/effectsContext.factory';
 
 export interface HttpListenerConfig {
   middlewares?: HttpMiddlewareEffect[];
@@ -48,17 +48,17 @@ export const httpListener = ({
     requestSubject$.pipe(
       tap(({ req, res }) => res.send = handleResponse(res)(req)),
       mergeMap(({ req, res }) => {
-        const metadata = createEffectMetadata({ ask, client: res });
+        const ctx = createEffectContext({ ask, client: res });
 
-        return combinedMiddlewares(of(req), metadata).pipe(
+        return combinedMiddlewares(of(req), ctx).pipe(
           takeWhile(() => !res.finished),
-          mergeMap(resolveRouting(routing, metadata)),
+          mergeMap(resolveRouting(routing, ctx)),
           defaultIfEmpty(defaultResponse),
-          mergeMap(out => output$(of({ req, res: out }), metadata)),
+          mergeMap(out => output$(of({ req, res: out }), ctx)),
           tap(res.send),
           catchError(error =>
-            error$(of({ req, error }), metadata).pipe(
-              mergeMap(out => output$(of({ req, res: out }), metadata)),
+            error$(of({ req, error }), ctx).pipe(
+              mergeMap(out => output$(of({ req, res: out }), ctx)),
               tap(res.send),
             ),
           ),

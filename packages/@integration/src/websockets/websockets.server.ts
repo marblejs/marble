@@ -15,11 +15,11 @@ const sum$: WsEffect = event$ =>
     matchEvent('SUM')
   );
 
-const add$: WsEffect = (event$, meta) =>
+const add$: WsEffect = (event$, ctx) =>
   event$.pipe(
     matchEvent('ADD'),
     use(eventValidator$(t.number)),
-    buffer(sum$(event$, meta)),
+    buffer(sum$(event$, ctx)),
     map(addEvents => addEvents.reduce((a, e) => e.payload + a, 0)),
     map(payload => ({ type: 'SUM_RESULT', payload })),
   );

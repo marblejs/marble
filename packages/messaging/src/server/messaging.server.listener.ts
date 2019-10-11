@@ -3,7 +3,7 @@ import {
   ContextProvider,
   combineMiddlewares,
   combineEffects,
-  createEffectMetadata,
+  createEffectContext,
   useContext,
 } from '@marblejs/core';
 import * as O from 'fp-ts/lib/Option';
@@ -52,24 +52,24 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     const errorSubject = new Subject<Error>();
     const combinedEffects = combineEffects(...effects);
     const combinedMiddlewares = combineMiddlewares(...middlewares);
-    const metadata = createEffectMetadata({ ask, client: conn });
+    const ctx = createEffectContext({ ask, client: conn });
 
     const message$ = conn.message$.pipe(
       map(msg => ({ ...msg, data: msgTransformer.decode(msg.data) } as TransportMessage<any>)),
       mergeMap(msg => of(msg).pipe(
-        publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), metadata).pipe(
+        publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), ctx).pipe(
           withLatestFrom(msg$),
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), metadata).pipe(
+        publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), ctx).pipe(
           withLatestFrom(msg$),
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        publish(msg$ => output$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), metadata).pipe(
+        publish(msg$ => output$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), ctx).pipe(
           withLatestFrom(msg$),
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        catchError(error => error$(of({ event: msg.data, error }), metadata).pipe(
+        catchError(error => error$(of({ event: msg.data, error }), ctx).pipe(
           map(data => ({ ...msg, data } as TransportMessage<any>)),
         )),
       ))

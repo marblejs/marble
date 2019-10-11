@@ -1,4 +1,4 @@
-import { HttpResponse, HttpMethod, HttpRequest, createEffectMetadata, createContext, lookup } from '@marblejs/core';
+import { HttpResponse, HttpMethod, HttpRequest, createEffectContext, createContext, lookup } from '@marblejs/core';
 
 export const capitalize = (str: string): string =>
   str
@@ -25,8 +25,8 @@ export const createMockRequest = (
   headers: { ...headers },
 } as unknown) as HttpRequest);
 
-export const createMockMetadata = () => {
+export const createMockEffectContext = () => {
   const context = createContext();
   const client = createMockResponse();
-  return createEffectMetadata({ ask: lookup(context), client });
+  return createEffectContext({ ask: lookup(context), client });
 };

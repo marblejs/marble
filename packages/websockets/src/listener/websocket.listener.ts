@@ -8,7 +8,7 @@ import {
   combineEffects,
   combineMiddlewares,
   Event,
-  createEffectMetadata,
+  createEffectContext,
   reader,
   ContextProvider,
   ContextReader,
@@ -57,22 +57,22 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   const handleMessage: HandleMessage = (client, ask) => {
     const eventSubject$ = new Subject<any>();
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
-    const metadata = createEffectMetadata({ ask, client });
+    const ctx = createEffectContext({ ask, client });
     const decodedEvent$ = incomingEventSubject$.pipe(map(providedTransformer.decode));
-    const middlewares$ = combinedMiddlewares(decodedEvent$, metadata);
-    const effects$ = combinedEffects(eventSubject$, metadata);
-    const effectsOutput$ = output$(effects$, metadata);
+    const middlewares$ = combinedMiddlewares(decodedEvent$, ctx);
+    const effects$ = combinedEffects(eventSubject$, ctx);
+    const effectsOutput$ = output$(effects$, ctx);
 
     const subscribeMiddlewares = (input$: Observable<any>) =>
       input$.subscribe(
         event => eventSubject$.next(event),
-        error => handleEffectsError(metadata, providedError$)(error),
+        error => handleEffectsError(ctx, providedError$)(error),
       );
 
     const subscribeEffects = (input$: Observable<any>) =>
       input$.subscribe(
         event => client.sendResponse(event),
-        error => handleEffectsError(metadata, providedError$)(error),
+        error => handleEffectsError(ctx, providedError$)(error),
       );
 
     let middlewaresSub = subscribeMiddlewares(middlewares$);
@@ -106,7 +106,7 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
   };
 
   const verifyClient = (ask: ContextProvider): WebSocket.VerifyClientCallbackAsync  => (info, callback) => {
-    connection$(of(info.req), createEffectMetadata({ ask, client: undefined }))
+    connection$(of(info.req), createEffectContext({ ask, client: undefined }))
       .pipe(map(Boolean))
       .subscribe(
         isVerified => callback(isVerified),
