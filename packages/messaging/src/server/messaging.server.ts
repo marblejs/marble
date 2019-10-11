@@ -24,8 +24,8 @@ export const createMicroservice = (config: CreateMicroserviceConfig) => {
 
   if (event$) {
     const serverEvent$ = serverEventSubject.asObservable().pipe(takeWhile(e => !isCloseEvent(e)));
-    const metadata = createEffectMetadata({ ask: lookup(context) });
-    event$(serverEvent$, undefined, metadata).subscribe();
+    const metadata = createEffectMetadata({ ask: lookup(context), client: undefined });
+    event$(serverEvent$, metadata).subscribe();
   }
 
   return listenerWithContext.listen;

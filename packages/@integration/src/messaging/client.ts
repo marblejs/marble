@@ -36,7 +36,7 @@ const rootValiadtor$ = requestValidator$({
 const test$ = r.pipe(
   r.matchPath('/test'),
   r.matchType('GET'),
-  r.useEffect((req$, _, { ask }) => req$.pipe(
+  r.useEffect((req$, { ask }) => req$.pipe(
     mergeMap(() => useContext(ClientToken)(ask).emit({ type: 'TEST' })),
     mapTo(({ body: 'OK' })),
   )),
@@ -45,7 +45,7 @@ const test$ = r.pipe(
 const fib$ = r.pipe(
   r.matchPath('/fib/:number'),
   r.matchType('GET'),
-  r.useEffect((req$, _, { ask }) => req$.pipe(
+  r.useEffect((req$, { ask }) => req$.pipe(
     use(rootValiadtor$),
     map(req => Number(req.params.number)),
     mergeMap(number => {

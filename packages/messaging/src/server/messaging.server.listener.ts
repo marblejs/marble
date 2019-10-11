@@ -30,7 +30,7 @@ export interface MessagingListenerConfig {
   msgTransformer?: TransportMessageTransformer<any>;
 }
 
-const defaultOutput$: MsgOutputEffect = msg$ => msg$;
+const defaultOutput$: MsgOutputEffect = msg$ => msg$.pipe(map(m => m.event));
 const defaultError$: MsgErrorEffect = msg$ => msg$.pipe(map(m => m.event));
 
 export const messagingListener = (config: MessagingListenerConfig = {}) => {
@@ -52,24 +52,24 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     const errorSubject = new Subject<Error>();
     const combinedEffects = combineEffects(...effects);
     const combinedMiddlewares = combineMiddlewares(...middlewares);
-    const metadata = createEffectMetadata({ ask });
+    const metadata = createEffectMetadata({ ask, client: conn });
 
     const message$ = conn.message$.pipe(
       map(msg => ({ ...msg, data: msgTransformer.decode(msg.data) } as TransportMessage<any>)),
       mergeMap(msg => of(msg).pipe(
-        publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), conn, metadata).pipe(
+        publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), metadata).pipe(
           withLatestFrom(msg$),
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), conn, metadata).pipe(
+        publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), metadata).pipe(
           withLatestFrom(msg$),
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        publish(msg$ => output$(msg$.pipe(map(m => m.data)), conn, metadata).pipe(
+        publish(msg$ => output$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), metadata).pipe(
           withLatestFrom(msg$),
         )),
         map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        catchError(error => error$(of({ event: msg.data, error }), conn, metadata).pipe(
+        catchError(error => error$(of({ event: msg.data, error }), metadata).pipe(
           map(data => ({ ...msg, data } as TransportMessage<any>)),
         )),
       ))
