@@ -1,13 +1,16 @@
-import { HttpRequest, HttpResponse, createContext, createEffectMetadata, lookup } from '@marblejs/core';
+import { HttpRequest, createContext, createEffectMetadata, lookup } from '@marblejs/core';
+import { createHttpResponse } from '@marblejs/core/dist/+internal/testing';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { of } from 'rxjs';
 import { validator$, Joi } from '../../src';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const MockReq = require('mock-req');
 
 describe('Joi middleware - Body', () => {
   const context = createContext();
-  const metadata = createEffectMetadata({ ask: lookup(context) });
+  const client = createHttpResponse();
+  const metadata = createEffectMetadata({ ask: lookup(context), client });
 
   it(`throws an error if doesn't pass a required field`, done => {
     expect.assertions(2);
@@ -18,7 +21,6 @@ describe('Joi middleware - Body', () => {
     });
 
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
     const schema = {
       body: Joi.object({
         token: Joi.string()
@@ -27,7 +29,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$()(req$, res, metadata);
+    const http$ = bodyParser$()(req$, metadata);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -55,7 +57,6 @@ describe('Joi middleware - Body', () => {
     });
 
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
     const schema = {
       body: Joi.object({
         token: Joi.string()
@@ -64,7 +65,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$()(req$, res, metadata);
+    const http$ = bodyParser$()(req$, metadata);
     const valid$ = validator$(schema)(http$);
 
     valid$.subscribe(
@@ -92,7 +93,6 @@ describe('Joi middleware - Body', () => {
     });
 
     const req$ = of(request as HttpRequest);
-    const res = {} as HttpResponse;
     const schema = {
       body: Joi.object({
         token: Joi.string()
@@ -101,7 +101,7 @@ describe('Joi middleware - Body', () => {
       })
     };
 
-    const http$ = bodyParser$()(req$, res, metadata);
+    const http$ = bodyParser$()(req$, metadata);
     const valid$ = validator$(schema, { allowUnknown: true })(http$);
 
     valid$.subscribe(data => {
