@@ -1,22 +1,23 @@
-name: test
+name: Marble.js packages test suite
 
-on:
-  pull_request:
-    branches:    
-      - master
-      - developr
-      - next
-      - 'feature/**'
+on: [push, pull_request]
 
 jobs:
   test:
     name: Unit + integration test 
     runs-on: ${{ matrix.os }}
+    
     strategy:
       matrix:
         node_version: [8, 10, 12]
         os: [ubuntu-latest]
+
     steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
       - name: Install global dependencies
         run: |
           npm i -g yarn
