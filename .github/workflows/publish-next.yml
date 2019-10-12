@@ -1,0 +1,25 @@
+name: Publish canary "next" build
+
+on:
+  push:
+    branches:
+      - next
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Build packages & publish to npm registry
+        run: |
+          yarn
+          npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
+          npm run publish:canary:major:github
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+

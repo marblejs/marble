@@ -21,6 +21,7 @@
     "publish": "lerna publish --no-push --force-publish=*",
     "publish:canary:minor": "lerna publish --no-push --dist-tag dev --canary minor --preid dev --force-publish=* --npm-client npm",
     "publish:canary:major": "lerna publish --no-push --dist-tag next --canary major --preid next --force-publish=* --npm-client npm",
+    "publish:canary:major:github": "lerna publish --no-push --dist-tag next --canary major --preid next --force-publish=* --npm-client npm --yes --no-verify-access --no-git-reset",
     "precommit": "lint-staged"
   },
   "lint-staged": {
