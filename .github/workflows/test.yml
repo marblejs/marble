@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: Unit + integration test
+    name: Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
