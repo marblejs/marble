@@ -1,12 +1,11 @@
-name: Marble.js packages test suite
+name: Test suite
 
 on: [push, pull_request]
 
 jobs:
   test:
-    name: Unit + integration test 
+    name: Test
     runs-on: ${{ matrix.os }}
-    
     strategy:
       matrix:
         node_version: [8, 10, 12]
@@ -18,9 +17,17 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install global dependencies
-        run: |
-          npm i -g yarn
-          npm i -g codecov
-      - name: Run build + tests
+      - name: Install dependencies
         run: yarn
+      - name: Build packages
+        run: yarn build
+      - name: Lint code
+        run: yarn lint
+      - name: Run unit tests
+        run: yarn test:unit
+      - name: Run integration tests
+        run: yarn test:integration
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
