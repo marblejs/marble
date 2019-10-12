@@ -6,7 +6,14 @@
 
 # @marblejs/middleware-joi
 
+
+
 A [joi](https://github.com/hapijs/joi) validation middleware for [Marble.js](https://github.com/marblejs/marble).
+
+## Deprecation
+
+`@marblejs/middleware-joi` is deprecated since v2.0.
+Please use `@marblejs/middlware-io` instead.
 
 ## Installation
 
