@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@marblejs/core">
-    <img src="https://github.com/marblejs/marble/workflows/test/badge.svg" alt="GitHub Actions" status" height="18">
+    <img src="https://github.com/marblejs/marble/workflows/Test%20suite/badge.svg" alt="GitHub Actions" status" height="18">
   </a>
   <a href="https://badge.fury.io/js/%40marblejs%2Fcore">
     <img src="https://badge.fury.io/js/%40marblejs%2Fcore.svg" alt="npm version" height="18">
