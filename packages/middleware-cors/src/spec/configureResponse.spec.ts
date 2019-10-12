@@ -1,6 +1,6 @@
 import { configureResponse } from '../configureResponse';
 import { CORSOptions } from '../middleware';
-import { createMockRequest, createMockResponse } from './middleware.spec';
+import { createMockRequest, createMockResponse } from '../util';
 
 
 

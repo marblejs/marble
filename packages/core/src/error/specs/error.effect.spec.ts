@@ -5,6 +5,7 @@ import { HttpError } from '../error.model';
 describe('defaultError$', () => {
   const req = createHttpRequest();
   const client = createHttpResponse();
+  const ctx = { client };
 
   test('maps HttpError', () => {
     const error = new HttpError('test-message', 400);
@@ -20,7 +21,7 @@ describe('defaultError$', () => {
     Marbles.assertEffect(defaultError$, [
       ['-a-', { a: incomingRequest }],
       ['-a-', { a: outgoingResponse }],
-    ], { client });
+    ], { ctx });
   });
 
   test('maps other errors', () => {
@@ -37,7 +38,7 @@ describe('defaultError$', () => {
     Marbles.assertEffect(defaultError$, [
       ['-a-', { a: incomingRequest }],
       ['-a-', { a: outgoingResponse }],
-    ], { client, meta: { error } });
+    ], { ctx });
   });
 
   test('maps to "Internal server error" if "error" is not provided', () => {
@@ -54,6 +55,6 @@ describe('defaultError$', () => {
     Marbles.assertEffect(defaultError$, [
       ['-a-', { a: incomingRequest }],
       ['-a-', { a: outgoingResponse }],
-    ], { client, meta: {} });
+    ], { ctx });
   });
 });

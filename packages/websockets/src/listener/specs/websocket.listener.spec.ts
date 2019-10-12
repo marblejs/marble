@@ -36,7 +36,7 @@ describe('WebSocket listener', () => {
 
     test('echoes back to all clients', done => {
       // given
-      const echo$: WsEffect = (event$, client) => event$.pipe(
+      const echo$: WsEffect = (event$, { client }) => event$.pipe(
         mergeMap(client.sendBroadcastResponse),
       );
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });

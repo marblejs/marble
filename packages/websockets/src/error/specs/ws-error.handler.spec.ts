@@ -1,40 +1,46 @@
-import { EventError, EffectMetadata, createContext, createEffectMetadata, lookup } from '@marblejs/core';
+import { EventError, EffectContext, createContext, createEffectContext, lookup } from '@marblejs/core';
 import { mapTo } from 'rxjs/operators';
 import { handleEffectsError } from '../ws-error.handler';
 import { MarbleWebSocketClient } from '../../websocket.interface';
 import { WsErrorEffect } from '../../effects/ws-effects.interface';
 
+const createMockClient = (): MarbleWebSocketClient =>
+  ({ sendResponse: jest.fn() }) as any;
+
 describe('#handleEffectsError', () => {
-  let defaultMetadata: EffectMetadata;
+  let ctx: EffectContext<MarbleWebSocketClient>;
 
   beforeEach(() => {
-    defaultMetadata = createEffectMetadata({ ask: lookup(createContext()) });
+    ctx = createEffectContext({
+      ask: lookup(createContext()),
+      client: createMockClient(),
+    });
   });
 
   test('handles error if error$ is defined', () => {
     // given
-    const client = { sendResponse: jest.fn() } as any as MarbleWebSocketClient;
     const error = new EventError({ type: 'EVENT' }, '');
-    const error$: WsErrorEffect = event$ => event$.pipe(
-      mapTo({ type: error.event.type, error: {} }),
-    );
+    const error$: WsErrorEffect = event$ =>
+      event$.pipe(
+        mapTo({ type: error.event.type, error: {} }),
+      );
 
     // when
-    handleEffectsError(defaultMetadata, client, error$)(error);
+    handleEffectsError(ctx, error$)(error);
 
     // then
-    expect(client.sendResponse).toHaveBeenCalled();
+    expect(ctx.client.sendResponse).toHaveBeenCalled();
   });
 
   test('does nothing if error$ is undefined', () => {
     // given
-    const client = { sendResponse: jest.fn() } as any as MarbleWebSocketClient;
     const error = new EventError({ type: 'EVENT' }, '');
+    const error$ = undefined;
 
     // when
-    handleEffectsError(defaultMetadata, client, undefined)(error);
+    handleEffectsError(ctx, error$)(error);
 
     // then
-    expect(client.sendResponse).not.toHaveBeenCalled();
+    expect(ctx.client.sendResponse).not.toHaveBeenCalled();
   });
 });

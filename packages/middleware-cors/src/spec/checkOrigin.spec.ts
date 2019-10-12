@@ -1,5 +1,5 @@
 import { checkOrigin } from '../checkOrigin';
-import { createMockRequest } from './middleware.spec';
+import { createMockRequest } from '../util';
 
 describe('checkOrigin', () => {
   test('check wildcard option correctly', done => {

@@ -5,6 +5,7 @@ import { WsEffect } from '../../effects/ws-effects.interface';
 
 describe('#broadcast operator', () => {
   const client = { sendBroadcastResponse: jest.fn(() => EMPTY) };
+  const ctx = { client };
 
   test('sends broadcast response', () => {
     // given
@@ -12,7 +13,7 @@ describe('#broadcast operator', () => {
     const outgoingEvent = { type: 'TEST_EVENT_RESPONSE', payload: 'test_payload' };
 
     // when
-    const effect$: WsEffect = (event$, client) =>
+    const effect$: WsEffect = (event$, { client }) =>
       event$.pipe(
         broadcast(client, () => outgoingEvent),
       );
@@ -21,7 +22,7 @@ describe('#broadcast operator', () => {
     Marbles.assertEffect(effect$, [
       ['-a--', { a: incomingEvent }],
       ['----', {}],
-    ], { client });
+    ], { ctx });
 
     expect(client.sendBroadcastResponse).toHaveBeenCalledWith(outgoingEvent);
   });

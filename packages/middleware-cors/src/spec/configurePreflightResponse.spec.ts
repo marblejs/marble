@@ -1,6 +1,6 @@
 import { configurePreflightResponse } from '../configurePreflightResponse';
 import { CORSOptions } from '../middleware';
-import { createMockRequest, createMockResponse } from './middleware.spec';
+import { createMockRequest, createMockResponse } from '../util';
 
 describe('configurePreflightResponse', () => {
   test('should configure headers correctly', done => {
