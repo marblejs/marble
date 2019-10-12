@@ -1,0 +1,25 @@
+name: test
+
+on:
+  pull_request:
+    branches:    
+      - master
+      - developr
+      - next
+      - 'feature/**'
+
+jobs:
+  test:
+    name: Unit + integration test 
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node_version: [8, 10, 12]
+        os: [ubuntu-latest]
+    steps:
+      - name: Install global dependencies
+        run: |
+          npm i -g yarn
+          npm i -g codecov
+      - name: Run build + tests
+        run: yarn
