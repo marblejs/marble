@@ -8,18 +8,18 @@ import {
 import { iif, throwError, of } from 'rxjs';
 import { tap, mergeMap, buffer, map } from 'rxjs/operators';
 import { matchEvent, use } from '@marblejs/core';
-import { eventValidator$, t } from '../../../middleware-io/dist';
+import { eventValidator$, t } from '@marblejs/middleware-io';
 
 const sum$: WsEffect = event$ =>
   event$.pipe(
     matchEvent('SUM')
   );
 
-const add$: WsEffect = (event$, ...args) =>
+const add$: WsEffect = (event$, ctx) =>
   event$.pipe(
     matchEvent('ADD'),
     use(eventValidator$(t.number)),
-    buffer(sum$(event$, ...args)),
+    buffer(sum$(event$, ctx)),
     map(addEvents => addEvents.reduce((a, e) => e.payload + a, 0)),
     map(payload => ({ type: 'SUM_RESULT', payload })),
   );

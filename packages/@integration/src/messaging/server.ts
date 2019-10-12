@@ -57,12 +57,13 @@ const error$: MsgServerEffect = event$ =>
     tap(({ error }) => console.error(error)),
   );
 
-const output$: MsgOutputEffect = (event$, _, { initiator }) =>
+const output$: MsgOutputEffect = event$ =>
   event$.pipe(
-    tap(event => console.log(`processed ::`, event, initiator && {
+    tap(({ event, initiator }) => console.log(`processed ::`, event, {
       replyTo: initiator.replyTo,
       correlationId: initiator.correlationId,
     })),
+    map(({ event }) => event),
   );
 
 export const microservice = createMicroservice({

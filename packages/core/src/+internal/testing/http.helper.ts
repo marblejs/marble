@@ -21,6 +21,7 @@ interface HttpRequestMockParams {
 
 interface HttpResponseMockParams {
   statusCode?: number;
+  finished?: boolean;
   [key: string]: any;
 }
 

@@ -5,7 +5,7 @@ import { takeWhile } from 'rxjs/operators';
 import { isCloseEvent, AllServerEvents } from './server.event';
 import { subscribeServerEvents } from './server.event.subscriber';
 import { createContext, lookup, registerAll, bindTo } from '../context/context.factory';
-import { createEffectMetadata } from '../effects/effectsMetadata.factory';
+import { createEffectContext } from '../effects/effectsContext.factory';
 import { CreateServerConfig, Server } from './server.interface';
 import { serverEvent$ } from './server.tokens';
 
@@ -25,8 +25,8 @@ export const createServer = (config: CreateServerConfig): Server => {
   subscribeServerEvents(hostname || DEFAULT_HOSTNAME)(serverEventSubject)(server);
 
   if (event$) {
-    const metadata = createEffectMetadata({ ask: lookup(context) });
-    event$(serverEventSubject.pipe(takeWhile(e => !isCloseEvent(e))), server, metadata).subscribe();
+    const ctx = createEffectContext({ ask: lookup(context), client: server });
+    event$(serverEventSubject.pipe(takeWhile(e => !isCloseEvent(e))), ctx).subscribe();
   }
 
   const listen = () => new Promise<https.Server | http.Server>((resolve, reject) => {

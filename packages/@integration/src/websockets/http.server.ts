@@ -20,7 +20,7 @@ export const WsServerToken = createContextToken<MarbleWebSocketServer>('MarbleWe
 const root$ = r.pipe(
   r.matchPath('/'),
   r.matchType('GET'),
-  r.useEffect((req$, _, { ask }) => {
+  r.useEffect((req$, { ask }) => {
     const wsServer = useContext(WsServerToken)(ask);
 
     return req$.pipe(
@@ -29,7 +29,7 @@ const root$ = r.pipe(
     );
   }));
 
-const upgrade$: HttpServerEffect = (event$, _, { ask }) =>
+const upgrade$: HttpServerEffect = (event$, { ask }) =>
   event$.pipe(
     matchEvent(ServerEvent.upgrade),
     mapToServer({

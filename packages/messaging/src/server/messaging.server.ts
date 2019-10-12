@@ -1,4 +1,4 @@
-import { createContext, registerAll, bindTo, createEffectMetadata, lookup } from '@marblejs/core';
+import { createContext, registerAll, bindTo, createEffectContext, lookup } from '@marblejs/core';
 import { Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { CreateMicroserviceConfig } from './messaging.server.interface';
@@ -24,8 +24,8 @@ export const createMicroservice = (config: CreateMicroserviceConfig) => {
 
   if (event$) {
     const serverEvent$ = serverEventSubject.asObservable().pipe(takeWhile(e => !isCloseEvent(e)));
-    const metadata = createEffectMetadata({ ask: lookup(context) });
-    event$(serverEvent$, undefined, metadata).subscribe();
+    const ctx = createEffectContext({ ask: lookup(context), client: undefined });
+    event$(serverEvent$, ctx).subscribe();
   }
 
   return listenerWithContext.listen;

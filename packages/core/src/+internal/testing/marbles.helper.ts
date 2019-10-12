@@ -1,11 +1,11 @@
 import { TestScheduler } from 'rxjs/testing';
-import { EffectMetadata, EffectLike } from '../../effects/effects.interface';
+import { EffectContext, EffectLike } from '../../effects/effects.interface';
 
 type MarbleFlow =
   | [string, { [marble: string]: any } | undefined]
   | [string, { [marble: string]: any } | undefined, any]
   ;
-type MarbleDependencies = { client?: any; meta?: Partial<EffectMetadata> };
+type MarbleDependencies = { ctx?: Partial<EffectContext<any>> };
 
 export const Marbles = {
   deepEquals: (actual: any, expected: any) => expect(actual).toEqual(expected),
@@ -24,7 +24,7 @@ export const Marbles = {
     const stream$ = scheduler.createColdObservable(initStream, initValues, initError);
 
     scheduler
-      .expectObservable(effect(stream$, dependencies.client, dependencies.meta))
+      .expectObservable(effect(stream$, dependencies.ctx))
       .toBe(expectedStream, expectedValues, expectedError);
 
     scheduler.flush();
