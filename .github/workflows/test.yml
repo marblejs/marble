@@ -18,7 +18,5 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install Codecov
-        run: npm i -g codecov
       - name: Run build + tests
         run: yarn
