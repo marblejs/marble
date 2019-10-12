@@ -6,7 +6,6 @@ jobs:
   test:
     name: Unit + integration test
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         node_version: [8, 10, 12]
