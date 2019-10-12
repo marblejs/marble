@@ -4,9 +4,9 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: Unit + integration test 
+    name: Unit + integration test
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
       matrix:
         node_version: [8, 10, 12]
@@ -28,3 +28,7 @@ jobs:
         run: yarn test:unit
       - name: Run integration tests
         run: yarn test:integration
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
