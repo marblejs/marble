@@ -1,25 +1,30 @@
-name: test
+name: Test suite
 
-on:
-  pull_request:
-    branches:    
-      - master
-      - developr
-      - next
-      - 'feature/**'
+on: [push, pull_request]
 
 jobs:
   test:
     name: Unit + integration test 
     runs-on: ${{ matrix.os }}
+    
     strategy:
       matrix:
         node_version: [8, 10, 12]
         os: [ubuntu-latest]
+
     steps:
-      - name: Install global dependencies
-        run: |
-          npm i -g yarn
-          npm i -g codecov
-      - name: Run build + tests
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
         run: yarn
+      - name: Build packages
+        run: yarn build
+      - name: Lint code
+        run: yarn lint
+      - name: Run unit tests
+        run: yarn test:unit
+      - name: Run integration tests
+        run: yarn test:integration
