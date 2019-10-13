@@ -5,6 +5,8 @@ import { microservice as messagingServer } from '../src/messaging/server';
 const microservice = messagingServer();
 
 beforeAll(() => microservice);
+beforeAll(() => jest.spyOn(console, 'log').mockImplementation());
+beforeAll(() => jest.spyOn(console, 'info').mockImplementation());
 
 describe('messaging integration', () => {
   test('GET /fib returns 10, 11, 12, 13, 14 th fibonacci number', async () =>

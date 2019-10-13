@@ -41,11 +41,11 @@ class AmqpStrategyConnection implements TransportLayerConnection {
 
   get message$() {
     return this.msgSubject$.asObservable().pipe(
-      map(message => ({
-        data: message.content,
-        replyTo: message.properties.replyTo,
-        correlationId: message.properties.correlationId,
-        raw: message,
+      map(raw => ({
+        data: raw.content,
+        replyTo: raw.properties.replyTo,
+        correlationId: raw.properties.correlationId,
+        raw,
       } as TransportMessage<Buffer>)),
     );
   }
@@ -102,15 +102,15 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     });
   };
 
-  ackMessage = (message: TransportMessage<any> | undefined) => {
-    if (message) {
-      this.channelWrapper.ack(message.raw);
+  ackMessage = (msg: ConsumeMessage | undefined) => {
+    if (msg) {
+      this.channelWrapper.ack(msg);
     }
   }
 
-  nackMessage = (message: TransportMessage<any> | undefined, resend = true) => {
-    if (message) {
-      this.channelWrapper.nack(message.raw, false , resend);
+  nackMessage = (msg: ConsumeMessage | undefined, resend = true) => {
+    if (msg) {
+      this.channelWrapper.nack(msg, false , resend);
     }
   }
 

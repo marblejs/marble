@@ -14,6 +14,9 @@ import {
 import { merge } from 'rxjs';
 import { map, tap, filter, distinctUntilChanged } from 'rxjs/operators';
 
+const log = (tag: string) => (data: any) =>
+  console.log(tag, data);
+
 const fibonacci = (n: number): number =>
   n === 0 || n === 1
     ? n
@@ -21,7 +24,7 @@ const fibonacci = (n: number): number =>
 
 const log$: MsgMiddlewareEffect = event$ =>
   event$.pipe(
-    tap(event => console.log('server ::', event)),
+    tap(({ type, payload }) => log('INPUT')({ type, payload })),
   );
 
 const fibonacci$: MsgEffect = event$ =>
@@ -59,7 +62,9 @@ const error$: MsgServerEffect = event$ =>
 
 const output$: MsgOutputEffect = event$ =>
   event$.pipe(
-    tap(({ event, initiator }) => console.log(`processed ::`, event, {
+    tap(({ event, initiator }) => log('OUTPUT')({
+      event: event.type,
+      payload: event.payload,
       replyTo: initiator.replyTo,
       correlationId: initiator.correlationId,
     })),
