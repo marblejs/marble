@@ -1,4 +1,4 @@
-import { Event, matchEvent, use } from '@marblejs/core';
+import { Event, matchEvent, use, EventError, createEvent } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { map, tap, mergeMapTo } from 'rxjs/operators';
 import { createMicroservice } from './messaging.server';
@@ -7,31 +7,33 @@ import { Transport, TransportMessage } from '../transport/transport.interface';
 import { createAmqpStrategy } from '../transport/strategies/amqp.strategy';
 import { MsgEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
 import { Subject, throwError } from 'rxjs';
+import { AmqpStrategyOptions } from '../transport/strategies/amqp.strategy.interface';
 
 describe('messagingServer', () => {
 
   describe('AMQP', () => {
-    const options = {
+    const createOptions = (config: { expectAck?: boolean; queue?: string } = {}): AmqpStrategyOptions => ({
       host: 'amqp://localhost:5672',
-      queue: 'test_queue_server',
+      queue: config.queue || 'test_queue_server',
+      expectAck: config.expectAck,
       queueOptions: { durable: false },
-    };
+    });
 
-    const runServer = (effect$?: MsgEffect, error$?: MsgErrorEffect) =>
+    const runServer = (options: AmqpStrategyOptions) => (effect$?: MsgEffect, error$?: MsgErrorEffect) =>
       createMicroservice({
         options,
         transport: Transport.AMQP,
         messagingListener: messagingListener(effect$ ? { effects: [effect$], error$ } : undefined),
       })();
 
-    const runClient = () =>
+    const runClient = (options: AmqpStrategyOptions) =>
       createAmqpStrategy(options).connect({ isConsumer: false });
 
     const createMessage = (data: any): TransportMessage<Buffer> => ({
       data: Buffer.from(JSON.stringify(data)),
     });
 
-    test('receives RPC response from consumer', async () => {
+    test('handles RPC event', async () => {
       const rpc$: MsgEffect = event$ =>
         event$.pipe(
           matchEvent('RPC_TEST'),
@@ -40,8 +42,9 @@ describe('messagingServer', () => {
           map(payload => ({ type: 'RPC_TEST_RESULT', payload: payload + 1 })),
         );
 
-      const client = await runClient();
-      const server = await runServer(rpc$);
+      const options = createOptions({ expectAck: false });
+      const client = await runClient(options);
+      const server = await runServer(options)(rpc$);
       const message = createMessage({ type: 'RPC_TEST', payload: 1 });
 
       const result = await client.sendMessage(options.queue, message);
@@ -52,7 +55,7 @@ describe('messagingServer', () => {
       await server.close();
     });
 
-    test('emits event to consumer', async done => {
+    test('handles published event', async done => {
       const eventSubject = new Subject();
 
       eventSubject.subscribe(event => {
@@ -69,8 +72,9 @@ describe('messagingServer', () => {
           tap(event => eventSubject.next(event)),
         );
 
-      const server = await runServer(event$);
-      const client = await runClient();
+      const options = createOptions({ expectAck: false });
+      const client = await runClient(options);
+      const server = await runServer(options)(event$);
       const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
 
       const emitResult = await client.emitMessage(options.queue, message);
@@ -78,33 +82,93 @@ describe('messagingServer', () => {
       expect(emitResult).toEqual(true);
     });
 
-    test('reacts to thrown error', async done => {
-      const expectedMessage = { type: 'EVENT_TEST' };
-      const expectedError = new Error('test_error');
-      const errorSubject = new Subject<[Event, Error | undefined]>();
+    test('acks processed event', async done => {
+      const eventSubject = new Subject();
+
+      eventSubject.subscribe(event => {
+        expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
+        setTimeout(() => server.close().then(done), 1000);
+      });
+
+      const event$: MsgEffect = (event$, { client }) =>
+        event$.pipe(
+          matchEvent('EVENT_TEST'),
+          use(eventValidator$(t.number)),
+          map(event => {
+            client.ackMessage(event.raw);
+            return { type: 'EVENT_TEST_RESPONSE', payload: event.payload + 1 };
+          }),
+          tap(event => eventSubject.next(event)),
+        );
+
+      const options = createOptions({ expectAck: true, queue: 'test_ack_queue_server' });
+      const client = await runClient(options);
+      const server = await runServer(options)(event$);
+      const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
+
+      await client.emitMessage(options.queue, message);
+    });
+
+    test('reacts to thrown Error', async done => {
+      const event = { type: 'EVENT_TEST' };
+      const error = new Error('test_error');
+      const errorSubject = new Subject<[Event | undefined, Error]>();
 
       errorSubject.subscribe(data => {
-        expect(data[0]).toEqual(expectedMessage);
-        expect(data[1]).toEqual(expectedError);
+        expect(data[0]).toBeUndefined();
+        expect(data[1]).toEqual(error);
         setTimeout(() => server.close().then(done), 1000);
       });
 
       const event$: MsgEffect = event$ =>
         event$.pipe(
           matchEvent('EVENT_TEST'),
-          mergeMapTo(throwError(expectedError)),
+          mergeMapTo(throwError(error)),
         );
 
       const error$: MsgErrorEffect = event$ =>
         event$.pipe(
           tap(({ event, error }) => errorSubject.next([event, error])),
-          map(({ event }) => event),
+          map(() => createEvent('ERROR')),
         );
 
-      const server = await runServer(event$, error$);
-      const client = await runClient();
+      const options = createOptions({ expectAck: false });
+      const client = await runClient(options);
+      const server = await runServer(options)(event$, error$);
 
-      const emitResult = await client.emitMessage(options.queue, createMessage(expectedMessage));
+      const emitResult = await client.emitMessage(options.queue, createMessage(event));
+
+      expect(emitResult).toEqual(true);
+    });
+
+    test('reacts to thrown EventError', async done => {
+      const event = { type: 'EVENT_TEST' };
+      const error = new EventError(event, 'test_error');
+      const errorSubject = new Subject<[Event | undefined, Error]>();
+
+      errorSubject.subscribe(data => {
+        expect(data[0]).toEqual(event);
+        expect(data[1]).toEqual(error);
+        setTimeout(() => server.close().then(done), 1000);
+      });
+
+      const event$: MsgEffect = event$ =>
+        event$.pipe(
+          matchEvent('EVENT_TEST'),
+          mergeMapTo(throwError(error)),
+        );
+
+      const error$: MsgErrorEffect = event$ =>
+        event$.pipe(
+          tap(({ event, error }) => errorSubject.next([event, error])),
+          map(() => createEvent('ERROR')),
+        );
+
+      const options = createOptions({ expectAck: false });
+      const client = await runClient(options);
+      const server = await runServer(options)(event$, error$);
+
+      const emitResult = await client.emitMessage(options.queue, createMessage(event));
 
       expect(emitResult).toEqual(true);
     });

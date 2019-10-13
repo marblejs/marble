@@ -1,16 +1,18 @@
 import {
   reader,
+  Event,
   ContextProvider,
   combineMiddlewares,
   combineEffects,
   createEffectContext,
   useContext,
+  EventError,
 } from '@marblejs/core';
 import * as O from 'fp-ts/lib/Option';
 import * as R from 'fp-ts/lib/Reader';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Observable, Subscription, Subject, of } from 'rxjs';
-import { map, publish, withLatestFrom, takeUntil, catchError, mergeMap, take } from 'rxjs/operators';
+import { map, publish, withLatestFrom, takeUntil, catchError, take } from 'rxjs/operators';
 import {
   TransportMessage,
   TransportMessageTransformer,
@@ -31,7 +33,7 @@ export interface MessagingListenerConfig {
 }
 
 const defaultOutput$: MsgOutputEffect = msg$ => msg$.pipe(map(m => m.event));
-const defaultError$: MsgErrorEffect = msg$ => msg$.pipe(map(m => m.event));
+const defaultError$: MsgErrorEffect = msg$ => msg$;
 
 export const messagingListener = (config: MessagingListenerConfig = {}) => {
   const {
@@ -54,25 +56,28 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     const combinedMiddlewares = combineMiddlewares(...middlewares);
     const ctx = createEffectContext({ ask, client: conn });
 
+    const decode = (msg: TransportMessage<Buffer>): TransportMessage<Event> => ({
+      ...msg,
+      data: { ...msgTransformer.decode(msg.data), raw: msg.raw },
+    });
+
     const message$ = conn.message$.pipe(
-      map(msg => ({ ...msg, data: msgTransformer.decode(msg.data) } as TransportMessage<any>)),
-      mergeMap(msg => of(msg).pipe(
-        publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), ctx).pipe(
-          withLatestFrom(msg$),
-        )),
-        map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), ctx).pipe(
-          withLatestFrom(msg$),
-        )),
-        map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        publish(msg$ => output$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), ctx).pipe(
-          withLatestFrom(msg$),
-        )),
-        map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-        catchError(error => error$(of({ event: msg.data, error }), ctx).pipe(
-          map(data => ({ ...msg, data } as TransportMessage<any>)),
-        )),
-      ))
+      map(decode),
+      publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), ctx).pipe(
+        withLatestFrom(msg$),
+      )),
+      map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
+      publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), ctx).pipe(
+        withLatestFrom(msg$),
+      )),
+      map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
+      publish(msg$ => output$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), ctx).pipe(
+        withLatestFrom(msg$),
+      )),
+      map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
+      catchError((error: EventError) => error$(of({ event: error.event, error }), ctx).pipe(
+        map(data => ({ data } as TransportMessage<any>)),
+      )),
     );
 
     const onSubscribeEffectsOutput = (conn: TransportLayerConnection) => (msg: TransportMessage<any>) => {

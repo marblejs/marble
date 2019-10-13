@@ -23,8 +23,8 @@ export interface TransportLayerConfig {
 export interface TransportLayerConnection {
   sendMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<TransportMessage<Buffer>>;
   emitMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<any>;
-  ackMessage: (message: TransportMessage<any> | undefined) => void;
-  nackMessage: (message: TransportMessage<any> | undefined, resend?: boolean) => void;
+  ackMessage: (message: any | undefined) => void;
+  nackMessage: (message: any | undefined, resend?: boolean) => void;
   close: () => Promise<any>;
   getChannel(): string;
   message$: Observable<TransportMessage<Buffer>>;
