@@ -32,7 +32,7 @@
     "@marblejs/middleware-multipart": "^2.3.1",
     "@marblejs/websockets": "^2.3.1",
     "@types/node": "^10.1.2",
-    "rxjs": "^6.3.3",
+    "rxjs": "^6.5.3",
     "typescript": "~3.0.3"
   },
   "devDependencies": {

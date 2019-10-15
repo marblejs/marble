@@ -22,7 +22,7 @@ describe('#factorizeRouting', () => {
 
     const routeGroupNested: RouteEffectGroup = {
       path: '/nested',
-      effects: [{ path: '/', method: 'GET', effect: e5$, middlewares: m$ }],
+      effects: [{ path: '/', method: 'GET', effect: e5$, middleware: m$ }],
       middlewares: [m$],
     };
 
@@ -30,7 +30,7 @@ describe('#factorizeRouting', () => {
       path: '/:id',
       effects: [
         { path: '/', method: 'GET', effect: e2$ },
-        { path: '/', method: 'POST', effect: e3$, middlewares: m$ },
+        { path: '/', method: 'POST', effect: e3$, middleware: m$ },
         routeGroupNested,
         { path: '*', method: '*', effect: e4$ },
       ],

@@ -40,7 +40,7 @@
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
     "@marblejs/core": "^2.1.0",
-    "rxjs": "^6.3.3"
+    "rxjs": "^6.5.3"
   },
   "dependencies": {
     "@types/joi": "^14.0.0",
