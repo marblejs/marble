@@ -1,9 +1,7 @@
 import { BoundDependency } from '@marblejs/core';
-import { NatsStrategy } from '../transport/strategies/nats.strategy.interface';
-import { TcpStrategy } from '../transport/strategies/tcp.strategy.interface';
-import { AmqpStrategy } from '../transport/strategies/amqp.strategy.interface';
 import { messagingListener } from './messaging.server.listener';
 import { MsgServerEffect } from '../effects/messaging.effects.interface';
+import { TransportStrategy } from '../transport/transport.interface';
 
 type ConfigurationBase =  {
   messagingListener: ReturnType<typeof messagingListener>;
@@ -12,7 +10,6 @@ type ConfigurationBase =  {
 }
 
 export type CreateMicroserviceConfig =
-  | AmqpStrategy & ConfigurationBase
-  | NatsStrategy & ConfigurationBase
-  | TcpStrategy & ConfigurationBase
+  & TransportStrategy
+  & ConfigurationBase
   ;

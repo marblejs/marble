@@ -1,8 +1,5 @@
 import { Observable } from 'rxjs';
-import { NatsStrategy } from '../transport/strategies/nats.strategy.interface';
-import { TcpStrategy } from '../transport/strategies/tcp.strategy.interface';
-import { AmqpStrategy } from '../transport/strategies/amqp.strategy.interface';
-import { TransportMessageTransformer } from '../transport/transport.interface';
+import { TransportMessageTransformer, TransportStrategy } from '../transport/transport.interface';
 
 export interface MessagingClient {
   emit: <T>(data: T) => Observable<boolean>;
@@ -15,7 +12,6 @@ type ConfigurationBase =  {
 }
 
 export type MessagingClientConfig =
-  | AmqpStrategy & ConfigurationBase
-  | NatsStrategy & ConfigurationBase
-  | TcpStrategy & ConfigurationBase
+  & TransportStrategy
+  & ConfigurationBase
   ;

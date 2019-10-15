@@ -2,7 +2,7 @@
 import { TransportLayer } from '../transport.interface';
 
 /* istanbul ignore next */
-export const createNatsStrategy = (): TransportLayer => {
+export const createRedisStrategy = (): TransportLayer => {
   // @TODO
   return {} as any;
 };

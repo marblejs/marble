@@ -1,5 +1,8 @@
 import { Observable } from 'rxjs';
 import { Event } from '@marblejs/core';
+import { RedisStrategy } from './strategies/redis.strategy.interface';
+import { AmqpStrategy } from './strategies/amqp.strategy.interface';
+import { TcpStrategy } from './strategies/tcp.strategy.interface';
 
 export enum Transport {
   TCP,
@@ -9,6 +12,12 @@ export enum Transport {
   MQTT,
   GRPC,
 }
+
+export type TransportStrategy =
+  | AmqpStrategy
+  | RedisStrategy
+  | TcpStrategy
+  ;
 
 export interface TransportLayer {
   connect: (opts: { isConsumer: boolean }) => Promise<TransportLayerConnection>;
