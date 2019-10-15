@@ -42,7 +42,7 @@
   },
   "peerDependencies": {
     "@marblejs/core": "^2.1.0",
-    "rxjs": "^6.3.3"
+    "rxjs": "^6.5.3"
   },
   "devDependencies": {
     "@marblejs/core": "^2.3.1"

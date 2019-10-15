@@ -26,6 +26,8 @@ describe('#factorizeRegExpWithParams', () => {
     expect(parameters).toEqual([ 'param1', 'param2' ]);
     expect(match[1]).toEqual('test1');
     expect(match[2]).toEqual('test2');
+
+    return;
   });
 
   test('factorizes path with connected parameters as a one', () => {
@@ -112,7 +114,7 @@ describe('#factorizeRegExpWithParams', () => {
 
     // then
     if (match) {
-      expect(match[1]).toEqual('test');
+      return expect(match[1]).toEqual('test');
     } else {
       return fail(`${testUrl} -> Regexp should be matched`);
     }
@@ -149,5 +151,7 @@ describe('#factorizeRegExpWithParams', () => {
     } else {
       return fail(`${testUrl3} -> Regexp should be matched`);
     }
+
+    return;
   });
 });

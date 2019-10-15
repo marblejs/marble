@@ -66,7 +66,7 @@ describe('Response handler', () => {
     const headers = { 'Content-Type': ContentType.AUDIO_MPEG };
 
     // when
-    jest.spyOn(body, 'pipe').mockImplementation(jest.fn);
+    jest.spyOn(body, 'pipe').mockImplementation(() => jest.fn() as any);
     handle({ body, headers });
 
     // then

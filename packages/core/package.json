@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "rxjs": "^6.3.3"
+    "rxjs": "^6.5.3"
   },
   "dependencies": {
     "@types/json-schema": "^7.0.3",

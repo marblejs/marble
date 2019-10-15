@@ -38,6 +38,8 @@ describe('Error model', () => {
     expect(error.message).toBe('test-message');
     expect(Error.captureStackTrace).toHaveBeenCalled();
     expect(stackTraceFactory).toHaveBeenCalledWith('test-message', []);
+
+    return;
   });
 
   test('#isHttpError detects HttpError type', () => {
