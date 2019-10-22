@@ -8,7 +8,6 @@ import { TransportMessage, TransportLayerConnection } from '../transport/transpo
 import { provideTransportLayer } from '../transport/transport.provider';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MessagingClient, MessagingClientConfig } from './messaging.client.interface';
-import { createUuid } from '@marblejs/core/dist/+internal/utils';
 
 export const messagingClient = (config: MessagingClientConfig) => {
   const {
@@ -31,7 +30,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
     from(conn).pipe(
       mergeMap(c => c.sendMessage(
         c.getChannel(),
-        { data: msgTransformer.encode(msg as any), correlationId: createUuid() },
+        { data: msgTransformer.encode(msg as any) },
       )),
       map(m => m as TransportMessage<Buffer>),
       map(m => msgTransformer.decode(m.data) as U),

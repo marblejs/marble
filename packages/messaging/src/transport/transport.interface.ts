@@ -31,7 +31,7 @@ export interface TransportLayerConfig {
 
 export interface TransportLayerConnection {
   sendMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<TransportMessage<Buffer>>;
-  emitMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<any>;
+  emitMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<boolean>;
   ackMessage: (message: any | undefined) => void;
   nackMessage: (message: any | undefined, resend?: boolean) => void;
   close: () => Promise<any>;

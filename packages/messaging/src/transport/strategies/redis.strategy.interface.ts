@@ -6,5 +6,16 @@ export interface RedisStrategy {
 }
 
 export interface RedisStrategyOptions {
-  // @TODO
+  host: string;
+  channel: string;
+  port?: number;
+  password?: string;
+}
+
+
+export enum RedisConnectionStatus {
+  READY = 'READY',
+  CONNECT = 'CONNECT',
+  RECONNECTING = 'RECONNECTING',
+  END = 'END',
 }
