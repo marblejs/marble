@@ -5,6 +5,7 @@ import { RedisClient, ClientOpts } from 'redis';
 import { TransportLayer, TransportLayerConnection, TransportMessage } from '../transport.interface';
 import { RedisStrategyOptions, RedisConnectionStatus } from './redis.strategy.interface';
 import { quitRedisClient, subscribeRedisChannel, encodeMessage, decodeMessage, unsubscribeRedisChannel, connectRedisClient } from './redis.strategy.helper';
+import { throwUnsupportedError } from '../transport.error';
 
 class RedisStrategyConnection implements TransportLayerConnection {
   private msgSubject$ = new Subject<{ content: string }>();
@@ -87,14 +88,6 @@ class RedisStrategyConnection implements TransportLayerConnection {
     ).toPromise();
   }
 
-  ackMessage = () => {
-    throw new Error('Unsupported'); // @TODO
-  }
-
-  nackMessage = () => {
-    throw new Error('Unsupported'); // @TODO
-  }
-
   close = async () => {
     await Promise.all([
       quitRedisClient(this.publisher),
@@ -103,6 +96,10 @@ class RedisStrategyConnection implements TransportLayerConnection {
 
     this.closeSubject$.next();
   }
+
+  ackMessage = () => throwUnsupportedError('Redis')('ackMessage');
+
+  nackMessage = () => throwUnsupportedError('Redis')('nackMessage');
 
   getChannel = () => this.opts.channel;
 }
