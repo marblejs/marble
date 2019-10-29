@@ -1,25 +1,35 @@
 import * as redis from 'redis';
 import { TransportMessage } from '../transport.interface';
 
-export const connectRedisClient = (options?: redis.ClientOpts | undefined): Promise<redis.RedisClient> =>
+export const connectClient = (options?: redis.ClientOpts | undefined): Promise<redis.RedisClient> =>
   new Promise((resolve, reject) => {
     const client = redis.createClient(options);
-    client.on('connect', error => error ? reject() : resolve(client));
+    client.once('connect', error => error ? reject() : resolve(client));
   });
 
-export const quitRedisClient = (client: redis.RedisClient): Promise<undefined> =>
+export const quitClient = (client: redis.RedisClient): Promise<undefined> =>
   new Promise((resolve, reject) => {
     client.quit(error => error ? reject() : resolve());
   });
 
-export const subscribeRedisChannel = (client: redis.RedisClient) => (channel: string): Promise<undefined> =>
+export const setExpirationForChannel = (client: redis.RedisClient) => (channel: string) => (seconds: number): Promise<undefined> =>
+  new Promise((resolve, reject) => {
+    client.expire(channel, seconds, error => error ? reject() : resolve());
+  });
+
+export const subscribeChannel = (client: redis.RedisClient) => (channel: string): Promise<undefined> =>
   new Promise((resolve, reject) => {
     client.subscribe(channel, error => error ? reject() : resolve());
   });
 
-export const unsubscribeRedisChannel = (client: redis.RedisClient) => (channel: string): Promise<undefined> =>
+export const unsubscribeChannel = (client: redis.RedisClient) => (channel: string): Promise<undefined> =>
   new Promise((resolve, reject) => {
     client.unsubscribe(channel, error => error ? reject() : resolve());
+  });
+
+export const publishMessage = (client: redis.RedisClient) => (channel: string) => (message: string): Promise<boolean>  =>
+  new Promise((res, rej) => {
+    client.publish(channel, message, err => err ? rej(false) : res(true));
   });
 
 export const encodeMessage = (uuid: string | undefined) => (message: Buffer): string =>

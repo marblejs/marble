@@ -1,6 +1,6 @@
 import * as uuid from 'uuid/v4';
 import { createMicroservice } from '../server/messaging.server';
-import { TransportMessage, Transport, TransportLayerConnection } from '../transport/transport.interface';
+import { TransportMessage, Transport } from '../transport/transport.interface';
 import { MsgEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
 import { messagingListener } from '../server/messaging.server.listener';
 import { provideTransportLayer } from '../transport/transport.provider';
@@ -20,5 +20,8 @@ export const createMessage = (data: any): TransportMessage<Buffer> => ({
   correlationId: uuid(),
 });
 
-export const close = (conn: TransportLayerConnection) => (done: () => void) =>
-  setTimeout(() => conn.close().then(done), 1000);
+export const wait = (seconds = 1000) =>
+  new Promise(res => {
+    setTimeout(() => res(), seconds);
+  });
+

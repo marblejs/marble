@@ -4,8 +4,8 @@ import { map, mapTo, take } from 'rxjs/operators';
 import { RedisClient, ClientOpts } from 'redis';
 import { TransportLayer, TransportLayerConnection, TransportMessage } from '../transport.interface';
 import { RedisStrategyOptions, RedisConnectionStatus } from './redis.strategy.interface';
-import { quitRedisClient, subscribeRedisChannel, encodeMessage, decodeMessage, unsubscribeRedisChannel, connectRedisClient } from './redis.strategy.helper';
 import { throwUnsupportedError } from '../transport.error';
+import * as RedisHelper from './redis.strategy.helper';
 
 class RedisStrategyConnection implements TransportLayerConnection {
   private msgSubject$ = new Subject<{ content: string }>();
@@ -46,21 +46,21 @@ class RedisStrategyConnection implements TransportLayerConnection {
     return merge(
       fromEvent<Error>(this.publisher, 'error'),
       fromEvent<Error>(this.subscriber, 'error'),
+      fromEvent<Error>(this.rpcSubscriber, 'error'),
     );
   }
 
   get message$() {
     return this.msgSubject$.asObservable().pipe(
-      map(msg => decodeMessage(msg.content)),
+      map(msg => RedisHelper.decodeMessage(msg.content)),
     );
   }
 
-  emitMessage = async (channel: string, message: TransportMessage<Buffer>) =>
-    new Promise<boolean>((res, rej) => {
-      const replyChannel = message.correlationId;
-      const encodedMessage = encodeMessage(replyChannel)(message.data);
-      this.publisher.publish(channel, encodedMessage, err => err ? rej(false) : res(true));
-    });
+  emitMessage = async (channel: string, message: TransportMessage<Buffer>) => {
+    const replyChannel = message.correlationId;
+    const encodedMessage = RedisHelper.encodeMessage(replyChannel)(message.data);
+    return RedisHelper.publishMessage(this.publisher)(channel)(encodedMessage);
+  }
 
   sendMessage = async (channel: string, message: TransportMessage<Buffer>) => {
     const rpcSubject$ = new Subject<{ content: string }>();
@@ -69,14 +69,13 @@ class RedisStrategyConnection implements TransportLayerConnection {
 
     message.correlationId = correlationId;
 
-    this.rpcSubscriber.expire(replyChannel, 1);
+    await RedisHelper.setExpirationForChannel(this.rpcSubscriber)(replyChannel)(1);
+    await RedisHelper.subscribeChannel(this.rpcSubscriber)(replyChannel);
 
-    await subscribeRedisChannel(this.rpcSubscriber)(replyChannel);
-
-    this.rpcSubscriber.on('message', async (ch, msg) => {
+    this.rpcSubscriber.once('message', async (ch, msg) => {
       if (ch === replyChannel) {
         rpcSubject$.next({ content: msg });
-        await unsubscribeRedisChannel(this.rpcSubscriber)(replyChannel);
+        await RedisHelper.unsubscribeChannel(this.rpcSubscriber)(replyChannel);
       }
     });
 
@@ -84,14 +83,17 @@ class RedisStrategyConnection implements TransportLayerConnection {
 
     return rpcSubject$.asObservable().pipe(
       take(1),
-      map(msg => decodeMessage(msg.content)),
+      map(msg => RedisHelper.decodeMessage(msg.content)),
     ).toPromise();
   }
 
   close = async () => {
+    this.subscriber.removeAllListeners('message');
+
     await Promise.all([
-      quitRedisClient(this.publisher),
-      quitRedisClient(this.subscriber),
+      RedisHelper.quitClient(this.publisher),
+      RedisHelper.quitClient(this.subscriber),
+      RedisHelper.quitClient(this.rpcSubscriber),
     ]);
 
     this.closeSubject$.next();
@@ -125,15 +127,15 @@ class RedisStrategy implements TransportLayer {
 
     await import('redis');
 
-    const publisher = await connectRedisClient(this.clientOpts);
-    const subscriber = await connectRedisClient(this.clientOpts);
-    const rpcSubscriber = await connectRedisClient(this.clientOpts);
+    const publisher = await RedisHelper.connectClient(this.clientOpts);
+    const subscriber = await RedisHelper.connectClient(this.clientOpts);
+    const rpcSubscriber = await RedisHelper.connectClient(this.clientOpts);
 
-    publisher.expire(channel, 1);
+    await RedisHelper.setExpirationForChannel(publisher)(channel)(1);
 
     if (data.isConsumer) {
-      subscriber.expire(channel, 1);
-      await subscribeRedisChannel(subscriber)(channel);
+      await RedisHelper.setExpirationForChannel(subscriber)(channel)(1);
+      await RedisHelper.subscribeChannel(subscriber)(channel);
     }
 
     return new RedisStrategyConnection({ isConsumer, channel }, publisher, subscriber, rpcSubscriber);

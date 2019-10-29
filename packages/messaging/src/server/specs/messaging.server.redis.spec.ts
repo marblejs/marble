@@ -4,7 +4,7 @@ import { map, tap } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
 import { MsgEffect, MsgErrorEffect } from '../../effects/messaging.effects.interface';
 import { RedisStrategyOptions } from '../../transport/strategies/redis.strategy.interface';
-import { runClient, runServer, createMessage, close } from '../../util/messaging.test.util';
+import { runClient, runServer, createMessage,  wait } from '../../util/messaging.test.util';
 
 const createOptions = (config: { channel?: string } = {}): RedisStrategyOptions => ({
   host: 'redis://127.0.0.1:6379',
@@ -14,6 +14,15 @@ const createOptions = (config: { channel?: string } = {}): RedisStrategyOptions 
 describe('messagingServer::Redis', () => {
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => jest.fn());
+  });
+
+  test('starts a server and closes connection immediately', async () => {
+    const options = createOptions();
+    const client = await runClient(Transport.REDIS, options);
+    const server = await runServer(Transport.REDIS, options)();
+
+    await client.close();
+    await server.close();
   });
 
   test('handles RPC event', async () => {
@@ -36,6 +45,7 @@ describe('messagingServer::Redis', () => {
     expect(parsedResult).toEqual({ type: 'RPC_TEST_RESULT', payload: 2 });
 
     await server.close();
+    await client.close();
   });
 
   test('handles published event', async done => {
@@ -45,9 +55,12 @@ describe('messagingServer::Redis', () => {
         use(eventValidator$(t.number)),
         map(event => event.payload),
         map(payload => ({ type: 'EVENT_TEST_RESPONSE', payload: payload + 1 })),
-        tap(event => {
+        tap(async event => {
           expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
-          close(server)(done);
+          await wait();
+          await server.close();
+          await client.close();
+          done();
         }),
       );
 
@@ -69,10 +82,13 @@ describe('messagingServer::Redis', () => {
 
     const error$: MsgErrorEffect = event$ =>
       event$.pipe(
-        tap(({ event, error }) => {
+        tap(async ({ event, error }) => {
           expect(event).toBeUndefined();
           expect(error).toEqual(error);
-          close(server)(done);
+          await wait();
+          await server.close();
+          await client.close();
+          done();
         }),
         map(() => createEvent('ERROR')),
       );
