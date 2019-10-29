@@ -4,6 +4,7 @@ import { Channel, ConsumeMessage } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import { TransportLayer, TransportMessage, TransportLayerConnection } from '../transport.interface';
 import { AmqpStrategyOptions, AmqpConnectionStatus } from './amqp.strategy.interface';
+import { createUuid } from '@marblejs/core/dist/+internal/utils';
 
 class AmqpStrategyConnection implements TransportLayerConnection {
   private closeSubject$ = new Subject();
@@ -51,9 +52,9 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   }
 
   sendMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
+    const { data } = msg;
+    const correlationId = createUuid();
     const replyToSubject = new Subject<string>();
-
-    const { correlationId, data } = msg;
     const resSubject$ = new Subject<{ msg: ConsumeMessage; tag: string }>();
 
     replyToSubject
@@ -96,10 +97,13 @@ class AmqpStrategyConnection implements TransportLayerConnection {
 
   emitMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
     const { correlationId, data, replyTo } = msg;
-    return this.channelWrapper.sendToQueue(queue, data, {
+
+    await this.channelWrapper.sendToQueue(queue, data, {
       replyTo,
       correlationId,
     });
+
+    return true;
   };
 
   ackMessage = (msg: ConsumeMessage | undefined) => {

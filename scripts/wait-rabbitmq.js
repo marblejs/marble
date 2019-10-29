@@ -6,17 +6,17 @@ const SECOND = 1000;
 
 const log = msg => console.info(chalk.yellow(msg));
 
-const waitForRabbitMq = async () => {
+const wait = async () => {
   try {
     const conn = await amqplib.connect('amqp://localhost:5672');
     const channel = await conn.createChannel();
     process.exit();
-  } catch(err) {
+  } catch {
     log(' -- Waiting for RabbitMQ to be ready...');
-    setTimeout(() => waitForRabbitMq(), 5 * SECOND);
+    setTimeout(() => wait(), 5 * SECOND);
   }
 }
 
 (async function() {
-  await waitForRabbitMq();
+  await wait();
 })();
