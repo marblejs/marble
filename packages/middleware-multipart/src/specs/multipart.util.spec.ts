@@ -71,15 +71,16 @@ test('#setRequestData sets file related request data', () => {
   })
 });
 
-describe('#streamFileTo', async () => {
+describe('#streamFileTo', () => {
   const TMP_PATH = path.resolve(__dirname, '../../../../tmp');
   const uploadFilePath = path.resolve(__dirname, '../../README.md');
   const savedFilePath = path.resolve(TMP_PATH, 'data_field');
-  const file = fs.createReadStream(uploadFilePath) as NodeJS.ReadableStream;
 
   afterEach(() => rimraf.sync(TMP_PATH));
 
   test('streams file to given path ', async () => {
+    const file = fs.createReadStream(uploadFilePath);
+
     if (fs.existsSync(TMP_PATH)) { rimraf.sync(TMP_PATH); }
 
     const response = await from(streamFileTo(TMP_PATH)({
@@ -94,9 +95,12 @@ describe('#streamFileTo', async () => {
     expect(fs.readFileSync(savedFilePath)).toBeDefined();
 
     fs.unlinkSync(savedFilePath);
+    file.close();
   });
 
   test('streams file to given path ', async () => {
+    const file = fs.createReadStream(uploadFilePath);
+
     const response = await from(streamFileTo(TMP_PATH)({
       file,
       fieldname: 'data_field',
@@ -109,6 +113,7 @@ describe('#streamFileTo', async () => {
     expect(fs.readFileSync(savedFilePath)).toBeDefined();
 
     fs.unlinkSync(savedFilePath);
+    file.close();
   });
 
   test('creates folder if it doesn not exist ', async () => {
