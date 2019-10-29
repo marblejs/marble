@@ -35,7 +35,7 @@ describe('File reader', () => {
   it('#readFile returns Buffer when found', done => {
     // given
     const mockedData = 'test_data';
-    const mockedBuffer = new Buffer(mockedData);
+    const mockedBuffer = Buffer.from(mockedData);
 
     // when
     const readFileStub = (_, callback) => callback(undefined, mockedBuffer);

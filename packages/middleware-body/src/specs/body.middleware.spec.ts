@@ -120,7 +120,7 @@ describe('bodyParser$ middleware', () => {
     const http$ = bodyParser$()(req$, ctx);
 
     http$.subscribe(data => {
-      expect(data.body).toEqual(new Buffer(message));
+      expect(data.body).toEqual(Buffer.from(message));
       done();
     });
 

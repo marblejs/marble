@@ -9,7 +9,7 @@ describe('#mapToServer operator', () => {
   let bufferMock;
 
   beforeEach(() => {
-    bufferMock = new Buffer('');
+    bufferMock = Buffer.from('');
     socketMock = { destroy: jest.fn() };
     webSocketServerMock = {
       handleUpgrade: jest.fn((req, socket, head, done) => done()),
