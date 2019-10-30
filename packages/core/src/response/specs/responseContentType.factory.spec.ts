@@ -6,7 +6,7 @@ describe('Response content-type factory', () => {
 
   it('#getMimeType detects mime-type from path', () => {
     // given
-    const body = new Buffer('test');
+    const body = Buffer.from('test');
     const path = '/test/index.html';
 
     // when
@@ -30,7 +30,7 @@ describe('Response content-type factory', () => {
 
   it('#getMimeType returns DEFAULT_CONTENT_TYPE', () => {
     // given
-    const body = new Buffer('test');
+    const body = Buffer.from('test');
     const path = '/test/index';
 
     // when
