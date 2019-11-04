@@ -11,8 +11,8 @@ import {
 import * as O from 'fp-ts/lib/Option';
 import * as R from 'fp-ts/lib/Reader';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Observable, Subscription, Subject, of } from 'rxjs';
-import { map, publish, withLatestFrom, takeUntil, catchError, take } from 'rxjs/operators';
+import { Observable, Subscription, Subject, of, zip } from 'rxjs';
+import { map, publish, takeUntil, catchError, take } from 'rxjs/operators';
 import {
   TransportMessage,
   TransportMessageTransformer,
@@ -63,16 +63,19 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
 
     const message$ = conn.message$.pipe(
       map(decode),
-      publish(msg$ => combinedMiddlewares(msg$.pipe(map(m => m.data)), ctx).pipe(
-        withLatestFrom(msg$),
+      publish(msg$ => zip(
+        combinedMiddlewares(msg$.pipe(map(m => m.data)), ctx),
+        msg$,
       )),
       map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-      publish(msg$ => combinedEffects(msg$.pipe(map(m => m.data)), ctx).pipe(
-        withLatestFrom(msg$),
+      publish(msg$ => zip(
+        combinedEffects(msg$.pipe(map(m => m.data)), ctx),
+        msg$,
       )),
       map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-      publish(msg$ => output$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), ctx).pipe(
-        withLatestFrom(msg$),
+      publish(msg$ => zip(
+        output$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), ctx),
+        msg$,
       )),
       map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
       catchError((error: EventError) => error$(of({ event: error.event, error }), ctx).pipe(

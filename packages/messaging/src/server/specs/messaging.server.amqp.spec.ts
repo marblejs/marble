@@ -1,6 +1,6 @@
 import { Event, matchEvent, use, EventError, createEvent } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { map, tap, mergeMapTo } from 'rxjs/operators';
+import { map, tap, mergeMapTo, delay } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
 import { MsgEffect, MsgErrorEffect } from '../../effects/messaging.effects.interface';
 import { Subject, throwError } from 'rxjs';
@@ -19,6 +19,7 @@ describe('messagingServer::AMQP', () => {
     const rpc$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('RPC_TEST'),
+        delay(250),
         use(eventValidator$(t.number)),
         map(event => event.payload),
         map(payload => ({ type: 'RPC_TEST_RESULT', payload: payload + 1 })),
@@ -27,12 +28,17 @@ describe('messagingServer::AMQP', () => {
     const options = createOptions({ expectAck: false });
     const client = await runClient(Transport.AMQP, options);
     const server = await runServer(Transport.AMQP, options)(rpc$);
-    const message = createMessage({ type: 'RPC_TEST', payload: 1 });
 
-    const result = await client.sendMessage(options.queue, message);
-    const parsedResult = JSON.parse(result.data.toString());
+    const result = await Promise.all([
+      client.sendMessage(options.queue, createMessage({ type: 'RPC_TEST', payload: 1 })),
+      client.sendMessage(options.queue, createMessage({ type: 'RPC_TEST', payload: 10 })),
+    ]);
 
-    expect(parsedResult).toEqual({ type: 'RPC_TEST_RESULT', payload: 2 });
+    const parsedResult0 = JSON.parse(result[0].data.toString());
+    const parsedResult1 = JSON.parse(result[1].data.toString());
+
+    expect(parsedResult0).toEqual({ type: 'RPC_TEST_RESULT', payload: 2 });
+    expect(parsedResult1).toEqual({ type: 'RPC_TEST_RESULT', payload: 11 });
 
     await server.close();
   });
