@@ -1,6 +1,6 @@
 import { Event, matchEvent, use, EventError, createEvent } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { map, tap, mergeMapTo, delay } from 'rxjs/operators';
+import { map, tap, mergeMapTo, delay, bufferCount } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
 import { MsgEffect, MsgErrorEffect } from '../../effects/messaging.effects.interface';
 import { Subject, throwError } from 'rxjs';
@@ -97,16 +97,20 @@ describe('messagingServer::AMQP', () => {
     await client.emitMessage(options.queue, message);
   });
 
-  test('reacts to thrown Error', async done => {
+  test('reacts to thrown Error and doesn\'t crash internal messages stream', async done => {
     const event = { type: 'EVENT_TEST' };
     const error = new Error('test_error');
     const errorSubject = new Subject<[Event | undefined, Error]>();
 
-    errorSubject.subscribe(data => {
-      expect(data[0]).toBeUndefined();
-      expect(data[1]).toEqual(error);
-      setTimeout(() => server.close().then(done), 1000);
-    });
+    errorSubject
+      .pipe(bufferCount(2))
+      .subscribe(data => {
+        expect(data[0][0]).toBeUndefined();
+        expect(data[0][1]).toEqual(error);
+        expect(data[1][0]).toBeUndefined();
+        expect(data[1][1]).toEqual(error);
+        setTimeout(() => server.close().then(done), 1000);
+      });
 
     const event$: MsgEffect = event$ =>
       event$.pipe(
@@ -124,9 +128,8 @@ describe('messagingServer::AMQP', () => {
     const client = await runClient(Transport.AMQP, options);
     const server = await runServer(Transport.AMQP, options)(event$, error$);
 
-    const emitResult = await client.emitMessage(options.queue, createMessage(event));
-
-    expect(emitResult).toEqual(true);
+    await client.emitMessage(options.queue, createMessage(event));
+    await client.emitMessage(options.queue, createMessage(event));
   });
 
   test('reacts to thrown EventError', async done => {
