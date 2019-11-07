@@ -91,6 +91,10 @@ export const microservice = createMicroservice({
   ),
 });
 
+const bootstrap = async () => {
+  await microservice();
+};
+
 if (process.env.NODE_ENV !== 'test') {
-  microservice();
+  bootstrap();
 }

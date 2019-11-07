@@ -98,11 +98,16 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
       if (effectsSub.closed) { effectsSub = subscribeEffects(message$); }
     }
 
+    const onSubscribeEffectsClose = () => {
+      effectsSub = subscribeEffects(message$);
+    }
+
     const subscribeEffects = (input$: Observable<TransportMessage<any>>) => input$
       .pipe(takeUntil(conn.close$))
       .subscribe(
         onSubscribeEffectsOutput(conn),
         onSubscribeEffectsError(errorSubject),
+        onSubscribeEffectsClose,
       );
 
     conn.close$
