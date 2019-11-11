@@ -4,7 +4,7 @@ import { map, tap } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
 import { MsgEffect, MsgErrorEffect } from '../../effects/messaging.effects.interface';
 import { RedisStrategyOptions } from '../../transport/strategies/redis.strategy.interface';
-import { runClient, runServer, createMessage,  wait } from '../../util/messaging.test.util';
+import { runClient, runServer, createMessage, wait } from '../../util/messaging.test.util';
 
 const createOptions = (config: { channel?: string } = {}): RedisStrategyOptions => ({
   host: 'redis://127.0.0.1:6379',

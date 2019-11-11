@@ -125,8 +125,6 @@ class RedisStrategy implements TransportLayer {
     const { isConsumer } = data;
     const { channel } = this.options;
 
-    await import('redis');
-
     const publisher = await RedisHelper.connectClient(this.clientOpts);
     const subscriber = await RedisHelper.connectClient(this.clientOpts);
     const rpcSubscriber = await RedisHelper.connectClient(this.clientOpts);

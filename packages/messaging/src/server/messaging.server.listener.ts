@@ -34,10 +34,11 @@ export interface MessagingListenerConfig {
 
 const defaultOutput$: MsgOutputEffect = msg$ => msg$.pipe(map(m => m.event));
 const defaultError$: MsgErrorEffect = msg$ => msg$;
+const defaultEffect$: MsgEffect = msg$ => msg$;
 
 export const messagingListener = (config: MessagingListenerConfig = {}) => {
   const {
-    effects = [],
+    effects = [defaultEffect$],
     middlewares = [],
     output$ = defaultOutput$,
     error$ = defaultError$,

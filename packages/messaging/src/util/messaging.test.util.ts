@@ -20,8 +20,8 @@ export const createMessage = (data: any): TransportMessage<Buffer> => ({
   correlationId: uuid(),
 });
 
-export const wait = (seconds = 1000) =>
+export const wait = (seconds = 1) =>
   new Promise(res => {
-    setTimeout(() => res(), seconds);
+    setTimeout(() => res(), seconds * 1000);
   });
 
