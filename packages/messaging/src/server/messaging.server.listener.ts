@@ -59,7 +59,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
 
     const decode = (msg: TransportMessage<Buffer>): TransportMessage<Event> => ({
       ...msg,
-      data: { ...msgTransformer.decode(msg.data), raw: msg.raw },
+      data: { ...msgTransformer.decode(msg.data), raw: msg },
     });
 
     const message$ = conn.message$.pipe(

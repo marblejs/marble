@@ -2,7 +2,7 @@ import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { Subject, fromEvent, merge } from 'rxjs';
 import { map, mapTo, take } from 'rxjs/operators';
 import { RedisClient, ClientOpts } from 'redis';
-import { TransportLayer, TransportLayerConnection, TransportMessage } from '../transport.interface';
+import { TransportLayer, TransportLayerConnection, TransportMessage, Transport } from '../transport.interface';
 import { RedisStrategyOptions, RedisConnectionStatus } from './redis.strategy.interface';
 import { throwUnsupportedError } from '../transport.error';
 import * as RedisHelper from './redis.strategy.helper';
@@ -108,6 +108,10 @@ class RedisStrategyConnection implements TransportLayerConnection {
 
 class RedisStrategy implements TransportLayer {
   constructor(private options: RedisStrategyOptions) {}
+
+  get type() {
+    return Transport.REDIS;
+  }
 
   get config() {
     return ({
