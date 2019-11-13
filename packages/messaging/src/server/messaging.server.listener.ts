@@ -23,6 +23,7 @@ import { jsonTransformer } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
 import { AllServerEvents, ServerEvent } from './messaging.server.events';
+import { inputLogger$, outputLogger$ } from '../middlewares/messaging.eventLogger.middleware';
 
 export interface MessagingListenerConfig {
   effects?: MsgEffect<any, any>[];
@@ -54,7 +55,8 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
 
     const errorSubject = new Subject<Error>();
     const combinedEffects = combineEffects(...effects);
-    const combinedMiddlewares = combineMiddlewares(...middlewares);
+    const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
+    const combinedOutput = combineEffects(outputLogger$, output$);
     const ctx = createEffectContext({ ask, client: conn });
 
     const decode = (msg: TransportMessage<Buffer>): TransportMessage<Event> => ({
@@ -75,7 +77,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
       )),
       map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
       publish(msg$ => zip(
-        output$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), ctx),
+        combinedOutput(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), ctx),
         msg$,
       )),
       map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),

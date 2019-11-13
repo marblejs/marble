@@ -7,5 +7,4 @@ export * from './server/messaging.server';
 export * from './server/messaging.server.interface';
 export * from './server/messaging.server.tokens';
 export * from './server/messaging.server.events';
-export { status$, input$, output$ } from './server/messaging.server.logger';
 export { messagingListener } from './server/messaging.server.listener';

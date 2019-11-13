@@ -1,4 +1,5 @@
 import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
 import { ContextToken } from './context.token.factory';
 import { ContextProvider } from './context.factory';
@@ -20,6 +21,6 @@ export const useContext = <T>(token: ContextToken<T>) => (ask: ContextProvider) 
 
       throw error;
     },
-    dep => dep,
+    identity,
   ),
 );
