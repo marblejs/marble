@@ -10,15 +10,15 @@ export type Logger = (opts: LoggerOptions) => any;
 
 export const provideLogger = (ask: ContextProvider): Logger => pipe(
   ask(LoggerToken),
-  getOrElse(() => log),
+  getOrElse(() => defaultLogger),
 );
 
-const log: Logger = ({ channel, message, tag, level = LoggerLevel.INFO }) => {
+const defaultLogger: Logger = ({ channel, message, tag, level = LoggerLevel.INFO }) => {
   const now = new Date().toISOString();
   const colorize = {
     [LoggerLevel.ERROR]: chalk.red,
     [LoggerLevel.INFO]: chalk.green,
     [LoggerLevel.WARN]: chalk.yellow,
   }[level];
-  return console.log(`${now}\t${channel}\t${colorize(tag)}\t${message}`);
+  return console.log(now.padEnd(30) + channel.padEnd(15) + colorize(tag.padEnd(15)) + message);
 };

@@ -23,7 +23,7 @@ import { jsonTransformer } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
 import { AllServerEvents, ServerEvent } from './messaging.server.events';
-import { inputLogger$, outputLogger$ } from '../middlewares/messaging.eventLogger.middleware';
+import { inputLogger$, outputLogger$, errorLogger$ } from '../middlewares/messaging.eventLogger.middleware';
 
 export interface MessagingListenerConfig {
   effects?: MsgEffect<any, any>[];
@@ -57,6 +57,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     const combinedEffects = combineEffects(...effects);
     const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
     const combinedOutput = combineEffects(outputLogger$, output$);
+    const combinedError = combineEffects(errorLogger$, error$);
     const ctx = createEffectContext({ ask, client: conn });
 
     const decode = (msg: TransportMessage<Buffer>): TransportMessage<Event> => ({
@@ -81,7 +82,7 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
         msg$,
       )),
       map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-      catchError((error: EventError) => error$(of({ event: error.event, error }), ctx).pipe(
+      catchError((error: EventError) => combinedError(of({ event: error.event, error }), ctx).pipe(
         map(data => ({ data } as TransportMessage<any>)),
       )),
     );

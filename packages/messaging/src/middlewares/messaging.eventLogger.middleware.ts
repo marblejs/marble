@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import { tap, map } from 'rxjs/operators';
 import { useContext } from '@marblejs/core';
 import { provideLogger, LoggerLevel } from '../server/messaging.server.logger';
-import { MsgMiddlewareEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
+import { MsgMiddlewareEffect, MsgOutputEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
 import { TransportLayerToken } from '../server/messaging.server.tokens';
 
 export const inputLogger$: MsgMiddlewareEffect = (event$, ctx) => {
@@ -48,5 +48,21 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
       });
     }),
     map(({ event }) => event),
+  );
+};
+
+export const errorLogger$: MsgErrorEffect = (event$, ctx) => {
+  const logger = provideLogger(ctx.ask);
+  const transportLayer = useContext(TransportLayerToken)(ctx.ask);
+
+  return event$.pipe(
+    tap(({ error, event }) => logger({
+      tag: 'ERROR',
+      message: chalk.red(event
+        ? `${error.name}, ${error.message} for event ${event.type}`
+        : `${error.name}, ${error.message}`),
+      level: LoggerLevel.ERROR,
+      channel: transportLayer.config.channel,
+    })),
   );
 };
