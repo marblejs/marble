@@ -4,13 +4,15 @@ import { getOrElse } from 'fp-ts/lib/Option';
 import { ContextProvider } from '@marblejs/core';
 import { LoggerToken } from './messaging.server.tokens';
 
+const IS_TEST_ENV = process.env.NODE_ENV === 'test';
+
 export enum LoggerLevel { INFO, WARN, ERROR }
 export type LoggerOptions = { channel: string; message: string; tag: string; level?: LoggerLevel };
 export type Logger = (opts: LoggerOptions) => any;
 
 export const provideLogger = (ask: ContextProvider): Logger => pipe(
   ask(LoggerToken),
-  getOrElse(() => defaultLogger),
+  getOrElse(() => !IS_TEST_ENV ? defaultLogger : () => undefined),
 );
 
 const defaultLogger: Logger = ({ channel, message, tag, level = LoggerLevel.INFO }) => {

@@ -27,7 +27,6 @@ export const microservice = createMicroservice({
   }),
 });
 
-
 if (process.env.NODE_ENV !== 'test') {
   microservice();
 }

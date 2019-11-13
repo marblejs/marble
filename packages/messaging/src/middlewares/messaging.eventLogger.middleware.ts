@@ -32,7 +32,9 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
 
   return event$.pipe(
     tap(({ event, initiator }) => {
-      const eventType = chalk.yellow(event.type);
+      const isError = !!event.error;
+      const colorize = isError ? chalk.red : chalk.yellow;
+      const eventType = colorize(event.type);
       const eventCorrelationId = initiator.correlationId && chalk.magenta(initiator.correlationId);
       const eventReplyTo = initiator.replyTo && chalk.yellow(initiator.replyTo);
       const channel = transportLayer.config.channel;
@@ -41,7 +43,7 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
         : `${eventType}, id: ${eventCorrelationId}`;
 
       logger({
-        level: LoggerLevel.INFO,
+        level: isError ? LoggerLevel.ERROR : LoggerLevel.INFO,
         tag: 'EVENT_OUT',
         message,
         channel,
