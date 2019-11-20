@@ -1,9 +1,9 @@
-import { Event, matchEvent, use, EventError, createEvent } from '@marblejs/core';
+import { Event, matchEvent, use, combineEffects } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
+import { Subject, throwError } from 'rxjs';
 import { map, tap, mergeMapTo, delay, bufferCount } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
-import { MsgEffect, MsgErrorEffect } from '../../effects/messaging.effects.interface';
-import { Subject, throwError } from 'rxjs';
+import { MsgEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
 import { AmqpStrategyOptions } from '../../transport/strategies/amqp.strategy.interface';
 import { runClient, runServer, createMessage } from '../../util/messaging.test.util';
 
@@ -98,69 +98,44 @@ describe('messagingServer::AMQP', () => {
   });
 
   test('reacts to thrown Error and doesn\'t crash internal messages stream', async done => {
-    const event = { type: 'EVENT_TEST' };
+    const event1: Event = { type: 'EVENT_TEST_1' };
+    const event2: Event = { type: 'EVENT_TEST_2' };
     const error = new Error('test_error');
-    const errorSubject = new Subject<[Event | undefined, Error]>();
+    const expectedError = { error: { message: error.message, name: error.name }, type: 'UNHANDLED_ERROR' };
+    const outputSubject = new Subject<Event>();
 
-    errorSubject
+    outputSubject
       .pipe(bufferCount(2))
       .subscribe(data => {
-        expect(data[0][0]).toBeUndefined();
-        expect(data[0][1]).toEqual(error);
-        expect(data[1][0]).toBeUndefined();
-        expect(data[1][1]).toEqual(error);
+        expect(data[0].type).toEqual(expectedError.type);
+        expect(data[0].error).toEqual(expectedError.error);
+        expect(data[1].type).toEqual(event2.type);
+        expect(data[1].payload).toEqual(event2.payload);
         setTimeout(() => server.close().then(done), 1000);
       });
 
-    const event$: MsgEffect = event$ =>
+    const event1$: MsgEffect = event$ =>
       event$.pipe(
-        matchEvent('EVENT_TEST'),
+        matchEvent(event1.type),
         mergeMapTo(throwError(error)),
       );
 
-    const error$: MsgErrorEffect = event$ =>
+    const event2$: MsgEffect = event$ =>
       event$.pipe(
-        tap(({ event, error }) => errorSubject.next([event, error])),
-        map(() => createEvent('ERROR')),
+        matchEvent(event2.type),
+      );
+
+    const output$: MsgOutputEffect = event$ =>
+      event$.pipe(
+        tap(({ event }) => outputSubject.next(event)),
+        map(({ event }) => event),
       );
 
     const options = createOptions({ expectAck: false });
     const client = await runClient(Transport.AMQP, options);
-    const server = await runServer(Transport.AMQP, options)(event$, error$);
+    const server = await runServer(Transport.AMQP, options)(combineEffects(event1$, event2$), output$);
 
-    await client.emitMessage(options.queue, createMessage(event));
-    await client.emitMessage(options.queue, createMessage(event));
-  });
-
-  test('reacts to thrown EventError', async done => {
-    const event = { type: 'EVENT_TEST' };
-    const error = new EventError(event, 'test_error');
-    const errorSubject = new Subject<[Event | undefined, Error]>();
-
-    errorSubject.subscribe(data => {
-      expect(data[0]).toEqual(event);
-      expect(data[1]).toEqual(error);
-      setTimeout(() => server.close().then(done), 1000);
-    });
-
-    const event$: MsgEffect = event$ =>
-      event$.pipe(
-        matchEvent('EVENT_TEST'),
-        mergeMapTo(throwError(error)),
-      );
-
-    const error$: MsgErrorEffect = event$ =>
-      event$.pipe(
-        tap(({ event, error }) => errorSubject.next([event, error])),
-        map(() => createEvent('ERROR')),
-      );
-
-    const options = createOptions({ expectAck: false });
-    const client = await runClient(Transport.AMQP, options);
-    const server = await runServer(Transport.AMQP, options)(event$, error$);
-
-    const emitResult = await client.emitMessage(options.queue, createMessage(event));
-
-    expect(emitResult).toEqual(true);
+    await client.emitMessage(options.queue, createMessage(event1));
+    await client.emitMessage(options.queue, createMessage(event2));
   });
 });

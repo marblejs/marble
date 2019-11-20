@@ -2,7 +2,7 @@ import { Subject, fromEvent, merge, from } from 'rxjs';
 import { map, filter, take, mapTo, first, mergeMap } from 'rxjs/operators';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
-import { TransportLayer, TransportMessage, TransportLayerConnection } from '../transport.interface';
+import { TransportLayer, TransportMessage, TransportLayerConnection, Transport } from '../transport.interface';
 import { AmqpStrategyOptions, AmqpConnectionStatus } from './amqp.strategy.interface';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 
@@ -106,15 +106,15 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     return true;
   };
 
-  ackMessage = (msg: ConsumeMessage | undefined) => {
+  ackMessage = (msg: TransportMessage | undefined) => {
     if (msg) {
-      this.channelWrapper.ack(msg);
+      this.channelWrapper.ack(msg.raw);
     }
   }
 
-  nackMessage = (msg: ConsumeMessage | undefined, resend = true) => {
+  nackMessage = (msg: TransportMessage | undefined, resend = true) => {
     if (msg) {
-      this.channelWrapper.nack(msg, false , resend);
+      this.channelWrapper.nack(msg.raw, false , resend);
     }
   }
 
@@ -129,6 +129,10 @@ class AmqpStrategyConnection implements TransportLayerConnection {
 
 class AmqpStrategy implements TransportLayer {
   constructor(private options: AmqpStrategyOptions) {}
+
+  get type() {
+    return Transport.AMQP;
+  }
 
   get config() {
     return ({

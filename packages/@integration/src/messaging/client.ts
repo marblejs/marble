@@ -45,22 +45,22 @@ const test$ = r.pipe(
 const fib$ = r.pipe(
   r.matchPath('/fib/:number'),
   r.matchType('GET'),
-  r.useEffect((req$, { ask }) => req$.pipe(
-    use(rootValiadtor$),
-    map(req => Number(req.params.number)),
-    mergeMap(number => {
-      const client = useContext(ClientToken)(ask);
+  r.useEffect((req$, ctx) => {
+    const client = useContext(ClientToken)(ctx.ask);
 
-      return forkJoin(
+    return req$.pipe(
+      use(rootValiadtor$),
+      map(req => Number(req.params.number)),
+      mergeMap(number => forkJoin(
         client.send({ type: 'FIB', payload: number + 0 }),
         client.send({ type: 'FIB', payload: number + 1 }),
         client.send({ type: 'FIB', payload: number + 2 }),
         client.send({ type: 'FIB', payload: number + 3 }),
         client.send({ type: 'FIB', payload: number + 4 }),
-      );
-    }),
-    map(body => ({ body })),
-  )),
+      )),
+      map(body => ({ body })),
+    );
+  }),
 );
 
 const listening$: HttpServerEffect = event$ =>
