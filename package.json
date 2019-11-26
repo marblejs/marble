@@ -11,7 +11,7 @@
     "pretest": "yarn lint",
     "link:all": "lerna exec -- yarn link",
     "unlink:all": "lerna exec -- yarn unlink",
-    "test": "sleep 5s && yarn test:unit && yarn test:integration",
+    "test": "yarn test:unit && yarn test:integration",
     "test:unit": "SCOPE=unit ./scripts/run-tests.sh",
     "test:watch": "SCOPE=watch ./scripts/run-tests.sh",
     "test:integration": "SCOPE=integration ./scripts/run-tests.sh",
@@ -61,10 +61,10 @@
     "@types/jest": "~24.0.19",
     "@types/node": "^12.7.12",
     "@types/supertest": "^2.0.7",
-    "@typescript-eslint/eslint-plugin": "^1.7.0",
-    "@typescript-eslint/parser": "^1.7.0",
+    "@typescript-eslint/eslint-plugin": "~2.9.0",
+    "@typescript-eslint/parser": "~2.9.0",
     "@types/rimraf": "^2.0.2",
-    "eslint": "^5.16.0",
+    "eslint": "~6.7.1",
     "husky": "^0.14.0",
     "jest": "~24.9.0",
     "lerna": "~3.17.0",
@@ -73,8 +73,7 @@
     "rimraf": "^2.6.2",
     "supertest": "^3.0.0",
     "ts-jest": "~24.1.0",
-    "ts-loader": "^5.0.0",
-    "typescript": "~3.6.4"
+    "typescript": "~3.7.2"
   },
   "workspaces": [
     "packages/*"
