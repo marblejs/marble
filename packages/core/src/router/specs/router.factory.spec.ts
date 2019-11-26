@@ -1,16 +1,16 @@
-import { mapTo } from 'rxjs/operators';
-import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+import { of } from 'rxjs';
+import { mapTo, tap } from 'rxjs/operators';
 import { RouteEffect, RouteEffectGroup, Routing } from '../router.interface';
 import { factorizeRouting } from '../router.factory';
+import { createHttpRequest } from '../../+internal';
+import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
+import { createEffectContext } from '../../effects/effectsContext.factory';
+import { EffectContext } from '../../effects/effects.interface';
+import { HttpResponse } from '../../http.interface';
 
 describe('#factorizeRouting', () => {
-  let effectsCombiner;
-
-  beforeEach(() => {
-    jest.unmock('../../effects/effects.combiner.ts');
-    effectsCombiner = require('../../effects/effects.combiner');
-  });
-
   test('factorizes routing with nested groups', () => {
     // given
     const m$: HttpMiddlewareEffect = req$ => req$;
@@ -43,7 +43,6 @@ describe('#factorizeRouting', () => {
     ];
 
     // when
-    effectsCombiner.combineMiddlewares = jest.fn(() => m$);
     const factorizedRouting = factorizeRouting(routing);
 
     // then
@@ -59,25 +58,61 @@ describe('#factorizeRouting', () => {
         regExp: /^\/([^\/]+?)(?:\/)?$/i,
         path: '/:id',
         methods: {
-          GET: { middleware: m$, effect: e2$, parameters: ['id'] },
-          POST: { middleware: m$, effect: e3$, parameters: ['id'] },
+          GET: { middleware: expect.any(Function), effect: e2$, parameters: ['id'] },
+          POST: { middleware: expect.any(Function), effect: e3$, parameters: ['id'] },
         },
       },
       {
         regExp: /^\/([^\/]+?)\/nested(?:\/)?$/i,
         path: '/:id/nested',
         methods: {
-          GET: { middleware: m$, effect: e5$, parameters: ['id'] },
+          GET: { middleware: expect.any(Function), effect: e5$, parameters: ['id'] },
         },
       },
       {
         regExp: /^\/([^\/]+?)\/(.*)(?:\/)?$/i,
         path: '/:id/(.*)',
         methods: {
-          '*': { middleware: m$, effect: e4$, parameters: ['id'] },
+          '*': { middleware: expect.any(Function), effect: e4$, parameters: ['id'] },
         },
       },
     ] as Routing);
+  });
+
+  test('composes routed middlewares', async () => {
+    // given
+    const spy = jest.fn();
+    const req$ = of(createHttpRequest());
+    const ctx = createEffectContext({} as EffectContext<HttpResponse>);
+    const m$: HttpMiddlewareEffect = req$ => req$.pipe(tap(spy));
+    const e$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
+
+    const routeEffect: RouteEffect = {
+      path: '/',
+      method: 'GET',
+      effect: e$,
+      middleware: m$,
+    };
+
+    const routeGroupNested: RouteEffectGroup = {
+      path: '/nested',
+      effects: [routeEffect],
+      middlewares: [m$],
+    };
+
+    const routing: (RouteEffect | RouteEffectGroup)[] = [{
+      path: '/test',
+      effects: [routeGroupNested],
+      middlewares: [m$, m$],
+    }];
+
+    // when
+    const factorizedRouting = factorizeRouting(routing);
+    const middleware$ = factorizedRouting[0].methods.GET!.middleware!;
+    await middleware$(req$, ctx).toPromise();
+
+    // then
+    expect(spy).toHaveBeenCalledTimes(4);
   });
 
   test('throws error if route is redefined', () => {
