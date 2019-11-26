@@ -9,6 +9,7 @@ import {
   RouteEffectGroup,
 } from './router.interface';
 import { factorizeRegExpWithParams } from './router.params.factory';
+import { isNonNullable } from '../+internal/utils';
 
 export const factorizeRouting = (
   routes: (RouteEffect | RouteEffectGroup)[],
@@ -33,7 +34,7 @@ export const factorizeRouting = (
     const method: RoutingMethod = {
       effect: route.effect,
       middleware: middlewares.length
-        ? combineMiddlewares(...middlewares)
+        ? combineMiddlewares(...[...middlewares, route.middleware].filter(isNonNullable))
         : route.middleware,
       parameters,
     };
