@@ -40,6 +40,7 @@ export const createHttpRequest = (data?: HttpRequestMockParams) => Object.assign
     query: {},
     params: {},
     meta: {},
+    response: createHttpResponse() as HttpResponse,
   },
   data,
 ) as HttpRequest;
@@ -47,4 +48,8 @@ export const createHttpRequest = (data?: HttpRequestMockParams) => Object.assign
 export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
   new class extends EventEmitter {
     statusCode = data.statusCode;
+    writeHead = jest.fn();
+    setHeader = jest.fn();
+    getHeader = jest.fn();
+    end = jest.fn();
   } as any as HttpResponse;

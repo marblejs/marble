@@ -1,4 +1,6 @@
-import { HttpResponse, HttpMethod, HttpRequest, createEffectContext, createContext, lookup } from '@marblejs/core';
+import * as http from 'http';
+import { HttpMethod, createEffectContext, createContext, lookup } from '@marblejs/core';
+import { createHttpRequest } from '@marblejs/core/dist/+internal';
 
 export const capitalize = (str: string): string =>
   str
@@ -9,24 +11,13 @@ export const capitalize = (str: string): string =>
 export const isString = (str: any): boolean =>
   typeof str === 'string' || str instanceof String;
 
-
-export const createMockResponse = () => (({
-  writeHead: jest.fn(),
-  setHeader: jest.fn(),
-  getHeader: jest.fn(),
-  end: jest.fn(),
-} as unknown) as HttpResponse);
-
 export const createMockRequest = (
   method: HttpMethod = 'GET',
   headers: any = { origin: 'fake-origin' },
-) => (({
-  method,
-  headers: { ...headers },
-} as unknown) as HttpRequest);
+) => createHttpRequest({ method, headers });
 
 export const createMockEffectContext = () => {
   const context = createContext();
-  const client = createMockResponse();
+  const client = http.createServer();
   return createEffectContext({ ask: lookup(context), client });
 };

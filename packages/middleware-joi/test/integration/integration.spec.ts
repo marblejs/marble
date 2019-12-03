@@ -1,10 +1,15 @@
 import * as request from 'supertest';
-import { createContext } from '@marblejs/core';
-import { server } from '../helpers/api.spec-util';
+import { HttpServer, createServer } from '@marblejs/core';
+import { app } from '../helpers/api.spec-util';
 
 describe('Joi middleware - Integration', () => {
-  const app = server()(createContext());
   const token = '181782881DB38D84';
+
+  let httpServer: HttpServer;
+
+  beforeEach(async () => {
+    httpServer = await createServer({ httpListener: app })();
+  });
 
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(jest.fn);
@@ -18,13 +23,13 @@ describe('Joi middleware - Integration', () => {
       }
     };
 
-    return request(app)
+    return request(httpServer)
       .get('/api/user/1')
       .then(res => expect(res.body).toEqual(expected));
   });
 
   it('should send a get request with parameters', async () => {
-    return request(app)
+    return request(httpServer)
       .get('/api/user/1')
       .set('token', token)
       .expect(200, { id: 1 });
@@ -38,21 +43,21 @@ describe('Joi middleware - Integration', () => {
       }
     };
 
-    return request(app)
+    return request(httpServer)
       .get('/api/user/11')
       .set('token', token)
       .then(res => expect(res.body).toEqual(expected));
   });
 
   it('should send a get request with query', async () => {
-    return request(app)
+    return request(httpServer)
       .get('/api/post?page=2')
       .set('token', token)
       .expect(200, { page: 2 });
   });
 
   it('should send a post request with body', async () => {
-    return request(app)
+    return request(httpServer)
       .post('/api/user')
       .set('token', token)
       .send({ name: 'lucio' })
@@ -61,7 +66,7 @@ describe('Joi middleware - Integration', () => {
 
   it('should send a post request with query and body', async () => {
     const time = Date.now();
-    return request(app)
+    return request(httpServer)
       .post(`/api/post?timestamp=${time}`)
       .set('token', token)
       .send({ title: 'Middleware Joi' })

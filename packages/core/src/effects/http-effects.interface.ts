@@ -1,6 +1,4 @@
-import * as http from 'http';
-import * as https from 'https';
-import { HttpRequest, HttpResponse, HttpStatus, HttpHeaders } from '../http.interface';
+import { HttpRequest, HttpStatus, HttpHeaders, HttpServer } from '../http.interface';
 import { HttpError } from '../error/error.model';
 import { Event } from '../event/event.interface';
 import { Effect } from './effects.interface';
@@ -18,11 +16,11 @@ export interface HttpMiddlewareEffect<
 
 export interface HttpErrorEffect<
   Err extends Error = HttpError,
-> extends HttpEffect<{ req: HttpRequest; error: Err }, HttpEffectResponse, HttpResponse> {}
+> extends HttpEffect<{ req: HttpRequest; error: Err }, HttpEffectResponse> {}
 
 export interface HttpServerEffect<
   Ev extends Event = Event
-> extends HttpEffect<Ev, any, http.Server | https.Server> {}
+> extends HttpEffect<Ev, any, HttpServer> {}
 
 export interface HttpOutputEffect<
   Req extends HttpRequest = HttpRequest,
@@ -32,5 +30,5 @@ export interface HttpOutputEffect<
 export interface HttpEffect<
   I = HttpRequest,
   O = HttpEffectResponse,
-  Client = HttpResponse,
+  Client = HttpServer,
 > extends Effect<I, O, Client> {}

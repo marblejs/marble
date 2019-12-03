@@ -1,12 +1,13 @@
-import { HttpRequest, createContext, createEffectContext, lookup } from '@marblejs/core';
-import { Marbles, ContentType, createHttpResponse } from '@marblejs/core/dist/+internal';
+import * as http from 'http';
 import * as qs from 'qs';
-import { of } from 'rxjs';
-import { bodyParser$ } from '../body.middleware';
 import * as MockReq from 'mock-req';
+import { of } from 'rxjs';
+import { HttpRequest, createContext, createEffectContext, lookup } from '@marblejs/core';
+import { Marbles, ContentType } from '@marblejs/core/dist/+internal';
+import { bodyParser$ } from '../body.middleware';
 
 describe('bodyParser$ middleware', () => {
-  const client = createHttpResponse();
+  const client = http.createServer();
   const context = createContext();
   const ctx = createEffectContext({ ask: lookup(context), client });
 

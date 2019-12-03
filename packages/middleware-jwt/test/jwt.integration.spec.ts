@@ -1,12 +1,16 @@
 import * as request from 'supertest';
 import { verifyToken } from '../src';
 import { app, SECRET_KEY } from './jwt.integration';
-import { createContext } from '@marblejs/core';
+import { HttpServer, createServer } from '@marblejs/core';
 
 const LOGIN_CREDENTIALS = { email: 'admin@admin.com', password: 'admin' };
 
 describe('@marblejs/middleware-jwt - HTTP integration', () => {
-  const httpServer = app(createContext());
+  let httpServer: HttpServer;
+
+  beforeEach(async () => {
+    httpServer = await createServer({ httpListener: app })();
+  });
 
   test('POST /api/login returns token and verifies its correctness', async () =>
     request(httpServer)

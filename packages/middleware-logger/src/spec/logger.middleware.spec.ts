@@ -1,10 +1,11 @@
-import { Marbles, createHttpRequest, createHttpResponse } from '@marblejs/core/dist/+internal';
+import * as http from 'http';
+import { Marbles, createHttpRequest } from '@marblejs/core/dist/+internal';
 import { logger$, loggerWithOpts$ } from '../logger.middleware';
 import { createEffectContext, createContext, lookup } from '@marblejs/core';
 
 const createMockEffectContext = () => {
   const context = createContext();
-  const client = createHttpResponse();
+  const client = http.createServer();
   return createEffectContext({ ask: lookup(context), client });
 };
 
@@ -20,14 +21,14 @@ describe('logger$', () => {
     const ctx = createMockEffectContext();
     const request = createHttpRequest({ url: '/', method: 'GET' });
 
-    ctx.client.statusCode = 200;
+    request.response.statusCode = 200;
 
     Marbles.assertEffect(logger$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
     ], { ctx });
 
-    ctx.client.emit('finish');
+    request.response.emit('finish');
     expect(console.info).toHaveBeenCalled();
   });
 
@@ -35,14 +36,14 @@ describe('logger$', () => {
     const ctx = createMockEffectContext();
     const request = createHttpRequest({ url: '/test', method: 'POST' });
 
-    ctx.client.statusCode = 403;
+    request.response.statusCode = 403;
 
     Marbles.assertEffect(logger$(), [
       ['-a-', { a: request }],
       ['-a-', { a: request }],
     ], { ctx });
 
-    ctx.client.emit('finish');
+    request.response.emit('finish');
     expect(console.info).toHaveBeenCalled();
   });
 
@@ -54,7 +55,7 @@ describe('loggerWithOpts$', () => {
     const ctx = createMockEffectContext();
     const request = createHttpRequest({ url: '/', method: 'GET' });
 
-    ctx.client.statusCode = 200;
+    request.response.statusCode = 200;
 
     spyOn(console, 'info').and.stub();
 
@@ -63,7 +64,7 @@ describe('loggerWithOpts$', () => {
       ['-a-', { a: request }],
     ], { ctx });
 
-    ctx.client.emit('finish');
+    request.response.emit('finish');
     expect(console.info).toHaveBeenCalled();
   });
 

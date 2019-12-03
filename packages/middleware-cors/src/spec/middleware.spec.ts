@@ -29,7 +29,7 @@ describe('CORS middleware', () => {
     const middleware$ = cors$();
 
     middleware$(request$, ctx).subscribe(() => {
-      expect(ctx.client.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
+      expect(request.response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
       done();
     });
   });
@@ -53,9 +53,9 @@ describe('CORS middleware', () => {
     const middleware$ = cors$(options);
 
     middleware$(request$, ctx).subscribe(() => {
-      expect(ctx.client.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
-      expect(ctx.client.setHeader).toBeCalledWith('Access-Control-Allow-Credentials', 'true');
-      expect(ctx.client.setHeader).toBeCalledWith('Access-Control-Expose-Headers', 'X-Header, X-Custom-Header');
+      expect(request.response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
+      expect(request.response.setHeader).toBeCalledWith('Access-Control-Allow-Credentials', 'true');
+      expect(request.response.setHeader).toBeCalledWith('Access-Control-Expose-Headers', 'X-Header, X-Custom-Header');
       done();
     });
   });

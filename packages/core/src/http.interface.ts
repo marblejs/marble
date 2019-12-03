@@ -1,4 +1,5 @@
 import * as http from 'http';
+import * as https from 'https';
 import { Observable } from 'rxjs';
 import { HttpEffectResponse } from './effects/http-effects.interface';
 
@@ -13,6 +14,7 @@ export interface HttpRequest<
   params: TParams;
   query: TQuery;
   meta?: Record<string, any>;
+  response: HttpResponse;
   [key: string]: any;
 }
 
@@ -42,6 +44,8 @@ export enum HttpMethodType {
   TRACE,
   '*',
 }
+
+export type HttpServer = https.Server | http.Server;
 
 export type HttpMethod = keyof typeof HttpMethodType;
 

@@ -1,3 +1,4 @@
+import * as http from 'http';
 import {
   HttpRequest,
   HttpError,
@@ -6,7 +7,6 @@ import {
   createEffectContext,
   lookup,
 } from '@marblejs/core';
-import { createHttpResponse } from '@marblejs/core/dist/+internal/testing/http.helper';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
 import { of, throwError, iif } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
@@ -23,7 +23,8 @@ const verifyPayload$ = (payload: { id: string }) =>
 describe('JWT middleware', () => {
   let utilModule;
   let factoryModule;
-  const client = createHttpResponse();
+
+  const client = http.createServer();
   const context = createContext();
   const ctx = createEffectContext({ ask: lookup(context), client });
 
@@ -63,7 +64,6 @@ describe('JWT middleware', () => {
       },
       () => {
         fail(`Stream shouldn\'t throw an error`);
-        done();
       }
     );
   });
@@ -116,7 +116,6 @@ describe('JWT middleware', () => {
     middleware$.subscribe(
       () => {
         fail(`Stream should throw an error`);
-        done();
       },
       err => {
         expect(err).toEqual(expectedError);

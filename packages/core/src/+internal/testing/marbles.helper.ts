@@ -20,6 +20,14 @@ export const Marbles = {
     const [initStream, initValues, initError] = marbleflow[0];
     const [expectedStream, expectedValues, expectedError] = marbleflow[1];
 
+    if (initValues) {
+      Object.values(initValues).map(req => req.response = undefined);
+    }
+
+    if (expectedValues) {
+      Object.values(expectedValues).map(req => req.response = undefined);
+    }
+
     const scheduler = Marbles.createTestScheduler();
     const stream$ = scheduler.createColdObservable(initStream, initValues, initError);
 
