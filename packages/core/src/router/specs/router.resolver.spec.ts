@@ -1,13 +1,14 @@
+import * as http from 'http';
 import { mapTo, tap, map } from 'rxjs/operators';
 import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
 import { EffectContext } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
-import { HttpRequest, HttpResponse, HttpMethod } from '../../http.interface';
+import { HttpMethod, HttpServer } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
 import { createContext } from '../../context/context.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { lookup } from '../../context/context.factory';
-import { createHttpResponse } from '../../+internal';
+import { createHttpRequest } from '../../+internal';
 
 describe('#findRoute', () => {
   test('finds route inside collection', () => {
@@ -105,7 +106,7 @@ describe('#findRoute', () => {
 describe('#resolveRouting', () => {
   let router;
   let queryFactory;
-  let effectContext: EffectContext<HttpResponse>;
+  let effectContext: EffectContext<HttpServer>;
   const context = createContext();
 
   beforeEach(() => {
@@ -115,7 +116,7 @@ describe('#resolveRouting', () => {
     queryFactory = require('../router.query.factory');
     effectContext = createEffectContext({
       ask: lookup(context),
-      client: createHttpResponse(),
+      client: http.createServer(),
     });
   });
 
@@ -123,7 +124,7 @@ describe('#resolveRouting', () => {
     // given
     const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
     const expectedMachingResult: RouteMatched = { effect: effect$, params: {}, path: '/' };
-    const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
+    const req = createHttpRequest({ method: 'GET', url: '/' });
 
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);
@@ -141,7 +142,7 @@ describe('#resolveRouting', () => {
 
   test('returns empty stream if effect has been not found', done => {
     // given
-    const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
+    const req = createHttpRequest({ method: 'GET', url: '/' });
 
     // when
     router.findRoute = jest.fn(() => undefined);
@@ -166,8 +167,8 @@ describe('#resolveRouting', () => {
 
   test('returns empty stream if response has been finished', done => {
     // given
-    const req = {} as HttpRequest;
-    effectContext.client.finished = true;
+    const req = createHttpRequest();
+    req.response.finished = true;
 
     // when
     const resolvedRoute = resolveRouting([], effectContext)(req);
@@ -195,7 +196,7 @@ describe('#resolveRouting', () => {
     const effect$: HttpEffect = req$ => req$.pipe(map(req => ({ body: req.test }) ));
 
     const expectedMachingResult: RouteMatched = { middleware: middleware$, effect: effect$, params: {}, path: '/' };
-    const req = { url: '/', method: 'GET', query: {}, params: {} } as HttpRequest;
+    const req = createHttpRequest({ method: 'GET', url: '/' });
 
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);

@@ -1,14 +1,15 @@
 import * as http from 'http';
 import * as https from 'https';
 import * as net from 'net';
-import { Subject } from 'rxjs';
-import { ServerEventType, ServerEvent, AllServerEvents } from './server.event';
+import { Subject, Observable } from 'rxjs';
+import { ServerEventType, ServerEvent, AllServerEvents, isCloseEvent } from './server.event';
 import { AddressInfo } from 'net';
+import { takeWhile } from 'rxjs/operators';
 
 export const subscribeServerEvents =
   (hostname: string) =>
-  (event$: Subject<AllServerEvents>) =>
-  (httpServer: http.Server | https.Server) => {
+  (httpServer: http.Server | https.Server): Observable<AllServerEvents> => {
+    const event$ = new Subject<AllServerEvents>();
 
     httpServer.on(ServerEventType.CONNECT, (req: http.IncomingMessage, socket: net.Socket, head: Buffer) =>
       event$.next(ServerEvent.connect(req, socket, head)),
@@ -50,4 +51,8 @@ export const subscribeServerEvents =
       const serverAddressInfo = httpServer.address() as AddressInfo;
       event$.next(ServerEvent.listening(serverAddressInfo.port, hostname));
     });
+
+    return event$
+      .asObservable()
+      .pipe(takeWhile(e => !isCloseEvent(e)));
   };

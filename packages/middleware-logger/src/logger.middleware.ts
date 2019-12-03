@@ -3,10 +3,10 @@ import { timestamp, tap, map } from 'rxjs/operators';
 import { LoggerOptions } from './logger.model';
 import { loggerHandler } from './logger.handler';
 
-export const logger$ = (opts: LoggerOptions = {}): HttpMiddlewareEffect => (req$, ctx) =>
+export const logger$ = (opts: LoggerOptions = {}): HttpMiddlewareEffect => req$ =>
   req$.pipe(
     timestamp(),
-    tap(loggerHandler(ctx.client, opts)),
+    tap(loggerHandler(opts)),
     map(({ value: req }) => req),
   );
 

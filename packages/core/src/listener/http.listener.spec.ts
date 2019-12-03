@@ -4,13 +4,18 @@ import { mapTo, switchMap } from 'rxjs/operators';
 import { httpListener } from './http.listener';
 import { EffectFactory } from '../effects/effects.factory';
 import { HttpMiddlewareEffect } from '../effects/http-effects.interface';
-import { createContext } from '../context/context.factory';
+import { createContext, registerAll, bindTo } from '../context/context.factory';
+import { ServerClientToken } from '../server/server.tokens';
 
 describe('Http listener', () => {
   let effectsCombiner;
   let responseHandler;
   let routerFactory;
   let routerResolver;
+
+  const context = registerAll([
+    bindTo(ServerClientToken)(jest.fn),
+  ])(createContext());
 
   const effect$ = EffectFactory
     .matchPath('/')
@@ -36,7 +41,6 @@ describe('Http listener', () => {
     // given
     const req = {} as IncomingMessage;
     const res = {} as OutgoingMessage;
-    const context = createContext();
 
     // when
     effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
@@ -62,7 +66,6 @@ describe('Http listener', () => {
   test('#httpListener allows empty middlewares', () => {
     // given
     const req = {} as IncomingMessage;
-    const context = createContext();
 
     // when
     effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
@@ -81,7 +84,6 @@ describe('Http listener', () => {
     const error = new Error('test');
     const req = {} as IncomingMessage;
     const res = {} as OutgoingMessage;
-    const context = createContext();
     const error$ = jest.fn(() => of({ body: 'error' }));
 
     // when

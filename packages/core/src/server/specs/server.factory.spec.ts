@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as http from 'http';
 import * as https from 'https';
 import { forkJoin } from 'rxjs';
-import { mapTo, tap, filter, take } from 'rxjs/operators';
+import { tap, filter, take } from 'rxjs/operators';
 import { httpListener } from '../../listener/http.listener';
 import { createServer } from '../server.factory';
 import {
@@ -16,13 +15,15 @@ import {
   isCheckContinueEvent,
   isCheckExpectationEvent,
   isClientErrorEvent,
-  isRequestEvent,
 } from '../server.event';
 import { EventEmitter } from 'events';
-import { r } from '../../router/router.ixbuilder';
+import { lookup } from '../../context/context.factory';
+import { useContext } from '../../context/context.hook';
+import { ServerClientToken } from '../server.tokens';
+import { HttpServer } from '../../http.interface';
 
 describe('#createServer', () => {
-  let server: https.Server | http.Server;
+  let server: HttpServer;
 
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -80,30 +81,24 @@ describe('#createServer', () => {
     expect(server.listening).toBe(true);
   });
 
-  test('returns server and routing', async () => {
+  test('returns server via context', async () => {
     // given
-    const effect$ = r.pipe(
-      r.matchPath('/'),
-      r.matchType('GET'),
-      r.useEffect(req$ => req$.pipe(mapTo({ status: 200 }))));
-    const app = httpListener({ effects: [effect$] });
+   const app = httpListener({ effects: [] });
+
+    const marbleServer = createServer({
+      httpListener: app,
+    });
 
     // when
-    const marbleServer = createServer({ httpListener: app });
     server = await marbleServer();
 
-    // then
-    expect(marbleServer.config).toBeDefined();
-    expect(marbleServer.config.server).toBeDefined();
-    expect(marbleServer.config.routing).toBeInstanceOf(Array);
-    expect(marbleServer.config.routing[0].path).toEqual('');
-    expect(
-      marbleServer.config.routing[0].methods.GET &&
-      marbleServer.config.routing[0].methods.GET.effect
-    ).toBeDefined();
+    const ask = lookup(marbleServer.context);
+    const boundServer = useContext(ServerClientToken)(ask);
+
+    expect(boundServer).toBeDefined();
   });
 
-  test(`emits server events`, async done => {
+  test.only(`emits server events`, async done => {
     // given
     const app = httpListener({ effects: [] });
 
@@ -117,7 +112,6 @@ describe('#createServer', () => {
         event$.pipe(filter(isConnectionEvent), take(1)),
         event$.pipe(filter(isListeningEvent), take(1)),
         event$.pipe(filter(isUpgradeEvent), take(1)),
-        event$.pipe(filter(isRequestEvent), take(1)),
         event$.pipe(filter(isCheckContinueEvent), take(1)),
         event$.pipe(filter(isCheckExpectationEvent), take(1)),
       ).pipe(
@@ -131,7 +125,6 @@ describe('#createServer', () => {
     server.emit(ServerEventType.CONNECTION, new EventEmitter());
     server.emit(ServerEventType.LISTENING);
     server.emit(ServerEventType.UPGRADE);
-    server.emit(ServerEventType.REQUEST);
     server.emit(ServerEventType.CHECK_CONTINUE);
     server.emit(ServerEventType.CHECK_EXPECTATION);
   });

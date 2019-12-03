@@ -6,7 +6,10 @@ import {
   RouteParameters,
   QueryParameters,
 } from '../../http.interface';
+import * as http from 'http';
 import { EventEmitter } from 'events';
+import { createContext, lookup } from '../../context/context.factory';
+import { createEffectContext } from '../../effects/effectsContext.factory';
 
 interface HttpRequestMockParams {
   url?: string;
@@ -16,6 +19,7 @@ interface HttpRequestMockParams {
   headers?: HttpHeaders;
   method?: HttpMethod;
   meta?: Record<string, any>;
+  response?: HttpResponse;
   [key: string]: any;
 }
 
@@ -40,6 +44,7 @@ export const createHttpRequest = (data?: HttpRequestMockParams) => Object.assign
     query: {},
     params: {},
     meta: {},
+    response: createHttpResponse() as HttpResponse,
   },
   data,
 ) as HttpRequest;
@@ -47,4 +52,14 @@ export const createHttpRequest = (data?: HttpRequestMockParams) => Object.assign
 export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
   new class extends EventEmitter {
     statusCode = data.statusCode;
+    writeHead = jest.fn();
+    setHeader = jest.fn();
+    getHeader = jest.fn();
+    end = jest.fn();
   } as any as HttpResponse;
+
+export const createMockEffectContext = () => {
+  const context = createContext();
+  const client = http.createServer();
+  return createEffectContext({ ask: lookup(context), client });
+};

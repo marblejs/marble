@@ -1,10 +1,14 @@
 import { ContentType } from '@marblejs/core/dist/+internal/http';
+import { createServer, HttpServer } from '@marblejs/core';
 import * as request from 'supertest';
 import { app } from './bodyParser.integration';
-import { createContext } from '@marblejs/core';
 
 describe('@marblejs/middleware-body - integration', () => {
-  const httpServer = app(createContext());
+  let httpServer: HttpServer;
+
+  beforeEach(async () => {
+    httpServer = await createServer({ httpListener: app })();
+  });
 
   describe('POST /default-parser', () => {
     test(`parses ${ContentType.APPLICATION_JSON} content-type`, async () =>
@@ -33,7 +37,7 @@ describe('@marblejs/middleware-body - integration', () => {
         .post('/multiple-parsers')
         .set({ 'Content-Type': ContentType.APPLICATION_JSON })
         .send(body)
-        .expect(200, body)
+        .expect(200, body),
     );
 
     test(`parses custom "test/json" content-type`, async () =>

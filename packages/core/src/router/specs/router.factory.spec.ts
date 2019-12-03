@@ -8,7 +8,7 @@ import { createHttpRequest } from '../../+internal';
 import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { EffectContext } from '../../effects/effects.interface';
-import { HttpResponse } from '../../http.interface';
+import { HttpServer } from '../../http.interface';
 
 describe('#factorizeRouting', () => {
   test('factorizes routing with nested groups', () => {
@@ -83,7 +83,7 @@ describe('#factorizeRouting', () => {
     // given
     const spy = jest.fn();
     const req$ = of(createHttpRequest());
-    const ctx = createEffectContext({} as EffectContext<HttpResponse>);
+    const ctx = createEffectContext({} as EffectContext<HttpServer>);
     const m$: HttpMiddlewareEffect = req$ => req$.pipe(tap(spy));
     const e$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
 

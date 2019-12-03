@@ -1,5 +1,5 @@
+import { createHttpResponse } from '@marblejs/core/dist/+internal/testing';
 import { AccessControlHeader, applyHeaders, ConfiguredHeader } from '../applyHeaders';
-import { createMockResponse } from '../util';
 
 describe('applyHeaders', () => {
   test('should handle many methods correctly', done => {
@@ -7,7 +7,7 @@ describe('applyHeaders', () => {
       { key: AccessControlHeader.Origin, value: '*' },
       { key: AccessControlHeader.Methods, value: 'POST' },
     ];
-    const res = createMockResponse();
+    const res = createHttpResponse();
 
     applyHeaders(configured, res);
 

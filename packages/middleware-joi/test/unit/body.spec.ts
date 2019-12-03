@@ -1,5 +1,5 @@
+import * as http from 'http';
 import { HttpRequest, createContext, createEffectContext, lookup } from '@marblejs/core';
-import { createHttpResponse } from '@marblejs/core/dist/+internal/testing';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { of } from 'rxjs';
 import { validator$, Joi } from '../../src';
@@ -9,7 +9,7 @@ const MockReq = require('mock-req');
 
 describe('Joi middleware - Body', () => {
   const context = createContext();
-  const client = createHttpResponse();
+  const client = http.createServer();
   const ctx = createEffectContext({ ask: lookup(context), client });
 
   it(`throws an error if doesn't pass a required field`, done => {

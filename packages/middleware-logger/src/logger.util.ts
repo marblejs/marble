@@ -10,7 +10,7 @@ export const isNotSilent = (opts: LoggerOptions) => (_: LoggerCtx) =>
 
 export const filterResponse = (opts: LoggerOptions) => (ctx: LoggerCtx) => pipe(
   O.fromNullable(opts.filter),
-  O.map(filter => filter(ctx.res, ctx.req)),
+  O.map(filter => filter(ctx.res, ctx.req)), // @TODO: use only HttpRequest
   O.getOrElse(() => true),
 );
 
