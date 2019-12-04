@@ -1,15 +1,13 @@
-import * as http from 'http';
 import * as qs from 'qs';
 import * as MockReq from 'mock-req';
 import { of } from 'rxjs';
-import { HttpRequest, createContext, createEffectContext, lookup } from '@marblejs/core';
+import { HttpRequest } from '@marblejs/core';
+import { createMockEffectContext } from '@marblejs/core/dist/+internal/testing';
 import { Marbles, ContentType } from '@marblejs/core/dist/+internal';
 import { bodyParser$ } from '../body.middleware';
 
 describe('bodyParser$ middleware', () => {
-  const client = http.createServer();
-  const context = createContext();
-  const ctx = createEffectContext({ ask: lookup(context), client });
+  const ctx = createMockEffectContext();
 
   beforeEach(() => {
     spyOn(console, 'log').and.stub();
@@ -157,7 +155,6 @@ describe('bodyParser$ middleware', () => {
     http$.subscribe(
       () => {
         fail('Exceptions should be thrown');
-        done();
       },
       error => {
         expect(error.message).toBe('Request body parse error');
@@ -181,7 +178,6 @@ describe('bodyParser$ middleware', () => {
     http$.subscribe(
       () => {
         fail('Exceptions should be thrown');
-        done();
       },
       error => {
         expect(error).toBeDefined();

@@ -98,7 +98,7 @@ describe('#createServer', () => {
     expect(boundServer).toBeDefined();
   });
 
-  test.only(`emits server events`, async done => {
+  test(`emits server events`, async done => {
     // given
     const app = httpListener({ effects: [] });
 

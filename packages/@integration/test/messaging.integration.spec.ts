@@ -1,18 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import * as request from 'supertest';
+import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
+import { createMicroserviceTestBed } from '@marblejs/messaging/dist/+internal/testing';
 import { server } from '../src/messaging/client';
-import { microservice as messagingServer } from '../src/messaging/server';
+import { microservice } from '../src/messaging/server';
 
 describe('messaging integration', () => {
-  const microservice = messagingServer();
+  const httpTestBed = createHttpServerTestBed(server);
+  const microserviceTestBed = createMicroserviceTestBed(microservice);
 
-  beforeAll(() => microservice);
-  beforeAll(() => jest.spyOn(console, 'log').mockImplementation());
-  beforeAll(() => jest.spyOn(console, 'info').mockImplementation());
-  afterAll(() => microservice.then(con => con.close()));
+  beforeAll(async () => {
+    jest.spyOn(console, 'log').mockImplementation();
+    jest.spyOn(console, 'info').mockImplementation();
+  });
 
-  test('GET /fib returns 10, 11, 12, 13, 14 th fibonacci number', async () => {
-    const httpServer = await server();
-    return request(httpServer)
+  test('GET /fib returns 10, 11, 12, 13, 14 th fibonacci number', async () =>
+    request(httpTestBed.getInstance())
       .get('/fib/10')
       .expect(200, [
         { type: 'FIB_RESULT', payload: 55 },
@@ -20,7 +24,7 @@ describe('messaging integration', () => {
         { type: 'FIB_RESULT', payload: 144 },
         { type: 'FIB_RESULT', payload: 233 },
         { type: 'FIB_RESULT', payload: 377 },
-      ]);
-  });
+      ])
+  );
 });
 

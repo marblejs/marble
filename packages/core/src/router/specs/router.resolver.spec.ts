@@ -1,14 +1,10 @@
-import * as http from 'http';
 import { mapTo, tap, map } from 'rxjs/operators';
 import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
 import { EffectContext } from '../../effects/effects.interface';
 import { findRoute, resolveRouting } from '../router.resolver';
 import { HttpMethod, HttpServer } from '../../http.interface';
 import { RouteMatched, Routing } from '../router.interface';
-import { createContext } from '../../context/context.factory';
-import { createEffectContext } from '../../effects/effectsContext.factory';
-import { lookup } from '../../context/context.factory';
-import { createHttpRequest } from '../../+internal';
+import { createHttpRequest, createMockEffectContext } from '../../+internal';
 
 describe('#findRoute', () => {
   test('finds route inside collection', () => {
@@ -106,18 +102,14 @@ describe('#findRoute', () => {
 describe('#resolveRouting', () => {
   let router;
   let queryFactory;
-  let effectContext: EffectContext<HttpServer>;
-  const context = createContext();
+  let ctx: EffectContext<HttpServer>;
 
   beforeEach(() => {
     jest.unmock('../router.resolver.ts');
     jest.unmock('../router.query.factory');
     router = require('../router.resolver.ts');
     queryFactory = require('../router.query.factory');
-    effectContext = createEffectContext({
-      ask: lookup(context),
-      client: http.createServer(),
-    });
+    ctx = createMockEffectContext();
   });
 
   test('resolves found effect', done => {
@@ -129,7 +121,7 @@ describe('#resolveRouting', () => {
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);
     queryFactory.queryParamsFactory = jest.fn(() => ({}));
-    const resolvedRoute = resolveRouting([], effectContext)(req);
+    const resolvedRoute = resolveRouting([], ctx)(req);
 
     // then
     resolvedRoute.subscribe(effect => {
@@ -146,7 +138,7 @@ describe('#resolveRouting', () => {
 
     // when
     router.findRoute = jest.fn(() => undefined);
-    const resolvedRoute = resolveRouting([], effectContext)(req);
+    const resolvedRoute = resolveRouting([], ctx)(req);
 
     // then
     resolvedRoute.subscribe(
@@ -171,7 +163,7 @@ describe('#resolveRouting', () => {
     req.response.finished = true;
 
     // when
-    const resolvedRoute = resolveRouting([], effectContext)(req);
+    const resolvedRoute = resolveRouting([], ctx)(req);
 
     // then
     resolvedRoute.subscribe(
@@ -201,7 +193,7 @@ describe('#resolveRouting', () => {
     // when
     router.findRoute = jest.fn(() => expectedMachingResult);
     queryFactory.queryParamsFactory = jest.fn(() => ({}));
-    const resolvedRoute = resolveRouting([], effectContext)(req);
+    const resolvedRoute = resolveRouting([], ctx)(req);
 
     // then
     resolvedRoute.subscribe(effect => {

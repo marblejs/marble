@@ -3,8 +3,6 @@ import * as https from 'https';
 import { httpListener } from '../listener/http.listener';
 import { HttpServerEffect } from '../effects/http-effects.interface';
 import { BoundDependency, Context } from '../context/context.factory';
-import { RoutingItem } from '../router/router.interface';
-import { HttpServer } from '../http.interface';
 
 export interface CreateServerConfig {
   port?: number;
@@ -22,9 +20,4 @@ export interface Server {
 
 export interface ServerOptions {
   httpsOptions?: https.ServerOptions;
-}
-
-export interface ServerConfig {
-  server: HttpServer;
-  routing: RoutingItem[];
 }

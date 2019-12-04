@@ -1,12 +1,5 @@
-import * as http from 'http';
-import {
-  HttpRequest,
-  HttpError,
-  HttpStatus,
-  createContext,
-  createEffectContext,
-  lookup,
-} from '@marblejs/core';
+import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
+import { createMockEffectContext } from '@marblejs/core/dist/+internal';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
 import { of, throwError, iif } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
@@ -24,9 +17,7 @@ describe('JWT middleware', () => {
   let utilModule;
   let factoryModule;
 
-  const client = http.createServer();
-  const context = createContext();
-  const ctx = createEffectContext({ ask: lookup(context), client });
+  const ctx = createMockEffectContext();
 
   beforeEach(() => {
     jest.unmock('../jwt.util.ts');

@@ -4,7 +4,7 @@ import { subscribeServerEvents } from './server.event.subscriber';
 import { createContext, lookup, registerAll, bindTo } from '../context/context.factory';
 import { createEffectContext } from '../effects/effectsContext.factory';
 import { CreateServerConfig, Server } from './server.interface';
-import {ServerClientToken, ServerEventStreamToken } from './server.tokens';
+import { ServerClientToken, ServerEventStreamToken } from './server.tokens';
 
 const DEFAULT_HOSTNAME = '127.0.0.1';
 

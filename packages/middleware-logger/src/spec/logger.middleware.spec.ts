@@ -1,14 +1,6 @@
-import * as http from 'http';
 import { of } from 'rxjs';
-import { createHttpRequest } from '@marblejs/core/dist/+internal';
+import { createHttpRequest, createMockEffectContext } from '@marblejs/core/dist/+internal';
 import { logger$, loggerWithOpts$ } from '../logger.middleware';
-import { createEffectContext, createContext, lookup } from '@marblejs/core';
-
-const createMockEffectContext = () => {
-  const context = createContext();
-  const client = http.createServer();
-  return createEffectContext({ ask: lookup(context), client });
-};
 
 beforeEach(() => {
   spyOn(console, 'log').and.stub();

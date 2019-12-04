@@ -1,21 +1,18 @@
 import * as request from 'supertest';
-import { HttpServer, createServer } from '@marblejs/core';
+import { createServer } from '@marblejs/core';
+import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
 import { app } from '../helpers/api.spec-util';
 
 describe('Joi middleware - Integration', () => {
   const token = '181782881DB38D84';
-
-  let httpServer: HttpServer;
-
-  beforeEach(async () => {
-    httpServer = await createServer({ httpListener: app })();
-  });
+  const server = createServer({ httpListener: app });
+  const httpTestBed = createHttpServerTestBed(server);
 
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(jest.fn);
   });
 
-  it('should fail without a token', async () => {
+  test('should fail without a token', async () => {
     const expected = {
       error: {
         status: 400,
@@ -23,19 +20,19 @@ describe('Joi middleware - Integration', () => {
       }
     };
 
-    return request(httpServer)
+    return request(httpTestBed.getInstance())
       .get('/api/user/1')
       .then(res => expect(res.body).toEqual(expected));
   });
 
-  it('should send a get request with parameters', async () => {
-    return request(httpServer)
+  test('should send a get request with parameters', async () => {
+    return request(httpTestBed.getInstance())
       .get('/api/user/1')
       .set('token', token)
       .expect(200, { id: 1 });
   });
 
-  it('should send a get request with an invalid param', async () => {
+  test('should send a get request with an invalid param', async () => {
     const expected = {
       error: {
         status: 400,
@@ -43,30 +40,30 @@ describe('Joi middleware - Integration', () => {
       }
     };
 
-    return request(httpServer)
+    return request(httpTestBed.getInstance())
       .get('/api/user/11')
       .set('token', token)
       .then(res => expect(res.body).toEqual(expected));
   });
 
-  it('should send a get request with query', async () => {
-    return request(httpServer)
+  test('should send a get request with query', async () => {
+    return request(httpTestBed.getInstance())
       .get('/api/post?page=2')
       .set('token', token)
       .expect(200, { page: 2 });
   });
 
-  it('should send a post request with body', async () => {
-    return request(httpServer)
+  test('should send a post request with body', async () => {
+    return request(httpTestBed.getInstance())
       .post('/api/user')
       .set('token', token)
       .send({ name: 'lucio' })
       .expect(200, { name: 'lucio', passport: 'marble.js' });
   });
 
-  it('should send a post request with query and body', async () => {
+  test('should send a post request with query and body', async () => {
     const time = Date.now();
-    return request(httpServer)
+    return request(httpTestBed.getInstance())
       .post(`/api/post?timestamp=${time}`)
       .set('token', token)
       .send({ title: 'Middleware Joi' })

@@ -5,11 +5,13 @@ import {
   HttpMethod,
   RouteParameters,
   QueryParameters,
+  HttpServer,
 } from '../../http.interface';
 import * as http from 'http';
 import { EventEmitter } from 'events';
 import { createContext, lookup } from '../../context/context.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
+import { Server } from '../../server/server.interface';
 
 interface HttpRequestMockParams {
   url?: string;
@@ -62,4 +64,22 @@ export const createMockEffectContext = () => {
   const context = createContext();
   const client = http.createServer();
   return createEffectContext({ ask: lookup(context), client });
+};
+
+export const createHttpServerTestBed = (server: Server) => {
+  let httpServer: HttpServer;
+
+  const getInstance = () => httpServer;
+
+  beforeAll(async () => {
+    httpServer = await server();
+  });
+
+  afterAll(done => {
+    httpServer.close(done);
+  });
+
+  return {
+    getInstance,
+  };
 };
