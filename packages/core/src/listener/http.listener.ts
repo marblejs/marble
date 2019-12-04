@@ -2,7 +2,7 @@ import { IncomingMessage, OutgoingMessage } from 'http';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as R from 'fp-ts/lib/Reader';
 import { of, Subject } from 'rxjs';
-import { catchError, defaultIfEmpty, mergeMap, tap, takeWhile, map } from 'rxjs/operators';
+import { catchError, defaultIfEmpty, mergeMap, tap, map, publish } from 'rxjs/operators';
 import { combineMiddlewares } from '../effects/effects.combiner';
 import {
   HttpEffectResponse,
@@ -42,6 +42,7 @@ export const httpListener = ({
   R.ask<Context>(),
   R.map(ctx => {
     const requestSubject$ = new Subject<HttpRequest>();
+    const request$ = requestSubject$.asObservable();
 
     const ask = lookup(ctx);
     const client = useContext(ServerClientToken)(ask);
@@ -50,10 +51,10 @@ export const httpListener = ({
     const routing = factorizeRouting(effects);
     const defaultResponse = { status: HttpStatus.NOT_FOUND } as HttpEffectResponse;
 
-    requestSubject$.pipe(
+    request$.pipe(
+      publish(req$ => combinedMiddlewares(req$, effectContext)),
       mergeMap(req => {
-        return combinedMiddlewares(of(req), effectContext).pipe(
-          takeWhile(() => !req.response.finished),
+        return of(req).pipe(
           mergeMap(resolveRouting(routing, effectContext)),
           defaultIfEmpty(defaultResponse),
           mergeMap(out => output$(of({ req, res: out }), effectContext)),
