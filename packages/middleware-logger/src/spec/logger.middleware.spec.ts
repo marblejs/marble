@@ -1,5 +1,6 @@
 import * as http from 'http';
-import { Marbles, createHttpRequest } from '@marblejs/core/dist/+internal';
+import { of } from 'rxjs';
+import { createHttpRequest } from '@marblejs/core/dist/+internal';
 import { logger$, loggerWithOpts$ } from '../logger.middleware';
 import { createEffectContext, createContext, lookup } from '@marblejs/core';
 
@@ -9,63 +10,54 @@ const createMockEffectContext = () => {
   return createEffectContext({ ask: lookup(context), client });
 };
 
+beforeEach(() => {
+  spyOn(console, 'log').and.stub();
+  spyOn(console, 'info').and.stub();
+  spyOn(console, 'error').and.stub();
+});
+
 describe('logger$', () => {
-
-  beforeEach(() => {
-    spyOn(console, 'log').and.stub();
-    spyOn(console, 'info').and.stub();
-    spyOn(console, 'error').and.stub();
-  });
-
-  test('reacts to 200 status on the console', () => {
+  test('reacts to 200 status on the console', async () => {
+    // given
     const ctx = createMockEffectContext();
-    const request = createHttpRequest({ url: '/', method: 'GET' });
+    const req = createHttpRequest({ url: '/', method: 'GET' });
+    req.response.statusCode = 200;
 
-    request.response.statusCode = 200;
+    // when
+    await logger$()(of(req), ctx).toPromise();
+    req.response.emit('finish');
 
-    Marbles.assertEffect(logger$(), [
-      ['-a-', { a: request }],
-      ['-a-', { a: request }],
-    ], { ctx });
-
-    request.response.emit('finish');
+    // then
     expect(console.info).toHaveBeenCalled();
   });
 
-  test('reacts to 400 status on the console', () => {
+  test('reacts to 400 status on the console', async () => {
+    // given
     const ctx = createMockEffectContext();
-    const request = createHttpRequest({ url: '/test', method: 'POST' });
+    const req = createHttpRequest({ url: '/test', method: 'POST' });
+    req.response.statusCode = 403;
 
-    request.response.statusCode = 403;
+    // when
+    await logger$()(of(req), ctx).toPromise();
+    req.response.emit('finish');
 
-    Marbles.assertEffect(logger$(), [
-      ['-a-', { a: request }],
-      ['-a-', { a: request }],
-    ], { ctx });
-
-    request.response.emit('finish');
+    // then
     expect(console.info).toHaveBeenCalled();
   });
-
 });
 
 describe('loggerWithOpts$', () => {
-
-  test('reacts to 200 status on the console', () => {
+  test('reacts to 200 status on the console', async () => {
+    // given
     const ctx = createMockEffectContext();
-    const request = createHttpRequest({ url: '/', method: 'GET' });
+    const req = createHttpRequest({ url: '/', method: 'GET' });
+    req.response.statusCode = 200;
 
-    request.response.statusCode = 200;
+    // when
+    await loggerWithOpts$()(of(req), ctx).toPromise();
+    req.response.emit('finish');
 
-    spyOn(console, 'info').and.stub();
-
-    Marbles.assertEffect(loggerWithOpts$(), [
-      ['-a-', { a: request }],
-      ['-a-', { a: request }],
-    ], { ctx });
-
-    request.response.emit('finish');
+    // then
     expect(console.info).toHaveBeenCalled();
   });
-
 });

@@ -3,6 +3,10 @@ import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import httpListener from './http.listener';
 
+const port = process.env.PORT
+  ? Number(process.env.PORT)
+  : undefined;
+
 const listening$: HttpServerEffect = event$ =>
   event$.pipe(
     matchEvent(ServerEvent.listening),
@@ -11,7 +15,7 @@ const listening$: HttpServerEffect = event$ =>
   );
 
 export const server = createServer({
-  port: 1337,
+  port,
   httpListener,
   event$: (...args) => merge(
     listening$(...args),
