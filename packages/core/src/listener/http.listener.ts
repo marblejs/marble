@@ -18,6 +18,8 @@ import { factorizeRouting } from '../router/router.factory';
 import { defaultError$ } from '../error/error.effect';
 import { Context, lookup } from '../context/context.factory';
 import { createEffectContext } from '../effects/effectsContext.factory';
+import { useContext } from '../context/context.hook';
+import { ServerClientToken } from '../server/server.tokens';
 
 export interface HttpListenerConfig {
   middlewares?: HttpMiddlewareEffect[];
@@ -39,37 +41,42 @@ export const httpListener = ({
 }: HttpListenerConfig): R.Reader<Context, HttpListener> => pipe(
   R.ask<Context>(),
   R.map(ctx => {
+    const requestSubject$ = new Subject<HttpRequest>();
+
     const ask = lookup(ctx);
-    const requestSubject$ = new Subject<{ req: HttpRequest; res: HttpResponse }>();
+    const client = useContext(ServerClientToken)(ask);
+    const effectContext = createEffectContext({ ask, client });
     const combinedMiddlewares = combineMiddlewares(...middlewares);
     const routing = factorizeRouting(effects);
     const defaultResponse = { status: HttpStatus.NOT_FOUND } as HttpEffectResponse;
 
     requestSubject$.pipe(
-      tap(({ req, res }) => res.send = handleResponse(res)(req)),
-      mergeMap(({ req, res }) => {
-        const ctx = createEffectContext({ ask, client: res });
-
-        return combinedMiddlewares(of(req), ctx).pipe(
-          takeWhile(() => !res.finished),
-          mergeMap(resolveRouting(routing, ctx)),
+      mergeMap(req => {
+        return combinedMiddlewares(of(req), effectContext).pipe(
+          takeWhile(() => !req.response.finished),
+          mergeMap(resolveRouting(routing, effectContext)),
           defaultIfEmpty(defaultResponse),
-          mergeMap(out => output$(of({ req, res: out }), ctx)),
-          tap(res.send),
+          mergeMap(out => output$(of({ req, res: out }), effectContext)),
+          tap(req.response.send),
           catchError(error =>
-            error$(of({ req, error }), ctx).pipe(
-              mergeMap(out => output$(of({ req, res: out }), ctx)),
-              tap(res.send),
+            error$(of({ req, error }), effectContext).pipe(
+              mergeMap(out => output$(of({ req, res: out }), effectContext)),
+              tap(req.response.send),
             ),
           ),
         );
       }),
     ).subscribe();
 
-    const httpServer = (req: IncomingMessage, res: OutgoingMessage) => requestSubject$.next({
-      req: req as HttpRequest,
-      res: res as HttpResponse,
-    });
+    const httpServer = (req: IncomingMessage, res: OutgoingMessage) => {
+      const marbleReq = req as HttpRequest;
+      const marbleRes = res as HttpResponse;
+
+      marbleRes.send = handleResponse(marbleRes)(marbleReq);
+      marbleReq.response = marbleRes;
+
+      return requestSubject$.next(marbleReq);
+    };
 
     httpServer.config = { routing };
 

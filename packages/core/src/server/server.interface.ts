@@ -2,8 +2,7 @@ import * as http from 'http';
 import * as https from 'https';
 import { httpListener } from '../listener/http.listener';
 import { HttpServerEffect } from '../effects/http-effects.interface';
-import { BoundDependency } from '../context/context.factory';
-import { RoutingItem } from '../router/router.interface';
+import { BoundDependency, Context } from '../context/context.factory';
 
 export interface CreateServerConfig {
   port?: number;
@@ -16,14 +15,9 @@ export interface CreateServerConfig {
 
 export interface Server {
   (): Promise<https.Server | http.Server>;
-  config: ServerConfig;
+  context: Context;
 }
 
 export interface ServerOptions {
   httpsOptions?: https.ServerOptions;
-}
-
-export interface ServerConfig {
-  server: https.Server | http.Server;
-  routing: RoutingItem[];
 }

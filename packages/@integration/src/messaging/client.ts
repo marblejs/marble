@@ -16,6 +16,10 @@ import { merge, forkJoin } from 'rxjs';
 import { tap, map, mergeMap, mapTo } from 'rxjs/operators';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 
+const port = process.env.PORT
+  ? Number(process.env.PORT)
+  : undefined;
+
 const ClientToken = createContextToken<MessagingClient>('MessagingClient');
 
 const client = messagingClient({
@@ -71,7 +75,7 @@ const listening$: HttpServerEffect = event$ =>
   );
 
 export const server = createServer({
-  port: Number(process.env.PORT) || 1337,
+  port,
   httpListener: httpListener({
     middlewares: [logger$()],
     effects: [test$, fib$],

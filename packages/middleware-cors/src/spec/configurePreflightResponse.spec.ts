@@ -1,12 +1,13 @@
+import { createHttpResponse } from '@marblejs/core/dist/+internal/testing';
 import { configurePreflightResponse } from '../configurePreflightResponse';
 import { CORSOptions } from '../middleware';
-import { createMockRequest, createMockResponse } from '../util';
+import { createMockRequest } from '../util';
 
 describe('configurePreflightResponse', () => {
   test('should configure headers correctly', done => {
     const origin = 'fake-origin';
     const req = createMockRequest('OPTIONS', { origin });
-    const res = createMockResponse();
+    const res = createHttpResponse();
     const options: CORSOptions = {
       origin: '*',
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -39,7 +40,7 @@ describe('configurePreflightResponse', () => {
   test('should configure headers correctly', done => {
     const origin = 'fake-origin';
     const req = createMockRequest('OPTIONS', { origin });
-    const res = createMockResponse();
+    const res = createHttpResponse();
     const options: CORSOptions = {
       origin: '*',
       withCredentials: false,
@@ -70,7 +71,7 @@ describe('configurePreflightResponse', () => {
   test('should disallow preflight request', done => {
     const origin = 'fake-origin';
     const req = createMockRequest('OPTIONS', { origin });
-    const res = createMockResponse();
+    const res = createHttpResponse();
     const options: CORSOptions = {
       origin: 'another-origin',
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -99,7 +100,7 @@ describe('configurePreflightResponse', () => {
       origin,
       'access-control-request-method': 'GET',
     });
-    const res = createMockResponse();
+    const res = createHttpResponse();
     const options: CORSOptions = {
       origin: 'fake-origin',
       methods: ['OPTIONS'],

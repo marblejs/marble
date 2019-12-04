@@ -1,8 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as rimraf from 'rimraf';
 import * as request from 'supertest';
 import { map } from 'rxjs/operators';
-import { r, use, httpListener, createContext } from '@marblejs/core';
+import { r, use, httpListener, createServer } from '@marblejs/core';
+import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
 import { multipart$ } from '../multipart.middleware';
 import { streamFileTo } from '../multipart.util';
 
@@ -47,19 +49,23 @@ const filesystemMultipart$ = r.pipe(
     }}))
   )));
 
-const app = httpListener({
-  effects: [memoryMultipart$, memoryWithOptionsMultipart$, filesystemMultipart$],
-})(createContext());
-
-afterEach(() => {
-  if (fs.existsSync(TMP_PATH)) { fs.rmdirSync(TMP_PATH); }
+const server = createServer({
+  httpListener: httpListener({
+    effects: [memoryMultipart$, memoryWithOptionsMultipart$, filesystemMultipart$],
+  }),
 });
 
 describe('multipart$', () => {
+  const httpTestBed = createHttpServerTestBed(server);
+
+  afterEach(() => {
+    if (fs.existsSync(TMP_PATH)) { rimraf.sync(TMP_PATH); }
+  });
+
   test('parses multipart/form-data request with additional fields and stores it in-memory', async () => {
     const data = Buffer.from('test_buffer_1');
 
-    return request(app)
+    return request(httpTestBed.getInstance())
       .post('/memory')
       .field('field_1', 'test_1')
       .field('field_2', 'test_2')
@@ -86,7 +92,7 @@ describe('multipart$', () => {
     const savedFilePath = path.resolve(TMP_PATH, 'data_field');
     const file = fs.readFileSync(uploadFilePath);
 
-    return request(app)
+    return request(httpTestBed.getInstance())
       .post('/filesystem')
       .field('field_1', 'test_1')
       .field('field_2', 'test_2')
@@ -112,7 +118,7 @@ describe('multipart$', () => {
   });
 
   test('throws an error if incoming request is not multipart/form-data', async () =>
-    request(app)
+    request(httpTestBed.getInstance())
       .post('/memory')
       .send({ test: 'test' })
       .expect(412)
@@ -128,7 +134,7 @@ describe('multipart$', () => {
     const data1 = Buffer.from('test_buffer_1');
     const data2 = Buffer.from('test_buffer_2');
 
-    return request(app)
+    return request(httpTestBed.getInstance())
       .post('/memory-with-options')
       .attach('data_field_1', data1)
       .attach('data_field_2', data2)
@@ -142,7 +148,7 @@ describe('multipart$', () => {
   });
 
   test('throws an error if max fields count limit is reached', async () => {
-    return request(app)
+    return request(httpTestBed.getInstance())
       .post('/memory-with-options')
       .field('field_1', 'test_1')
       .field('field_2', 'test_2')
@@ -159,7 +165,7 @@ describe('multipart$', () => {
   test('throws an error if max file size limit is reached', async () => {
     const data = Buffer.from(Array(100).fill(0));
 
-    return request(app)
+    return request(httpTestBed.getInstance())
       .post('/memory-with-options')
       .attach('data_field', data)
       .expect(412)

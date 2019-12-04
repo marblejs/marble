@@ -1,13 +1,13 @@
 import { createContext, registerAll, bindTo, createEffectContext, lookup, combineEffects } from '@marblejs/core';
 import { Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
-import { CreateMicroserviceConfig } from './messaging.server.interface';
+import { CreateMicroserviceConfig, Microservice } from './messaging.server.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
 import { AllServerEvents, isCloseEvent } from './messaging.server.events';
 import { statusLogger$ } from '../middlewares/messaging.statusLogger.middleware';
 
-export const createMicroservice = (config: CreateMicroserviceConfig) => {
+export const createMicroservice = (config: CreateMicroserviceConfig): Microservice => {
   const {
     event$,
     options,

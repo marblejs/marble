@@ -65,5 +65,7 @@ const middlewares = [
     { stripUnknown: true }
   )
 ];
+
 const effects = [api$];
-export const server = () => httpListener({ middlewares, effects });
+
+export const app = httpListener({ middlewares, effects });

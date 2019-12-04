@@ -1,6 +1,6 @@
 import { EMPTY, Observable, of } from 'rxjs';
 import { mergeMap, takeWhile } from 'rxjs/operators';
-import { HttpMethod, HttpRequest, HttpResponse } from '../http.interface';
+import { HttpMethod, HttpRequest, HttpServer } from '../http.interface';
 import { EffectContext } from '../effects/effects.interface';
 import { HttpEffectResponse } from '../effects/http-effects.interface';
 import { RouteMatched, Routing, RoutingItem } from './router.interface';
@@ -38,8 +38,8 @@ export const findRoute = (
 };
 
 export const resolveRouting =
-  (routing: Routing, effectContext: EffectContext<HttpResponse>) => (req: HttpRequest): Observable<HttpEffectResponse> => {
-    if (effectContext.client.finished) { return EMPTY; }
+  (routing: Routing, effectContext: EffectContext<HttpServer>) => (req: HttpRequest): Observable<HttpEffectResponse> => {
+    if (req.response.finished) { return EMPTY; }
     req.meta = {};
 
     const [urlPath, urlQuery] = req.url.split('?');
@@ -55,7 +55,7 @@ export const resolveRouting =
 
     return middleware
       ? middleware(of(req), effectContext).pipe(
-          takeWhile(() => !effectContext.client.finished),
+          takeWhile(() => !req.response.finished),
           mergeMap(req => routeMatched.effect(of(req), effectContext))
         )
       : routeMatched.effect(of(req), effectContext);

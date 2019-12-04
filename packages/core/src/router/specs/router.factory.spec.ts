@@ -4,11 +4,8 @@ import { of } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import { RouteEffect, RouteEffectGroup, Routing } from '../router.interface';
 import { factorizeRouting } from '../router.factory';
-import { createHttpRequest } from '../../+internal';
+import { createHttpRequest, createMockEffectContext } from '../../+internal';
 import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
-import { createEffectContext } from '../../effects/effectsContext.factory';
-import { EffectContext } from '../../effects/effects.interface';
-import { HttpResponse } from '../../http.interface';
 
 describe('#factorizeRouting', () => {
   test('factorizes routing with nested groups', () => {
@@ -82,8 +79,8 @@ describe('#factorizeRouting', () => {
   test('composes routed middlewares', async () => {
     // given
     const spy = jest.fn();
-    const req$ = of(createHttpRequest());
-    const ctx = createEffectContext({} as EffectContext<HttpResponse>);
+    const req = createHttpRequest();
+    const ctx = createMockEffectContext();
     const m$: HttpMiddlewareEffect = req$ => req$.pipe(tap(spy));
     const e$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
 
@@ -109,7 +106,7 @@ describe('#factorizeRouting', () => {
     // when
     const factorizedRouting = factorizeRouting(routing);
     const middleware$ = factorizedRouting[0].methods.GET!.middleware!;
-    await middleware$(req$, ctx).toPromise();
+    await middleware$(of(req), ctx).toPromise();
 
     // then
     expect(spy).toHaveBeenCalledTimes(4);

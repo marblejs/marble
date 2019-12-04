@@ -1,15 +1,17 @@
 import * as request from 'supertest';
 import { verifyToken } from '../src';
 import { app, SECRET_KEY } from './jwt.integration';
-import { createContext } from '@marblejs/core';
+import { createServer } from '@marblejs/core';
+import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
 
 const LOGIN_CREDENTIALS = { email: 'admin@admin.com', password: 'admin' };
 
 describe('@marblejs/middleware-jwt - HTTP integration', () => {
-  const httpServer = app(createContext());
+  const server = createServer({ httpListener: app });
+  const httpTestBed = createHttpServerTestBed(server);
 
   test('POST /api/login returns token and verifies its correctness', async () =>
-    request(httpServer)
+    request(httpTestBed.getInstance())
       .post('/api/login')
       .send(LOGIN_CREDENTIALS)
       .expect(200)
@@ -24,13 +26,13 @@ describe('@marblejs/middleware-jwt - HTTP integration', () => {
       }));
 
     test('GET /api/secured authorizes request and checks the `req.user` object', async () => {
-      const token = await request(httpServer)
+      const token = await request(httpTestBed.getInstance())
         .post('/api/login')
         .send(LOGIN_CREDENTIALS)
         .expect(200)
         .then(req => req.body.token as string);
 
-      return request(httpServer)
+      return request(httpTestBed.getInstance())
         .get('/api/secured')
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
@@ -43,20 +45,20 @@ describe('@marblejs/middleware-jwt - HTTP integration', () => {
     });
 
     test('GET /api/secured return 401 if payload doesn\'t pass verification', async () => {
-      const token = await request(httpServer)
+      const token = await request(httpTestBed.getInstance())
         .post('/api/login')
         .send({ ...LOGIN_CREDENTIALS, email: 'doesnt_exists@admin.com' })
         .expect(200)
         .then(req => req.body.token as string);
 
-      return request(httpServer)
+      return request(httpTestBed.getInstance())
         .get('/api/secured')
         .set('Authorization', `Bearer ${token}`)
         .expect(401, { error: { status: 401, message: 'Unauthorized' } });
     });
 
     test('GET /api/secured returns 401 if token is wrong', async () =>
-      request(httpServer)
+      request(httpTestBed.getInstance())
         .get('/api/secured')
         .set('Authorization', `Bearer WRONG_TOKEN`)
         .expect(401, { error: { status: 401, message: 'Unauthorized' } }));

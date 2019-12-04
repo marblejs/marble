@@ -1,12 +1,5 @@
-import {
-  HttpRequest,
-  HttpError,
-  HttpStatus,
-  createContext,
-  createEffectContext,
-  lookup,
-} from '@marblejs/core';
-import { createHttpResponse } from '@marblejs/core/dist/+internal/testing/http.helper';
+import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
+import { createMockEffectContext } from '@marblejs/core/dist/+internal';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
 import { of, throwError, iif } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
@@ -23,9 +16,8 @@ const verifyPayload$ = (payload: { id: string }) =>
 describe('JWT middleware', () => {
   let utilModule;
   let factoryModule;
-  const client = createHttpResponse();
-  const context = createContext();
-  const ctx = createEffectContext({ ask: lookup(context), client });
+
+  const ctx = createMockEffectContext();
 
   beforeEach(() => {
     jest.unmock('../jwt.util.ts');
@@ -63,7 +55,6 @@ describe('JWT middleware', () => {
       },
       () => {
         fail(`Stream shouldn\'t throw an error`);
-        done();
       }
     );
   });
@@ -116,7 +107,6 @@ describe('JWT middleware', () => {
     middleware$.subscribe(
       () => {
         fail(`Stream should throw an error`);
-        done();
       },
       err => {
         expect(err).toEqual(expectedError);
