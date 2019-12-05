@@ -36,7 +36,6 @@ export const factorizeRouting = (
       middleware: middlewares.length
         ? combineMiddlewares(...[...middlewares, route.middleware].filter(isNonNullable))
         : route.middleware,
-      parameters,
     };
 
     if (foundRoute) {
@@ -50,6 +49,7 @@ export const factorizeRouting = (
     return routing.push({
       path,
       regExp,
+      parameters,
       methods: { [route.method]: method },
     } as RoutingItem);
   });

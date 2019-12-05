@@ -54,23 +54,26 @@ describe('#factorizeRouting', () => {
       {
         regExp: /^\/([^\/]+?)(?:\/)?$/i,
         path: '/:id',
+        parameters: ['id'],
         methods: {
-          GET: { middleware: expect.any(Function), effect: e2$, parameters: ['id'] },
-          POST: { middleware: expect.any(Function), effect: e3$, parameters: ['id'] },
+          GET: { middleware: expect.any(Function), effect: e2$ },
+          POST: { middleware: expect.any(Function), effect: e3$ },
         },
       },
       {
         regExp: /^\/([^\/]+?)\/nested(?:\/)?$/i,
         path: '/:id/nested',
+        parameters: ['id'],
         methods: {
-          GET: { middleware: expect.any(Function), effect: e5$, parameters: ['id'] },
+          GET: { middleware: expect.any(Function), effect: e5$ },
         },
       },
       {
         regExp: /^\/([^\/]+?)\/(.*)(?:\/)?$/i,
         path: '/:id/(.*)',
+        parameters: ['id'],
         methods: {
-          '*': { middleware: expect.any(Function), effect: e4$, parameters: ['id'] },
+          '*': { middleware: expect.any(Function), effect: e4$ },
         },
       },
     ] as Routing);

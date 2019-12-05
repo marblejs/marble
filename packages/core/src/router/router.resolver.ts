@@ -14,7 +14,7 @@ export const findRoute = (
   method: HttpMethod
 ): RouteMatched | undefined => {
   for (let i = 0; i < routing.length; ++i) {
-    const { regExp, methods, path } = routing[i];
+    const { regExp, methods, path, parameters } = routing[i];
     const match = url.match(regExp);
 
     if (!match) { continue; }
@@ -23,7 +23,7 @@ export const findRoute = (
 
     if (!routingMethod) { continue; }
 
-    const { parameters, effect, middleware } = routingMethod;
+    const { effect, middleware } = routingMethod;
     const params = {};
 
     if (parameters) {

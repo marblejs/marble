@@ -30,7 +30,6 @@ export interface ParametricRegExp {
 }
 
 export interface RoutingMethod {
-  parameters?: string[] | undefined;
   middleware?: HttpMiddlewareEffect | undefined;
   effect: HttpEffect;
 }
@@ -39,6 +38,7 @@ export interface RoutingItem {
   regExp: RegExp;
   path: string;
   methods: Partial<Record<HttpMethod, RoutingMethod>>;
+  parameters?: string[] | undefined;
 }
 
 export interface RouteMatched {

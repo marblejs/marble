@@ -1,4 +1,4 @@
-all: middlewares routing
+all: routing middlewares
 
 routing:
 	@./run 1 $@

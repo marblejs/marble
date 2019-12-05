@@ -52,7 +52,8 @@ describe('#findRoute', () => {
     const routing: Routing = [{
       regExp: /^\/group\/([^\/]+)\/foo$/,
       path: '/group/:param/foo',
-      methods: { GET: { effect: e$, parameters: ['param'] } }
+      parameters: ['param'],
+      methods: { GET: { effect: e$ } }
     }];
 
     // when
