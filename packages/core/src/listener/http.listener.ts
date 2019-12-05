@@ -1,7 +1,8 @@
 import { IncomingMessage, OutgoingMessage } from 'http';
+import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as R from 'fp-ts/lib/Reader';
-import { of, Subject } from 'rxjs';
+import { of, Subject, zip, OperatorFunction } from 'rxjs';
 import { catchError, defaultIfEmpty, mergeMap, tap, map, publish } from 'rxjs/operators';
 import { combineMiddlewares } from '../effects/effects.combiner';
 import {
@@ -20,6 +21,7 @@ import { Context, lookup } from '../context/context.factory';
 import { createEffectContext } from '../effects/effectsContext.factory';
 import { useContext } from '../context/context.hook';
 import { ServerClientToken } from '../server/server.tokens';
+import { EffectError } from '../error/error.model';
 
 export interface HttpListenerConfig {
   middlewares?: HttpMiddlewareEffect[];
@@ -51,8 +53,23 @@ export const httpListener = ({
     const routing = factorizeRouting(effects);
     const defaultResponse = { status: HttpStatus.NOT_FOUND } as HttpEffectResponse;
 
+    const errorGuard: OperatorFunction<[any, HttpRequest], HttpRequest> = flow(
+      map(result => {
+        if (result[0] instanceof Error) throw new EffectError(result[0], result[1]);
+        return result[0];
+      }),
+    );
+
+    const catchEffectError: OperatorFunction<HttpRequest, Error> = flow(
+      catchError(error => of(error)),
+    );
+
     request$.pipe(
-      publish(req$ => combinedMiddlewares(req$, effectContext)),
+      publish(req$ => zip(
+        combinedMiddlewares(req$, effectContext).pipe(catchEffectError),
+        req$,
+      )),
+      errorGuard,
       mergeMap(req => {
         return of(req).pipe(
           mergeMap(resolveRouting(routing, effectContext)),
@@ -67,7 +84,15 @@ export const httpListener = ({
           ),
         );
       }),
-    ).subscribe();
+    ).subscribe(
+      undefined,
+      ({ req, error }: EffectError) => {
+        error$(of({ req, error }), effectContext).pipe(
+          mergeMap(out => output$(of({ req, res: out }), effectContext)),
+          tap(req.response.send),
+        ).subscribe();
+      },
+    );
 
     const httpServer = (req: IncomingMessage, res: OutgoingMessage) => {
       const marbleReq = req as HttpRequest;

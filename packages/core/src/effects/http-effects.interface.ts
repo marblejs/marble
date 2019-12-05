@@ -1,5 +1,4 @@
 import { HttpRequest, HttpStatus, HttpHeaders, HttpServer } from '../http.interface';
-import { HttpError } from '../error/error.model';
 import { Event } from '../event/event.interface';
 import { Effect } from './effects.interface';
 
@@ -15,7 +14,7 @@ export interface HttpMiddlewareEffect<
 > extends HttpEffect<I, O> {}
 
 export interface HttpErrorEffect<
-  Err extends Error = HttpError,
+  Err extends Error = Error,
 > extends HttpEffect<{ req: HttpRequest; error: Err }, HttpEffectResponse> {}
 
 export interface HttpServerEffect<

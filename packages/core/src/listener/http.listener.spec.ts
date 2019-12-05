@@ -1,52 +1,41 @@
-import { IncomingMessage, OutgoingMessage } from 'http';
-import { of, throwError } from 'rxjs';
-import { mapTo, switchMap } from 'rxjs/operators';
+import * as http from 'http';
+import { throwError } from 'rxjs';
+import { mapTo, mergeMap } from 'rxjs/operators';
+import { r } from '../router/router.ixbuilder';
 import { httpListener } from './http.listener';
-import { EffectFactory } from '../effects/effects.factory';
-import { HttpMiddlewareEffect } from '../effects/http-effects.interface';
+import { HttpMiddlewareEffect, HttpEffectResponse } from '../effects/http-effects.interface';
 import { createContext, registerAll, bindTo } from '../context/context.factory';
 import { ServerClientToken } from '../server/server.tokens';
 
 describe('Http listener', () => {
-  let effectsCombiner;
   let responseHandler;
-  let routerFactory;
-  let routerResolver;
 
   const context = registerAll([
-    bindTo(ServerClientToken)(jest.fn),
+    bindTo(ServerClientToken)(() => http.createServer()),
   ])(createContext());
 
-  const effect$ = EffectFactory
-    .matchPath('/')
-    .matchType('GET')
-    .use(req$ => req$.pipe(mapTo( {} )));
-
-  const middleware$: HttpMiddlewareEffect = req$ => req$;
-
   beforeEach(() => {
-    jest.unmock('../error/error.effect.ts');
-    jest.unmock('../effects/effects.combiner.ts');
     jest.unmock('../response/response.handler.ts');
-    jest.unmock('../router/router.factory.ts');
-    jest.unmock('../router/router.resolver.ts');
-
-    effectsCombiner = require('../effects/effects.combiner.ts');
     responseHandler = require('../response/response.handler.ts');
-    routerFactory = require('../router/router.factory.ts');
-    routerResolver = require('../router/router.resolver.ts');
   });
 
   test('#httpListener handles received HttpRequest', done => {
     // given
-    const req = {} as IncomingMessage;
-    const res = {} as OutgoingMessage;
+    const req = { url: '/', method: 'GET' } as http.IncomingMessage;
+    const res = {} as http.OutgoingMessage;
+    const effectResponse = { body: 'test' } as HttpEffectResponse;
+    const sender = jest.fn();
+
+    const effect$ = r.pipe(
+      r.matchPath('/'),
+      r.matchType('GET'),
+      r.useEffect(req$ => req$.pipe(mapTo(effectResponse))),
+    );
+
+    const middleware$: HttpMiddlewareEffect = req$ => req$;
 
     // when
-    effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
-    routerFactory.factorizeRouting = jest.fn(() => []);
-    routerResolver.resolveRouting = jest.fn(() => () => () => of({ body: 'test' }));
-    responseHandler.handleResponse = jest.fn(() => () => () => undefined);
+    responseHandler.handleResponse = jest.fn(() => () => sender);
 
     httpListener({
       middlewares: [middleware$],
@@ -54,58 +43,62 @@ describe('Http listener', () => {
     })(context)(req, res);
 
     // then
-    setTimeout(() => {
-      expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith(middleware$);
-      expect(routerFactory.factorizeRouting).toHaveBeenCalledWith([effect$]);
-      expect(routerResolver.resolveRouting).toHaveBeenCalled();
-      expect(responseHandler.handleResponse).toHaveBeenCalled();
-      done();
-    }, 0);
+    expect(sender).toHaveBeenCalledWith(effectResponse);
+    done();
   });
 
-  test('#httpListener allows empty middlewares', () => {
+  test('#httpListener allows empty middlewares', done => {
     // given
-    const req = {} as IncomingMessage;
+    const req = { url: '/', method: 'GET' } as http.IncomingMessage;
+    const res = {} as http.OutgoingMessage;
+    const effectResponse = { body: 'test' } as HttpEffectResponse;
+    const sender = jest.fn();
+
+    const effect$ = r.pipe(
+      r.matchPath('/'),
+      r.matchType('GET'),
+      r.useEffect(req$ => req$.pipe(mapTo(effectResponse))),
+    );
 
     // when
-    effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
-    routerFactory.factorizeRouting = jest.fn(() => []);
+    responseHandler.handleResponse = jest.fn(() => () => sender);
 
     httpListener({
+      middlewares: [],
       effects: [effect$],
-    })(context);
+    })(context)(req, res);
 
     // then
-    expect(effectsCombiner.combineMiddlewares).toHaveBeenCalledWith(...[]);
+    expect(sender).toHaveBeenCalledWith(effectResponse);
+    done();
   });
 
   test('#httpListener catches error', done => {
     // given
     const error = new Error('test');
-    const req = {} as IncomingMessage;
-    const res = {} as OutgoingMessage;
-    const error$ = jest.fn(() => of({ body: 'error' }));
+    const req = { url: '/', method: 'GET' } as http.IncomingMessage;
+    const res = {} as http.OutgoingMessage;
+    const effectResponse = { body: { error: { message: 'test', status: 500 } }, status: 500 } as HttpEffectResponse;
+    const sender = jest.fn();
+
+    const effect$ = r.pipe(
+      r.matchPath('/'),
+      r.matchType('GET'),
+      r.useEffect(req$ => req$.pipe(
+        mergeMap(() => throwError(error)),
+      )),
+    );
 
     // when
-    effectsCombiner.combineMiddlewares = jest.fn(() => () => of(req));
-    routerFactory.factorizeRouting = jest.fn(() => []);
-    routerResolver.resolveRouting = jest.fn(() => () => () =>
-      of({ body: 'test' }).pipe(switchMap(() => throwError(error)))
-    );
-    responseHandler.handleResponse = jest.fn(() => () => () => undefined);
+    responseHandler.handleResponse = jest.fn(() => () => sender);
 
     httpListener({
-      middlewares: [middleware$],
+      middlewares: [],
       effects: [effect$],
-      error$,
     })(context)(req, res);
 
     // then
-    setTimeout(() => {
-      expect(responseHandler.handleResponse).toHaveBeenCalledTimes(1);
-      expect(error$).toHaveBeenCalled();
-      done();
-    }, 0);
+    expect(sender).toHaveBeenCalledWith(effectResponse);
+    done();
   });
-
 });
