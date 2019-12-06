@@ -58,6 +58,7 @@ export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
     setHeader = jest.fn();
     getHeader = jest.fn();
     end = jest.fn();
+    send = jest.fn();
   } as any as HttpResponse;
 
 export const createMockEffectContext = () => {

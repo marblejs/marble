@@ -1,129 +1,132 @@
-import { Subject, zip, OperatorFunction, of } from 'rxjs';
-import { publish, catchError, map, mergeMap} from 'rxjs/operators';
-import { Routing } from './router.interface';
+import { Subject, zip, OperatorFunction, of, fromEvent, Observable } from 'rxjs';
+import { publish, catchError, map, filter, takeUntil} from 'rxjs/operators';
+import { Routing, BootstrappedRoutingItem } from './router.interface';
 import { EffectContext } from '../effects/effects.interface';
-import { HttpServer, HttpRequest, HttpMethod } from '../http.interface';
+import { HttpServer, HttpRequest } from '../http.interface';
 import { queryParamsFactory } from './router.query.factory';
+import { defaultError$ } from '../error/error.effect';
 import { HttpMiddlewareEffect, HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http-effects.interface';
 import { combineMiddlewares } from '../effects/effects.combiner';
-import { flow } from 'fp-ts/lib/function';
+import { matchRoute } from './router.matcher';
+import { isError } from '../+internal/utils';
 
-interface RoutingResolver {
-  (routing: Routing, ctx: EffectContext<HttpServer>):
-    (middleware$: HttpMiddlewareEffect, output$: HttpOutputEffect, error$: HttpErrorEffect) =>
-      (req: HttpRequest) => {
-        inputSubject?: Subject<HttpRequest<unknown, unknown, unknown>>;
-        outputSubject: Subject<{ res: HttpEffectResponse; req: HttpRequest}>;
-      };
-}
+export const resolveRouting = (
+  routing: Routing,
+  ctx: EffectContext<HttpServer>,
+) => (
+  globalMiddleware$?: HttpMiddlewareEffect,
+  output$?: HttpOutputEffect,
+  error$?: HttpErrorEffect,
+) => {
+  const close$ = new Subject();
 
-interface BootstrappedRoutingItem {
-  regExp: RegExp;
-  path: string;
-  methods: Partial<Record<HttpMethod, {
-    input: Subject<HttpRequest>;
-    output: Subject<{ req: HttpRequest; res: HttpEffectResponse }>;
-  }>>;
-  parameters?: string[] | undefined;
-}
+  fromEvent(ctx.client, 'close')
+    .subscribe(() => close$.next());
 
-type BootstrappedRouting = BootstrappedRoutingItem[];
-
-export interface RouteMatched {
-  inputSubject: Subject<HttpRequest>;
-  outputSubject: Subject<{ req: HttpRequest; res: HttpEffectResponse }>;
-  params: Record<string, string>;
-  path: string;
-}
-
-export const findRoute = (routing: BootstrappedRouting) => (url: string, method: HttpMethod): RouteMatched | undefined => {
-  for (let i = 0; i < routing.length; ++i) {
-    const { regExp, methods, path, parameters } = routing[i];
-    const match = url.match(regExp);
-
-    if (!match) { continue; }
-
-    const subject = methods[method] || methods['*'];
-
-    if (!subject) { continue; }
-
-    const params = {};
-
-    if (parameters) {
-      for (let p = 0; p < parameters.length; p++) {
-        params[parameters[p]] = decodeURIComponent(match[p + 1]);
-      }
-    }
-
-    return { inputSubject: subject.input, outputSubject: subject.output, params, path };
-  }
-
-  return undefined;
-};
-
-export const resolveRouting: RoutingResolver = (routing, ctx) => (globalMiddleware$, output$, error$) => {
   const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
-  const outputStream$ = outputSubject.asObservable();
+  const outputStream$ = outputSubject.asObservable().pipe(takeUntil(close$));
 
-  zip(
-    output$(outputStream$, ctx).pipe(catchError(error => of(error))),
+  const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
+  const errorStream$ = errorSubject.asObservable().pipe(takeUntil(close$));
+
+  const outputEffect = output$
+    ? output$(outputStream$, ctx).pipe(catchError(error => of(error)))
+    : outputStream$.pipe(map(({ res }) => res));
+
+  const errorEffect = error$
+    ? error$(errorStream$, ctx)
+    : defaultError$(errorStream$, ctx);
+
+  const errorGuard: OperatorFunction<[HttpEffectResponse, HttpRequest], [HttpEffectResponse, HttpRequest]> =
+    filter(response => {
+      if (isError(response[0])) {
+        errorSubject.next({ error: response[0], req: response[1] });
+        return false;
+      }
+
+      return true;
+    });
+
+  const outputFlow$ = zip(
+    outputEffect,
     outputStream$.pipe(map(out => out.req)),
-  ).subscribe(([res, req]) => req.response.send(res));
+  );
+
+  const errorFlow$ = zip(
+    errorEffect,
+    errorStream$.pipe(map(err => err.req)),
+  );
+
+  const subscribeOutput = (stream$: Observable<any>) =>
+    stream$.subscribe(
+      ([res, req]) => req.response.send(res),
+      undefined,
+      () => subscribeOutput(stream$),
+    );
+
+  const subscribeError = (stream$: Observable<any>) =>
+    stream$.subscribe(
+      ([res, req]) => req.response.send(res),
+      undefined,
+      () => subscribeError(stream$),
+    );
+
+  subscribeOutput(outputFlow$);
+  subscribeError(errorFlow$);
 
   const bootstrappedRrouting: BootstrappedRoutingItem[] = routing.map(item => ({
     ...item,
     methods: Object.entries(item.methods).reduce((acc, [method, methodItem]) => {
       if (!methodItem) return { [method]: undefined };
 
-      const isError = (data: any): data is Error =>
-        !!(data as any).stack;
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const errorGuard: OperatorFunction<[HttpEffectResponse, HttpRequest], [HttpEffectResponse, HttpRequest]> = flow(
-        mergeMap(response =>
-          isError(response[0])
-            ? error$(of({ error: response[0], req: response[1] }), ctx)
-              .pipe(map(res => [res, response[1]] as [HttpEffectResponse, HttpRequest]))
-            : of(response)
-        ),
-      );
-
-      const { middleware, effect } = methodItem;
+      const { middleware, effect, parameters } = methodItem;
 
       const inputSubject = new Subject<HttpRequest>();
-      const inputStream$ = inputSubject.asObservable();
+      const inputStream$ = inputSubject.asObservable().pipe(takeUntil(close$));
 
-      const middleware$ = combineMiddlewares(globalMiddleware$, middleware);
+      const middleware$ = combineMiddlewares(r$ => r$, globalMiddleware$, middleware);
 
-      zip(
+      const subscribe = (stream$: Observable<any>) =>
+        stream$.subscribe(
+          ([res, req]) => outputSubject.next({ req, res }),
+          undefined,
+          () => subscribe(stream$),
+        );
+
+      const flow$ = zip(
         inputStream$.pipe(
           publish(req$ => middleware$(req$, ctx)),
           publish(req$ => effect(req$, ctx)),
           catchError(error => of(error)),
         ),
         inputStream$,
-      )
-        .subscribe(([res, req]) => outputSubject.next({ req, res }));
+      ).pipe(errorGuard)
 
-      return { ...acc, [method]: { input: inputSubject, output: outputSubject } };
+      subscribe(flow$);
+
+      return { ...acc, [method]: { subject: inputSubject, parameters } };
     }, {}),
   }));
 
-  const find = findRoute(bootstrappedRrouting);
+  const find = matchRoute(bootstrappedRrouting);
 
-  return req => {
+  const resolve = (req: HttpRequest) => {
     const [urlPath, urlQuery] = req.url.split('?');
-    // const path = (urlPath + '/').replace(/\/\/+/g, '/'); // @TODO: think of removing it
-
     const resolvedRoute = find(urlPath, req.method);
 
-    if (!resolvedRoute) { return { outputSubject }; }
+    if (!resolvedRoute) { return; }
 
     req.query = queryParamsFactory(urlQuery);
     req.params = resolvedRoute.params;
     req.meta = {};
     req.meta.path = resolvedRoute.path;
 
-    return { inputSubject: resolvedRoute.inputSubject, outputSubject: resolvedRoute.outputSubject };
+    return resolvedRoute.subject;
   };
+
+  return {
+    resolve,
+    errorSubject,
+    outputSubject,
+  }
 };

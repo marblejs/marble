@@ -1,23 +1,25 @@
 import { IncomingMessage, OutgoingMessage } from 'http';
-import { map } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as R from 'fp-ts/lib/Reader';
+import { throwError } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { combineMiddlewares } from '../effects/effects.combiner';
 import {
   HttpMiddlewareEffect,
   HttpErrorEffect,
   HttpOutputEffect,
 } from '../effects/http-effects.interface';
-import { HttpRequest, HttpResponse } from '../http.interface';
+import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { handleResponse } from '../response/response.handler';
 import { RouteEffect, RouteEffectGroup, RoutingItem } from '../router/router.interface';
 import { resolveRouting } from '../router/router.resolver.v2';
 import { factorizeRouting } from '../router/router.factory';
-import { defaultError$ } from '../error/error.effect';
 import { Context, lookup } from '../context/context.factory';
 import { createEffectContext } from '../effects/effectsContext.factory';
 import { useContext } from '../context/context.hook';
 import { ServerClientToken } from '../server/server.tokens';
+import { r } from '../router/router.ixbuilder';
+import { HttpError } from '../error/error.model';
 
 export interface HttpListenerConfig {
   middlewares?: HttpMiddlewareEffect[];
@@ -34,23 +36,27 @@ export interface HttpListener {
 export const httpListener = ({
   middlewares = [],
   effects,
-  error$ = defaultError$,
-  output$ = out$ => out$.pipe(map(o => o.res)),
+  output$,
+  error$,
 }: HttpListenerConfig): R.Reader<Context, HttpListener> => pipe(
   R.ask<Context>(),
   R.map(ctx => {
+
+    const notFound$ = r.pipe(
+      r.matchPath('*'),
+      r.matchType('*'),
+      r.useEffect(req$ => req$.pipe(
+        mergeMap(() => throwError(
+          new HttpError('Route not found', HttpStatus.NOT_FOUND)
+        )),
+      )));
 
     const ask = lookup(ctx);
     const client = useContext(ServerClientToken)(ask);
     const effectContext = createEffectContext({ ask, client });
     const middleware$ = combineMiddlewares(...middlewares);
-    const routing = factorizeRouting(effects);
-    const provideRoute = resolveRouting(routing, effectContext)(
-      middleware$,
-      output$,
-      error$,
-    );
-    // const defaultResponse = { status: HttpStatus.NOT_FOUND } as HttpEffectResponse;
+    const routing = factorizeRouting([...effects, notFound$]);
+    const { resolve, outputSubject } = resolveRouting(routing, effectContext)(middleware$, output$, error$);
 
     const httpServer = (req: IncomingMessage, res: OutgoingMessage) => {
       const marbleReq = req as HttpRequest;
@@ -59,12 +65,12 @@ export const httpListener = ({
       marbleRes.send = handleResponse(marbleRes)(marbleReq);
       marbleReq.response = marbleRes;
 
-      const route = provideRoute(marbleReq);
+      const subject = resolve(marbleReq);
 
-      if (route.inputSubject) {
-        route.inputSubject.next(marbleReq);
+      if (subject) {
+        subject.next(marbleReq);
       } else {
-        route.outputSubject.next({ req: marbleReq, res: { status: 500 }});
+        outputSubject.next({ req: marbleReq, res: { status: HttpStatus.NOT_FOUND }});
       }
     };
 

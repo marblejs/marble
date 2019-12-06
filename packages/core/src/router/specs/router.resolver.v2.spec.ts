@@ -1,74 +1,90 @@
-// import { mapTo, take } from 'rxjs/operators';
-// import { HttpEffect } from '../../effects/http-effects.interface';
-// import { Routing } from '../router.interface';
-// import { resolveRouting } from '../router.resolver.v2';
-// import { createMockEffectContext, createHttpRequest } from '../../+internal';
-// import { of, forkJoin } from 'rxjs';
-// import { factorizeRegExpWithParams } from '../router.params.factory';
+import { mapTo, take, toArray } from 'rxjs/operators';
+import { HttpEffect } from '../../effects/http-effects.interface';
+import { Routing } from '../router.interface';
+import { resolveRouting } from '../router.resolver.v2';
+import { createMockEffectContext, createHttpRequest, createHttpResponse } from '../../+internal';
+import { factorizeRegExpWithParams } from '../router.params.factory';
 
-// describe('#findRoute', () => {
-//   test('finds route inside collection', async (done) => {
-//     // given
-//     const ctx = createMockEffectContext();
+describe('#resolveRouting', () => {
+  test('resolves routes inside collection', async (done) => {
+    // given
+    const ctx = createMockEffectContext();
+    const response = createHttpResponse();
+    response.send = jest.fn();
 
-//     const path1 = factorizeRegExpWithParams('/');
-//     const path2 = factorizeRegExpWithParams('/group');
-//     const path3 = factorizeRegExpWithParams('/group/nested/foo');
+    const path1 = factorizeRegExpWithParams('/');
+    const path2 = factorizeRegExpWithParams('/group');
+    const path3 = factorizeRegExpWithParams('/group/:id/foo');
 
-//     const e1$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_1' }));
-//     const e2$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_2' }));
-//     const e3$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_3' }));
-//     const e4$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_4' }));
+    const e1$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_1' }));
+    const e2$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_2' }));
+    const e3$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_3' }));
+    const e4$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_4' }));
 
-//     const req1 = createHttpRequest(({ url: '/', method: 'GET' }));
-//     const req2 = createHttpRequest(({ url: '/', method: 'POST' }));
-//     const req3 = createHttpRequest(({ url: '/group', method: 'GET' }));
-//     const req4 = createHttpRequest(({ url: '/group/nested/foo', method: 'POST' }));
+    const req1 = createHttpRequest(({ url: '/', method: 'GET', response }));
+    const req2 = createHttpRequest(({ url: '/', method: 'POST', response }));
+    const req3 = createHttpRequest(({ url: '/group', method: 'GET', response }));
+    const req4 = createHttpRequest(({ url: '/group/123/foo', method: 'POST', response }));
+    const req5 = createHttpRequest(({ url: '/unknown', method: 'GET', response }));
 
-//     const routing: Routing = [
-//       {
-//         regExp: path1.regExp,
-//         path: path1.path,
-//         methods: { GET: { effect: e1$ }, POST: { effect: e2$ } },
-//       },
-//       {
-//         regExp: path2.regExp,
-//         path: path2.path,
-//         methods: { GET: { effect: e3$ } },
-//       },
-//       {
-//         regExp: path3.regExp,
-//         path: path3.path,
-//         methods: { POST: { effect: e4$ } },
-//       },
-//     ];
+    const routing: Routing = [
+      {
+        regExp: path1.regExp,
+        path: path1.path,
+        methods: { GET: { effect: e1$ }, POST: { effect: e2$ } },
+      },
+      {
+        regExp: path2.regExp,
+        path: path2.path,
+        methods: { GET: { effect: e3$, parameters: ['id'] } },
+      },
+      {
+        regExp: path3.regExp,
+        path: path3.path,
+        methods: { POST: { effect: e4$ } },
+      },
+    ];
 
-//     // when
-//     const routing$ = resolveRouting(routing, ctx);
-//     const e1Result = await routing$(of(req1)).toPromise();
-//     const e2Result = await routing$(of(req2)).toPromise();
-//     const e3Result = await routing$(of(req3)).toPromise();
-//     const e4Result = await routing$(of(req4)).toPromise();
+    // when
+    const { resolve, outputSubject } = resolveRouting(routing, ctx)();
 
-//     // then
-//     forkJoin([
-//       e1Result.subject.pipe(take(1)),
-//       e2Result.subject.pipe(take(1)),
-//       e3Result.subject.pipe(take(1)),
-//       e4Result.subject.pipe(take(1)),
-//     ]).subscribe(
-//       result => {
-//         expect(result[0]).toEqual({ body: 'test_1' });
-//         expect(result[1]).toEqual({ body: 'test_2' });
-//         expect(result[2]).toEqual({ body: 'test_3' });
-//         expect(result[3]).toEqual({ body: 'test_4' });
-//         done();
-//       },
-//     )
+    // then
+    outputSubject.pipe(take(4), toArray()).subscribe(
+      result => {
+        expect(result[0].res).toEqual({ body: 'test_1' });
+        expect(result[1].res).toEqual({ body: 'test_2' });
+        expect(result[2].res).toEqual({ body: 'test_3' });
+        expect(result[3].res).toEqual({ body: 'test_4' });
+        done();
+      },
+    );
 
-//     e1Result.subject.next(e1Result.req);
-//     e2Result.subject.next(e2Result.req);
-//     e3Result.subject.next(e3Result.req);
-//     e4Result.subject.next(e4Result.req);
-//   });
-// });
+    resolve(req1)?.next(req1);
+    resolve(req2)?.next(req2);
+    resolve(req3)?.next(req3);
+    resolve(req4)?.next(req4);
+    resolve(req5)?.next(req5);
+  });
+
+  test('returns undefined if route cannot be resolved', () => {
+    // given
+    const ctx = createMockEffectContext();
+    const response = createHttpResponse();
+    const req = createHttpRequest(({ url: '/unknown', method: 'GET', response }));
+    const path = factorizeRegExpWithParams('/');
+
+    const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
+
+    const routing: Routing = [{
+      regExp: path.regExp,
+      path: path.path,
+      methods: { GET: { effect: effect$ } },
+    }];
+
+    // when
+    const subject = resolveRouting(routing, ctx)().resolve(req);
+
+    // then
+    expect(subject).toBeUndefined();
+  });
+});

@@ -1,3 +1,4 @@
+import { Subject } from 'rxjs';
 import { HttpMethod, HttpRequest } from '../http.interface';
 import { HttpEffect, HttpMiddlewareEffect, HttpEffectResponse } from '../effects/http-effects.interface';
 
@@ -30,6 +31,7 @@ export interface ParametricRegExp {
 }
 
 export interface RoutingMethod {
+  parameters?: string[];
   middleware?: HttpMiddlewareEffect | undefined;
   effect: HttpEffect;
 }
@@ -38,14 +40,21 @@ export interface RoutingItem {
   regExp: RegExp;
   path: string;
   methods: Partial<Record<HttpMethod, RoutingMethod>>;
-  parameters?: string[] | undefined;
-}
-
-export interface RouteMatched {
-  middleware?: HttpMiddlewareEffect | undefined;
-  effect: HttpEffect;
-  params: Record<string, string>;
-  path: string;
 }
 
 export type Routing = RoutingItem[];
+
+export interface BootstrappedRoutingItem extends Omit<RoutingItem, 'methods'> {
+  methods: Partial<Record<HttpMethod, {
+    subject: Subject<HttpRequest>;
+    parameters?: string[];
+  }>>;
+}
+
+export type BootstrappedRouting = BootstrappedRoutingItem[];
+
+export interface RouteMatched {
+  subject: Subject<HttpRequest>;
+  params: Record<string, string>;
+  path: string;
+}

@@ -6,6 +6,9 @@ import { RouteEffect, RouteEffectGroup, Routing } from '../router.interface';
 import { factorizeRouting } from '../router.factory';
 import { createHttpRequest, createMockEffectContext } from '../../+internal';
 import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
+import { factorizeRegExpWithParams } from '../router.params.factory';
+
+const getRegExp = (path: string) => factorizeRegExpWithParams(path).regExp;
 
 describe('#factorizeRouting', () => {
   test('factorizes routing with nested groups', () => {
@@ -17,26 +20,60 @@ describe('#factorizeRouting', () => {
     const e4$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test4' }));
     const e5$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test5' }));
 
-    const routeGroupNested: RouteEffectGroup = {
-      path: '/nested',
-      effects: [{ path: '/', method: 'GET', effect: e5$, middleware: m$ }],
-      middlewares: [m$],
-    };
-
-    const routeGroup: RouteEffectGroup = {
-      path: '/:id',
-      effects: [
-        { path: '/', method: 'GET', effect: e2$ },
-        { path: '/', method: 'POST', effect: e3$, middleware: m$ },
-        routeGroupNested,
-        { path: '*', method: '*', effect: e4$ },
-      ],
-      middlewares: [m$, m$],
-    };
-
     const routing: (RouteEffect | RouteEffectGroup)[] = [
-      { path: '/', method: 'GET', effect: e1$ },
-      routeGroup,
+      // effect 1
+      {
+        path: '/',
+        method: 'GET',
+        effect: e1$,
+      },
+      // combined
+      {
+        path: '/level_1',
+        middlewares: [m$, m$],
+        effects: [
+          // effect 2
+          {
+            path: '/',
+            method: 'GET',
+            effect: e2$,
+          },
+          // effect 3
+          {
+            path: '/:id1',
+            method: 'POST',
+            effect: e3$,
+            middleware: m$,
+          },
+          // effect 3
+          {
+            path: '/:id2',
+            method: 'DELETE',
+            effect: e3$,
+            middleware: m$,
+          },
+          // combined
+          {
+            path: '/level_2',
+            middlewares: [m$],
+            effects: [
+              // effect 4
+              {
+                path: '/',
+                method: 'GET',
+                effect: e4$,
+                middleware: m$
+              },
+            ],
+          },
+          // effect 5
+          {
+            path: '*',
+            method: '*',
+            effect: e5$,
+          },
+        ],
+      },
     ];
 
     // when
@@ -45,35 +82,39 @@ describe('#factorizeRouting', () => {
     // then
     expect(factorizedRouting).toEqual([
       {
-        regExp: /^(?:\/)?$/i,
+        regExp: getRegExp('/'),
         path: '',
         methods: {
-          GET: { effect: e1$, middleware: undefined, parameters: undefined },
+          GET: { effect: e1$, middleware: undefined, parameters: undefined, },
         },
       },
       {
-        regExp: /^\/([^\/]+?)(?:\/)?$/i,
-        path: '/:id',
-        parameters: ['id'],
+        regExp: getRegExp('/level_1'),
+        path: '/level_1',
         methods: {
-          GET: { middleware: expect.any(Function), effect: e2$ },
-          POST: { middleware: expect.any(Function), effect: e3$ },
+          GET: { middleware: expect.any(Function), effect: e2$, parameters: undefined, },
         },
       },
       {
-        regExp: /^\/([^\/]+?)\/nested(?:\/)?$/i,
-        path: '/:id/nested',
-        parameters: ['id'],
+        regExp: getRegExp('/level_1/:id1'),
+        path: '/level_1/:id1',
         methods: {
-          GET: { middleware: expect.any(Function), effect: e5$ },
+          POST: { middleware: expect.any(Function), effect: e3$, parameters: ['id1'] },
+          DELETE: { middleware: expect.any(Function), effect: e3$, parameters: ['id2'] },
         },
       },
       {
-        regExp: /^\/([^\/]+?)\/(.*)(?:\/)?$/i,
-        path: '/:id/(.*)',
-        parameters: ['id'],
+        regExp: getRegExp('/level_1/level_2'),
+        path: '/level_1/level_2',
         methods: {
-          '*': { middleware: expect.any(Function), effect: e4$ },
+          GET: { middleware: expect.any(Function), effect: e4$, parameters: undefined, },
+        },
+      },
+      {
+        regExp: getRegExp('/level_1/*'),
+        path: '/level_1/(.*)',
+        methods: {
+          '*': { middleware: expect.any(Function), effect: e5$ },
         },
       },
     ] as Routing);

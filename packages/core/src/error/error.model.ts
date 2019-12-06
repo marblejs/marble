@@ -1,22 +1,12 @@
 import { Event } from '../event/event.interface';
-import { HttpStatus, HttpRequest } from '../http.interface';
+import { HttpStatus } from '../http.interface';
 import { ExtendableError } from '../+internal/utils';
 
 export enum ErrorType {
   CORE_ERROR = 'CoreError',
   CONTEXT_ERROR = 'ContextError',
   HTTP_ERROR = 'HttpError',
-  EFFECT_ERROR = 'EffectError',
   EVENT_ERROR = 'EventError',
-}
-
-export class EffectError extends ExtendableError {
-  constructor(
-    public readonly error: Error,
-    public readonly req: HttpRequest,
-  ) {
-    super(ErrorType.EFFECT_ERROR, '');
-  }
 }
 
 export class HttpError extends ExtendableError {

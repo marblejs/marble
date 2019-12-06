@@ -32,6 +32,7 @@ export const factorizeRouting = (
     const { regExp, parameters, path } = factorizeRegExpWithParams(concatenatedPath);
     const foundRoute = routing.find(route => route.regExp.source === regExp.source);
     const method: RoutingMethod = {
+      parameters,
       effect: route.effect,
       middleware: middlewares.length
         ? combineMiddlewares(...[...middlewares, route.middleware].filter(isNonNullable))
@@ -49,7 +50,6 @@ export const factorizeRouting = (
     return routing.push({
       path,
       regExp,
-      parameters,
       methods: { [route.method]: method },
     } as RoutingItem);
   });
