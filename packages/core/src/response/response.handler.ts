@@ -7,17 +7,17 @@ import { headersFactory } from './responseHeaders.factory';
 import { isStream } from '../+internal/utils';
 import { applyMetadata } from '../+internal/testing';
 
-export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effect: HttpEffectResponse) => {
+export const handleResponse = (res: HttpResponse) => (req: HttpRequest) => (effectResponse: HttpEffectResponse) => {
   if (res.finished) { return EMPTY; }
 
-  const status = effect.status || HttpStatus.OK;
+  const status = effectResponse.status || HttpStatus.OK;
   const path = url.parse(req.url).pathname || '';
 
-  const headersFactoryWithData = headersFactory({ body: effect.body, path, status });
-  const headers = headersFactoryWithData(effect.headers);
+  const headersFactoryWithData = headersFactory({ body: effectResponse.body, path, status });
+  const headers = headersFactoryWithData(effectResponse.headers);
 
   const bodyFactoryWithHeaders = bodyFactory(headers);
-  const body = bodyFactoryWithHeaders(effect.body);
+  const body = bodyFactoryWithHeaders(effectResponse.body);
 
   applyMetadata(req, res);
 
