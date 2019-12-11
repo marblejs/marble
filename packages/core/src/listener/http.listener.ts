@@ -7,11 +7,12 @@ import {
   HttpErrorEffect,
   HttpOutputEffect,
 } from '../effects/http-effects.interface';
-import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
+import { HttpRequest, HttpResponse } from '../http.interface';
 import { handleResponse } from '../response/response.handler';
 import { RouteEffect, RouteEffectGroup, RoutingItem } from '../router/router.interface';
 import { resolveRouting } from '../router/router.resolver.v2';
 import { factorizeRoutingWithDefaults } from '../router/router.factory';
+import { ROUTE_NOT_FOUND_ERROR } from '../router/router.effects';
 import { Context, lookup } from '../context/context.factory';
 import { createEffectContext } from '../effects/effectsContext.factory';
 import { useContext } from '../context/context.hook';
@@ -42,7 +43,7 @@ export const httpListener = ({
     const effectContext = createEffectContext({ ask, client });
     const middleware$ = combineMiddlewares(...middlewares);
     const routing = factorizeRoutingWithDefaults(effects);
-    const { resolve, outputSubject } = resolveRouting(routing, effectContext)(middleware$, output$, error$);
+    const { resolve, errorSubject } = resolveRouting(routing, effectContext)(middleware$, output$, error$);
 
     const httpServer = (req: IncomingMessage, res: OutgoingMessage) => {
       const marbleReq = req as HttpRequest;
@@ -51,12 +52,12 @@ export const httpListener = ({
       marbleRes.send = handleResponse(marbleRes)(marbleReq);
       marbleReq.response = marbleRes;
 
-      const subject = resolve(marbleReq);
+      const routeSubject = resolve(marbleReq);
 
-      if (subject) {
-        subject.next(marbleReq);
+      if (routeSubject) {
+        routeSubject.next(marbleReq);
       } else {
-        outputSubject.next({ req: marbleReq, res: { status: HttpStatus.NOT_FOUND }});
+        errorSubject.next({ req: marbleReq, error: ROUTE_NOT_FOUND_ERROR });
       }
     };
 
