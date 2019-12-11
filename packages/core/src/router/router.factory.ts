@@ -10,6 +10,7 @@ import {
 } from './router.interface';
 import { factorizeRegExpWithParams } from './router.params.factory';
 import { isNonNullable } from '../+internal/utils';
+import { notFound$ } from './router.effects';
 
 export const factorizeRouting = (
   routes: (RouteEffect | RouteEffectGroup)[],
@@ -57,3 +58,5 @@ export const factorizeRouting = (
   return routing;
 };
 
+export const factorizeRoutingWithDefaults = (routes: (RouteEffect | RouteEffectGroup)[]): Routing =>
+  factorizeRouting([...routes, notFound$]);
