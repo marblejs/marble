@@ -3,12 +3,16 @@ import { HttpMethod, HttpRequest } from '../http.interface';
 import { HttpEffect, HttpMiddlewareEffect, HttpEffectResponse } from '../effects/http-effects.interface';
 
 // Route
+export interface RouteMeta extends Record<string, any> {
+  overridable?: boolean;
+}
+
 export interface RouteEffect<T extends HttpRequest = HttpRequest> {
   path: string;
   method: HttpMethod;
   effect: HttpEffect<T, HttpEffectResponse>;
   middleware?: HttpMiddlewareEffect;
-  meta?: any;
+  meta?: RouteMeta;
 }
 
 export interface RouteEffectGroup {

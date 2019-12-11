@@ -1,12 +1,11 @@
 import { Subject, zip, OperatorFunction, of, fromEvent, Observable } from 'rxjs';
-import { publish, catchError, map, filter, takeUntil} from 'rxjs/operators';
+import { publish, catchError, map, filter, takeUntil, share, take} from 'rxjs/operators';
 import { Routing, BootstrappedRoutingItem } from './router.interface';
 import { EffectContext } from '../effects/effects.interface';
 import { HttpServer, HttpRequest } from '../http.interface';
 import { queryParamsFactory } from './router.query.factory';
 import { defaultError$ } from '../error/error.effect';
-import { HttpMiddlewareEffect, HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http-effects.interface';
-import { combineMiddlewares } from '../effects/effects.combiner';
+import { HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http-effects.interface';
 import { matchRoute } from './router.matcher';
 import { isError } from '../+internal/utils';
 
@@ -14,14 +13,10 @@ export const resolveRouting = (
   routing: Routing,
   ctx: EffectContext<HttpServer>,
 ) => (
-  globalMiddleware$?: HttpMiddlewareEffect,
   output$?: HttpOutputEffect,
   error$?: HttpErrorEffect,
 ) => {
-  const close$ = new Subject();
-
-  fromEvent(ctx.client, 'close')
-    .subscribe(() => close$.next());
+  const close$ = fromEvent(ctx.client, 'close').pipe(take(1), share());
 
   const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
   const outputStream$ = outputSubject.asObservable().pipe(takeUntil(close$));
@@ -84,8 +79,6 @@ export const resolveRouting = (
       const inputSubject = new Subject<HttpRequest>();
       const inputStream$ = inputSubject.asObservable().pipe(takeUntil(close$));
 
-      const middleware$ = combineMiddlewares(r$ => r$, globalMiddleware$, middleware);
-
       const subscribe = (stream$: Observable<any>) =>
         stream$.subscribe(
           ([res, req]) => outputSubject.next({ req, res }),
@@ -95,7 +88,7 @@ export const resolveRouting = (
 
       const flow$ = zip(
         inputStream$.pipe(
-          publish(req$ => middleware$(req$, ctx)),
+          publish(req$ => middleware ? middleware(req$, ctx) : req$),
           publish(req$ => effect(req$, ctx)),
           catchError(error => of(error)),
         ),

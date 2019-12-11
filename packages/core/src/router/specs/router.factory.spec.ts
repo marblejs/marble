@@ -3,10 +3,11 @@
 import { of } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import { RouteEffect, RouteEffectGroup, Routing } from '../router.interface';
-import { factorizeRouting } from '../router.factory';
+import { factorizeRouting, factorizeRoutingWithDefaults } from '../router.factory';
 import { createHttpRequest, createMockEffectContext } from '../../+internal';
 import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http-effects.interface';
 import { factorizeRegExpWithParams } from '../router.params.factory';
+import { r } from '../router.ixbuilder';
 
 const getRegExp = (path: string) => factorizeRegExpWithParams(path).regExp;
 
@@ -173,5 +174,48 @@ describe('#factorizeRouting', () => {
 
     // then
     expect(error).toThrowError('Redefinition of route at "GET: /test"');
+  });
+});
+
+describe('#factorizeRoutingWithDefaults', () => {
+  test('adds fallback route', () => {
+    const factorizedRouting = factorizeRoutingWithDefaults([]);
+
+    expect(factorizedRouting).toEqual([
+      {
+        regExp: getRegExp('/*'),
+        path: '/(.*)',
+        methods: {
+          '*': {
+            effect: expect.any(Function),
+            middleware: undefined,
+            parameters: undefined,
+          },
+        },
+      },
+    ] as Routing);
+  });
+
+  test('allows to redefine fallback route', () => {
+    const fallback$ = r.pipe(
+      r.matchPath('*'),
+      r.matchType('*'),
+      r.useEffect(req$ => req$.pipe(mapTo({ body: 'fallback' }))));
+
+    const factorizedRouting = factorizeRoutingWithDefaults([ fallback$ ]);
+
+    expect(factorizedRouting).toEqual([
+      {
+        regExp: getRegExp('/*'),
+        path: '/(.*)',
+        methods: {
+          [fallback$.method]: {
+            effect: fallback$.effect,
+            middleware: undefined,
+            parameters: undefined,
+          },
+        },
+      },
+    ] as Routing);
   });
 });

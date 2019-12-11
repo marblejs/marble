@@ -9,8 +9,10 @@ import {
   RouteEffectGroup,
 } from './router.interface';
 import { factorizeRegExpWithParams } from './router.params.factory';
-import { isNonNullable } from '../+internal/utils';
 import { notFound$ } from './router.effects';
+
+const canOverrideRoute = (route: RouteEffect) =>
+  route.meta?.overridable === true;
 
 export const factorizeRouting = (
   routes: (RouteEffect | RouteEffectGroup)[],
@@ -36,13 +38,17 @@ export const factorizeRouting = (
       parameters,
       effect: route.effect,
       middleware: middlewares.length
-        ? combineMiddlewares(...[...middlewares, route.middleware].filter(isNonNullable))
+        ? combineMiddlewares(...middlewares, route.middleware)
         : route.middleware,
     };
 
     if (foundRoute) {
-      if (foundRoute.methods[route.method]) {
+      if (!canOverrideRoute(route) && foundRoute.methods[route.method]) {
         throw new Error(`Redefinition of route at "${route.method}: ${parentPath + route.path}"`);
+      }
+
+      if (canOverrideRoute(route) && foundRoute.methods[route.method]) {
+        return;
       }
 
       return foundRoute.methods[route.method] = method;
@@ -58,5 +64,8 @@ export const factorizeRouting = (
   return routing;
 };
 
-export const factorizeRoutingWithDefaults = (routes: (RouteEffect | RouteEffectGroup)[]): Routing =>
-  factorizeRouting([...routes, notFound$]);
+export const factorizeRoutingWithDefaults = (
+  routes: (RouteEffect | RouteEffectGroup)[],
+  middlewares: HttpMiddlewareEffect[] = [],
+): Routing =>
+  factorizeRouting([...routes, notFound$], middlewares);

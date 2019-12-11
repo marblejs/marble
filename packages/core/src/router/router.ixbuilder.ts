@@ -1,5 +1,5 @@
 import { IxBuilder, ichainCurry } from '../+internal/fp/IxBuilder';
-import { RouteEffect } from './router.interface';
+import { RouteEffect, RouteMeta } from './router.interface';
 import { HttpMethod } from '../http.interface';
 import { HttpMiddlewareEffect, HttpEffect } from '../effects/http-effects.interface';
 import { combineMiddlewares } from '../effects/effects.combiner';
@@ -36,7 +36,7 @@ const use = (middleware: HttpMiddlewareEffect) => ichainCurry((spec: RouteEffect
 const useEffect = (effect: HttpEffect) => ichainCurry((spec: RouteEffectSpec) =>
   new IxBuilder<TypeApplied | MiddlewareApplied, EffectApplied, RouteEffectSpec>({ ...spec, effect }));
 
-const applyMeta = (meta: Record<string, any>) => ichainCurry((spec: RouteEffectSpec) =>
+const applyMeta = (meta: RouteMeta) => ichainCurry((spec: RouteEffectSpec) =>
   new IxBuilder<EffectApplied | MetaApplied, MetaApplied, RouteEffectSpec>({
     ...spec,
     meta: { ...spec.meta, ...meta },
