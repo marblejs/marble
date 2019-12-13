@@ -4,7 +4,9 @@ import { subscribeServerEvents } from './server.event.subscriber';
 import { createContext, lookup, registerAll, bindTo } from '../context/context.factory';
 import { createEffectContext } from '../effects/effectsContext.factory';
 import { CreateServerConfig, Server } from './server.interface';
-import { ServerClientToken, ServerEventStreamToken } from './server.tokens';
+import { ServerClientToken, ServerEventStreamToken, ServerRequestMetadataStorageToken } from './server.tokens';
+import { insertIf, isTestingMetadataOn } from '../+internal';
+import { serverRequestMetadataStorage } from './server.metadata.storage';
 
 const DEFAULT_HOSTNAME = '127.0.0.1';
 
@@ -16,10 +18,12 @@ export const createServer = (config: CreateServerConfig): Server => {
 
   const boundServerEvent$ = bindTo(ServerEventStreamToken)(() => serverEvent$);
   const boundServer = bindTo(ServerClientToken)(() => server);
+  const boundServerRequestMetadataStorage = bindTo(ServerRequestMetadataStorageToken)(serverRequestMetadataStorage);
 
   const context = registerAll([
     boundServer,
     boundServerEvent$,
+    ...insertIf(isTestingMetadataOn(), boundServerRequestMetadataStorage),
     ...dependencies,
   ])(createContext());
 

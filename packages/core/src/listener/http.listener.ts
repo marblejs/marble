@@ -47,7 +47,7 @@ export const httpListener = ({
       const marbleReq = req as HttpRequest;
       const marbleRes = res as HttpResponse;
 
-      marbleRes.send = handleResponse(marbleRes)(marbleReq);
+      marbleRes.send = handleResponse(ask)(marbleRes)(marbleReq);
       marbleReq.response = marbleRes;
 
       const routeSubject = resolve(marbleReq);
