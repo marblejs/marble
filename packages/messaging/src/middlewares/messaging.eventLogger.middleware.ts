@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { tap, map } from 'rxjs/operators';
 import { useContext } from '@marblejs/core';
 import { provideLogger, LoggerLevel } from '../server/messaging.server.logger';
@@ -11,10 +10,8 @@ export const inputLogger$: MsgMiddlewareEffect = (event$, ctx) => {
 
   return event$.pipe(
     tap(event => {
-      const eventType = chalk.yellow(event.type);
-      const eventCorrelationId = chalk.magenta(event.raw.correlationId);
       const channel = transportLayer.config.channel;
-      const message = `${eventType}, id: ${eventCorrelationId}`;
+      const message = `${event.type}, id: ${event.raw.correlationId}`;
 
       logger({
         level: LoggerLevel.INFO,
@@ -32,18 +29,15 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
 
   return event$.pipe(
     tap(({ event, initiator }) => {
-      const isError = !!event.error;
-      const colorize = isError ? chalk.red : chalk.yellow;
-      const eventType = colorize(event.type);
-      const eventCorrelationId = initiator.correlationId && chalk.magenta(initiator.correlationId);
-      const eventReplyTo = initiator.replyTo && chalk.yellow(initiator.replyTo);
       const channel = transportLayer.config.channel;
-      const message = eventReplyTo
-        ? `${eventType}, id: ${eventCorrelationId} and sent to ${eventReplyTo}`
-        : `${eventType}, id: ${eventCorrelationId}`;
+      const message = event.error
+        ? `${event.error.name}, ${event.error.message} for event ${event.type}`
+        : initiator.replyTo
+          ? `${event.type}, id: ${initiator.correlationId} and sent to ${initiator.replyTo}`
+          : `${event.type}, id: ${initiator.correlationId}`;
 
       logger({
-        level: isError ? LoggerLevel.ERROR : LoggerLevel.INFO,
+        level: event.error ? LoggerLevel.ERROR : LoggerLevel.INFO,
         tag: 'EVENT_OUT',
         message,
         channel,
@@ -60,9 +54,9 @@ export const errorLogger$: MsgErrorEffect = (event$, ctx) => {
   return event$.pipe(
     tap(({ error, event }) => logger({
       tag: 'ERROR',
-      message: chalk.red(event
+      message: event
         ? `${error.name}, ${error.message} for event ${event.type}`
-        : `${error.name}, ${error.message}`),
+        : `${error.name}, ${error.message}`,
       level: LoggerLevel.ERROR,
       channel: transportLayer.config.channel,
     })),
