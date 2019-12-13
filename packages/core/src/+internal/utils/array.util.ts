@@ -14,3 +14,6 @@ export const filterArray = <T>(f: (v: T) => boolean) => (array: T[]) =>
 
 export const mapArray = <T, R>(f: (v: T) => R) => (array: T[]) =>
   array.map(f);
+
+export const insertIf = <T>(condition: boolean, ...elements: T[]) =>
+  condition ? elements : [];

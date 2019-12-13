@@ -3,6 +3,8 @@ import * as https from 'https';
 import { Observable } from 'rxjs';
 import { HttpEffectResponse } from './effects/http-effects.interface';
 
+export type HttpRequestMetadata = Record<string, any>;
+
 export interface HttpRequest<
   TBody = unknown,
   TParams = unknown,
@@ -13,7 +15,7 @@ export interface HttpRequest<
   body: TBody;
   params: TParams;
   query: TQuery;
-  meta?: Record<string, any>;
+  meta?: HttpRequestMetadata;
   response: HttpResponse;
   [key: string]: any;
 }

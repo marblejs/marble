@@ -35,7 +35,7 @@ describe('Http listener', () => {
     const middleware$: HttpMiddlewareEffect = req$ => req$;
 
     // when
-    responseHandler.handleResponse = jest.fn(() => () => sender);
+    responseHandler.handleResponse = jest.fn(() => () => () => sender);
 
     httpListener({
       middlewares: [middleware$],
@@ -61,7 +61,7 @@ describe('Http listener', () => {
     );
 
     // when
-    responseHandler.handleResponse = jest.fn(() => () => sender);
+    responseHandler.handleResponse = jest.fn(() => () => () => sender);
 
     httpListener({
       middlewares: [],
@@ -90,7 +90,7 @@ describe('Http listener', () => {
     );
 
     // when
-    responseHandler.handleResponse = jest.fn(() => () => sender);
+    responseHandler.handleResponse = jest.fn(() => () => () => sender);
 
     httpListener({
       middlewares: [],
