@@ -5,7 +5,6 @@ import { Transport } from '../transport/transport.interface';
 import { AmqpConnectionStatus } from '../transport/strategies/amqp.strategy.interface';
 import { RedisConnectionStatus } from '../transport/strategies/redis.strategy.interface';
 import { ServerEvent } from '../server/messaging.server.events';
-import chalk from 'chalk';
 import { MsgServerEffect } from '../effects/messaging.effects.interface';
 import { TransportLayerToken } from '../server/messaging.server.tokens';
 
@@ -31,7 +30,7 @@ const connect$: MsgServerEffect = (event$, ctx) => {
     filter(({ type }) => type === serverStatusMap.connect[transportLayer.type]),
     tap(({ host, channel }) => logger({
       tag: 'CONNECTED',
-      message: `Connected server to host: ${chalk.yellow(host)}`,
+      message: `Connected server to host: ${host}`,
       level: LoggerLevel.INFO,
       channel,
     })),
@@ -49,7 +48,7 @@ const disconnect$: MsgServerEffect = (event$, ctx) => {
     filter(({ type }) => type === serverStatusMap.disconnect[transportLayer.type]),
     tap(({ host, channel }) => logger({
       tag: 'DISCONNECTED',
-      message: `Disconnected server from host: ${chalk.yellow(host)}`,
+      message: `Disconnected server from host: ${host}`,
       level: LoggerLevel.ERROR,
       channel,
     }))

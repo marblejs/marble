@@ -6,9 +6,14 @@ import { LoggerToken } from './messaging.server.tokens';
 
 const IS_TEST_ENV = process.env.NODE_ENV === 'test';
 
-export enum LoggerLevel { INFO, WARN, ERROR }
-export type LoggerOptions = { channel: string; message: string; tag: string; level?: LoggerLevel };
 export type Logger = (opts: LoggerOptions) => any;
+export enum LoggerLevel { INFO, WARN, ERROR }
+export type LoggerOptions = {
+  channel: string;
+  message: string;
+  tag: string;
+  level?: LoggerLevel;
+};
 
 export const provideLogger = (ask: ContextProvider): Logger => pipe(
   ask(LoggerToken),
@@ -17,10 +22,10 @@ export const provideLogger = (ask: ContextProvider): Logger => pipe(
 
 const defaultLogger: Logger = ({ channel, message, tag, level = LoggerLevel.INFO }) => {
   const now = new Date().toISOString();
-  const colorize = {
+  const colorizeText = {
     [LoggerLevel.ERROR]: chalk.red,
     [LoggerLevel.INFO]: chalk.green,
     [LoggerLevel.WARN]: chalk.yellow,
   }[level];
-  return console.log(now.padEnd(30) + channel.padEnd(15) + colorize(tag.padEnd(15)) + message);
+  return console.log(now.padEnd(30) + channel.padEnd(15) + colorizeText(tag.padEnd(15)) + message);
 };
