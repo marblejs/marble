@@ -1,6 +1,6 @@
 import { throwError } from 'rxjs';
 import { mergeMapTo } from 'rxjs/operators';
-import { HttpError } from '../../error/error.model';
+import { HttpError } from '../error/http.error.model';
 import { HttpStatus } from '../http.interface';
 import { r } from './http.router.ixbuilder';
 

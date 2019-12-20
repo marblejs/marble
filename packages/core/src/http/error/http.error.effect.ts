@@ -1,7 +1,7 @@
 import { map } from 'rxjs/operators';
-import { HttpError, isHttpError } from '../../error/error.model';
 import { HttpErrorEffect } from '../effects/http.effects.interface';
 import { HttpStatus } from '../http.interface';
+import { HttpError, isHttpError } from './http.error.model';
 
 const defaultHttpError = new HttpError(
   'Internal server error',

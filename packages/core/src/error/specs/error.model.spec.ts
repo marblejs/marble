@@ -1,4 +1,4 @@
-import { HttpError, isHttpError, CoreError, isCoreError, EventError, isEventError } from '../error.model';
+import { CoreError, isCoreError, EventError, isEventError } from '../error.model';
 
 describe('Error model', () => {
 
@@ -8,14 +8,6 @@ describe('Error model', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  test('#HttpError creates error object', () => {
-    const error = new HttpError('test-message', 200);
-
-    expect(error.name).toBe('HttpError');
-    expect(error.status).toBe(200);
-    expect(error.message).toBe('test-message');
   });
 
   test('#CoreError creates error object', () => {
@@ -40,14 +32,6 @@ describe('Error model', () => {
     expect(stackTraceFactory).toHaveBeenCalledWith('test-message', []);
 
     return;
-  });
-
-  test('#isHttpError detects HttpError type', () => {
-    const httpError = new HttpError('test-message', 200);
-    const otherError = new Error();
-
-    expect(isHttpError(httpError)).toBe(true);
-    expect(isHttpError(otherError)).toBe(false);
   });
 
   test('#isCoreError detects CoreError type', () => {

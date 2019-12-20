@@ -1,6 +1,6 @@
 import { Marbles, createHttpResponse, createHttpRequest } from '../../../+internal';
 import { defaultError$ } from '../http.error.effect';
-import { HttpError } from '../../../error/error.model'; // @TODO: move to 'http' folder
+import { HttpError } from '../http.error.model';
 
 describe('defaultError$', () => {
   const req = createHttpRequest();
