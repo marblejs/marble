@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 import { mapTo, map } from 'rxjs/operators';
 import { Marbles } from '../../+internal/testing';
-import { matchEvent } from './matchEvent.operator';
 import { Event } from '../../event/event.interface';
-import { ServerEventType, ServerEvent, AllServerEvents, } from '../../server/server.event';
+import { ServerEventType, ServerEvent, AllServerEvents, } from '../../http/server/http.server.event';
+import { matchEvent } from './matchEvent.operator';
 
 describe('#matchEvent operator', () => {
   test(`matches string Event`, () => {

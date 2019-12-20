@@ -1,5 +1,5 @@
 import { Event } from '../event/event.interface';
-import { HttpStatus } from '../http.interface';
+import { HttpStatus } from '../http/http.interface';
 import { ExtendableError } from '../+internal/utils';
 
 export enum ErrorType {

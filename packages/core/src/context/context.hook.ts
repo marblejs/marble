@@ -1,10 +1,10 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
-import { ContextToken } from './context.token.factory';
-import { ContextProvider } from './context.factory';
 import { ContextError } from '../error/error.model';
 import { coreErrorFactory, CoreErrorOptions } from '../error/error.factory';
+import { ContextToken } from './context.token.factory';
+import { ContextProvider } from './context.factory';
 
 const coreErrorOptions: CoreErrorOptions =  { contextMethod: 'useContext', offset: 2 };
 

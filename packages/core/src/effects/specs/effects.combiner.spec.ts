@@ -1,6 +1,6 @@
 import { of } from 'rxjs';
 import { tap, mapTo, filter } from 'rxjs/operators';
-import { HttpMiddlewareEffect, HttpEffect } from '../http-effects.interface';
+import { HttpMiddlewareEffect, HttpEffect } from '../../http/effects/http.effects.interface';
 import { combineMiddlewares, combineEffects } from '../effects.combiner';
 import { Marbles, createHttpRequest, createMockEffectContext } from '../../+internal';
 

@@ -3,8 +3,8 @@ import { Subject, fromEvent, merge } from 'rxjs';
 import { map, mapTo, take } from 'rxjs/operators';
 import { RedisClient, ClientOpts } from 'redis';
 import { TransportLayer, TransportLayerConnection, TransportMessage, Transport } from '../transport.interface';
-import { RedisStrategyOptions, RedisConnectionStatus } from './redis.strategy.interface';
 import { throwUnsupportedError } from '../transport.error';
+import { RedisStrategyOptions, RedisConnectionStatus } from './redis.strategy.interface';
 import * as RedisHelper from './redis.strategy.helper';
 
 class RedisStrategyConnection implements TransportLayerConnection {

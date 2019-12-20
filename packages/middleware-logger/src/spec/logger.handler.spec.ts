@@ -1,9 +1,9 @@
-import { Timestamp } from 'rxjs';
 import { WriteStream } from 'fs';
+import { Timestamp } from 'rxjs';
 import { HttpRequest } from '@marblejs/core';
+import { createHttpRequest } from '@marblejs/core/dist/+internal';
 import { loggerHandler } from '../logger.handler';
 import { LoggerOptions } from '../logger.model';
-import { createHttpRequest } from '@marblejs/core/dist/+internal';
 
 describe('#loggerHandler', () => {
   let loggerUtil;

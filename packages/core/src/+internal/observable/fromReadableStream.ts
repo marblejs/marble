@@ -1,5 +1,5 @@
-import { Observable } from 'rxjs';
 import { Readable } from 'stream';
+import { Observable } from 'rxjs';
 
 export const fromReadableStream = (stream: Readable): Observable<any> => {
   stream.pause();

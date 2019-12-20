@@ -1,7 +1,7 @@
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { EMPTY } from 'rxjs';
-import { broadcast } from './broadcast.operator';
 import { WsEffect } from '../../effects/ws-effects.interface';
+import { broadcast } from './broadcast.operator';
 
 describe('#broadcast operator', () => {
   const client = { sendBroadcastResponse: jest.fn(() => EMPTY) };

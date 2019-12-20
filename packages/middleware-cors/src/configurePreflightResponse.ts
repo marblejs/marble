@@ -1,6 +1,5 @@
-import { HttpMethod, HttpRequest, HttpResponse, HttpStatus } from '@marblejs/core';
 import { isString } from 'util';
-
+import { HttpMethod, HttpRequest, HttpResponse, HttpStatus } from '@marblejs/core';
 import { checkOrigin } from './checkOrigin';
 import { AccessControlHeader, applyHeaders, ConfiguredHeader } from './applyHeaders';
 import { CORSOptions } from './middleware';

@@ -1,5 +1,5 @@
-import { HttpEffect } from '../../effects/http-effects.interface';
-import { HttpStatus } from '../../http.interface';
+import { HttpEffect } from '../../http/effects/http.effects.interface';
+import { HttpStatus } from '../../http/http.interface';
 import { createHttpRequest, Marbles } from '../../+internal/testing';
 import { switchToProtocol } from './switchToProtocol.operator';
 

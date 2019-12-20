@@ -1,8 +1,8 @@
 import { createContext } from '@marblejs/core';
-import { messagingClient } from './messaging.client';
-import { MessagingClientConfig } from './messaging.client.interface';
 import { Transport, TransportMessage } from '../transport/transport.interface';
 import { createAmqpStrategy } from '../transport/strategies/amqp.strategy';
+import { messagingClient } from './messaging.client';
+import { MessagingClientConfig } from './messaging.client.interface';
 
 describe('#messagingClient', () => {
 

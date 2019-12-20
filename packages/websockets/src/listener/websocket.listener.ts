@@ -14,7 +14,6 @@ import {
   ContextReader,
 } from '@marblejs/core';
 import * as WS from '../websocket.interface';
-import * as WSHelper from './websocket.helper';
 import * as WSEffect from '../effects/ws-effects.interface';
 import { jsonTransformer } from '../transformer/json.transformer';
 import { EventTransformer } from '../transformer/transformer.inteface';
@@ -22,6 +21,7 @@ import { handleResponse, handleBroadcastResponse } from '../response/ws-response
 import { handleEffectsError } from '../error/ws-error.handler';
 import { provideErrorEffect } from '../error/ws-error.provider';
 import { WebSocketConnectionError } from '../error/ws-error.model';
+import * as WSHelper from './websocket.helper';
 
 type HandleMessage =
   (client: WS.MarbleWebSocketClient, contextProvider: ContextProvider) => void;

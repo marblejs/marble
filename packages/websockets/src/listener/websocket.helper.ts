@@ -1,5 +1,6 @@
 import * as WebSocket from 'ws';
 import { EMPTY, fromEvent, merge, SchedulerLike, throwError, interval, from, iif, of } from 'rxjs';
+import { takeUntil, catchError, tap, mapTo, timeout, map, mergeMap, mergeMapTo } from 'rxjs/operators';
 import {
   MarbleWebSocketClient,
   MarbleWebSocketServer,
@@ -8,7 +9,6 @@ import {
   WebSocketServer,
 } from '../websocket.interface';
 import { WebSocketConnectionError } from '../error/ws-error.model';
-import { takeUntil, catchError, tap, mapTo, timeout, map, mergeMap, mergeMapTo } from 'rxjs/operators';
 export { WebSocket };
 
 type ExtendableServerFields = {

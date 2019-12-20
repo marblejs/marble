@@ -1,10 +1,10 @@
-import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
-import {  Observable, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
+import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
+import { ContentType } from '@marblejs/core/dist/+internal/http';
 import { parseMultipart } from './multipart.parser';
 import { shouldParseMultipart } from './multipart.util';
 import { WithFile, ParserOpts } from './multipart.interface';
-import { ContentType } from '@marblejs/core/dist/+internal/http';
 
 export const multipart$ = <File extends string>(opts: ParserOpts = {}) => <T extends HttpRequest>(req$: Observable<T>) =>
   req$.pipe(

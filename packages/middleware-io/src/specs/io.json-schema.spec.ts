@@ -1,8 +1,8 @@
 import * as t from 'io-ts';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { ioTypeToJsonSchema, mergeJsonObjects, withJsonSchema } from '../io.json-schema';
 import { JSONSchema7 } from 'json-schema';
+import { ioTypeToJsonSchema, mergeJsonObjects, withJsonSchema } from '../io.json-schema';
 
 const customIntegerStringType = () => new t.Type<number, string, unknown>(
   'IntegerString',
