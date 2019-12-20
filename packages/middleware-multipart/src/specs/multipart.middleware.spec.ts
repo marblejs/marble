@@ -58,8 +58,12 @@ const server = createServer({
 describe('multipart$', () => {
   const httpTestBed = createHttpServerTestBed(server);
 
+  beforeEach(() => {
+    if (!fs.existsSync(TMP_PATH)) fs.mkdirSync(TMP_PATH);
+  });
+
   afterEach(() => {
-    if (fs.existsSync(TMP_PATH)) { rimraf.sync(TMP_PATH); }
+    if (fs.existsSync(TMP_PATH)) rimraf.sync(TMP_PATH);
   });
 
   test('parses multipart/form-data request with additional fields and stores it in-memory', async () => {
