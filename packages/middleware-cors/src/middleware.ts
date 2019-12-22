@@ -1,6 +1,6 @@
-import { HttpMethod, HttpMiddlewareEffect, HttpStatus } from '@marblejs/core';
-import { tap } from 'rxjs/operators';
 import { isString } from 'util';
+import { tap } from 'rxjs/operators';
+import { HttpMethod, HttpMiddlewareEffect, HttpStatus } from '@marblejs/core';
 
 import { configurePreflightResponse } from './configurePreflightResponse';
 import { configureResponse } from './configureResponse';

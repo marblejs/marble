@@ -1,5 +1,4 @@
 import { isEmpty, size } from 'fp-ts/lib/Map';
-import { some } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as R from 'fp-ts/lib/Reader';
 import * as O from 'fp-ts/lib/Option';
@@ -67,7 +66,7 @@ describe('#register', () => {
     const context = register(boundDependency)(createContext());
 
     // then
-    expect(lookup(context)(token)).toEqual(some('test'));
+    expect(lookup(context)(token)).toEqual(O.some('test'));
   });
 });
 
@@ -90,7 +89,7 @@ describe('#registerAll', () => {
 
     // then
     expect(size(context)).toEqual(3);
-    expect(lookup(context)(token2)).toEqual(some('test_2'));
+    expect(lookup(context)(token2)).toEqual(O.some('test_2'));
   });
 });
 
@@ -119,8 +118,8 @@ describe('#reader', () => {
     ])(createContext());
 
     // then
-    expect(lookup(context1)(token2)).toEqual(some('test_1_2'));
-    expect(lookup(context2)(token2)).toEqual(some('test_1_2'));
+    expect(lookup(context1)(token2)).toEqual(O.some('test_1_2'));
+    expect(lookup(context2)(token2)).toEqual(O.some('test_1_2'));
   });
 
   test('asks context for a eager reader dependency', () => {
@@ -156,9 +155,9 @@ describe('#reader', () => {
     ])(createContext());
 
     // then
-    expect(lookup(context)(token1)).toEqual(some('test'));
-    expect(lookup(context)(token2)).toEqual(some('test_1'));
-    expect(lookup(context)(token3)).toEqual(some('test_1_2'));
+    expect(lookup(context)(token1)).toEqual(O.some('test'));
+    expect(lookup(context)(token2)).toEqual(O.some('test_1'));
+    expect(lookup(context)(token3)).toEqual(O.some('test_1_2'));
     expect(executionOrder).toEqual([2, 1, 3]);
   });
 
@@ -174,9 +173,9 @@ describe('#reader', () => {
     ])(createContext());
 
     // then
-    expect(lookup(context)(token)).toEqual(some('test'));
-    expect(lookup(context)(token)).toEqual(some('test'));
-    expect(lookup(context)(token)).toEqual(some('test'));
+    expect(lookup(context)(token)).toEqual(O.some('test'));
+    expect(lookup(context)(token)).toEqual(O.some('test'));
+    expect(lookup(context)(token)).toEqual(O.some('test'));
     expect(spy).toHaveBeenCalledTimes(1);
   });
 });

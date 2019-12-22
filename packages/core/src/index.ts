@@ -1,23 +1,35 @@
-export { EffectFactory } from './effects/effects.factory';
-export { defaultError$ } from './error/error.effect';
+// http
+export { EffectFactory } from './http/effects/http.effects.factory';
+export { defaultError$ } from './http/error/http.error.effect';
+export { HttpError } from './http/error/http.error.model';
+export { combineRoutes } from './http/router/http.router.combiner';
+export { r } from './http/router/http.router.ixbuilder';
+export * from './http/router/http.router.interface';
+export * from './http/effects/http.effects.interface';
+export * from './http/server/http.server.event';
+export * from './http/server/http.server.interface';
+export * from './http/server/http.server.tokens';
+export * from './http/server/http.server.factory';
+export * from './http/server/http.server.listener';
+export * from './http/http.interface';
+
+// core - error
 export { coreErrorFactory, CoreErrorOptions } from './error/error.factory';
-export { HttpError, CoreError, EventError } from './error/error.model';
-export { combineRoutes } from './router/router.combiner';
-export { r } from './router/router.ixbuilder';
+export { CoreError, EventError } from './error/error.model';
+
+// core - effects
 export { combineEffects, combineMiddlewares } from './effects/effects.combiner';
 export { createEffectContext } from './effects/effectsContext.factory';
 export * from './effects/effects.interface';
-export * from './effects/http-effects.interface';
-export * from './router/router.interface';
+
+// core - operators
 export * from './operators';
-export * from './http.interface';
+
+// core - event
 export * from './event/event.factory';
 export * from './event/event.interface';
+
+// core - context
 export * from './context/context.factory';
 export * from './context/context.hook';
 export * from './context/context.token.factory';
-export * from './server/server.event';
-export * from './server/server.interface';
-export * from './server/server.tokens';
-export { createServer } from './server/server.factory';
-export { HttpListenerConfig, httpListener } from './listener/http.listener';

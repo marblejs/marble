@@ -1,3 +1,5 @@
+import * as http from 'http';
+import { EventEmitter } from 'events';
 import {
   HttpRequest,
   HttpResponse,
@@ -6,12 +8,10 @@ import {
   RouteParameters,
   QueryParameters,
   HttpServer,
-} from '../../http.interface';
-import * as http from 'http';
-import { EventEmitter } from 'events';
+} from '../../http/http.interface';
 import { createContext, lookup } from '../../context/context.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
-import { Server } from '../../server/server.interface';
+import { Server } from '../../http/server/http.server.interface';
 
 interface HttpRequestMockParams {
   url?: string;

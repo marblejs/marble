@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
+import { from } from 'rxjs';
 import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
 import { shouldParseFieldname, shouldParseMultipart, setRequestData, streamFileTo } from '../multipart.util';
 import { FileIncomingData } from '../multipart.interface';
-import { from } from 'rxjs';
 
 test('#shouldParseFieldname checks if given fieldname can be parsed by middleware', () => {
   expect(shouldParseFieldname(undefined)('test')).toEqual(true);

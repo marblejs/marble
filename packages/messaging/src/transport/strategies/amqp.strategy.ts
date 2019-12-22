@@ -2,9 +2,9 @@ import { Subject, fromEvent, merge, from } from 'rxjs';
 import { map, filter, take, mapTo, first, mergeMap } from 'rxjs/operators';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
+import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { TransportLayer, TransportMessage, TransportLayerConnection, Transport } from '../transport.interface';
 import { AmqpStrategyOptions, AmqpConnectionStatus } from './amqp.strategy.interface';
-import { createUuid } from '@marblejs/core/dist/+internal/utils';
 
 class AmqpStrategyConnection implements TransportLayerConnection {
   private closeSubject$ = new Subject();

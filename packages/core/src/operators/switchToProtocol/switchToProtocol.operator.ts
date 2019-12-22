@@ -1,6 +1,6 @@
 import { Observable, iif, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { HttpRequest, HttpStatus } from '../../http.interface';
+import { HttpRequest, HttpStatus } from '../../http/http.interface';
 
 export const switchToProtocol = <I extends HttpRequest>
   (protocol: string) =>

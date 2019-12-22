@@ -22,9 +22,9 @@ import {
 } from '../transport/transport.interface';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
+import { inputLogger$, outputLogger$, errorLogger$ } from '../middlewares/messaging.eventLogger.middleware';
 import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
 import { AllServerEvents, ServerEvent } from './messaging.server.events';
-import { inputLogger$, outputLogger$, errorLogger$ } from '../middlewares/messaging.eventLogger.middleware';
 
 type ProcessOperator = OperatorFunction<TransportMessage<any>, TransportMessage<any>>;
 

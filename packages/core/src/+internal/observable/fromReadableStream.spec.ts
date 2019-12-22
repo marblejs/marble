@@ -1,5 +1,5 @@
-import { fromReadableStream } from './fromReadableStream';
 import { Transform } from 'stream';
+import { fromReadableStream } from './fromReadableStream';
 
 class DuplexStream extends Transform {
   _transform(chunk, _, callback) {

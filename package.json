@@ -65,6 +65,7 @@
     "@typescript-eslint/parser": "~2.9.0",
     "@types/rimraf": "^2.0.2",
     "eslint": "~6.7.1",
+    "eslint-plugin-import": "~2.19.1",
     "husky": "^0.14.0",
     "jest": "~24.9.0",
     "lerna": "~3.17.0",
