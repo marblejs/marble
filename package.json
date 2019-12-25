@@ -3,7 +3,7 @@
   "version": "2.3.1",
   "description": "Reactive Node APIs made easy",
   "scripts": {
-    "build": "yarn clean && lerna run build",
+    "build": "lerna run build",
     "postbuild": "rimraf packages/**/*.spec.js packages/**/*.spec.d.ts",
     "benchmark": "make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
@@ -15,7 +15,7 @@
     "test:unit": "SCOPE=unit ./scripts/run-tests.sh",
     "test:watch": "SCOPE=watch ./scripts/run-tests.sh",
     "test:integration": "SCOPE=integration ./scripts/run-tests.sh",
-    "clean": "lerna run clean",
+    "clean": "lerna run clean && rimraf packages/*/tsconfig.tsbuildinfo",
     "purge": "yarn clean && rimraf node_modules",
     "prepublishOnly": "yarn clean && yarn build && yarn test",
     "publish": "lerna publish --no-push --force-publish=*",
