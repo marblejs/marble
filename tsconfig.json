@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
+    "composite": true,
     "declaration": true,
+    "declarationMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "module": "commonjs",
@@ -12,6 +14,7 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": false,
     "resolveJsonModule": true,
+    "incremental": true,
     "pretty": true,
     "strict": true,
     "target": "es6",
