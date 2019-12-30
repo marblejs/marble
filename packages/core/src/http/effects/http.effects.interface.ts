@@ -19,7 +19,7 @@ export interface HttpErrorEffect<
 
 export interface HttpServerEffect<
   Ev extends Event = Event
-> extends HttpEffect<Ev, any, HttpServer> {}
+> extends HttpEffect<Ev, any> {}
 
 export interface HttpOutputEffect<
   Req extends HttpRequest = HttpRequest,
@@ -29,5 +29,4 @@ export interface HttpOutputEffect<
 export interface HttpEffect<
   I = HttpRequest,
   O = HttpEffectResponse,
-  Client = HttpServer,
-> extends Effect<I, O, Client> {}
+> extends Effect<I, O, HttpServer> {}
