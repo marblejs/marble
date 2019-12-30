@@ -29,7 +29,7 @@ export const httpListener = createListener<HttpListenerConfig, HttpListener>(con
     middlewares = [],
     output$,
     error$,
-  } = config;
+  } = config ?? {};
 
   const client = useContext(ServerClientToken)(ask);
   const effectContext = createEffectContext({ ask, client });

@@ -10,5 +10,5 @@ export interface ListenerConfig<T = any> {
 }
 
 export interface Listener<T extends ListenerConfig, U> {
-  (config: T): Reader<Context, U>;
+  (config?: T): Reader<Context, U>;
 }

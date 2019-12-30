@@ -1,15 +1,13 @@
 import {
-  reader,
   Event,
-  ContextProvider,
   combineMiddlewares,
   combineEffects,
   createEffectContext,
   useContext,
   EventError,
+  createListener,
 } from '@marblejs/core';
 import * as O from 'fp-ts/lib/Option';
-import * as R from 'fp-ts/lib/Reader';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { flow } from 'fp-ts/lib/function';
 import { Observable, Subscription, Subject, of, zip, OperatorFunction} from 'rxjs';
@@ -18,7 +16,6 @@ import {
   TransportMessage,
   TransportMessageTransformer,
   TransportLayerConnection,
-  TransportLayer,
 } from '../transport/transport.interface';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
@@ -36,24 +33,26 @@ export interface MessagingListenerConfig {
   msgTransformer?: TransportMessageTransformer<any>;
 }
 
+export interface MessagingListener {
+  listen: () => Promise<TransportLayerConnection>;
+}
+
 const defaultOutput$: MsgOutputEffect = msg$ => msg$.pipe(map(m => m.event));
 const defaultError$: MsgErrorEffect = msg$ => msg$;
 const defaultEffect$: MsgEffect = msg$ => msg$;
 
-export const messagingListener = (config: MessagingListenerConfig = {}) => {
+export const messagingListener = createListener<MessagingListenerConfig, MessagingListener>(config => ask => {
+  const transportLayer = useContext(TransportLayerToken)(ask);
+
   const {
     effects = [defaultEffect$],
     middlewares = [],
     output$ = defaultOutput$,
     error$ = defaultError$,
     msgTransformer = jsonTransformer,
-  } = config;
+  } = config ?? {};
 
-  const handleConnection = (
-    conn: TransportLayerConnection,
-    serverEventsSubject: Subject<AllServerEvents>,
-    ask: ContextProvider,
-  ) => {
+  const handleConnection = (conn: TransportLayerConnection, serverEventsSubject: Subject<AllServerEvents>) => {
     let effectsSub: Subscription;
 
     const errorSubject = new Subject<Error>();
@@ -158,12 +157,12 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     effectsSub = subscribeEffects(message$);
   };
 
-  const listen = (transportLayer: TransportLayer, ask: ContextProvider) => async () => {
+  const listen = async () => {
     const { host, channel } = transportLayer.config;
     const serverEventsSubject = pipe(ask(ServerEventsToken), O.getOrElse(() => undefined as unknown as Subject<AllServerEvents>));
     const connection = await transportLayer.connect({ isConsumer: true });
 
-    handleConnection(connection, serverEventsSubject, ask);
+    handleConnection(connection, serverEventsSubject);
 
     connection.status$
       .pipe(takeUntil(connection.close$))
@@ -172,11 +171,5 @@ export const messagingListener = (config: MessagingListenerConfig = {}) => {
     return connection;
   };
 
-  return pipe(reader, R.map(ask => {
-    const transportLayer = useContext(TransportLayerToken)(ask);
-
-    return {
-      listen: listen(transportLayer, ask),
-    }
-  }));
-};
+  return { listen };
+});
