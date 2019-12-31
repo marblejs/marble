@@ -1,5 +1,5 @@
 import { Event } from '@marblejs/core';
-import { EventTransformer } from './transformer.inteface';
+import { EventTransformer } from './websocket.transformer.interface';
 
 export const jsonTransformer: EventTransformer<Event, string> = {
   decode: event => JSON.parse(event),

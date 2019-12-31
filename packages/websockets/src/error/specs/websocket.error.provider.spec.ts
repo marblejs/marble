@@ -1,7 +1,7 @@
 import { mapTo } from 'rxjs/operators';
-import { WsErrorEffect } from '../../effects/ws-effects.interface';
-import { error$ as defaultError$ } from '../ws-error.effect';
-import { provideErrorEffect } from '../ws-error.provider';
+import { WsErrorEffect } from '../../effects/websocket.effects.interface';
+import { error$ as defaultError$ } from '../websocket.error.effect';
+import { provideErrorEffect } from '../websocket.error.provider';
 
 describe('#provideErrorEffect', () => {
   test('provides passed error$', () => {

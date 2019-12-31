@@ -1,6 +1,6 @@
 import { EventError } from '@marblejs/core';
 import { map } from 'rxjs/operators';
-import { WsErrorEffect } from '../effects/ws-effects.interface';
+import { WsErrorEffect } from '../effects/websocket.effects.interface';
 
 const DEFAULT_ERROR_CHANNEL = 'ERROR';
 

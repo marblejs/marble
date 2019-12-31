@@ -1,34 +1,23 @@
 import * as http from 'http';
 import * as WebSocket from 'ws';
-import * as R from 'fp-ts/lib/Reader';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { Subject, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import {
-  combineEffects,
-  combineMiddlewares,
-  Event,
-  createEffectContext,
-  reader,
-  ContextProvider,
-  ContextReader,
-} from '@marblejs/core';
+import { combineEffects, combineMiddlewares, Event, createEffectContext, createListener } from '@marblejs/core';
 import * as WS from '../websocket.interface';
-import * as WSEffect from '../effects/ws-effects.interface';
-import { jsonTransformer } from '../transformer/json.transformer';
-import { EventTransformer } from '../transformer/transformer.inteface';
-import { handleResponse, handleBroadcastResponse } from '../response/ws-response.handler';
-import { handleEffectsError } from '../error/ws-error.handler';
-import { provideErrorEffect } from '../error/ws-error.provider';
-import { WebSocketConnectionError } from '../error/ws-error.model';
-import * as WSHelper from './websocket.helper';
+import * as WSEffect from '../effects/websocket.effects.interface';
+import { jsonTransformer } from '../transformer/websocket.json.transformer';
+import { EventTransformer } from '../transformer/websocket.transformer.interface';
+import { handleResponse, handleBroadcastResponse } from '../response/websocket.response.handler';
+import { handleEffectsError } from '../error/websocket.error.handler';
+import { provideErrorEffect } from '../error/websocket.error.provider';
+import { WebSocketConnectionError } from '../error/websocket.error.model';
+import * as WSHelper from './websocket.server.helper';
 
 type HandleMessage =
-  (client: WS.MarbleWebSocketClient, contextProvider: ContextProvider) => void;
+  (client: WS.MarbleWebSocketClient) => void;
 
 type HandleConnection =
-  (server: WS.MarbleWebSocketServer, contextProvider: ContextProvider) =>
-  (client: WS.WebSocketClient, request: http.IncomingMessage) =>  void;
+  (server: WS.MarbleWebSocketServer) => (client: WS.WebSocketClient, request: http.IncomingMessage) => void;
 
 export interface WebSocketListenerConfig {
   effects?: WSEffect.WsEffect<any, any>[];
@@ -39,7 +28,11 @@ export interface WebSocketListenerConfig {
   output$?: WSEffect.WsOutputEffect;
 }
 
-export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
+export interface WebSocketListener {
+  (options?: WebSocket.ServerOptions): WS.MarbleWebSocketServer;
+}
+
+export const webSocketListener = createListener<WebSocketListenerConfig, WebSocketListener>(config => ask => {
   const {
     error$,
     effects = [],
@@ -47,14 +40,14 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     eventTransformer,
     connection$ = (req$: Observable<http.IncomingMessage>) => req$,
     output$ = (out$: Observable<Event>) => out$,
-  } = config;
+  } = config ?? {};
 
   const combinedMiddlewares = combineMiddlewares(...middlewares);
   const combinedEffects = combineEffects(...effects);
   const providedError$ = provideErrorEffect(error$, eventTransformer);
   const providedTransformer: EventTransformer<any, any> = eventTransformer || jsonTransformer;
 
-  const handleMessage: HandleMessage = (client, ask) => {
+  const handleMessage: HandleMessage = client => {
     const eventSubject$ = new Subject<any>();
     const incomingEventSubject$ = new Subject<WS.WebSocketData>();
     const ctx = createEffectContext({ ask, client });
@@ -94,18 +87,18 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
     client.once('close', onClose);
   };
 
-  const handleConnection: HandleConnection = (server, ask) => (client) => {
+  const handleConnection: HandleConnection = server => client => {
     const extendedClient = WSHelper.extendClientWith({
       sendResponse: handleResponse(client, providedTransformer),
       sendBroadcastResponse: handleBroadcastResponse(server, providedTransformer),
       isAlive: true,
     })(client);
 
-    handleMessage(extendedClient, ask);
+    handleMessage(extendedClient);
     WSHelper.handleClientBrokenConnection(extendedClient).subscribe();
   };
 
-  const verifyClient = (ask: ContextProvider): WebSocket.VerifyClientCallbackAsync  => (info, callback) => {
+  const verifyClient: WebSocket.VerifyClientCallbackAsync = (info, callback) => {
     connection$(of(info.req), createEffectContext({ ask, client: undefined }))
       .pipe(map(Boolean))
       .subscribe(
@@ -114,18 +107,18 @@ export const webSocketListener = (config: WebSocketListenerConfig = {}) => {
       );
   };
 
-  return (serverOptions: WebSocket.ServerOptions = {}): ContextReader => pipe(reader, R.map(ask => {
+  return (serverOptions: WebSocket.ServerOptions = {}) => {
     const webSocketServer = WSHelper.createWebSocketServer({
       noServer: true,
-      verifyClient: verifyClient(ask),
+      verifyClient,
       ...serverOptions,
     });
     const sendBroadcastResponse = handleBroadcastResponse(webSocketServer, providedTransformer);
     const extendedWebSocketServer = WSHelper.extendServerWith({ sendBroadcastResponse })(webSocketServer);
 
-    extendedWebSocketServer.on('connection', handleConnection(extendedWebSocketServer, ask));
+    extendedWebSocketServer.on('connection', handleConnection(extendedWebSocketServer));
     WSHelper.handleServerBrokenConnections(extendedWebSocketServer).subscribe();
 
     return extendedWebSocketServer;
-  }));
-};
+  };
+});

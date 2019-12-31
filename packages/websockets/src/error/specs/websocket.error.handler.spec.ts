@@ -1,8 +1,8 @@
 import { EventError, EffectContext, createContext, createEffectContext, lookup } from '@marblejs/core';
 import { mapTo } from 'rxjs/operators';
-import { handleEffectsError } from '../ws-error.handler';
+import { handleEffectsError } from '../websocket.error.handler';
 import { MarbleWebSocketClient } from '../../websocket.interface';
-import { WsErrorEffect } from '../../effects/ws-effects.interface';
+import { WsErrorEffect } from '../../effects/websocket.effects.interface';
 
 const createMockClient = (): MarbleWebSocketClient =>
   ({ sendResponse: jest.fn() }) as any;
