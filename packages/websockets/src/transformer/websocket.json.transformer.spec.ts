@@ -1,4 +1,4 @@
-import { jsonTransformer } from './json.transformer';
+import { jsonTransformer } from './websocket.json.transformer';
 
 test('#jsonTransformer decodes and encodes incoming and outgoing data', () => {
   // given

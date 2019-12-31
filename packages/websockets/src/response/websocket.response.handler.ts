@@ -1,6 +1,6 @@
 import * as WebSocket from 'ws';
 import { EMPTY, Observable } from 'rxjs';
-import { EventTransformer } from '../transformer/transformer.inteface';
+import { EventTransformer } from '../transformer/websocket.transformer.interface';
 import { WebSocketClient } from '../websocket.interface';
 
 type ClientResponseHandler =

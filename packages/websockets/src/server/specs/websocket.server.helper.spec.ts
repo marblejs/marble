@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { TimeoutError } from 'rxjs';
 import { Marbles } from '@marblejs/core/dist/+internal';
 import { MarbleWebSocketClient, WebSocketStatus, WebSocketServer } from '../../websocket.interface';
-import { WebSocketConnectionError } from '../../error/ws-error.model';
+import { WebSocketConnectionError } from '../../error/websocket.error.model';
 import {
   handleClientValidationError,
   handleClientBrokenConnection,
@@ -10,7 +10,7 @@ import {
   HEART_BEAT_INTERVAL,
   HEART_BEAT_TERMINATE_INTERVAL,
   ClientStatus,
-} from '../websocket.helper';
+} from '../websocket.server.helper';
 
 class WebSocketClientMock extends EventEmitter {
   isAlive = false;
