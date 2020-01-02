@@ -27,6 +27,8 @@ export const createServer = (config: CreateServerConfig): Server => {
     ...dependencies,
   ])(createContext());
 
+  const listener = httpListener(context);
+
   if (event$) {
     const ctx = createEffectContext({ ask: lookup(context), client: server });
     event$(serverEvent$, ctx).subscribe();
@@ -34,14 +36,13 @@ export const createServer = (config: CreateServerConfig): Server => {
 
   const listen = () => new Promise<https.Server | http.Server>((resolve, reject) => {
     const runningServer = server.listen(port, hostname);
-    const httpListenerWithContext = httpListener(context);
 
     // @TODO: bind Routing
 
     runningServer.once('listening', () => resolve(runningServer));
     runningServer.once('error', error => reject(error));
     runningServer.once('close', runningServer.removeAllListeners);
-    runningServer.on('request', httpListenerWithContext);
+    runningServer.on('request', listener);
   });
 
   listen.context = context;

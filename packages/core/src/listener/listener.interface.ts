@@ -9,6 +9,13 @@ export interface ListenerConfig<T = any> {
   output$?: Effect<any, any, T>;
 }
 
-export interface Listener<T extends ListenerConfig, U> {
+export type ListenerHandler = (...args: any[]) => void;
+
+export interface Listener<T extends ListenerConfig, U extends ListenerHandler> {
   (config?: T): Reader<Context, U>;
+}
+
+export interface ListenerServer<T> {
+  (): Promise<T>;
+  context: Context;
 }

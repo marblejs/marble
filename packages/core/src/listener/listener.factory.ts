@@ -1,10 +1,7 @@
 import { flow } from 'fp-ts/lib/function';
 import { createReader, ReaderHandler } from '../context/context.reader.factory';
-import { ListenerConfig, Listener } from './listener.interface';
+import { ListenerConfig, Listener, ListenerHandler } from './listener.interface';
 
-export type ListenerHandler<T extends ListenerConfig, U> =
-  (config?: T) => ReaderHandler<U>;
-
-export const createListener = <T extends ListenerConfig, U>(
-  handler: ListenerHandler<T, U>
-): Listener<T, U> => flow(handler, createReader);
+export const createListener = <T extends ListenerConfig, U extends ListenerHandler>(
+  fn: (config?: T) => ReaderHandler<U>
+): Listener<T, U> => flow(fn, createReader);
