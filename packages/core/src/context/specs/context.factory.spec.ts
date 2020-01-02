@@ -56,14 +56,27 @@ describe('#createContext', () => {
 });
 
 describe('#register', () => {
-  test('registers bound readers', () => {
+  test('registers bound sync reader', async () => {
     // given
     const token = createContextToken();
     const dependency = pipe(R.ask<Context>(), R.map(_ => 'test'));
     const boundDependency = bindTo(token)(dependency);
 
     // when
-    const context = register(boundDependency)(createContext());
+    const context = await register(boundDependency)(createContext());
+
+    // then
+    expect(lookup(context)(token)).toEqual(O.some('test'));
+  });
+
+  test('registers bound async readers', async () => {
+    // given
+    const token = createContextToken();
+    const dependency = pipe(R.ask<Context>(), R.map(_ => Promise.resolve('test')));
+    const boundDependency = bindEagerlyTo(token)(dependency);
+
+    // when
+    const context = await register(boundDependency)(createContext());
 
     // then
     expect(lookup(context)(token)).toEqual(O.some('test'));
@@ -71,7 +84,7 @@ describe('#register', () => {
 });
 
 describe('#registerAll', () => {
-  test('registers set of bound readers', () => {
+  test('registers set of bound readers', async () => {
     // given
     const token1 = createContextToken<string>();
     const token2 = createContextToken<string>();
@@ -81,7 +94,7 @@ describe('#registerAll', () => {
     const dependency3 = pipe(R.ask<Context>(), R.map(_ => 'test_3'));
 
     // when
-    const context = registerAll([
+    const context = await registerAll([
       bindTo(token1)(dependency1),
       bindTo(token2)(dependency2),
       bindTo(token3)(dependency3),
@@ -94,7 +107,7 @@ describe('#registerAll', () => {
 });
 
 describe('#reader', () => {
-  test('asks context for a lazy reader dependency', () => {
+  test('asks context for a lazy reader dependency', async () => {
     // given
     const token1 = createContextToken<string>();
     const token2 = createContextToken<string>();
@@ -106,13 +119,13 @@ describe('#reader', () => {
     ));
 
     // when ordered
-    const context1 = registerAll([
+    const context1 = await registerAll([
       bindTo(token1)(dependency1),
       bindTo(token2)(dependency2),
     ])(createContext());
 
     // when reordered
-    const context2 = registerAll([
+    const context2 = await registerAll([
       bindTo(token2)(dependency2),
       bindTo(token1)(dependency1),
     ])(createContext());
@@ -122,7 +135,7 @@ describe('#reader', () => {
     expect(lookup(context2)(token2)).toEqual(O.some('test_1_2'));
   });
 
-  test('asks context for a eager reader dependency', () => {
+  test('asks context for a eager reader dependency', async () => {
     // given
     const executionOrder: number[] = [];
     const spy1 = jest.fn(() => executionOrder.push(1));
@@ -148,7 +161,7 @@ describe('#reader', () => {
     }));
 
     // when
-    const context = registerAll([
+    const context = await registerAll([
       bindLazilyTo(token1)(dependency1),
       bindEagerlyTo(token2)(dependency2),
       bindLazilyTo(token3)(dependency3),
@@ -161,14 +174,14 @@ describe('#reader', () => {
     expect(executionOrder).toEqual([2, 1, 3]);
   });
 
-  test('asks context for a lazy reader dependency and bootstraps it only once', () => {
+  test('asks context for a lazy reader dependency and bootstraps it only once', async () => {
     // given
     const spy = jest.fn();
     const token = createContextToken<string>();
     const dependency = pipe(reader, R.map(() => { spy(); return 'test'; }));
 
     // when
-    const context = registerAll([
+    const context = await registerAll([
       bindTo(token)(dependency),
     ])(createContext());
 

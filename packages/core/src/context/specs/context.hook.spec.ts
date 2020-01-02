@@ -7,14 +7,14 @@ describe('#useContext', () => {
     jest.spyOn(console, 'error').mockImplementation();
   });
 
-  test('injects bound dependency', () => {
+  test('injects bound dependency', async () => {
     // given
     const token1 = createContextToken('token_1');
     const token2 = createContextToken('token_2');
     const dependency1 = 'dependency_1';
     const dependency2 = 'dependency_2';
 
-    const context = registerAll([
+    const context = await registerAll([
       bindTo(token1)(() => dependency1),
       bindTo(token2)(() => dependency2),
     ])(createContext());
@@ -30,13 +30,13 @@ describe('#useContext', () => {
     expect(resolvedDependency2).toEqual(dependency2);
   });
 
-  test('throws an error if dependency is not bound', () => {
+  test('throws an error if dependency is not bound', async () => {
     // given
     const token1 = createContextToken('token_1');
     const token2 = createContextToken('token_2');
     const dependency1 = 'dependency_1';
 
-    const context = registerAll([
+    const context = await registerAll([
       bindTo(token1)(() => dependency1),
     ])(createContext());
 

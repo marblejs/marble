@@ -7,7 +7,7 @@ import { CreateMicroserviceConfig, Microservice } from './messaging.server.inter
 import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
 import { AllServerEvents, isCloseEvent, ServerEvent } from './messaging.server.events';
 
-export const createMicroservice = (config: CreateMicroserviceConfig): Microservice => {
+export const createMicroservice = async (config: CreateMicroserviceConfig): Promise<Microservice> => {
   const {
     event$,
     options,
@@ -20,7 +20,7 @@ export const createMicroservice = (config: CreateMicroserviceConfig): Microservi
   const transportLayer = provideTransportLayer(transport, options);
   const boundTransportLayer = bindTo(TransportLayerToken)(() => transportLayer);
   const boundServerEvents = bindTo(ServerEventsToken)(() => serverEventsSubject);
-  const context = registerAll([ boundTransportLayer, boundServerEvents, ...dependencies ])(createContext());
+  const context = await registerAll([ boundTransportLayer, boundServerEvents, ...dependencies ])(createContext());
   const listener = messagingListener(context);
 
   const serverEvent$ = serverEventsSubject.asObservable().pipe(takeWhile(e => !isCloseEvent(e)));

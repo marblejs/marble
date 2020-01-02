@@ -5,7 +5,7 @@ import { EventEmitter } from 'events';
 import { forkJoin } from 'rxjs';
 import { tap, filter, take } from 'rxjs/operators';
 import { httpListener } from '../http.server.listener';
-import { createServer } from '../http.server.factory';
+import { createServer } from '../http.server';
 import {
   ServerEventType,
   isListeningEvent,
@@ -40,13 +40,13 @@ describe('#createServer', () => {
   test('creates http server and starts listening', async () => {
     // given
     const hostname = '127.0.0.1';
-    const app = httpListener({ effects: [] });
+    const app = await createServer({
+      hostname,
+      httpListener: httpListener(),
+    });
 
     // when
-    server = await createServer({
-      hostname,
-      httpListener: app,
-    })();
+    server = await app();
 
     // then
     expect(server.listening).toBe(true);
@@ -54,10 +54,12 @@ describe('#createServer', () => {
 
   test('creates http server and starts listening without specified port and hostname', async () => {
     // given
-    const app = httpListener({ effects: [] });
+    const app = await createServer({
+      httpListener: httpListener(),
+    });
 
     // when
-    server = await createServer({ httpListener: app })();
+    server = await app();
 
     // then
     expect(server.listening).toBe(true);
@@ -65,17 +67,17 @@ describe('#createServer', () => {
 
   test('creates https server', async () => {
     // given
-    const app = httpListener({ effects: [] });
     const httpsOptions: https.ServerOptions = {
       key: fs.readFileSync(path.resolve(__dirname, '../../../../../../assets/key.pem')),
       cert: fs.readFileSync(path.resolve(__dirname, '../../../../../../assets/cert.pem')),
     };
+    const app = await createServer({
+      httpListener: httpListener(),
+      options: { httpsOptions },
+    });
 
     // when
-    server = await createServer({
-      httpListener: app,
-      options: { httpsOptions },
-    })();
+    server = await app();
 
     // then
     expect(server.listening).toBe(true);
@@ -83,28 +85,22 @@ describe('#createServer', () => {
 
   test('returns server via context', async () => {
     // given
-   const app = httpListener({ effects: [] });
-
-    const marbleServer = createServer({
-      httpListener: app,
+    const app = await createServer({
+      httpListener: httpListener(),
     });
 
     // when
-    server = await marbleServer();
+    server = await app();
 
-    const ask = lookup(marbleServer.context);
+    const ask = lookup(app.context);
     const boundServer = useContext(ServerClientToken)(ask);
 
     expect(boundServer).toBeDefined();
   });
 
   test(`emits server events`, async done => {
-    // given
-    const app = httpListener({ effects: [] });
-
-    // then
-    server = await createServer({
-      httpListener: app,
+    const app = await createServer({
+      httpListener: httpListener(),
       event$: event$ => forkJoin(
         event$.pipe(filter(isErrorEvent), take(1)),
         event$.pipe(filter(isClientErrorEvent), take(1)),
@@ -117,7 +113,9 @@ describe('#createServer', () => {
       ).pipe(
         tap(() => done()),
       ),
-    })();
+    });
+
+    server = await app();
 
     server.emit(ServerEventType.ERROR);
     server.emit(ServerEventType.CLIENT_ERROR);

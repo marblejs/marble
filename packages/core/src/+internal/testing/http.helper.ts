@@ -67,13 +67,14 @@ export const createMockEffectContext = () => {
   return createEffectContext({ ask: lookup(context), client });
 };
 
-export const createHttpServerTestBed = (server: Server) => {
+export const createHttpServerTestBed = (server: Promise<Server>) => {
   let httpServer: HttpServer;
 
   const getInstance = () => httpServer;
 
   beforeAll(async () => {
-    httpServer = await server();
+    const app = await server;
+    httpServer = await app();
   });
 
   afterAll(done => {
@@ -84,3 +85,5 @@ export const createHttpServerTestBed = (server: Server) => {
     getInstance,
   };
 };
+
+export type HttpServerTestBed = ReturnType<typeof createHttpServerTestBed>;

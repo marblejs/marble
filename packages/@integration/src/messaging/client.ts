@@ -88,6 +88,10 @@ export const server = createServer({
   ),
 });
 
-if (process.env.NODE_ENV !== 'test') {
-  server();
-}
+export const bootstrap = async () => {
+  const app = await server;
+
+  if (process.env.NODE_ENV !== 'test') app();
+};
+
+bootstrap();

@@ -47,18 +47,18 @@ const isLazyDependency = (x: any): x is ContextLazyReader => {
 
 export const createContext = () => M.empty;
 
-export const register = <T>(boundDependency: BoundDependency<T, ContextDependency>) => (context: Context): Context =>
+export const register = <T>(boundDependency: BoundDependency<T, ContextDependency>) => async (context: Context): Promise<Context> =>
   M.insertAt(setoidContextToken)(
     boundDependency.token,
     isEagerDependency(boundDependency.dependency)
-      ? boundDependency.dependency.eval(context)
+      ? await Promise.resolve(boundDependency.dependency.eval(context))
       : boundDependency.dependency,
   )(context);
 
-export const registerAll = (boundDependencies: BoundDependency<any, any>[]) => (context: Context): Context =>
+export const registerAll = (boundDependencies: BoundDependency<any, any>[]) => async (context: Context): Promise<Context> =>
   boundDependencies.reduce(
-    (ctx, dependency) => register(dependency)(ctx),
-    context,
+    async (ctx, dependency) => await register(dependency)(await ctx),
+    Promise.resolve(context),
   );
 
 export const lookup = (context: Context) => <T>(token: ContextToken<T>): O.Option<T> => pipe(

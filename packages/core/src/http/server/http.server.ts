@@ -10,7 +10,7 @@ import { CreateServerConfig, Server } from './http.server.interface';
 
 const DEFAULT_HOSTNAME = '127.0.0.1';
 
-export const createServer = (config: CreateServerConfig): Server => {
+export const createServer = async (config: CreateServerConfig): Promise<Server> => {
   const { httpListener, event$, port, hostname, dependencies = [], options = {} } = config;
 
   const server = options.httpsOptions ? https.createServer(options.httpsOptions) : http.createServer();
@@ -20,7 +20,7 @@ export const createServer = (config: CreateServerConfig): Server => {
   const boundServer = bindTo(ServerClientToken)(() => server);
   const boundServerRequestMetadataStorage = bindTo(ServerRequestMetadataStorageToken)(serverRequestMetadataStorage);
 
-  const context = registerAll([
+  const context = await registerAll([
     boundServer,
     boundServerEvent$,
     ...insertIf(isTestingMetadataOn(), boundServerRequestMetadataStorage),

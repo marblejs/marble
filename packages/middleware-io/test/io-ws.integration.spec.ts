@@ -1,6 +1,6 @@
+import { createContext } from '@marblejs/core';
 import { createWebSocketsTestBed } from '@marblejs/websockets/dist/+internal';
 import { app } from './io-ws.integration';
-import { createContext } from '@marblejs/core';
 
 describe('@marblejs/middleware-io - WebSocket integration', () => {
   const testBed = createWebSocketsTestBed();
@@ -17,7 +17,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     const context = createContext();
 
     // when
-    app({ server })(context);
+    app(context)({ server });
     targetClient.once('open', () => targetClient.send(event));
 
     // then
@@ -43,7 +43,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     };
 
     // when
-    app({ server })(context);
+    app(context)({ server });
     targetClient.once('open', () => targetClient.send(event));
 
     // then
