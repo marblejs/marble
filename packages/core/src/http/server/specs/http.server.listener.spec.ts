@@ -11,8 +11,8 @@ describe('Http listener', () => {
   let responseHandler;
   let context: Context;
 
-  beforeAll(async () => {
-    context = await registerAll([
+  beforeAll(() => {
+    context = registerAll([
       bindTo(ServerClientToken)(() => http.createServer()),
     ])(createContext());
   });

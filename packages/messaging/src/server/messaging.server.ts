@@ -1,6 +1,7 @@
 import { Subject } from 'rxjs';
 import { takeWhile, takeUntil, take } from 'rxjs/operators';
-import { createContext, registerAll, bindTo, createEffectContext, lookup, combineEffects } from '@marblejs/core';
+import { flow } from 'fp-ts/lib/function';
+import { createContext, registerAll, bindTo, createEffectContext, lookup, combineEffects, resolve } from '@marblejs/core';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { statusLogger$ } from '../middlewares/messaging.statusLogger.middleware';
 import { CreateMicroserviceConfig, Microservice } from './messaging.server.interface';
@@ -20,9 +21,17 @@ export const createMicroservice = async (config: CreateMicroserviceConfig): Prom
   const transportLayer = provideTransportLayer(transport, options);
   const boundTransportLayer = bindTo(TransportLayerToken)(() => transportLayer);
   const boundServerEvents = bindTo(ServerEventsToken)(() => serverEventsSubject);
-  const context = await registerAll([ boundTransportLayer, boundServerEvents, ...dependencies ])(createContext());
-  const listener = messagingListener(context);
 
+  const context = await flow(
+    registerAll([
+      boundTransportLayer,
+      boundServerEvents,
+      ...dependencies,
+    ]),
+    resolve,
+  )(createContext());
+
+  const listener = messagingListener(context);
   const serverEvent$ = serverEventsSubject.asObservable().pipe(takeWhile(e => !isCloseEvent(e)));
   const ctx = createEffectContext({ ask: lookup(context), client: undefined });
   const combinedEvents = event$ ? combineEffects(statusLogger$, event$) : statusLogger$;

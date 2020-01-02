@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as https from 'https';
-import { createContext, lookup, registerAll, bindTo } from '../../context/context.factory';
+import { flow } from 'fp-ts/lib/function';
+import { createContext, lookup, registerAll, bindTo, resolve } from '../../context/context.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { insertIf, isTestingMetadataOn } from '../../+internal';
 import { subscribeServerEvents } from './http.server.event.subscriber';
@@ -20,12 +21,15 @@ export const createServer = async (config: CreateServerConfig): Promise<Server> 
   const boundServer = bindTo(ServerClientToken)(() => server);
   const boundServerRequestMetadataStorage = bindTo(ServerRequestMetadataStorageToken)(serverRequestMetadataStorage);
 
-  const context = await registerAll([
-    boundServer,
-    boundServerEvent$,
-    ...insertIf(isTestingMetadataOn(), boundServerRequestMetadataStorage),
-    ...dependencies,
-  ])(createContext());
+  const context = await flow(
+    registerAll([
+      boundServer,
+      boundServerEvent$,
+      ...insertIf(isTestingMetadataOn(), boundServerRequestMetadataStorage),
+      ...dependencies,
+    ]),
+    resolve,
+  )(createContext());
 
   const listener = httpListener(context);
 
