@@ -15,6 +15,6 @@ const postUser$: WsEffect = event$ =>
     map(event => event),
   );
 
-export const app = webSocketListener({
+export const listener = webSocketListener({
   effects: [postUser$],
 });

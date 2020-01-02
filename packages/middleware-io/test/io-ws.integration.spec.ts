@@ -1,6 +1,6 @@
 import { createWebSocketsTestBed } from '@marblejs/websockets/dist/+internal';
-import { app } from './io-ws.integration';
-import { createContext } from '@marblejs/core';
+import { createWebSocketServer } from '@marblejs/websockets';
+import { listener } from './io-ws.integration';
 
 describe('@marblejs/middleware-io - WebSocket integration', () => {
   const testBed = createWebSocketsTestBed();
@@ -14,10 +14,9 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
     const server = testBed.getServer();
     const targetClient = testBed.getClient();
-    const context = createContext();
 
     // when
-    app({ server })(context);
+    createWebSocketServer({ options: { server }, webSocketListener: listener })();
     targetClient.once('open', () => targetClient.send(event));
 
     // then
@@ -31,7 +30,6 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     // given
     const server = testBed.getServer();
     const targetClient = testBed.getClient();
-    const context = createContext();
     const user = { id: 'id', age: '100', };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
     const expectedError = {
@@ -43,7 +41,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     };
 
     // when
-    app({ server })(context);
+    createWebSocketServer({ options: { server }, webSocketListener: listener })();
     targetClient.once('open', () => targetClient.send(event));
 
     // then

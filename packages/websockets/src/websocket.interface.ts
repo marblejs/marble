@@ -3,6 +3,8 @@ import { Observable } from 'rxjs';
 
 export type WebSocketServer = WebSocket.Server;
 
+export type WebSocketServerOptions = WebSocket.ServerOptions;
+
 export type WebSocketClient = WebSocket;
 
 export type WebSocketData = WebSocket.Data;

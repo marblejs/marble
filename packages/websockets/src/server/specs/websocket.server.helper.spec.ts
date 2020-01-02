@@ -10,7 +10,7 @@ import {
   HEART_BEAT_INTERVAL,
   HEART_BEAT_TERMINATE_INTERVAL,
   ClientStatus,
-} from '../websocket.helper';
+} from '../websocket.server.helper';
 
 class WebSocketClientMock extends EventEmitter {
   isAlive = false;

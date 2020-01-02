@@ -4,6 +4,7 @@ import {
   WsConnectionEffect,
   WebSocketConnectionError,
   webSocketListener,
+  createWebSocketServer,
 } from '@marblejs/websockets';
 import { iif, throwError, of } from 'rxjs';
 import { tap, mergeMap, buffer, map } from 'rxjs/operators';
@@ -38,8 +39,10 @@ const connection$: WsConnectionEffect = req$ =>
     )),
   );
 
-export const websocketsServer = webSocketListener({
-  middlewares: [logger$],
-  effects: [add$],
+export const websocketsServer = createWebSocketServer({
   connection$,
-})();
+  webSocketListener: webSocketListener({
+    middlewares: [logger$],
+    effects: [add$],
+  }),
+});

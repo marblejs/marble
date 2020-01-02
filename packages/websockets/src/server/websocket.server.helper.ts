@@ -29,7 +29,7 @@ export enum ClientStatus {
 export const HEART_BEAT_INTERVAL = 10 * 1000;
 export const HEART_BEAT_TERMINATE_INTERVAL = HEART_BEAT_INTERVAL + 1000;
 
-export const createWebSocketServer = (options: WebSocket.ServerOptions) =>
+export const createServer = (options: WebSocket.ServerOptions) =>
   new WebSocket.Server(options);
 
 export const extendServerWith = (extendableFields: ExtendableServerFields) => (server: WebSocketServer) => {
