@@ -1,6 +1,6 @@
 import { EventError } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
-import { defaultError$ } from '../ws-error.effect';
+import { defaultError$ } from '../websocket.error.effect';
 
 describe('defaultError$', () => {
   test('returns stream of error events for defined error object', () => {

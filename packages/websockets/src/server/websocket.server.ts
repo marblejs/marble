@@ -10,8 +10,8 @@ import {
   handleServerBrokenConnections,
   handleClientBrokenConnection,
 } from '../server/websocket.server.helper';
-import { handleBroadcastResponse, handleResponse } from '../response/ws-response.handler';
-import { WebSocketConnectionError } from '../error/ws-error.model';
+import { handleBroadcastResponse, handleResponse } from '../response/websocket.response.handler';
+import { WebSocketConnectionError } from '../error/websocket.error.model';
 import { WebSocketServerConfig, WebSocketServer } from './websocket.server.interface';
 
 export const createWebSocketServer = (config: WebSocketServerConfig): WebSocketServer => {

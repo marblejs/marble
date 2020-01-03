@@ -8,7 +8,7 @@ import {
   WebSocketStatus,
   WebSocketServer,
 } from '../websocket.interface';
-import { WebSocketConnectionError } from '../error/ws-error.model';
+import { WebSocketConnectionError } from '../error/websocket.error.model';
 export { WebSocket };
 
 type ExtendableServerFields = {

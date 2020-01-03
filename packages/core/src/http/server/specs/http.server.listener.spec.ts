@@ -4,15 +4,18 @@ import { mapTo, mergeMap } from 'rxjs/operators';
 import { r } from '../../router/http.router.ixbuilder';
 import { httpListener } from '../http.server.listener';
 import { HttpMiddlewareEffect, HttpEffectResponse } from '../../effects/http.effects.interface';
-import { createContext, registerAll, bindTo } from '../../../context/context.factory';
+import { createContext, registerAll, bindTo, Context } from '../../../context/context.factory';
 import { ServerClientToken } from '../http.server.tokens';
 
 describe('Http listener', () => {
   let responseHandler;
+  let context: Context;
 
-  const context = registerAll([
-    bindTo(ServerClientToken)(() => http.createServer()),
-  ])(createContext());
+  beforeAll(() => {
+    context = registerAll([
+      bindTo(ServerClientToken)(() => http.createServer()),
+    ])(createContext());
+  });
 
   beforeEach(() => {
     jest.unmock('../../response/http.responseHandler.ts');

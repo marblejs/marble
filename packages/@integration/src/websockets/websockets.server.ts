@@ -39,7 +39,7 @@ const connection$: WsConnectionEffect = req$ =>
     )),
   );
 
-export const websocketsServer = createWebSocketServer({
+export const webSocketServer = createWebSocketServer({
   connection$,
   webSocketListener: webSocketListener({
     middlewares: [logger$],

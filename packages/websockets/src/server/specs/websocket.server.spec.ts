@@ -2,9 +2,9 @@ import { EventError, HttpStatus } from '@marblejs/core';
 import { throwError, fromEvent, forkJoin, merge } from 'rxjs';
 import { tap, map, mergeMap, first, toArray, take, mergeMapTo } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.server.listener';
-import { WsEffect, WsMiddlewareEffect, WsConnectionEffect } from '../../effects/ws-effects.interface';
-import { WebSocketConnectionError } from '../../error/ws-error.model';
-import { EventTransformer } from '../../transformer/transformer.inteface';
+import { WsEffect, WsMiddlewareEffect, WsConnectionEffect } from '../../effects/websocket.effects.interface';
+import { WebSocketConnectionError } from '../../error/websocket.error.model';
+import { EventTransformer } from '../../transformer/websocket.transformer.interface';
 import { createWebSocketsTestBed } from '../../+internal';
 import { createWebSocketServer } from '../websocket.server';
 

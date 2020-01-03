@@ -13,7 +13,7 @@ import { mapToServer, MarbleWebSocketServer } from '@marblejs/websockets';
 import { logger$ } from '@marblejs/middleware-logger';
 import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
-import { websocketsServer } from './websockets.server';
+import { webSocketServer } from './websockets.server';
 
 export const WsServerToken = createContextToken<MarbleWebSocketServer>('MarbleWebSocketServer');
 
@@ -52,7 +52,7 @@ export const server = createServer({
     effects: [root$],
   }),
   dependencies: [
-    bindEagerlyTo(WsServerToken)(websocketsServer),
+    bindEagerlyTo(WsServerToken)(webSocketServer),
   ],
   event$: (...args) => merge(
     listening$(...args),
@@ -60,6 +60,10 @@ export const server = createServer({
   ),
 });
 
-if (process.env.NODE_ENV !== 'test') {
-  server();
-}
+export const bootstrap = async () => {
+  const app = await server;
+
+  if (process.env.NODE_ENV !== 'test') app();
+};
+
+bootstrap();

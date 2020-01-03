@@ -10,7 +10,7 @@ export const runServer = (transport: any, options: any) => (effect$?: MsgEffect,
     options,
     transport,
     messagingListener: messagingListener(effect$ ? { effects: [effect$], output$ } : undefined),
-  })();
+  }).then(app => app());
 
 export const runClient = (transport: Transport, transportOptions: any) =>
   provideTransportLayer(transport, transportOptions).connect({ isConsumer: false });

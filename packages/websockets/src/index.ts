@@ -6,9 +6,9 @@ export {
   MarbleWebSocketServer,
   WebSocketStatus,
 } from './websocket.interface';
-export { jsonTransformer } from './transformer/json.transformer';
-export { EventTransformer } from './transformer/transformer.inteface';
-export { defaultError$ } from './error/ws-error.effect';
-export { WebSocketConnectionError } from './error/ws-error.model';
-export * from './effects/ws-effects.interface';
+export { jsonTransformer } from './transformer/websocket.json.transformer';
+export { EventTransformer } from './transformer/websocket.transformer.interface';
+export { defaultError$ } from './error/websocket.error.effect';
+export { WebSocketConnectionError } from './error/websocket.error.model';
+export * from './effects/websocket.effects.interface';
 export * from './operators';

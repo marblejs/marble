@@ -8,11 +8,11 @@ import {
   createListener,
 } from '@marblejs/core';
 import * as WS from '../websocket.interface';
-import * as WSEffect from '../effects/ws-effects.interface';
-import { jsonTransformer } from '../transformer/json.transformer';
-import { EventTransformer } from '../transformer/transformer.inteface';
-import { handleEffectsError } from '../error/ws-error.handler';
-import { defaultError$ } from '../error/ws-error.effect';
+import * as WSEffect from '../effects/websocket.effects.interface';
+import { jsonTransformer } from '../transformer/websocket.json.transformer';
+import { EventTransformer } from '../transformer/websocket.transformer.interface';
+import { handleEffectsError } from '../error/websocket.error.handler';
+import { defaultError$ } from '../error/websocket.error.effect';
 
 export interface WebSocketListenerConfig {
   effects?: WSEffect.WsEffect<any, any>[];

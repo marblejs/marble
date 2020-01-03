@@ -9,7 +9,7 @@ export * from './http/effects/http.effects.interface';
 export * from './http/server/http.server.event';
 export * from './http/server/http.server.interface';
 export * from './http/server/http.server.tokens';
-export * from './http/server/http.server.factory';
+export * from './http/server/http.server';
 export * from './http/server/http.server.listener';
 export * from './http/http.interface';
 

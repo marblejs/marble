@@ -1,6 +1,6 @@
 import { BoundDependency, ListenerServer } from '@marblejs/core';
 import { WebSocketServerOptions, MarbleWebSocketServer } from '../websocket.interface';
-import { WsConnectionEffect } from '../effects/ws-effects.interface';
+import { WsConnectionEffect } from '../effects/websocket.effects.interface';
 import { webSocketListener } from './websocket.server.listener';
 
 export interface WebSocketServerConfig {
