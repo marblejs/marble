@@ -1,4 +1,7 @@
 import * as t from 'io-ts';
+import * as O from 'fp-ts/lib/Option';
+import * as E from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { Reporter } from 'io-ts/lib/Reporter';
 import { stringify, getLast } from '@marblejs/core/dist/+internal/utils';
 
@@ -14,10 +17,11 @@ const getPath = (context: t.Context) =>
     .filter(Boolean)
     .join('.');
 
-const getExpectedType = (context: t.ContextEntry[]) =>
-  getLast(context)
-    .map(c => c.type.name)
-    .getOrElse('any');
+const getExpectedType = (context: t.ContextEntry[]) => pipe(
+  getLast(context),
+  O.map(c => c.type.name),
+  O.getOrElse(() => 'any'),
+)
 
 const getErrorMessage = (value: any, context: t.Context): ReporterResult => ({
   path: getPath(context),
@@ -31,5 +35,5 @@ const failure = (errors: t.ValidationError[]): ReporterResult[] =>
 const success = () => [];
 
 export const defaultReporter: Reporter<ReporterResult[]> = {
-  report: validation => validation.fold(failure, success),
+  report: E.fold(failure, success),
 };

@@ -1,0 +1,52 @@
+{
+  "name": "@marblejs/messaging",
+  "version": "2.3.1",
+  "description": "Messaging module for Marble.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start": "yarn watch",
+    "watch": "tsc -w",
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "test": "jest --config ../../jest.config.js"
+  },
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "yarn": ">= 1.7.0",
+    "npm": ">= 5.0.0"
+  },
+  "author": "Józef Flakus <hello@jflakus.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "homepage": "https://github.com/marblejs/marble#readme",
+  "peerDependencies": {
+    "@marblejs/core": "^2.1.0",
+    "rxjs": "^6.5.3"
+  },
+  "dependencies": {
+    "chalk": "~2.4.1"
+  },
+  "devDependencies": {
+    "@marblejs/core": "^2.3.1",
+    "@marblejs/middleware-io": "^2.3.1",
+    "amqplib": "^0.5.3",
+    "amqp-connection-manager": "^3.0.0",
+    "redis": "^2.8.0",
+    "@types/redis": "^2.8.14",
+    "@types/amqplib": "^0.5.11",
+    "@types/amqp-connection-manager": "^2.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

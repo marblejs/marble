@@ -1,3 +1,5 @@
+import { getOrElse } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { getArrayFromEnum, getHead, getLast, filterArray, mapArray } from '../array.util';
 
 describe('Array util', () => {
@@ -24,8 +26,15 @@ describe('Array util', () => {
     const filledArray = ['test'];
 
     // when
-    const none = getHead<string>(emptyArray).getOrElse('');
-    const some = getHead(filledArray).getOrElse('');
+    const none = pipe(
+      getHead<string>(emptyArray),
+      getOrElse(() => ''),
+    );
+
+    const some = pipe(
+      getHead(filledArray),
+      getOrElse(() => ''),
+    );
 
     // then
     expect(none).toEqual('');
@@ -38,8 +47,14 @@ describe('Array util', () => {
     const filledArray = ['test_1', 'test_2'];
 
     // when
-    const none = getLast<string>(emptyArray).getOrElse('');
-    const some = getLast(filledArray).getOrElse('');
+    const none = pipe(
+      getLast<string>(emptyArray),
+      getOrElse(() => ''),
+    );
+    const some = pipe(
+      getLast(filledArray),
+      getOrElse(() => ''),
+    );
 
     // then
     expect(none).toEqual('');

@@ -3,3 +3,6 @@ export class ExtendableError extends Error {
     super(message);
   }
 }
+
+export const isError = (data: any): data is Error =>
+  !!data.stack && !!data.name;

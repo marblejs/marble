@@ -1,22 +1,10 @@
 import { Event } from '../event/event.interface';
-import { HttpStatus } from '../http.interface';
 import { ExtendableError } from '../+internal/utils';
 
 export enum ErrorType {
   CORE_ERROR = 'CoreError',
-  HTTP_ERROR = 'HttpError',
+  CONTEXT_ERROR = 'ContextError',
   EVENT_ERROR = 'EventError',
-}
-
-export class HttpError extends ExtendableError {
-  constructor(
-    public readonly message: string,
-    public readonly status: HttpStatus,
-    public readonly data?: object,
-    public readonly context?: string,
-  ) {
-    super(ErrorType.HTTP_ERROR, message);
-  }
 }
 
 export class CoreError extends ExtendableError {
@@ -33,6 +21,14 @@ export class CoreError extends ExtendableError {
   }
 }
 
+export class ContextError extends ExtendableError {
+  constructor(
+    public readonly message: string,
+  ) {
+    super(ErrorType.CONTEXT_ERROR, message);
+  }
+}
+
 export class EventError extends ExtendableError {
   constructor(
     public readonly event: Event,
@@ -42,9 +38,6 @@ export class EventError extends ExtendableError {
     super(ErrorType.EVENT_ERROR, message);
   }
 }
-
-export const isHttpError = (error: Error): error is HttpError =>
-  error.name === ErrorType.HTTP_ERROR;
 
 export const isCoreError = (error: Error): error is CoreError =>
   error.name === ErrorType.CORE_ERROR;

@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as rimraf from 'rimraf';
+import { from } from 'rxjs';
 import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
 import { shouldParseFieldname, shouldParseMultipart, setRequestData, streamFileTo } from '../multipart.util';
 import { FileIncomingData } from '../multipart.interface';
-import { from } from 'rxjs';
 
 test('#shouldParseFieldname checks if given fieldname can be parsed by middleware', () => {
   expect(shouldParseFieldname(undefined)('test')).toEqual(true);
@@ -70,16 +71,17 @@ test('#setRequestData sets file related request data', () => {
   })
 });
 
-describe('#streamFileTo', async () => {
+describe('#streamFileTo', () => {
   const TMP_PATH = path.resolve(__dirname, '../../../../tmp');
   const uploadFilePath = path.resolve(__dirname, '../../README.md');
   const savedFilePath = path.resolve(TMP_PATH, 'data_field');
-  const file = fs.createReadStream(uploadFilePath) as NodeJS.ReadableStream;
 
-  afterEach(() => fs.rmdirSync(TMP_PATH));
+  afterEach(() => rimraf.sync(TMP_PATH));
 
   test('streams file to given path ', async () => {
-    if (fs.existsSync(TMP_PATH)) { fs.rmdirSync(TMP_PATH); }
+    const file = fs.createReadStream(uploadFilePath);
+
+    if (fs.existsSync(TMP_PATH)) { rimraf.sync(TMP_PATH); }
 
     const response = await from(streamFileTo(TMP_PATH)({
       file,
@@ -93,9 +95,12 @@ describe('#streamFileTo', async () => {
     expect(fs.readFileSync(savedFilePath)).toBeDefined();
 
     fs.unlinkSync(savedFilePath);
+    file.close();
   });
 
   test('streams file to given path ', async () => {
+    const file = fs.createReadStream(uploadFilePath);
+
     const response = await from(streamFileTo(TMP_PATH)({
       file,
       fieldname: 'data_field',
@@ -108,11 +113,12 @@ describe('#streamFileTo', async () => {
     expect(fs.readFileSync(savedFilePath)).toBeDefined();
 
     fs.unlinkSync(savedFilePath);
+    file.close();
   });
 
   test('creates folder if it doesn not exist ', async () => {
     // given
-    if (fs.existsSync(TMP_PATH)) { fs.rmdirSync(TMP_PATH); }
+    if (fs.existsSync(TMP_PATH)) { rimraf.sync(TMP_PATH); }
 
     // when
     streamFileTo(TMP_PATH);

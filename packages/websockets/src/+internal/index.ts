@@ -1,1 +1,1 @@
-export * from './ws-test.util';
+export * from './websocket.test.util';

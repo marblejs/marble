@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  rabbit:
+    container_name: marble-rabbit
+    hostname: rabbit
+    image: "rabbitmq:management"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    tty: true
+  redis:
+    container_name: marble-redis
+    image: redis
+    ports:
+      - "6379:6379"
+    restart: always

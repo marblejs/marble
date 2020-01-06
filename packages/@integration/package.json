@@ -4,7 +4,10 @@
   "description": "Marble.js integration tests",
   "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node --project tsconfig.json src/index.ts",
+    "start:http": "PORT=1337 ts-node --project tsconfig.json src/http/index.ts",
+    "start:websockets": "ts-node --project tsconfig.json src/websockets/http.server.ts",
+    "start:messaging:server": "PORT=1337 ts-node --project tsconfig.json src/messaging/server.ts",
+    "start:messaging:client": "ts-node --project tsconfig.json src/messaging/client.ts",
     "watch:dev": "nodemon --watch src --ext ts --ignore '*.spec.ts' --exec yarn start",
     "test": "jest --config ../../jest.config.js",
     "clean": "rimraf dist"
@@ -29,11 +32,12 @@
     "@marblejs/middleware-multipart": "^2.3.1",
     "@marblejs/websockets": "^2.3.1",
     "@types/node": "^10.1.2",
-    "rxjs": "^6.3.3",
+    "rxjs": "^6.5.3",
     "typescript": "~3.0.3"
   },
   "devDependencies": {
     "nodemon": "^1.17.3",
-    "ts-node": "^7.0.1"
+    "ts-node": "^7.0.1",
+    "concurrently": "^4.1.0"
   }
 }

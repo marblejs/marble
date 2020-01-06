@@ -1,12 +1,15 @@
 name: Test suite
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+      - master
+      - next
 
 jobs:
   test:
-    name: Unit + integration test
+    name: Test
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         node_version: [8, 10, 12]

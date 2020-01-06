@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { Marbles } from '../../+internal';
-import { HttpEffect } from '../../effects/http-effects.interface';
-import { HttpRequest } from '../../http.interface';
+import { HttpEffect } from '../../http/effects/http.effects.interface';
+import { HttpRequest } from '../../http/http.interface';
 import { use } from './use.operator';
 
 const createMockReq = (req: Partial<HttpRequest>) => req;

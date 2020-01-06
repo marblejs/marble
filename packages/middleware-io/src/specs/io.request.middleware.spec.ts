@@ -1,5 +1,6 @@
 import * as t from 'io-ts';
 import { of } from 'rxjs';
+import { isLeft, getOrElse } from 'fp-ts/lib/Either';
 import { HttpError, HttpStatus } from '@marblejs/core';
 import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
 import { requestValidator$ } from '../io.request.middleware';
@@ -109,11 +110,11 @@ describe('#requestValidator$', () => {
       (u: unknown, c: t.Context) => {
         const validation = t.string.validate(u, c);
 
-        if (validation.isLeft() || u === '') {
+        if (isLeft(validation) || u === '') {
           return t.failure(u, c);
         }
 
-        const s = validation.value;
+        const s = getOrElse(() => '')(validation);
         const n = Number(s);
         return isNaN(n) ? t.failure(s, c) : t.success(n);
       },

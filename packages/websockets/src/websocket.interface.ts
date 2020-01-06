@@ -1,22 +1,3 @@
-import * as WebSocket from 'ws';
-import { Observable } from 'rxjs';
-
-export type WebSocketServer = WebSocket.Server;
-
-export type WebSocketClient = WebSocket;
-
-export type WebSocketData = WebSocket.Data;
-
-export interface MarbleWebSocketServer extends WebSocketServer {
-  sendBroadcastResponse: <T>(response: T) => Observable<never>;
-}
-
-export interface MarbleWebSocketClient extends WebSocketClient {
-  isAlive: boolean;
-  sendResponse: <T>(response: T) => Observable<never>;
-  sendBroadcastResponse: <T>(response: T) => Observable<never>;
-}
-
 export enum WebSocketStatus {
   NORMAL_CLOSURE = 1000,
   GOING_AWAY = 1001,
@@ -34,3 +15,10 @@ export enum WebSocketStatus {
   BAD_GATEWAY = 1014,
   TLS_HANDSHAKE = 1015,
 }
+
+export enum WebSocketConnectionLiveness {
+  ALIVE,
+  DEAD,
+}
+
+export type WebSocketData = string | Buffer | ArrayBuffer | Buffer[];

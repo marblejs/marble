@@ -1,12 +1,5 @@
-import {
-  HttpRequest,
-  HttpResponse,
-  HttpError,
-  HttpStatus,
-  createContext,
-  createEffectMetadata,
-  lookup,
-} from '@marblejs/core';
+import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
+import { createMockEffectContext } from '@marblejs/core/dist/+internal';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
 import { of, throwError, iif } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
@@ -23,8 +16,8 @@ const verifyPayload$ = (payload: { id: string }) =>
 describe('JWT middleware', () => {
   let utilModule;
   let factoryModule;
-  const context = createContext();
-  const effectMeta = createEffectMetadata({ ask: lookup(context) });
+
+  const ctx = createMockEffectContext();
 
   beforeEach(() => {
     jest.unmock('../jwt.util.ts');
@@ -44,15 +37,13 @@ describe('JWT middleware', () => {
     const mockedTokenPayload = { id: 'test_id' };
     const mockedRequest = { headers: { authorization: `Bearer ${mockedToken}`} } as HttpRequest;
     const expectedRequest = { ...mockedRequest, user: mockedTokenPayload };
-
     const req$ = of(mockedRequest);
-    const res = {} as HttpResponse;
 
     // when
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, effectMeta);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 
     // then
     middleware$.subscribe(
@@ -64,7 +55,6 @@ describe('JWT middleware', () => {
       },
       () => {
         fail(`Stream shouldn\'t throw an error`);
-        done();
       }
     );
   });
@@ -75,15 +65,13 @@ describe('JWT middleware', () => {
     const mockedToken = 'TEST_TOKEN';
     const mockedRequest = { headers: { authorization: `Bearer ${mockedToken}`} } as HttpRequest;
     const expectedError = new HttpError('Unauthorized', HttpStatus.UNAUTHORIZED);
-
     const req$ = of(mockedRequest);
-    const res = {} as HttpResponse;
 
     // when
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => throwError(expectedError));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, effectMeta);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 
     // then
     middleware$.subscribe(
@@ -107,21 +95,18 @@ describe('JWT middleware', () => {
     const mockedTokenPayload = { id: 'test_id_wrong' };
     const mockedRequest = { headers: { authorization: `Bearer ${mockedToken}`} } as HttpRequest;
     const expectedError = new HttpError('Unauthorized', HttpStatus.UNAUTHORIZED);
-
     const req$ = of(mockedRequest);
-    const res = {} as HttpResponse;
 
     // when
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
     factoryModule.verifyToken$ = jest.fn(() => () => of(mockedTokenPayload));
 
-    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, res, effectMeta);
+    const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 
     // then
     middleware$.subscribe(
       () => {
         fail(`Stream should throw an error`);
-        done();
       },
       err => {
         expect(err).toEqual(expectedError);

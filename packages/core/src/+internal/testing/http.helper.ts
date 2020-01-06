@@ -1,4 +1,5 @@
 import * as http from 'http';
+import { EventEmitter } from 'events';
 import {
   HttpRequest,
   HttpResponse,
@@ -6,8 +7,11 @@ import {
   HttpMethod,
   RouteParameters,
   QueryParameters,
-} from '../../http.interface';
-import { EventEmitter } from 'events';
+  HttpServer,
+} from '../../http/http.interface';
+import { createContext, lookup } from '../../context/context.factory';
+import { createEffectContext } from '../../effects/effectsContext.factory';
+import { Server } from '../../http/server/http.server.interface';
 
 interface HttpRequestMockParams {
   url?: string;
@@ -17,11 +21,13 @@ interface HttpRequestMockParams {
   headers?: HttpHeaders;
   method?: HttpMethod;
   meta?: Record<string, any>;
+  response?: HttpResponse;
   [key: string]: any;
 }
 
 interface HttpResponseMockParams {
   statusCode?: number;
+  finished?: boolean;
   [key: string]: any;
 }
 
@@ -40,6 +46,7 @@ export const createHttpRequest = (data?: HttpRequestMockParams) => Object.assign
     query: {},
     params: {},
     meta: {},
+    response: createHttpResponse() as HttpResponse,
   },
   data,
 ) as HttpRequest;
@@ -47,11 +54,36 @@ export const createHttpRequest = (data?: HttpRequestMockParams) => Object.assign
 export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
   new class extends EventEmitter {
     statusCode = data.statusCode;
+    writeHead = jest.fn();
+    setHeader = jest.fn();
+    getHeader = jest.fn();
+    end = jest.fn();
+    send = jest.fn();
   } as any as HttpResponse;
 
-export const mockHttpServer = (mocks: HttpServerMocks = {}) =>
-  jest.spyOn(http, 'createServer').mockImplementation(jest.fn(() => ({
-    listen: mocks.listen || jest.fn(),
-    close: mocks.close || jest.fn(callback => callback()),
-    on: mocks.on || jest.fn(),
-  })));
+export const createMockEffectContext = () => {
+  const context = createContext();
+  const client = http.createServer();
+  return createEffectContext({ ask: lookup(context), client });
+};
+
+export const createHttpServerTestBed = (server: Promise<Server>) => {
+  let httpServer: HttpServer;
+
+  const getInstance = () => httpServer;
+
+  beforeAll(async () => {
+    const app = await server;
+    httpServer = await app();
+  });
+
+  afterAll(done => {
+    httpServer.close(done);
+  });
+
+  return {
+    getInstance,
+  };
+};
+
+export type HttpServerTestBed = ReturnType<typeof createHttpServerTestBed>;

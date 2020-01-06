@@ -27,6 +27,7 @@ doc
 coverage
 tmp
 package-lock.json
+tsconfig.tsbuildinfo
 *.tgz
 
 # --------------------------------------------------

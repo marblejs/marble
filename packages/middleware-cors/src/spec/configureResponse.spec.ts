@@ -1,14 +1,13 @@
+import { createHttpResponse } from '@marblejs/core/dist/+internal/testing';
 import { configureResponse } from '../configureResponse';
 import { CORSOptions } from '../middleware';
-import { createMockRequest, createMockResponse } from './middleware.spec';
-
-
+import { createMockRequest } from '../util';
 
 describe('configureResponse', () => {
   test('should configure response correctly', done => {
     const origin = 'fake-origin';
     const req = createMockRequest('GET', { origin });
-    const res = createMockResponse();
+    const res = createHttpResponse();
     const options: CORSOptions = {
       origin: 'fake-origin',
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -40,7 +39,7 @@ describe('configureResponse', () => {
   test('should configure response correctly', done => {
     const origin = 'fake-origin';
     const req = createMockRequest('GET', { origin });
-    const res = createMockResponse();
+    const res = createHttpResponse();
     const options: CORSOptions = {
       origin: 'fake-origin',
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

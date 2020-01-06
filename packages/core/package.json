@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "rxjs": "^6.3.3"
+    "rxjs": "^6.5.3"
   },
   "dependencies": {
     "@types/json-schema": "^7.0.3",
@@ -39,7 +39,7 @@
     "@types/uuid": "^3.4.4",
     "chalk": "~2.4.1",
     "file-type": "^8.0.0",
-    "fp-ts": "1.15.0",
+    "fp-ts": "~2.1.0",
     "mime": "^2.3.1",
     "path-to-regexp": "^2.4.0",
     "qs": "^6.6.0",

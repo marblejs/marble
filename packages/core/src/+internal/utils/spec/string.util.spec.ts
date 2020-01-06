@@ -1,4 +1,4 @@
-import { isString, trim, stringify } from '../string.util';
+import { isString, trim, stringify, createUuid } from '../string.util';
 
 test('#isString check is given argument is of string type', () => {
   expect(isString('some string value')).toBe(true);
@@ -26,4 +26,8 @@ test('#stringify stringifies given value', () => {
   const unknownFunction = function() { return null; };
   unknownFunction.displayName = 'unknownFunction';
   expect(stringify(unknownFunction)).toEqual('unknownFunction');
+});
+
+test('#createUuid creates unique identifier', () => {
+  expect(createUuid()).toBeDefined();
 });

@@ -1,5 +1,5 @@
-import { prepareLogString, factorizeLog } from '../logger.factory';
 import { createHttpResponse, createHttpRequest } from '@marblejs/core/dist/+internal';
+import { prepareLogString, factorizeLog } from '../logger.factory';
 
 describe('Logger factory', () => {
   let loggerFactoryModule;

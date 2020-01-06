@@ -1,9 +1,9 @@
 {
   "name": "marblejs",
-  "version": "2.1.1",
+  "version": "2.3.1",
   "description": "Reactive Node APIs made easy",
   "scripts": {
-    "build": "yarn clean && lerna run build",
+    "build": "lerna run build",
     "postbuild": "rimraf packages/**/*.spec.js packages/**/*.spec.d.ts",
     "benchmark": "make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
@@ -12,15 +12,16 @@
     "link:all": "lerna exec -- yarn link",
     "unlink:all": "lerna exec -- yarn unlink",
     "test": "yarn test:unit && yarn test:integration",
-    "test:unit": "SCOPE=unit jest --expand --coverage --detectOpenHandles",
-    "test:integration": "SCOPE=integration jest --expand --detectOpenHandles",
-    "test:watch": "jest --expand --onlyChanged --watch",
-    "clean": "lerna run clean",
+    "test:unit": "SCOPE=unit ./scripts/run-tests.sh",
+    "test:watch": "SCOPE=watch ./scripts/run-tests.sh",
+    "test:integration": "SCOPE=integration ./scripts/run-tests.sh",
+    "clean": "lerna run clean && rimraf packages/*/tsconfig.tsbuildinfo",
     "purge": "yarn clean && rimraf node_modules",
     "prepublishOnly": "yarn clean && yarn build && yarn test",
     "publish": "lerna publish --no-push --force-publish=*",
-    "publish:canary:minor": "lerna publish --no-push --npm-tag next --canary minor --preid dev --force-publish=* --npm-client npm",
-    "publish:canary:major": "lerna publish --no-push --npm-tag next --canary major --preid next --force-publish=* --npm-client npm",
+    "publish:canary:minor": "lerna publish --no-push --dist-tag dev --canary minor --preid dev --force-publish=* --npm-client npm --ignore-scripts",
+    "publish:canary:major": "lerna publish --no-push --dist-tag next --canary major --preid next --force-publish=* --npm-client npm --ignore-scripts",
+    "publish:canary:major:github": "lerna publish --dist-tag next --canary major --preid next --npm-client npm --yes --force-publish=* --no-verify-access --no-git-reset --ignore-scripts",
     "precommit": "lint-staged"
   },
   "lint-staged": {
@@ -54,30 +55,31 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "rxjs": "^6.3.3"
+    "rxjs": "^6.5.3"
   },
   "devDependencies": {
-    "@types/jest": "~23.3.10",
-    "@types/node": "^10.12.15",
+    "@types/jest": "~24.0.19",
+    "@types/node": "^12.7.12",
     "@types/supertest": "^2.0.7",
-    "@typescript-eslint/eslint-plugin": "^1.7.0",
-    "@typescript-eslint/parser": "^1.7.0",
-    "eslint": "^5.16.0",
+    "@typescript-eslint/eslint-plugin": "~2.9.0",
+    "@typescript-eslint/parser": "~2.9.0",
+    "@types/rimraf": "^2.0.2",
+    "eslint": "~6.7.1",
+    "eslint-plugin-import": "~2.19.1",
     "husky": "^0.14.0",
-    "jest": "~23.6.0",
-    "lerna": "~3.10.7",
+    "jest": "~24.9.0",
+    "lerna": "~3.17.0",
     "lint-staged": "~8.1.0",
     "mock-req": "^0.2.0",
     "rimraf": "^2.6.2",
     "supertest": "^3.0.0",
-    "ts-jest": "~23.10.5",
-    "ts-loader": "^5.0.0",
-    "typescript": "~3.4.1"
+    "ts-jest": "~24.1.0",
+    "typescript": "~3.7.2"
   },
   "workspaces": [
     "packages/*"
   ],
   "resolutions": {
-    "fp-ts": "1.15.0"
+    "fp-ts": "~2.1.0"
   }
 }

@@ -1,15 +1,19 @@
 import * as t from 'io-ts';
-import { ioTypeToJsonSchema, mergeJsonObjects, withJsonSchema } from '../io.json-schema';
+import * as E from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { JSONSchema7 } from 'json-schema';
+import { ioTypeToJsonSchema, mergeJsonObjects, withJsonSchema } from '../io.json-schema';
 
 const customIntegerStringType = () => new t.Type<number, string, unknown>(
   'IntegerString',
   t.number.is,
-  (u, c) =>
-    t.string.validate(u, c).chain(s => {
+  (u, c) => pipe(
+    t.string.validate(u, c),
+    E.chain(s => {
       const d = parseFloat(s);
       return isNaN(d) || d % 1 !== 0 ? t.failure(u, c) : t.success(d);
     }),
+  ),
   String,
 );
 const customIntegerStringSchema: JSONSchema7 = {

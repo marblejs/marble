@@ -10,6 +10,7 @@
     "strict": true,
     "target": "es6",
     "outDir": "./dist/",
+    "rootDir": "./src",
     "typeRoots": [
       "node_modules/@types",
       "../node_modules/@types"
@@ -17,7 +18,7 @@
     "lib": [
       "dom",
       "es2018"
-    ],
+    ]
   },
   "inputs": [
     "src"
@@ -25,5 +26,17 @@
   "include": [
     "node_modules/@types",
     "src/**/*.ts"
+  ],
+  "references": [
+    { "path": "../core" },
+    { "path": "../messaging" },
+    { "path": "../websockets" },
+    { "path": "../middleware-body" },
+    { "path": "../middleware-cors" },
+    { "path": "../middleware-io" },
+    { "path": "../middleware-jwt" },
+    { "path": "../middleware-joi" },
+    { "path": "../middleware-logger" },
+    { "path": "../middleware-multipart" },
   ]
 }

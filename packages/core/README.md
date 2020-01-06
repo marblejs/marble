@@ -47,6 +47,7 @@ When looking at Marble.js you can ask: **"Why do we need RxJS for HTTP?"**. Desp
 | [@marblejs/middleware-jwt](https://www.npmjs.com/package/@marblejs/middleware-jwt)       | JWT autgorization middleware    |
 | [@marblejs/middleware-joi](https://www.npmjs.com/package/@marblejs/middleware-joi)       | JOI-based validation middleware |
 | [@marblejs/middleware-cors](https://www.npmjs.com/package/@marblejs/middleware-cors)     | CORS middleware                 |
+| [@marblejs/middleware-multipart](https://www.npmjs.com/package/@marblejs/middleware-multipart) | Multipart middleware      |
 
 ## <a name="docs"></a> Documentation
 

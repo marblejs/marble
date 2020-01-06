@@ -1,4 +1,4 @@
-import { HttpHeaders } from '../../http.interface';
+import { HttpHeaders } from '../../http/http.interface';
 
 export enum ContentType {
   APPLICATION = 'application/*',
