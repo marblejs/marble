@@ -1,20 +1,19 @@
 import * as WebSocket from 'ws';
-import { EMPTY, Observable } from 'rxjs';
+import {  Observable, of } from 'rxjs';
 import { EventTransformer } from '../transformer/websocket.transformer.interface';
-import { WebSocketClient } from '../websocket.interface';
 
 type ClientResponseHandler =
-  (client: WebSocketClient, eventTransformer: EventTransformer<any>) =>
-  <T>(response: T) => Observable<never>;
+  (client: WebSocket, eventTransformer: EventTransformer<any>) =>
+  <T>(response: T) => Observable<boolean>;
 
 type ServerResponseHandler =
   (server: WebSocket.Server, eventTransformer: EventTransformer<any>) =>
-  <T>(response: T) => Observable<never>;
+  <T>(response: T) => Observable<boolean>;
 
 export const handleResponse: ClientResponseHandler = (client, eventTransformer) => <T>(response: T) => {
   const encodedResponse = eventTransformer.encode(response);
   client.send(encodedResponse);
-  return EMPTY;
+  return of(true);
 };
 
 export const handleBroadcastResponse: ServerResponseHandler = (server, eventTransformer) => <T>(response: T) => {
@@ -22,5 +21,5 @@ export const handleBroadcastResponse: ServerResponseHandler = (server, eventTran
     const encodedResponse = eventTransformer.encode(response);
     c.send(encodedResponse);
   });
-  return EMPTY;
+  return of(true);
 };

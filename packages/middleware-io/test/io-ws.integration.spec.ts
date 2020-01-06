@@ -1,6 +1,6 @@
-import { createContext } from '@marblejs/core';
 import { createWebSocketsTestBed } from '@marblejs/websockets/dist/+internal';
-import { app } from './io-ws.integration';
+import { createWebSocketServer } from '@marblejs/websockets';
+import { listener } from './io-ws.integration';
 
 describe('@marblejs/middleware-io - WebSocket integration', () => {
   const testBed = createWebSocketsTestBed();
@@ -8,16 +8,17 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
   beforeEach(testBed.bootstrap);
   afterEach(testBed.teardown);
 
-  test('[POST_USER] sends user object', done => {
+  test('[POST_USER] sends user object', async done => {
     // given
     const user = { id: 'id', age: 100, };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
     const server = testBed.getServer();
     const targetClient = testBed.getClient();
-    const context = createContext();
 
     // when
-    app(context)({ server });
+    const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+    await app();
+
     targetClient.once('open', () => targetClient.send(event));
 
     // then
@@ -27,11 +28,10 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     });
   });
 
-  test('[POST_USER] throws an error if incoming object is invalid', done => {
+  test('[POST_USER] throws an error if incoming object is invalid', async done => {
     // given
     const server = testBed.getServer();
     const targetClient = testBed.getClient();
-    const context = createContext();
     const user = { id: 'id', age: '100', };
     const event = JSON.stringify({ type: 'POST_USER', payload: user });
     const expectedError = {
@@ -43,7 +43,9 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     };
 
     // when
-    app(context)({ server });
+    const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+    await app();
+
     targetClient.once('open', () => targetClient.send(event));
 
     // then

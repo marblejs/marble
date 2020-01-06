@@ -1,5 +1,6 @@
 import * as http from 'http';
 import * as WebSocket from 'ws';
+import { WebSocketClientConnection, WebSocketServerConnection } from '../server/websocket.server.interface';
 
 export const TEST_CONFIG = {
   PORT: 1337,
@@ -47,3 +48,24 @@ export const createWebSocketsTestBed = (clientsCount = 1, host = TEST_CONFIG.HOS
 };
 
 export type WebSocketsTestBed = typeof createWebSocketsTestBed;
+
+export const createWebSocketClientMock = (): WebSocketClientConnection => {
+  class WebSocketClientMock extends WebSocket.EventEmitter {
+    isAlive = false;
+    ping = jest.fn();
+    close = jest.fn();
+    terminate = jest.fn();
+  }
+
+  return new WebSocketClientMock() as any;
+}
+
+export const createWebSocketServerMock = (clients: ReturnType<typeof createWebSocketClientMock>[]): WebSocketServerConnection => {
+  class WebSocketServerMock extends WebSocket.EventEmitter {
+    constructor(public clients: ReturnType<typeof createWebSocketClientMock>[]) {
+      super();
+    }
+  }
+
+  return new WebSocketServerMock(clients) as any;
+}

@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { Event, Effect } from '@marblejs/core';
-import { MarbleWebSocketClient } from '../websocket.interface';
+import { WebSocketClientConnection } from '../server/websocket.server.interface';
 
 export interface WsMiddlewareEffect<
   I = Event,
@@ -11,7 +11,7 @@ export interface WsErrorEffect<
   T extends Error = Error,
   U = Event,
   V = Event
-> extends WsEffect<{ event?: U; error: T }, V, MarbleWebSocketClient> {}
+> extends WsEffect<{ event?: U; error: T }, V> {}
 
 export interface WsConnectionEffect<
   T extends http.IncomingMessage = http.IncomingMessage
@@ -24,5 +24,5 @@ export interface WsOutputEffect<
 export interface WsEffect<
   T = Event,
   U = Event,
-  V = MarbleWebSocketClient,
+  V = WebSocketClientConnection,
 > extends Effect<T, U, V> {}

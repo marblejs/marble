@@ -1,30 +1,32 @@
-import { EventError, createContext, HttpStatus } from '@marblejs/core';
+import { EventError, HttpStatus } from '@marblejs/core';
 import { throwError, fromEvent, forkJoin, merge } from 'rxjs';
-import { tap, map, mergeMap, first, toArray, take, mergeMapTo } from 'rxjs/operators';
+import { tap, map, mergeMap, first, toArray, take, mergeMapTo, mapTo } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.server.listener';
 import { WsEffect, WsMiddlewareEffect, WsConnectionEffect } from '../../effects/websocket.effects.interface';
 import { WebSocketConnectionError } from '../../error/websocket.error.model';
 import { EventTransformer } from '../../transformer/websocket.transformer.interface';
 import { createWebSocketsTestBed } from '../../+internal';
+import { createWebSocketServer } from '../websocket.server';
 
-describe('WebSocket listener', () => {
+describe('WebSocket server', () => {
   describe('JSON transformer', () => {
     const testBed = createWebSocketsTestBed(2);
 
     beforeEach(testBed.bootstrap);
     afterEach(testBed.teardown);
 
-    test('echoes back', done => {
+    test('echoes back', async done => {
       // given
       const targetClient = testBed.getClient(0);
       const server = testBed.getServer();
-      const context = createContext();
       const echo$: WsEffect = event$ => event$;
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
-      const webSocketServer = webSocketListener({ effects: [echo$] })(context);
+      const listener = webSocketListener({ effects: [echo$] });
 
       // when
-      webSocketServer({ server });
+      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      await app();
+
       targetClient.once('open', () => targetClient.send(event));
 
       // then
@@ -34,19 +36,20 @@ describe('WebSocket listener', () => {
       });
     });
 
-    test('echoes back to all clients', done => {
+    test('echoes back to all clients', async done => {
       // given
       const echo$: WsEffect = (event$, { client }) => event$.pipe(
-        mergeMap(client.sendBroadcastResponse),
+        mergeMap(event => client.sendBroadcastResponse(event).pipe(mapTo(event))),
       );
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
-      const context = createContext();
-      const webSocketServer = webSocketListener({ effects: [echo$] })(context);
+      const listener = webSocketListener({ effects: [echo$] });
       const server = testBed.getServer();
       const targetClient = testBed.getClient(0);
 
       // when
-      webSocketServer({ server });
+      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      await app();
+
       targetClient.on('open', () => targetClient.send(event));
 
       // then
@@ -60,16 +63,18 @@ describe('WebSocket listener', () => {
       });
     });
 
-    test('echoes back on upgraded http server', done => {
+    test('echoes back on upgraded http server', async done => {
       // given
       const echo$: WsEffect = event$ => event$;
       const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
       const server = testBed.getServer();
-      const context = createContext();
-      const webSocketServer = webSocketListener({ effects: [echo$] })(context)();
+      const listener = webSocketListener({ effects: [echo$] });
       const targetClient = testBed.getClient(0);
 
       // when
+      const app = await createWebSocketServer({ webSocketListener: listener });
+      const webSocketServer = await app();
+
       server.on('upgrade', (request, socket, head) => {
         webSocketServer.handleUpgrade(request, socket, head, ws => {
           webSocketServer.emit('connection', ws, request);
@@ -85,7 +90,7 @@ describe('WebSocket listener', () => {
       });
     });
 
-    test('passes through middlewares', done => {
+    test('passes through middlewares', async done => {
       // given
       const incomingEvent = JSON.stringify({ type: 'EVENT', payload: 0 });
       const outgoingEvent = JSON.stringify({ type: 'EVENT', payload: 3 });
@@ -95,14 +100,15 @@ describe('WebSocket listener', () => {
       );
       const targetClient = testBed.getClient(0);
       const server = testBed.getServer();
-      const context = createContext();
-      const webSocketServer = webSocketListener({
+      const listener = webSocketListener({
         effects: [e$],
         middlewares: [m$, m$, m$],
-      })(context);
+      });
 
       // when
-      webSocketServer({ server });
+      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener })
+      await app();
+
       targetClient.once('open', () => targetClient.send(incomingEvent));
 
       // then
@@ -112,7 +118,7 @@ describe('WebSocket listener', () => {
       });
     });
 
-    test('triggers default error effect in middlewares stream multiple times', done => {
+    test('passes error (thrown by invalid JSON object) through stream multiple times', async done => {
       // given
       const incomingEvent = '{ some: wrong JSON object }';
       const outgoingEvent = JSON.stringify({
@@ -121,11 +127,12 @@ describe('WebSocket listener', () => {
       });
       const targetClient = testBed.getClient(0);
       const server = testBed.getServer();
-      const context = createContext();
-      const webSocketServer = webSocketListener()(context);
+      const listener = webSocketListener();
 
       // when
-      webSocketServer({ server });
+      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      await app();
+
       targetClient.once('open', () => {
         targetClient.send(incomingEvent);
         targetClient.send(incomingEvent);
@@ -141,7 +148,7 @@ describe('WebSocket listener', () => {
         });
     });
 
-    test('triggers default error effect in effects stream multiple times', done => {
+    test('passes error (thrown by effect) through stream multiple times', async done => {
       // given
       const incomingEvent = JSON.stringify({ type: 'EVENT' });
       const outgoingEvent = JSON.stringify({ type: 'EVENT', error: { message: 'test message' } });
@@ -150,11 +157,12 @@ describe('WebSocket listener', () => {
       );
       const targetClient = testBed.getClient(0);
       const server = testBed.getServer();
-      const context = createContext();
-      const webSocketServer = webSocketListener({ effects: [effect$] })(context);
+      const listener = webSocketListener({ effects: [effect$] });
 
       // when
-      webSocketServer({ server });
+      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      await app();
+
       targetClient.once('open', () => {
         targetClient.send(incomingEvent);
         targetClient.send(incomingEvent);
@@ -170,17 +178,17 @@ describe('WebSocket listener', () => {
         });
     });
 
-    test('passes connection', done => {
+    test('passes connection', async done => {
       // given
       const connection$: WsConnectionEffect = req$ => req$;
-      const context = createContext();
-      const webSocketServer = webSocketListener({ connection$ })(context);
+      const listener = webSocketListener();
       const targetClient1 = testBed.getClient(0);
       const targetClient2 = testBed.getClient(1);
       const server = testBed.getServer();
 
       // when
-      webSocketServer({ server });
+      const app = await createWebSocketServer({ options: { server }, connection$, webSocketListener: listener });
+      await app();
 
       // then
       merge(
@@ -191,18 +199,18 @@ describe('WebSocket listener', () => {
       .subscribe(() => done());
     });
 
-    test('triggers connection error', done => {
+    test('triggers connection error', async done => {
       // given
-      const context = createContext();
       const error = new WebSocketConnectionError('Unauthorized', HttpStatus.UNAUTHORIZED);
       const connection$: WsConnectionEffect = req$ => req$.pipe(mergeMapTo(throwError(error)));
-      const webSocketServer = webSocketListener({ connection$ })(context);
+      const listener = webSocketListener();
       const targetClient1 = testBed.getClient(0);
       const targetClient2 = testBed.getClient(1);
       const server = testBed.getServer();
 
       // when
-      webSocketServer({ server });
+      const app = await createWebSocketServer({ options: { server }, connection$, webSocketListener: listener });
+      await app();
 
       // then
       merge(
@@ -228,7 +236,7 @@ describe('WebSocket listener', () => {
     beforeEach(testBed.bootstrap);
     afterEach(testBed.teardown);
 
-    test('operates over binary events', done => {
+    test('operates over binary events', async done => {
       // given
       const targetClient = testBed.getClient();
       const decodedMessage = 'hello world';
@@ -240,11 +248,12 @@ describe('WebSocket listener', () => {
         map(event => event.toString('utf8'))
       );
       const server = testBed.getServer();
-      const context = createContext();
-      const webSocketServer = webSocketListener({ effects: [effect$], eventTransformer })(context);
+      const listener = webSocketListener({ effects: [effect$], eventTransformer });
 
       // when
-      webSocketServer({ server });
+      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      await app();
+
       targetClient.once('open', () => {
         targetClient.send(Buffer.from(decodedMessage));
       });

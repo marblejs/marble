@@ -8,7 +8,7 @@ const errorFactory = (message: string | undefined, data: any | undefined) => ({
   message, data,
 });
 
-export const error$: WsErrorEffect<EventError> = event$ =>
+export const defaultError$: WsErrorEffect<EventError> = event$ =>
   event$.pipe(
     map(({ error, event }) => ({
       type: event ? event.type : DEFAULT_ERROR_CHANNEL,

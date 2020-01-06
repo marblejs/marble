@@ -1,4 +1,4 @@
-import {  WebSocketConnectionError } from '../websocket.error.model';
+import { WebSocketConnectionError } from '../websocket.error.model';
 import { WebSocketStatus } from '../../websocket.interface';
 
 test('WebSocketConnectionError creates error object', () => {

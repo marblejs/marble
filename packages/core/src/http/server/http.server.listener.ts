@@ -36,7 +36,7 @@ export const httpListener = createListener<HttpListenerConfig, HttpListener>(con
   const routing = factorizeRoutingWithDefaults(effects, middlewares ?? []);
   const { resolve, errorSubject } = resolveRouting(routing, effectContext)(output$, error$);
 
-  const httpServer = (req: IncomingMessage, res: OutgoingMessage) => {
+  const handle = (req: IncomingMessage, res: OutgoingMessage) => {
     const marbleReq = req as HttpRequest;
     const marbleRes = res as HttpResponse;
 
@@ -52,7 +52,7 @@ export const httpListener = createListener<HttpListenerConfig, HttpListener>(con
     }
   };
 
-  httpServer.config = { routing };
+  handle.config = { routing };
 
-  return httpServer;
+  return handle;
 });

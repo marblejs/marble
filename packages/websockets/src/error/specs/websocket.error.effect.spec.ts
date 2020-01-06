@@ -1,8 +1,8 @@
 import { EventError } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal';
-import { error$ } from '../websocket.error.effect';
+import { defaultError$ } from '../websocket.error.effect';
 
-describe('error$', () => {
+describe('defaultError$', () => {
   test('returns stream of error events for defined error object', () => {
     // given
     const event = { type: 'TEST_EVENT' };
@@ -17,7 +17,7 @@ describe('error$', () => {
     };
 
     // then
-    Marbles.assertEffect(error$, [
+    Marbles.assertEffect(defaultError$, [
       ['--a--', { a: incomingEvent }],
       ['--b--', { b: outgoingEvent }],
     ]);
@@ -31,7 +31,7 @@ describe('error$', () => {
     const outgoingEvent = { type: event.type, error: {} };
 
     // then
-    Marbles.assertEffect(error$, [
+    Marbles.assertEffect(defaultError$, [
       ['--a--', { a: incomingEvent }],
       ['--b--', { b: outgoingEvent }],
     ]);
@@ -45,7 +45,7 @@ describe('error$', () => {
     const outgoingEvent = { type: 'ERROR', error: {} };
 
     // then
-    Marbles.assertEffect(error$, [
+    Marbles.assertEffect(defaultError$, [
       ['--a--', { a: incomingEvent }],
       ['--b--', { b: outgoingEvent }],
     ]);

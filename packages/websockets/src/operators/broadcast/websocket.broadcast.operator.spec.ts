@@ -1,10 +1,10 @@
 import { Marbles } from '@marblejs/core/dist/+internal';
-import { EMPTY } from 'rxjs';
+import { of } from 'rxjs';
 import { WsEffect } from '../../effects/websocket.effects.interface';
 import { broadcast } from './websocket.broadcast.operator';
 
 describe('#broadcast operator', () => {
-  const client = { sendBroadcastResponse: jest.fn(() => EMPTY) };
+  const client = { sendBroadcastResponse: jest.fn(() => of(true)) };
   const ctx = { client };
 
   test('sends broadcast response', () => {
@@ -21,7 +21,7 @@ describe('#broadcast operator', () => {
     // then
     Marbles.assertEffect(effect$, [
       ['-a--', { a: incomingEvent }],
-      ['----', {}],
+      ['-b--', { b: outgoingEvent }],
     ], { ctx });
 
     expect(client.sendBroadcastResponse).toHaveBeenCalledWith(outgoingEvent);
