@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@marblejs/core">
-    <img src="https://travis-ci.com/marblejs/marble.svg?branch=master" alt="Travis-CI status" height="18">
+    <img src="https://github.com/marblejs/marble/workflows/Test%20suite/badge.svg" alt="GitHub Actions" status" height="18">
   </a>
   <a href="https://badge.fury.io/js/%40marblejs%2Fcore">
     <img src="https://badge.fury.io/js/%40marblejs%2Fcore.svg" alt="npm version" height="18">
@@ -45,7 +45,7 @@ When looking at Marble.js you can ask: **"Why do we need RxJS for HTTP?"**. Desp
 | [@marblejs/middleware-logger](https://www.npmjs.com/package/@marblejs/middleware-logger) | Logger middleware               |
 | [@marblejs/middleware-body](https://www.npmjs.com/package/@marblejs/middleware-body)     | Body parser middleware          |
 | [@marblejs/middleware-io](https://www.npmjs.com/package/@marblejs/middleware-io)         | I/O validation middleware       |
-| [@marblejs/middleware-jwt](https://www.npmjs.com/package/@marblejs/middleware-jwt)       | JWT autgorization middleware    |
+| [@marblejs/middleware-jwt](https://www.npmjs.com/package/@marblejs/middleware-jwt)       | JWT authorization middleware    |
 | [@marblejs/middleware-joi](https://www.npmjs.com/package/@marblejs/middleware-joi)       | JOI-based validation middleware |
 | [@marblejs/middleware-cors](https://www.npmjs.com/package/@marblejs/middleware-cors)     | CORS middleware                 |
 | [@marblejs/middleware-multipart](https://www.npmjs.com/package/@marblejs/middleware-multipart) | Multipart middleware      |
