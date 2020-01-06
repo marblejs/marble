@@ -2,19 +2,14 @@ import * as http from 'http';
 import * as WebSocket from 'ws';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { lookup, registerAll, createContext, createEffectContext, Context } from '@marblejs/core';
-import {
-  createServer,
-  extendServerWith,
-  extendClientWith,
-  handleServerBrokenConnections,
-  handleClientBrokenConnection,
-} from '../server/websocket.server.helper';
+import { flow } from 'fp-ts/lib/function';
+import { lookup, registerAll, createContext, createEffectContext, Context, resolve } from '@marblejs/core';
+import { createServer, handleServerBrokenConnections, handleClientBrokenConnection } from '../server/websocket.server.helper';
 import { handleBroadcastResponse, handleResponse } from '../response/websocket.response.handler';
 import { WebSocketConnectionError } from '../error/websocket.error.model';
-import { WebSocketServerConfig, WebSocketServer } from './websocket.server.interface';
+import { WebSocketServerConfig, WebSocketServer, WebSocketClientConnection } from './websocket.server.interface';
 
-export const createWebSocketServer = (config: WebSocketServerConfig): WebSocketServer => {
+export const createWebSocketServer = async (config: WebSocketServerConfig): Promise<WebSocketServer> => {
   const {
     options,
     dependencies = [],
@@ -31,32 +26,32 @@ export const createWebSocketServer = (config: WebSocketServerConfig): WebSocketS
       );
   };
 
-  const context = registerAll([ ...dependencies ])(createContext());
+  const context = await flow(
+    registerAll([ ...dependencies ]),
+    resolve,
+  )(createContext());
+
   const listener = webSocketListener(context);
+
   const server = createServer({
     noServer: true,
     verifyClient: verifyClient(context),
-    ...options,
-  });
-
-  const sendBroadcastResponse = handleBroadcastResponse(server, listener.eventTransformer);
-  const extendedServer = extendServerWith({ sendBroadcastResponse })(server);
+    ...options
+  }, listener.eventTransformer);
 
   const listen = async () => {
-    extendedServer.on('connection', client => {
-      const extendedClient = extendClientWith({
-        sendResponse: handleResponse(client, listener.eventTransformer),
-        sendBroadcastResponse: handleBroadcastResponse(server, listener.eventTransformer),
-        isAlive: true,
-      })(client);
+    server.on('connection', (client: WebSocketClientConnection) => {
+      client.sendResponse = handleResponse(client, listener.eventTransformer);
+      client.sendBroadcastResponse = handleBroadcastResponse(server, listener.eventTransformer);
+      client.isAlive = true;
 
-      handleClientBrokenConnection(extendedClient).subscribe();
-      listener(extendedClient);
+      handleClientBrokenConnection(client).subscribe();
+      listener(client);
     });
 
-    handleServerBrokenConnections(extendedServer).subscribe();
+    handleServerBrokenConnections(server).subscribe();
 
-    return extendedServer;
+    return server;
   };
 
   listen.context = context;

@@ -1,7 +1,6 @@
-import { EventEmitter } from 'events';
 import { TimeoutError } from 'rxjs';
 import { Marbles } from '@marblejs/core/dist/+internal';
-import { MarbleWebSocketClient, WebSocketStatus, WebSocketServer } from '../../websocket.interface';
+import { WebSocketStatus, WebSocketConnectionLiveness } from '../../websocket.interface';
 import { WebSocketConnectionError } from '../../error/websocket.error.model';
 import {
   handleClientValidationError,
@@ -9,33 +8,20 @@ import {
   handleServerBrokenConnections,
   HEART_BEAT_INTERVAL,
   HEART_BEAT_TERMINATE_INTERVAL,
-  ClientStatus,
 } from '../websocket.server.helper';
-
-class WebSocketClientMock extends EventEmitter {
-  isAlive = false;
-  ping = jest.fn();
-  close = jest.fn();
-  terminate = jest.fn();
-}
-
-class WebSocketServerMock extends EventEmitter {
-  constructor(public clients: WebSocketClientMock[]) {
-    super();
-  }
-}
+import { createWebSocketServerMock, createWebSocketClientMock } from '../../+internal';
 
 describe('#handleServerBrokenConnections', () => {
   test('terminates dead connections', () => {
     // given
     const scheduler = Marbles.createTestScheduler();
-    const server = new WebSocketServerMock([
-      new WebSocketClientMock(),
-      new WebSocketClientMock(),
+    const server = createWebSocketServerMock([
+      createWebSocketClientMock(),
+      createWebSocketClientMock(),
     ]);
 
     // when
-    const brokenConnection$ = handleServerBrokenConnections(server as any as WebSocketServer, scheduler);
+    const brokenConnection$ = handleServerBrokenConnections(server, scheduler);
 
     scheduler.schedule(() => {
       server.clients[0].isAlive = true;
@@ -58,8 +44,8 @@ describe('#handleServerBrokenConnections', () => {
       expectObservable(brokenConnection$).toBe(
         `${HEART_BEAT_INTERVAL}ms (ab) ${HEART_BEAT_INTERVAL - 4}ms (cd) 96ms |`,
         {
-          a: ClientStatus.ALIVE, b: ClientStatus.ALIVE,
-          c: ClientStatus.ALIVE, d: ClientStatus.DEAD,
+          a: WebSocketConnectionLiveness.ALIVE, b: WebSocketConnectionLiveness.ALIVE,
+          c: WebSocketConnectionLiveness.ALIVE, d: WebSocketConnectionLiveness.DEAD,
         },
       );
       flush();
@@ -73,7 +59,7 @@ describe('#handleClientBrokenConnection', () => {
   test('heartbeats and closes stream', () => {
     // given
     const scheduler = Marbles.createTestScheduler();
-    const client = new WebSocketClientMock() as any as MarbleWebSocketClient;
+    const client = createWebSocketClientMock();
     const isAlive = true;
 
     // when
@@ -99,7 +85,7 @@ describe('#handleClientBrokenConnection', () => {
   test('terminates if heartbeat is timed out', () => {
     // given
     const scheduler = Marbles.createTestScheduler();
-    const client = new WebSocketClientMock() as any as MarbleWebSocketClient;
+    const client = createWebSocketClientMock();
     const timeoutError = new TimeoutError();
     const isAlive = true;
 
@@ -124,7 +110,7 @@ describe('#handleClientValidationError', () => {
   test('closes connection with defined closing code', () => {
     // given
     const error = new WebSocketConnectionError('test', WebSocketStatus.NORMAL_CLOSURE);
-    const client = new WebSocketClientMock() as any as MarbleWebSocketClient;
+    const client = createWebSocketClientMock();
 
     // when
     client.isAlive = true;
@@ -138,7 +124,7 @@ describe('#handleClientValidationError', () => {
   test('closes connection with defined closing code', () => {
     // given
     const error = new Error('test') as WebSocketConnectionError;
-    const client = new WebSocketClientMock() as any as MarbleWebSocketClient;
+    const client = createWebSocketClientMock();
 
     // when
     client.isAlive = true;

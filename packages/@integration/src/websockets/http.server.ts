@@ -9,22 +9,22 @@ import {
   HttpServerEffect,
   useContext,
 } from '@marblejs/core';
-import { mapToServer, MarbleWebSocketServer } from '@marblejs/websockets';
+import { mapToServer, WebSocketServerConnection } from '@marblejs/websockets';
 import { logger$ } from '@marblejs/middleware-logger';
 import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { webSocketServer } from './websockets.server';
 
-export const WsServerToken = createContextToken<MarbleWebSocketServer>('MarbleWebSocketServer');
+export const WebSocketServerToken = createContextToken<WebSocketServerConnection>('WebSocketServerConnection');
 
 const root$ = r.pipe(
   r.matchPath('/'),
   r.matchType('GET'),
   r.useEffect((req$, { ask }) => {
-    const wsServer = useContext(WsServerToken)(ask);
+    const webSocketServer = useContext(WebSocketServerToken)(ask);
 
     return req$.pipe(
-      tap(() => wsServer.sendBroadcastResponse({ type: 'ROOT', payload: 'Hello' })),
+      tap(() => webSocketServer.sendBroadcastResponse({ type: 'ROOT', payload: 'Hello' })),
       map(body => ({ body })),
     );
   }));
@@ -34,7 +34,7 @@ const upgrade$: HttpServerEffect = (event$, { ask }) =>
     matchEvent(ServerEvent.upgrade),
     mapToServer({
       path: '/api/:version/ws',
-      server: ask(WsServerToken),
+      server: ask(WebSocketServerToken),
     }),
   );
 
@@ -52,7 +52,10 @@ export const server = createServer({
     effects: [root$],
   }),
   dependencies: [
-    bindEagerlyTo(WsServerToken)(webSocketServer),
+    bindEagerlyTo(WebSocketServerToken)(async () => {
+      const app = await webSocketServer;
+      return app();
+    }),
   ],
   event$: (...args) => merge(
     listening$(...args),

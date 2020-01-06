@@ -7,5 +7,7 @@ describe('@marblejs/websockets', () => {
     expect(API.defaultError$).toBeDefined();
     expect(API.jsonTransformer).toBeDefined();
     expect(API.webSocketListener).toBeDefined();
+    expect(API.createWebSocketServer).toBeDefined();
+    expect(API.WebSocketStatus).toBeDefined();
   });
 });

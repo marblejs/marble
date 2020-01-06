@@ -1,10 +1,10 @@
 import { Observable } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
-import { MarbleWebSocketClient } from '../../websocket.interface';
+import { WebSocketClientConnection } from '../../server/websocket.server.interface';
 
 export const broadcast =
-  <Input>(client: MarbleWebSocketClient, fn: (input: Input) => any) =>
-    (input$: Observable<Input>): Observable<never> =>
+  <Input>(client: WebSocketClientConnection, fn: (input: Input) => any) =>
+    (input$: Observable<Input>): Observable<boolean> =>
       input$.pipe(
         map(fn),
         mergeMap(data => client.sendBroadcastResponse(data)),

@@ -1,83 +1,68 @@
-import { Subject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, fromEvent, of } from 'rxjs';
+import { map, takeUntil, publish } from 'rxjs/operators';
 import {
   combineEffects,
   combineMiddlewares,
-  Event,
   createEffectContext,
   createListener,
+  Event,
+  EventError,
 } from '@marblejs/core';
-import * as WS from '../websocket.interface';
-import * as WSEffect from '../effects/websocket.effects.interface';
+import { WsEffect, WsErrorEffect, WsMiddlewareEffect, WsOutputEffect } from '../effects/websocket.effects.interface';
 import { jsonTransformer } from '../transformer/websocket.json.transformer';
 import { EventTransformer } from '../transformer/websocket.transformer.interface';
-import { handleEffectsError } from '../error/websocket.error.handler';
 import { defaultError$ } from '../error/websocket.error.effect';
+import { WebSocketClientConnection } from './websocket.server.interface';
 
 export interface WebSocketListenerConfig {
-  effects?: WSEffect.WsEffect<any, any>[];
-  middlewares?: WSEffect.WsMiddlewareEffect<any, any>[];
-  error$?: WSEffect.WsErrorEffect<Error, any, any>;
+  effects?: WsEffect<any, any>[];
+  middlewares?: WsMiddlewareEffect<any, any>[];
+  error$?: WsErrorEffect<Error, any, any>;
   eventTransformer?: EventTransformer<Event, any>;
-  output$?: WSEffect.WsOutputEffect;
+  output$?: WsOutputEffect;
 }
 
 export interface WebSocketListener {
-  (connection: WS.MarbleWebSocketClient): void;
+  (connection: WebSocketClientConnection): void;
   eventTransformer: EventTransformer<Event, any>;
 }
 
+const defaultEffect$: WsEffect = msg$ => msg$;
+const defaultOutput$: WsOutputEffect = (out$: Observable<Event>) => out$;
+
 export const webSocketListener = createListener<WebSocketListenerConfig, WebSocketListener>(config => ask => {
   const {
-    effects = [],
     middlewares = [],
+    effects = [defaultEffect$],
     error$ = defaultError$,
-    eventTransformer = jsonTransformer as EventTransformer<any, any>,
-    output$ = (out$: Observable<Event>) => out$,
+    output$ = defaultOutput$,
+    eventTransformer = jsonTransformer as EventTransformer<Event, any>,
   } = config ?? {};
 
-  const combinedMiddlewares = combineMiddlewares(...middlewares);
-  const combinedEffects = combineEffects(...effects);
+  const middleware$ = combineMiddlewares(...middlewares);
+  const effect$ = combineEffects(...effects);
 
-  const handle = (client:  WS.MarbleWebSocketClient) => {
-    const eventSubject$ = new Subject<any>();
-    const incomingEventSubject$ = new Subject<WS.WebSocketData>();
+  const handle = (client: WebSocketClientConnection) => {
     const ctx = createEffectContext({ ask, client });
-    const decodedEvent$ = incomingEventSubject$.pipe(map(eventTransformer.decode));
-    const middlewares$ = combinedMiddlewares(decodedEvent$, ctx);
-    const effects$ = combinedEffects(eventSubject$, ctx);
-    const effectsOutput$ = output$(effects$, ctx);
 
-    const subscribeMiddlewares = (input$: Observable<any>) =>
+    const event$ = fromEvent<MessageEvent>(client, 'message').pipe(
+      takeUntil(fromEvent(client, 'close')),
+      map(e => eventTransformer.decode(e.data)),
+      publish(e$ => middleware$(e$, ctx)),
+      publish(e$ => effect$(e$, ctx)),
+      publish(e$ => output$(e$, ctx)),
+    );
+
+    const subscribe = (input$: Observable<Event>) =>
       input$.subscribe(
-        event => eventSubject$.next(event),
-        error => handleEffectsError(ctx, error$)(error),
+        (event: Event) => client.sendResponse(event),
+        (error: EventError) => {
+          error$(of({ event: error.event, error }), ctx).subscribe(client.sendResponse);
+          subscribe(event$);
+        },
       );
 
-    const subscribeEffects = (input$: Observable<any>) =>
-      input$.subscribe(
-        event => client.sendResponse(event),
-        error => handleEffectsError(ctx, error$)(error),
-      );
-
-    let middlewaresSub = subscribeMiddlewares(middlewares$);
-    let effectsSub = subscribeEffects(effectsOutput$);
-
-    const onMessage = (event: WS.WebSocketData) => {
-      if (middlewaresSub.closed) { middlewaresSub = subscribeMiddlewares(middlewares$); }
-      if (effectsSub.closed) { effectsSub = subscribeEffects(effects$); }
-
-      incomingEventSubject$.next(event);
-    };
-
-    const onClose = () => {
-      client.removeListener('message', onMessage);
-      middlewaresSub.unsubscribe();
-      effectsSub.unsubscribe();
-    };
-
-    client.on('message', onMessage);
-    client.once('close', onClose);
+    subscribe(event$);
   };
 
   handle.eventTransformer = eventTransformer;
