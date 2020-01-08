@@ -30,8 +30,7 @@ describe('messagingServer::Redis', () => {
       event$.pipe(
         matchEvent('RPC_TEST'),
         use(eventValidator$(t.number)),
-        map(event => event.payload),
-        map(payload => ({ type: 'RPC_TEST_RESULT', payload: payload + 1 })),
+        map(event => ({ ...event, type: 'RPC_TEST_RESULT', payload: event.payload + 1 })),
       );
 
     const options = createOptions();
@@ -68,9 +67,8 @@ describe('messagingServer::Redis', () => {
     const client = await runClient(Transport.REDIS, options);
     const server = await runServer(Transport.REDIS, options)(event$);
     const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
-    const emitResult = await client.emitMessage(options.channel, message);
 
-    expect(emitResult).toEqual(true);
+    await client.emitMessage(options.channel, message);
   });
 
   test('throws an UnsupportedError for unsupported "ackMessage/nackMessage"', async done => {
@@ -82,21 +80,20 @@ describe('messagingServer::Redis', () => {
     const event$: MsgEffect = (event$, ctx) =>
       event$.pipe(
         matchEvent('EVENT_TEST'),
-        tap(event => ctx.client.ackMessage(event.raw)),
+        tap(event => ctx.client.ackMessage(event.metadata?.raw)),
       );
 
     const error$: MsgErrorEffect = event$ =>
       event$.pipe(
-        map(({ event, error}) => ({ event, error: { name: error.name, message: error.message }})),
-        tap(async ({ event, error }) => {
-          expect(event.type).toEqual('EVENT_TEST');
-          expect(error).toEqual(expectedEventError);
+        map(error => ({ type: 'UNHANDLED_ERROR', error: { name: error.name, message: error.message }})),
+        tap(async event => {
+          expect(event.type).toEqual('UNHANDLED_ERROR');
+          expect(event.error).toEqual(expectedEventError);
           await wait();
           await server.close();
           await client.close();
           done();
         }),
-        map(({ event }) => event),
       );
 
     const options = createOptions();

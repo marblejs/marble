@@ -5,8 +5,8 @@ import {
   createEffectContext,
   createListener,
 } from '@marblejs/core';
-import { Subject, of} from 'rxjs';
-import { map, publish, takeUntil, catchError, mergeMapTo, mergeMap, tap } from 'rxjs/operators';
+import { of, Observable} from 'rxjs';
+import { map, publish, catchError, takeUntil } from 'rxjs/operators';
 import {
   TransportMessage,
   TransportMessageTransformer,
@@ -32,19 +32,15 @@ const defaultEffect$: MsgEffect = msg$ =>
   msg$;
 
 const defaultOutput$: MsgOutputEffect = msg$ =>
-  msg$.pipe(map(m => m.event));
+  msg$;
 
 const defaultError$: MsgErrorEffect = msg$ =>
-  msg$.pipe(map(({ event, error }) => ({
-    type: event.type,
-    payload: event.payload,
-    error: { name: error.name, message: error.message },
-  } as Event)));
+  msg$.pipe(map(error => ({ type: 'UNHANDLED_ERROR', error: { name: error.name, message: error.message } } as Event)));
 
 export const messagingListener = createListener<MessagingListenerConfig, MessagingListener>(config => ask => {
   const {
-    effects = [defaultEffect$],
     middlewares = [],
+    effects = [defaultEffect$],
     output$ = defaultOutput$,
     error$ = defaultError$,
     msgTransformer = jsonTransformer,
@@ -55,47 +51,54 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
     const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
     const ctx = createEffectContext({ ask, client: connection });
 
-    const decode = (msg: TransportMessage<Buffer>): TransportMessage<Event> => ({
-      ...msg,
-      data: { ...msgTransformer.decode(msg.data), raw: msg },
+    const decode = (msg: TransportMessage<Buffer>): Event => ({
+      ...msgTransformer.decode(msg.data),
+      metadata: {
+        replyTo: msg.replyTo,
+        correlationId: msg.correlationId,
+        raw: msg,
+      }
     });
 
-    const subject = new Subject<TransportMessage<Buffer>>();
+    const stream = connection.message$.pipe(
+      takeUntil(connection.close$),
+      map(decode),
+      publish(e$ => combinedMiddlewares(e$, ctx)),
+      publish(e$ => combinedEffects(e$, ctx)),
+      publish(e$ => output$(e$, ctx)),
+      publish(e$ => outputLogger$(e$, ctx)),
+      catchError(error => {
+        const e$ = of(error);
+        return error$(e$, ctx).pipe(
+          publish(e$ => errorLogger$(e$, ctx)),
+        );
+      }),
+    );
 
-    subject
-      .pipe(
-        takeUntil(connection.close$),
-        map(decode),
-        mergeMap(initiator => of(initiator.data).pipe(
-          publish(e$ => combinedMiddlewares(e$, ctx)),
-          publish(e$ => combinedEffects(e$, ctx)),
-          publish(e$ => outputLogger$(e$.pipe(map(event => ({ initiator, event }))), ctx)),
-          publish(e$ => output$(e$.pipe(map(event => ({ initiator, event }))), ctx)),
-          catchError(error => {
-            const e$ = of({ event: initiator.data, error });
-            return errorLogger$(e$, ctx).pipe(
-              mergeMapTo(error$(e$, ctx)),
-            );
-          }),
-          tap(async event => {
-            if (initiator.replyTo) {
-              const { replyTo, correlationId, raw } = initiator;
-              const { type, payload, error } = event;
-              return connection.emitMessage(replyTo, {
-                data: msgTransformer.encode({ type, payload, error }),
-                correlationId,
-                raw,
-              });
-            }
+    const subscribe = (event$: Observable<Event<unknown, any, string>>) =>
+      event$.subscribe(
+        event => {
+          const { metadata, type, payload, error } = event;
 
-            return true;
-          }),
-        )),
-      )
-      .subscribe();
+          if (metadata && metadata.replyTo) {
+            const { replyTo, correlationId, raw } = metadata;
 
-    connection.message$
-      .pipe(takeUntil(connection.close$))
-      .subscribe(msg => subject.next(msg));
+            connection.emitMessage(replyTo, {
+              data: msgTransformer.encode({ type, payload, error }),
+              correlationId,
+              raw,
+            });
+          }
+        },
+        () => {
+          console.error('Unexpected stream error!'); // @TODO: handle unexpected error
+          subscribe(event$);
+        },
+        () => {
+          subscribe(event$);
+        },
+      );
+
+    subscribe(stream);
   };
 });

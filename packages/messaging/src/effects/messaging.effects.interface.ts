@@ -1,5 +1,5 @@
 import { Effect, Event } from '@marblejs/core';
-import { TransportLayerConnection, TransportMessage } from '../transport/transport.interface';
+import { TransportLayerConnection } from '../transport/transport.interface';
 
 type MsgClient = TransportLayerConnection;
 
@@ -9,9 +9,8 @@ export interface MsgMiddlewareEffect<
 > extends MsgEffect<I, O> {}
 
 export interface MsgErrorEffect<
-  I = Event,
   Err extends Error = Error,
-> extends MsgEffect<{ event: I; error: Err }, Event, MsgClient> {}
+> extends MsgEffect<Err, Event, MsgClient> {}
 
 export interface MsgEffect<
   I = Event,
@@ -22,7 +21,7 @@ export interface MsgEffect<
 export interface MsgOutputEffect<
   I = Event,
   O = Event,
-> extends MsgEffect<{ event: I; initiator: TransportMessage<any> }, O> {}
+> extends MsgEffect<I, O> {}
 
 export interface MsgServerEffect<T extends Event = Event>
   extends MsgEffect<T, any, undefined> {}
