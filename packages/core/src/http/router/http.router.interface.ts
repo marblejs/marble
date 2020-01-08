@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { HttpMethod, HttpRequest } from '../http.interface';
 import { HttpEffect, HttpMiddlewareEffect, HttpEffectResponse } from '../effects/http.effects.interface';
 
@@ -50,7 +50,7 @@ export type Routing = RoutingItem[];
 
 export interface BootstrappedRoutingItem extends Omit<RoutingItem, 'methods'> {
   methods: Partial<Record<HttpMethod, {
-    subject: Subject<HttpRequest>;
+    process: (req$: Observable<HttpRequest>) => Observable<HttpEffectResponse>;
     parameters?: string[];
   }>>;
 }
@@ -58,7 +58,7 @@ export interface BootstrappedRoutingItem extends Omit<RoutingItem, 'methods'> {
 export type BootstrappedRouting = BootstrappedRoutingItem[];
 
 export interface RouteMatched {
-  subject: Subject<HttpRequest>;
+  process: (req$: Observable<HttpRequest>) => Observable<HttpEffectResponse>;
   params: Record<string, string>;
   path: string;
 }

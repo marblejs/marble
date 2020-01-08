@@ -21,7 +21,7 @@ export const matchRoute = (routing: BootstrappedRouting) => (url: string, method
     }
 
     return {
-      subject: matchedMethod.subject,
+      process: matchedMethod.process,
       params,
       path,
     };
