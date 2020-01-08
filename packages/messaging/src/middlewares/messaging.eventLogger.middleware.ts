@@ -60,5 +60,6 @@ export const errorLogger$: MsgErrorEffect = (event$, ctx) => {
       level: LoggerLevel.ERROR,
       channel: transportLayer.config.channel,
     })),
+    map(({ event }) => event),
   );
 };

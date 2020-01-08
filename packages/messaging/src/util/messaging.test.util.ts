@@ -1,15 +1,15 @@
 import * as uuid from 'uuid/v4';
 import { createMicroservice } from '../server/messaging.server';
 import { TransportMessage, Transport } from '../transport/transport.interface';
-import { MsgEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
+import { MsgEffect, MsgOutputEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
 import { messagingListener } from '../server/messaging.server.listener';
 import { provideTransportLayer } from '../transport/transport.provider';
 
-export const runServer = (transport: any, options: any) => (effect$?: MsgEffect, output$?: MsgOutputEffect) =>
+export const runServer = (transport: any, options: any) => (effect$?: MsgEffect, output$?: MsgOutputEffect, error$?: MsgErrorEffect) =>
   createMicroservice({
     options,
     transport,
-    messagingListener: messagingListener(effect$ ? { effects: [effect$], output$ } : undefined),
+    messagingListener: messagingListener(effect$ ? { effects: [effect$], output$, error$ } : undefined),
   }).then(app => app());
 
 export const runClient = (transport: Transport, transportOptions: any) =>

@@ -1,5 +1,5 @@
 import { Subject, fromEvent, merge, from } from 'rxjs';
-import { map, filter, take, mapTo, first, mergeMap } from 'rxjs/operators';
+import { map, filter, take, mapTo, first, mergeMap, share } from 'rxjs/operators';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
@@ -42,6 +42,7 @@ class AmqpStrategyConnection implements TransportLayerConnection {
 
   get message$() {
     return this.msgSubject$.asObservable().pipe(
+      share(),
       map(raw => ({
         data: raw.content,
         replyTo: raw.properties.replyTo,

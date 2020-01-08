@@ -3,7 +3,7 @@ import { eventValidator$, t } from '@marblejs/middleware-io';
 import { Subject, throwError } from 'rxjs';
 import { map, tap, mergeMapTo, delay, bufferCount } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
-import { MsgEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
+import { MsgEffect, MsgErrorEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
 import { AmqpStrategyOptions } from '../../transport/strategies/amqp.strategy.interface';
 import { runClient, runServer, createMessage } from '../../util/messaging.test.util';
 
@@ -14,7 +14,7 @@ const createOptions = (config: { expectAck?: boolean; queue?: string } = {}): Am
   queueOptions: { durable: false },
 });
 
-describe('messagingServer::AMQP', () => {
+describe.only('messagingServer::AMQP', () => {
   test('handles RPC event', async () => {
     const rpc$: MsgEffect = event$ =>
       event$.pipe(
@@ -97,20 +97,19 @@ describe('messagingServer::AMQP', () => {
     await client.emitMessage(options.queue, message);
   });
 
-  test('reacts to thrown Error and doesn\'t crash internal messages stream', async done => {
+  test.only('reacts to thrown Error and doesn\'t crash internal messages stream', async done => {
     const event1: Event = { type: 'EVENT_TEST_1' };
     const event2: Event = { type: 'EVENT_TEST_2' };
     const error = new Error('test_error');
-    const expectedError = { error: { message: error.message, name: error.name }, type: 'UNHANDLED_ERROR' };
-    const outputSubject = new Subject<Event>();
+    const outputSubject = new Subject<[Event, Error | undefined]>();
 
     outputSubject
       .pipe(bufferCount(2))
       .subscribe(data => {
-        expect(data[0].type).toEqual(expectedError.type);
-        expect(data[0].error).toEqual(expectedError.error);
-        expect(data[1].type).toEqual(event2.type);
-        expect(data[1].payload).toEqual(event2.payload);
+        expect(data[0][0].type).toEqual(event1.type);
+        expect(data[0][1]).toEqual(error);
+        expect(data[1][0].type).toEqual(event2.type);
+        expect(data[1][1]).toBeUndefined();
         setTimeout(() => server.close().then(done), 1000);
       });
 
@@ -125,15 +124,21 @@ describe('messagingServer::AMQP', () => {
         matchEvent(event2.type),
       );
 
+    const error$: MsgErrorEffect = event$ =>
+      event$.pipe(
+        tap(({ event, error }) => outputSubject.next([event, error])),
+        map(({ event }) => event),
+      );
+
     const output$: MsgOutputEffect = event$ =>
       event$.pipe(
-        tap(({ event }) => outputSubject.next(event)),
+        tap(({ event }) => outputSubject.next([event, undefined])),
         map(({ event }) => event),
       );
 
     const options = createOptions({ expectAck: false });
     const client = await runClient(Transport.AMQP, options);
-    const server = await runServer(Transport.AMQP, options)(combineEffects(event1$, event2$), output$);
+    const server = await runServer(Transport.AMQP, options)(combineEffects(event1$, event2$), output$, error$);
 
     await client.emitMessage(options.queue, createMessage(event1));
     await client.emitMessage(options.queue, createMessage(event2));
