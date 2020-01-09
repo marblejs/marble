@@ -1,13 +1,16 @@
-import { Subject, zip, of, fromEvent, Observable } from 'rxjs';
-import { publish, catchError, map, takeUntil, share, take} from 'rxjs/operators';
+import { Subject, of, fromEvent, Observable } from 'rxjs';
+import { publish, takeUntil, share, take, mergeMap} from 'rxjs/operators';
 import { EffectContext } from '../../effects/effects.interface';
 import { HttpServer, HttpRequest } from '../http.interface';
 import { defaultError$ } from '../error/http.error.effect';
 import { HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http.effects.interface';
+import { coreErrorFactory, CoreErrorOptions } from '../../error/error.factory';
 import { Routing, BootstrappedRoutingItem } from './http.router.interface';
 import { queryParamsFactory } from './http.router.query.factory';
 import { matchRoute } from './http.router.matcher';
 import { ROUTE_NOT_FOUND_ERROR } from './http.router.effects';
+
+const coreErrorOptions: CoreErrorOptions =  { contextMethod: 'resolveRouting', offset: 0 };
 
 export const resolveRouting = (
   routing: Routing,
@@ -17,42 +20,38 @@ export const resolveRouting = (
   error$?: HttpErrorEffect,
 ) => {
   const close$ = fromEvent(ctx.client, 'close').pipe(take(1), share());
-
   const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
-  const outputStream$ = outputSubject.asObservable().pipe(takeUntil(close$));
-
   const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
-  const errorStream$ = errorSubject.asObservable().pipe(takeUntil(close$));
 
-  const outputEffect = output$
-    ? output$(outputStream$, ctx).pipe(catchError(error => of(error)))
-    : outputStream$.pipe(map(({ res }) => res));
-
-  const errorEffect = error$
-    ? error$(errorStream$, ctx)
-    : defaultError$(errorStream$, ctx);
-
-  const outputFlow$ = zip(
-    outputEffect,
-    outputStream$.pipe(map(out => out.req)),
+  const outputFlow$ = outputSubject.asObservable().pipe(
+    takeUntil(close$),
+    mergeMap(data => output$ ? output$(of(data), ctx) : of(data.res)),
   );
 
-  const errorFlow$ = zip(
-    errorEffect,
-    errorStream$.pipe(map(err => err.req)),
-  );
+  const errorFlow$ = errorSubject.asObservable().pipe(
+    takeUntil(close$),
+    mergeMap(data => error$ ? error$(of(data), ctx) : defaultError$(of(data), ctx)),
+  )
 
   const subscribeOutput = (stream$: Observable<any>) =>
     stream$.subscribe(
       ([res, req]) => req.response.send(res),
-      undefined,
+      error => {
+        const coreError = coreErrorFactory(error.message, coreErrorOptions)
+        console.error(coreError.stack);
+        subscribeOutput(stream$);
+      },
       () => subscribeOutput(stream$),
     );
 
   const subscribeError = (stream$: Observable<any>) =>
     stream$.subscribe(
       ([res, req]) => req.response.send(res),
-      undefined,
+      error => {
+        const coreError = coreErrorFactory(error.message, coreErrorOptions)
+        console.error(coreError.stack);
+        subscribeOutput(stream$);
+      },
       () => subscribeError(stream$),
     );
 
