@@ -24,4 +24,10 @@ const server = createServer({
   httpListener: httpListener({ effects, middlewares }),
 });
 
-server().then(() => console.log(`  ${n} middlewares - Marble.js`));
+const bootstrap = async () => {
+  const app = await server;
+  await app();
+  console.log(`  ${n} middlewares - Marble.js`);
+};
+
+bootstrap();

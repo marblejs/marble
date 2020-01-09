@@ -59,11 +59,11 @@ describe('#resolveRouting', () => {
       },
     );
 
-    resolve(req1)?.next(req1);
-    resolve(req2)?.next(req2);
-    resolve(req3)?.next(req3);
-    resolve(req4)?.next(req4);
-    resolve(req5)?.next(req5);
+    resolve(req1);
+    resolve(req2);
+    resolve(req3);
+    resolve(req4);
+    resolve(req5);
   });
 
   test('returns undefined if route cannot be resolved', () => {

@@ -2,7 +2,7 @@ import { matchEvent, use } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { map, tap } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
-import { MsgEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
+import { MsgEffect, MsgErrorEffect } from '../../effects/messaging.effects.interface';
 import { RedisStrategyOptions } from '../../transport/strategies/redis.strategy.interface';
 import { runClient, runServer, createMessage, wait } from '../../util/messaging.test.util';
 
@@ -30,8 +30,7 @@ describe('messagingServer::Redis', () => {
       event$.pipe(
         matchEvent('RPC_TEST'),
         use(eventValidator$(t.number)),
-        map(event => event.payload),
-        map(payload => ({ type: 'RPC_TEST_RESULT', payload: payload + 1 })),
+        map(event => ({ ...event, type: 'RPC_TEST_RESULT', payload: event.payload + 1 })),
       );
 
     const options = createOptions();
@@ -68,13 +67,11 @@ describe('messagingServer::Redis', () => {
     const client = await runClient(Transport.REDIS, options);
     const server = await runServer(Transport.REDIS, options)(event$);
     const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
-    const emitResult = await client.emitMessage(options.channel, message);
 
-    expect(emitResult).toEqual(true);
+    await client.emitMessage(options.channel, message);
   });
 
   test('throws an UnsupportedError for unsupported "ackMessage/nackMessage"', async done => {
-    const expectedEventType = 'UNHANDLED_ERROR';
     const expectedEventError = {
       name: 'UnsupportedError',
       message: 'Unsupported operation. Method \"ackMessage\" is unsupported for Redis transport layer.',
@@ -83,25 +80,25 @@ describe('messagingServer::Redis', () => {
     const event$: MsgEffect = (event$, ctx) =>
       event$.pipe(
         matchEvent('EVENT_TEST'),
-        tap(event => ctx.client.ackMessage(event.raw)),
+        tap(event => ctx.client.ackMessage(event.metadata?.raw)),
       );
 
-    const output$: MsgOutputEffect = event$ =>
+    const error$: MsgErrorEffect = event$ =>
       event$.pipe(
-        tap(async ({ event }) => {
-          expect(event.type).toEqual(expectedEventType);
+        map(error => ({ type: 'UNHANDLED_ERROR', error: { name: error.name, message: error.message }})),
+        tap(async event => {
+          expect(event.type).toEqual('UNHANDLED_ERROR');
           expect(event.error).toEqual(expectedEventError);
           await wait();
           await server.close();
           await client.close();
           done();
         }),
-        map(({ event }) => event),
       );
 
     const options = createOptions();
     const client = await runClient(Transport.REDIS, options);
-    const server = await runServer(Transport.REDIS, options)(event$, output$);
+    const server = await runServer(Transport.REDIS, options)(event$, undefined, error$);
     const message = createMessage({ type: 'EVENT_TEST' });
 
     const emitResult = await client.emitMessage(options.channel, message);

@@ -1,7 +1,7 @@
-import { tap, map } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { useContext } from '@marblejs/core';
 import { provideLogger, LoggerLevel } from '../server/messaging.server.logger';
-import { MsgMiddlewareEffect, MsgOutputEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
+import { MsgMiddlewareEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { TransportLayerToken } from '../server/messaging.server.tokens';
 
 export const inputLogger$: MsgMiddlewareEffect = (event$, ctx) => {
@@ -11,7 +11,7 @@ export const inputLogger$: MsgMiddlewareEffect = (event$, ctx) => {
   return event$.pipe(
     tap(event => {
       const channel = transportLayer.config.channel;
-      const message = `${event.type}, id: ${event.raw.correlationId}`;
+      const message = `${event.type}, id: ${event.metadata?.correlationId}`;
 
       logger({
         level: LoggerLevel.INFO,
@@ -28,13 +28,14 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
   const transportLayer = useContext(TransportLayerToken)(ctx.ask);
 
   return event$.pipe(
-    tap(({ event, initiator }) => {
+    tap(event => {
+      const { error, metadata, type } = event;
       const channel = transportLayer.config.channel;
-      const message = event.error
-        ? `${event.error.name}, ${event.error.message} for event ${event.type}`
-        : initiator.replyTo
-          ? `${event.type}, id: ${initiator.correlationId} and sent to ${initiator.replyTo}`
-          : `${event.type}, id: ${initiator.correlationId}`;
+      const message = error
+        ? `"${error.name}", "${error.message}" for event ${type}`
+        : metadata?.replyTo
+          ? `${event.type}, id: ${metadata?.correlationId ?? '-'} and sent to ${metadata?.replyTo ?? '-'}`
+          : `${event.type}, id: ${metadata?.correlationId ?? '-'}`;
 
       logger({
         level: event.error ? LoggerLevel.ERROR : LoggerLevel.INFO,
@@ -43,20 +44,17 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
         channel,
       });
     }),
-    map(({ event }) => event),
   );
 };
 
-export const errorLogger$: MsgErrorEffect = (event$, ctx) => {
+export const errorLogger$: MsgMiddlewareEffect = (event$, ctx) => {
   const logger = provideLogger(ctx.ask);
   const transportLayer = useContext(TransportLayerToken)(ctx.ask);
 
   return event$.pipe(
-    tap(({ error, event }) => logger({
+    tap(event => logger({
       tag: 'ERROR',
-      message: event
-        ? `${error.name}, ${error.message} for event ${event.type}`
-        : `${error.name}, ${error.message}`,
+      message: `"${event.error?.name ?? '-'}: ${event.error?.message ?? '-' }" for event ${event.type}`,
       level: LoggerLevel.ERROR,
       channel: transportLayer.config.channel,
     })),

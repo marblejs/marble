@@ -3,7 +3,7 @@ import { eventValidator$, t } from '@marblejs/middleware-io';
 import { Subject, throwError } from 'rxjs';
 import { map, tap, mergeMapTo, delay, bufferCount } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
-import { MsgEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
+import { MsgEffect, MsgErrorEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
 import { AmqpStrategyOptions } from '../../transport/strategies/amqp.strategy.interface';
 import { runClient, runServer, createMessage } from '../../util/messaging.test.util';
 
@@ -19,10 +19,9 @@ describe('messagingServer::AMQP', () => {
     const rpc$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('RPC_TEST'),
-        delay(250),
+        delay(50),
         use(eventValidator$(t.number)),
-        map(event => event.payload),
-        map(payload => ({ type: 'RPC_TEST_RESULT', payload: payload + 1 })),
+        map(event => ({ ...event, type: 'RPC_TEST_RESULT', payload: event.payload + 1 })),
       );
 
     const options = createOptions({ expectAck: false });
@@ -65,9 +64,7 @@ describe('messagingServer::AMQP', () => {
     const server = await runServer(Transport.AMQP, options)(event$);
     const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
 
-    const emitResult = await client.emitMessage(options.queue, message);
-
-    expect(emitResult).toEqual(true);
+    await client.emitMessage(options.queue, message);
   });
 
   test('acks processed event', async done => {
@@ -83,7 +80,7 @@ describe('messagingServer::AMQP', () => {
         matchEvent('EVENT_TEST'),
         use(eventValidator$(t.number)),
         map(event => {
-          client.ackMessage(event.raw);
+          client.ackMessage(event.metadata?.raw);
           return { type: 'EVENT_TEST_RESPONSE', payload: event.payload + 1 };
         }),
         tap(event => eventSubject.next(event)),
@@ -101,16 +98,15 @@ describe('messagingServer::AMQP', () => {
     const event1: Event = { type: 'EVENT_TEST_1' };
     const event2: Event = { type: 'EVENT_TEST_2' };
     const error = new Error('test_error');
-    const expectedError = { error: { message: error.message, name: error.name }, type: 'UNHANDLED_ERROR' };
-    const outputSubject = new Subject<Event>();
+    const outputSubject = new Subject<[Event | undefined, Error | undefined]>();
 
     outputSubject
       .pipe(bufferCount(2))
       .subscribe(data => {
-        expect(data[0].type).toEqual(expectedError.type);
-        expect(data[0].error).toEqual(expectedError.error);
-        expect(data[1].type).toEqual(event2.type);
-        expect(data[1].payload).toEqual(event2.payload);
+        expect(data[0][0]).toBeUndefined();
+        expect(data[0][1]).toEqual(error);
+        expect(data[1][0]).toEqual(event2);
+        expect(data[1][1]).toBeUndefined();
         setTimeout(() => server.close().then(done), 1000);
       });
 
@@ -123,17 +119,23 @@ describe('messagingServer::AMQP', () => {
     const event2$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent(event2.type),
+        map(event => ({ type: event.type })),
+      );
+
+    const error$: MsgErrorEffect = event$ =>
+      event$.pipe(
+        tap(error => outputSubject.next([undefined, error])),
+        map(() => ({ type: 'UNHANDLED' })),
       );
 
     const output$: MsgOutputEffect = event$ =>
       event$.pipe(
-        tap(({ event }) => outputSubject.next(event)),
-        map(({ event }) => event),
+        tap((event => outputSubject.next([event, undefined]))),
       );
 
     const options = createOptions({ expectAck: false });
     const client = await runClient(Transport.AMQP, options);
-    const server = await runServer(Transport.AMQP, options)(combineEffects(event1$, event2$), output$);
+    const server = await runServer(Transport.AMQP, options)(combineEffects(event1$, event2$), output$, error$);
 
     await client.emitMessage(options.queue, createMessage(event1));
     await client.emitMessage(options.queue, createMessage(event2));
