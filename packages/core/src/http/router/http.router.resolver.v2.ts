@@ -1,5 +1,5 @@
 import { Subject, of, fromEvent, Observable } from 'rxjs';
-import { publish, takeUntil, share, take, mergeMap} from 'rxjs/operators';
+import { publish, takeUntil, share, take, mergeMap, map} from 'rxjs/operators';
 import { EffectContext } from '../../effects/effects.interface';
 import { HttpServer, HttpRequest } from '../http.interface';
 import { defaultError$ } from '../error/http.error.effect';
@@ -25,15 +25,25 @@ export const resolveRouting = (
 
   const outputFlow$ = outputSubject.asObservable().pipe(
     takeUntil(close$),
-    mergeMap(data => output$ ? output$(of(data), ctx) : of(data.res)),
+    mergeMap(data => {
+      const stream = output$ ? output$(of(data), ctx) : of(data.res);
+      return stream.pipe(
+        map(res => ([res, data.req] as [HttpEffectResponse, HttpRequest])),
+      );
+    }),
   );
 
   const errorFlow$ = errorSubject.asObservable().pipe(
     takeUntil(close$),
-    mergeMap(data => error$ ? error$(of(data), ctx) : defaultError$(of(data), ctx)),
-  )
+    mergeMap(data => {
+      const stream = error$ ? error$(of(data), ctx) : defaultError$(of(data), ctx);
+      return stream.pipe(
+        map(res => ([res, data.req] as [HttpEffectResponse, HttpRequest])),
+      );
+    }),
+  );
 
-  const subscribeOutput = (stream$: Observable<any>) =>
+  const subscribeOutput = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
     stream$.subscribe(
       ([res, req]) => req.response.send(res),
       error => {
@@ -44,7 +54,7 @@ export const resolveRouting = (
       () => subscribeOutput(stream$),
     );
 
-  const subscribeError = (stream$: Observable<any>) =>
+  const subscribeError = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
     stream$.subscribe(
       ([res, req]) => req.response.send(res),
       error => {
