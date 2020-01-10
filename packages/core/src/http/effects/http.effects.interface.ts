@@ -3,6 +3,7 @@ import { Event } from '../../event/event.interface';
 import { Effect } from '../../effects/effects.interface';
 
 export interface HttpEffectResponse<T = any> {
+  request: HttpRequest;
   status?: HttpStatus;
   headers?: HttpHeaders;
   body?: T;
