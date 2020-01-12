@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { createContextToken } from '../../context/context.token.factory';
 import { HttpServer } from '../http.interface';
-import { Routing } from '../router/http.router.helpers';
+import { Routing } from '../router/http.router.interface';
 import { AllServerEvents } from './http.server.event';
 import { ServerRequestMetadataStorage } from './http.server.metadata.storage';
 

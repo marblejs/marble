@@ -1,16 +1,21 @@
 import { Subject, of, fromEvent, Observable } from 'rxjs';
-import { publish, takeUntil, share, take, mergeMap, map} from 'rxjs/operators';
+import { takeUntil, share, take, mergeMap, map } from 'rxjs/operators';
 import { EffectContext } from '../../effects/effects.interface';
 import { HttpServer, HttpRequest } from '../http.interface';
 import { defaultError$ } from '../error/http.error.effect';
 import { HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http.effects.interface';
-import { coreErrorFactory, CoreErrorOptions } from '../../error/error.factory';
+import {
+  unexpectedErrorWhileSendingErrorFactory,
+  unexpectedErrorWhileSendingOutputFactory,
+  errorNotBoundToRequestErrorFactory,
+  responseNotBoundToRequestErrorFactory,
+} from '../error/http.error.model';
 import { Routing, BootstrappedRoutingItem } from './http.router.interface';
 import { queryParamsFactory } from './http.router.query.factory';
 import { matchRoute } from './http.router.matcher';
 import { ROUTE_NOT_FOUND_ERROR } from './http.router.effects';
-
-const coreErrorOptions: CoreErrorOptions =  { contextMethod: 'resolveRouting', offset: 0 };
+import { decorateEffect } from './http.router.helpers';
+import { combineRouteMiddlewares } from './http.router.combiner';
 
 export const resolveRouting = (
   routing: Routing,
@@ -46,22 +51,14 @@ export const resolveRouting = (
   const subscribeOutput = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
     stream$.subscribe(
       ([res, req]) => req.response.send(res),
-      error => {
-        const coreError = coreErrorFactory(error.message, coreErrorOptions)
-        console.error(coreError.stack);
-        subscribeOutput(stream$);
-      },
+      error => { throw unexpectedErrorWhileSendingOutputFactory(error) },
       () => subscribeOutput(stream$),
     );
 
   const subscribeError = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
     stream$.subscribe(
       ([res, req]) => req.response.send(res),
-      error => {
-        const coreError = coreErrorFactory(error.message, coreErrorOptions)
-        console.error(coreError.stack);
-        subscribeOutput(stream$);
-      },
+      error => { throw unexpectedErrorWhileSendingErrorFactory(error) },
       () => subscribeError(stream$),
     );
 
@@ -73,19 +70,39 @@ export const resolveRouting = (
     methods: Object.entries(item.methods).reduce((acc, [method, methodItem]) => {
       if (!methodItem) return { [method]: undefined };
 
-      const { middleware, effect, parameters } = methodItem;
+      const { middlewares, effect, parameters, meta } = methodItem;
+      const subject = new Subject<HttpRequest>();
+      const decorate = !meta?.continuous;
 
-      const process = (req$: Observable<HttpRequest>) =>
-        middleware
-          ? effect(middleware(req$, ctx), ctx)
-          : effect(req$, ctx);
+      const input$ = subject.asObservable();
+      const middleware$ = combineRouteMiddlewares(decorate)(...middlewares)(input$, ctx);
+      const effect$ = decorate ? decorateEffect(middleware$) : middleware$;
+      const output$ = effect(effect$, ctx).pipe(takeUntil(close$));
+
+      const subscribe = (stream$: Observable<HttpEffectResponse>) =>
+        stream$.subscribe(
+          res => {
+            if (res.request) {
+              outputSubject.next({ res, req: res.request });
+            } else {
+              throw responseNotBoundToRequestErrorFactory(res);
+            }
+          },
+          error => {
+            if (error.request) {
+              errorSubject.next({ error, req: error.request });
+              subscribe(stream$);
+            } else {
+              throw errorNotBoundToRequestErrorFactory(error);
+            }
+          },
+        );
+
+      subscribe(output$);
 
       return {
         ...acc,
-        [method]: {
-          process,
-          parameters,
-        },
+        [method]: { subject, parameters },
       };
     }, {}),
   }));
@@ -105,15 +122,7 @@ export const resolveRouting = (
     req.meta = {};
     req.meta.path = resolvedRoute.path;
 
-    of(req)
-      .pipe(
-        publish(resolvedRoute.process),
-        take(1),
-      )
-      .subscribe(
-        res => outputSubject.next({ res, req }),
-        error => errorSubject.next({ error, req }),
-      );
+    resolvedRoute.subject.next(req);
   };
 
   return {

@@ -1,9 +1,11 @@
-import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { HttpMethod, HttpRequest } from '../http.interface';
 import { HttpEffect, HttpMiddlewareEffect, HttpEffectResponse } from '../effects/http.effects.interface';
 
 // Route
 export interface RouteMeta extends Record<string, any> {
+  name?: string;
+  continuous?: boolean;
   overridable?: boolean;
 }
 
@@ -36,8 +38,9 @@ export interface ParametricRegExp {
 
 export interface RoutingMethod {
   parameters?: string[];
-  middleware?: HttpMiddlewareEffect | undefined;
+  middlewares: HttpMiddlewareEffect[];
   effect: HttpEffect;
+  meta?: RouteMeta;
 }
 
 export interface RoutingItem {
@@ -50,7 +53,7 @@ export type Routing = RoutingItem[];
 
 export interface BootstrappedRoutingItem extends Omit<RoutingItem, 'methods'> {
   methods: Partial<Record<HttpMethod, {
-    process: (req$: Observable<HttpRequest>) => Observable<HttpEffectResponse>;
+    subject: Subject<HttpRequest>;
     parameters?: string[];
   }>>;
 }
@@ -58,7 +61,7 @@ export interface BootstrappedRoutingItem extends Omit<RoutingItem, 'methods'> {
 export type BootstrappedRouting = BootstrappedRoutingItem[];
 
 export interface RouteMatched {
-  process: (req$: Observable<HttpRequest>) => Observable<HttpEffectResponse>;
+  subject: Subject<HttpRequest>;
   params: Record<string, string>;
   path: string;
 }

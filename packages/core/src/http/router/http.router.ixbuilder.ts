@@ -1,11 +1,7 @@
-import { Observable, OperatorFunction, throwError, of } from 'rxjs';
-import { mergeMap, map, catchError } from 'rxjs/operators';
-import { pipeFromArray } from 'rxjs/internal/util/pipe';
 import { combineMiddlewares } from '../../effects/effects.combiner';
 import { IxBuilder, ichainCurry } from '../../+internal/fp/IxBuilder';
-import { HttpMiddlewareEffect, HttpEffect, HttpEffectResponse } from '../effects/http.effects.interface';
-import { HttpMethod, HttpRequest } from '../http.interface';
-import { HttpEffectError } from '../error/http.error.model';
+import { HttpMiddlewareEffect, HttpEffect } from '../effects/http.effects.interface';
+import { HttpMethod } from '../http.interface';
 import { RouteEffect, RouteMeta } from './http.router.interface';
 
 type Ready = 'Ready';
@@ -130,83 +126,4 @@ function pipe(
   )(route).run();
 }
 
-type EffectFn = (input$: Observable<HttpRequest>) => Observable<HttpEffectResponse>;
-
-export function handle(): EffectFn;
-export function handle<A>(
-  op1: OperatorFunction<HttpRequest, A>,
-): EffectFn;
-export function handle<A, B>(
-  op1: OperatorFunction<HttpRequest, A>,
-  op2: OperatorFunction<A, B>,
-): EffectFn;
-export function handle<A, B, C>(
-  op1: OperatorFunction<HttpRequest, A>,
-  op2: OperatorFunction<A, B>,
-  op3: OperatorFunction<B, C>,
-): EffectFn;
-export function handle<A, B, C, D>(
-  op1: OperatorFunction<HttpRequest, A>,
-  op2: OperatorFunction<A, B>,
-  op3: OperatorFunction<B, C>,
-  op4: OperatorFunction<C, D>,
-): EffectFn;
-export function handle<A, B, C, D, E>(
-  op1: OperatorFunction<HttpRequest, A>,
-  op2: OperatorFunction<A, B>,
-  op3: OperatorFunction<B, C>,
-  op4: OperatorFunction<C, D>,
-  op5: OperatorFunction<D, E>,
-): EffectFn;
-export function handle<A, B, C, D, E, F>(
-  op1: OperatorFunction<HttpRequest, A>,
-  op2: OperatorFunction<A, B>,
-  op3: OperatorFunction<B, C>,
-  op4: OperatorFunction<C, D>,
-  op5: OperatorFunction<D, E>,
-  op6: OperatorFunction<E, F>,
-): EffectFn;
-export function handle<A, B, C, D, E, F, G>(
-  op1: OperatorFunction<HttpRequest, A>,
-  op2: OperatorFunction<A, B>,
-  op3: OperatorFunction<B, C>,
-  op4: OperatorFunction<C, D>,
-  op5: OperatorFunction<D, E>,
-  op6: OperatorFunction<E, F>,
-  op7: OperatorFunction<F, G>,
-): EffectFn;
-export function handle<A, B, C, D, E, F, G, H>(
-  op1: OperatorFunction<HttpRequest, A>,
-  op2: OperatorFunction<A, B>,
-  op3: OperatorFunction<B, C>,
-  op4: OperatorFunction<C, D>,
-  op5: OperatorFunction<D, E>,
-  op6: OperatorFunction<E, F>,
-  op7: OperatorFunction<F, G>,
-  op8: OperatorFunction<G, H>,
-): EffectFn;
-export function handle<A, B, C, D, E, F, G, H, I>(
-  op1: OperatorFunction<HttpRequest, A>,
-  op2: OperatorFunction<A, B>,
-  op3: OperatorFunction<B, C>,
-  op4: OperatorFunction<C, D>,
-  op5: OperatorFunction<D, E>,
-  op6: OperatorFunction<E, F>,
-  op7: OperatorFunction<F, G>,
-  op8: OperatorFunction<G, H>,
-  op9: OperatorFunction<H, I>,
-  ...operations: OperatorFunction<any, any>[]
-): EffectFn;
-
-export function handle(...operators: OperatorFunction<any, any>[]): EffectFn {
-  return input$ =>
-    input$.pipe(
-      mergeMap(request => pipeFromArray([
-        ...operators,
-        map(res => ({ ...res, request })),
-        catchError(error => throwError(new HttpEffectError(error, request))),
-      ])(of(request)) as Observable<HttpEffectResponse>),
-    );
-}
-
-export const r = { matchPath, matchType, use, useEffect, applyMeta, pipe, handle };
+export const r = { matchPath, matchType, use, useEffect, applyMeta, pipe };
