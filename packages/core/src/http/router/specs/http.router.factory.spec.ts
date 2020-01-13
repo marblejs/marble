@@ -152,6 +152,7 @@ describe('#factorizeRoutingWithDefaults', () => {
             effect: expect.any(Function),
             middlewares: [],
             parameters: undefined,
+            meta: { overridable: true },
           },
         },
       },
