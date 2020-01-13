@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { throwError } from 'rxjs';
-import { mapTo, mergeMap, map } from 'rxjs/operators';
+import { mapTo, mergeMap } from 'rxjs/operators';
 import { r } from '../../router/http.router.ixbuilder';
 import { httpListener } from '../http.server.listener';
 import { HttpMiddlewareEffect, HttpEffectResponse } from '../../effects/http.effects.interface';
@@ -32,12 +32,9 @@ describe('Http listener', () => {
     const effect$ = r.pipe(
       r.matchPath('/'),
       r.matchType('GET'),
-      r.useEffect(req$ => {
-
-        return r.handle(
-          mapTo(effectResponse),
-        )(req$);
-      }),
+      r.useEffect(req$ => req$.pipe(
+        mapTo(effectResponse),
+      )),
     );
 
     const middleware$: HttpMiddlewareEffect = req$ => req$;
@@ -59,27 +56,17 @@ describe('Http listener', () => {
     // given
     const req = { url: '/', method: 'GET' } as http.IncomingMessage;
     const res = {} as http.OutgoingMessage;
+    const effectResponse = { body: 'test' } as HttpEffectResponse;
     const sender = jest.fn();
 
     const effect$ = r.pipe(
       r.matchPath('/'),
       r.matchType('GET'),
-      r.useEffect(req$ => {
-
-        return r.handle(
-          mapTo(1),
-          map(x => x + 1),
-          map(x => x + 1),
-          map(x => x + 1),
-          map(x => x + 1),
-          map(x => x + 1),
-          map(x => x + 1),
-          map(x => ({
-            body: x + 1,
-          })),
-        )(req$);
-      }),
+      r.useEffect(req$ => req$.pipe(
+        mapTo(effectResponse),
+      )),
     );
+
 
     // when
     responseHandler.handleResponse = jest.fn(() => () => () => sender);
@@ -90,7 +77,7 @@ describe('Http listener', () => {
     })(context)(req, res);
 
     // then
-    expect(sender).toHaveBeenCalledWith({ body: 8, request: { ...req, response: res }});
+    expect(sender).toHaveBeenCalledWith({ body: 'test', request: { ...req, response: res }});
     done();
   });
 
