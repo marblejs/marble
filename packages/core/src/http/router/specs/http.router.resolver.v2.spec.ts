@@ -31,17 +31,17 @@ describe('#resolveRouting', () => {
       {
         regExp: path1.regExp,
         path: path1.path,
-        methods: { GET: { effect: e1$ }, POST: { effect: e2$ } },
+        methods: { GET: { effect: e1$, middlewares: [] }, POST: { effect: e2$, middlewares: [] } },
       },
       {
         regExp: path2.regExp,
         path: path2.path,
-        methods: { GET: { effect: e3$, parameters: ['id'] } },
+        methods: { GET: { effect: e3$, middlewares: [], parameters: ['id'] } },
       },
       {
         regExp: path3.regExp,
         path: path3.path,
-        methods: { POST: { effect: e4$ } },
+        methods: { POST: { effect: e4$, middlewares: [] } },
       },
     ];
 
@@ -51,10 +51,10 @@ describe('#resolveRouting', () => {
     // then
     outputSubject.pipe(take(4), toArray()).subscribe(
       result => {
-        expect(result[0].res).toEqual({ body: 'test_1' });
-        expect(result[1].res).toEqual({ body: 'test_2' });
-        expect(result[2].res).toEqual({ body: 'test_3' });
-        expect(result[3].res).toEqual({ body: 'test_4' });
+        expect(result[0].res).toEqual({ body: 'test_1', request: req1 });
+        expect(result[1].res).toEqual({ body: 'test_2', request: req2 });
+        expect(result[2].res).toEqual({ body: 'test_3', request: req3 });
+        expect(result[3].res).toEqual({ body: 'test_4', request: req4 });
         done();
       },
     );
@@ -78,7 +78,7 @@ describe('#resolveRouting', () => {
     const routing: Routing = [{
       regExp: path.regExp,
       path: path.path,
-      methods: { GET: { effect: effect$ } },
+      methods: { GET: { effect: effect$, middlewares: [] } },
     }];
 
     // when

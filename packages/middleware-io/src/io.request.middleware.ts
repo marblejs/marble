@@ -68,7 +68,7 @@ export const requestValidator$ = <
           >;
         }),
         catchError((error: IOError) => throwError(
-          new HttpError(error.message, HttpStatus.BAD_REQUEST, error.data, error.context),
+          new HttpError(error.message, HttpStatus.BAD_REQUEST, error.data, req, error.context),
         )),
       )
     ),

@@ -17,39 +17,50 @@ const getFileValidator$ = requestValidator$({
 const postFile$ = r.pipe(
   r.matchPath('/upload'),
   r.matchType('POST'),
-  r.useEffect(req$ => req$.pipe(
-    use(multipart$({
-      files: ['image_1'],
-      stream: streamFileTo(TMP_PATH),
-    })),
-    map(req => ({
-      body: {
-        file: req.files,
-        body: req.body,
-      },
-    }))
-  )));
+  r.useEffect(req$ => {
+    console.log('Effect bootstrapped: "postFile$"');
+
+    return req$.pipe(
+      use(multipart$({
+        files: ['image_1'],
+        stream: streamFileTo(TMP_PATH),
+      })),
+      map(req => ({
+        body: {
+          file: req.files,
+          body: req.body,
+        },
+      }))
+    );
+  }));
 
 const getFileStream$ = r.pipe(
   r.matchPath('/stream/:dir*'),
   r.matchType('GET'),
-  r.useEffect(req$ => req$.pipe(
-    use(getFileValidator$),
-    map(req => req.params.dir),
-    map(dir => fs.createReadStream(path.resolve(STATIC_PATH, dir))),
-    map(body => ({ body })),
-  )),
-);
+  r.useEffect(req$ => {
+    console.log('Effect bootstrapped: "getFileStream$"');
+
+    return req$.pipe(
+      use(getFileValidator$),
+      map(req => req.params.dir),
+      map(dir => fs.createReadStream(path.resolve(STATIC_PATH, dir))),
+      map(body => ({ body })),
+    );
+  }));
 
 const getFile$ = r.pipe(
   r.matchPath('/:dir*'),
   r.matchType('GET'),
-  r.useEffect(req$ => req$.pipe(
-    use(getFileValidator$),
-    map(req => req.params.dir),
-    mergeMap(readFile(STATIC_PATH)),
-    map(body => ({ body }))
-  )));
+  r.useEffect(req$ => {
+    console.log('Effect bootstrapped: "getFile$"');
+
+    return req$.pipe(
+      use(getFileValidator$),
+      map(req => req.params.dir),
+      mergeMap(readFile(STATIC_PATH)),
+      map(body => ({ body }))
+    );
+  }));
 
 export const static$ = combineRoutes(
   '/static',

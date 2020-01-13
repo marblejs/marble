@@ -11,7 +11,7 @@ export const multipart$ = <File extends string>(opts: ParserOpts = {}) => <T ext
     mergeMap(req => shouldParseMultipart(req)
       ? parseMultipart(opts)(req)
       : throwError(
-        new HttpError(`Content-Type must be of type ${ContentType.MULTIPART_FORM_DATA}`, HttpStatus.PRECONDITION_FAILED)
+        new HttpError(`Content-Type must be of type ${ContentType.MULTIPART_FORM_DATA}`, HttpStatus.PRECONDITION_FAILED, undefined, req)
       )),
     map(req => req as T & WithFile<File>),
   );

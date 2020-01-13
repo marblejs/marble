@@ -32,7 +32,9 @@ describe('Http listener', () => {
     const effect$ = r.pipe(
       r.matchPath('/'),
       r.matchType('GET'),
-      r.useEffect(req$ => req$.pipe(mapTo(effectResponse))),
+      r.useEffect(req$ => req$.pipe(
+        mapTo(effectResponse),
+      )),
     );
 
     const middleware$: HttpMiddlewareEffect = req$ => req$;
@@ -46,7 +48,7 @@ describe('Http listener', () => {
     })(context)(req, res);
 
     // then
-    expect(sender).toHaveBeenCalledWith(effectResponse);
+    expect(sender).toHaveBeenCalledWith({ ...effectResponse, request: { ...req, response: res }});
     done();
   });
 
@@ -60,8 +62,11 @@ describe('Http listener', () => {
     const effect$ = r.pipe(
       r.matchPath('/'),
       r.matchType('GET'),
-      r.useEffect(req$ => req$.pipe(mapTo(effectResponse))),
+      r.useEffect(req$ => req$.pipe(
+        mapTo(effectResponse),
+      )),
     );
+
 
     // when
     responseHandler.handleResponse = jest.fn(() => () => () => sender);
@@ -72,7 +77,7 @@ describe('Http listener', () => {
     })(context)(req, res);
 
     // then
-    expect(sender).toHaveBeenCalledWith(effectResponse);
+    expect(sender).toHaveBeenCalledWith({ body: 'test', request: { ...req, response: res }});
     done();
   });
 

@@ -16,4 +16,4 @@ export const mapArray = <T, R>(f: (v: T) => R) => (array: T[]) =>
   array.map(f);
 
 export const insertIf = <T>(condition: boolean, ...elements: T[]) =>
-  condition ? elements : [];
+  condition ? elements as NonNullable<T>[] : [];
