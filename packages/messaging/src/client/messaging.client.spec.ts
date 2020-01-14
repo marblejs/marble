@@ -1,3 +1,4 @@
+import { TimeoutError } from 'rxjs';
 import { createContext } from '@marblejs/core';
 import { Transport, TransportMessage } from '../transport/transport.interface';
 import { createAmqpStrategy } from '../transport/strategies/amqp.strategy';
@@ -13,18 +14,19 @@ describe('#messagingClient', () => {
         host: 'amqp://localhost:5672',
         queue: 'test_queue_client',
         queueOptions: { durable: false },
+        timeout: 1000,
       },
     };
 
-    const runClient = () => messagingClient(clientOptions)(createContext());
+    const runClient = async () => await messagingClient(clientOptions)(createContext());
     const runServer = () => createAmqpStrategy(clientOptions.options).connect({ isConsumer: true });
     const createMessage = (data: any, correlationId?: string): TransportMessage<Buffer> => ({
       data: Buffer.from(JSON.stringify(data)),
       correlationId: correlationId,
     });
 
-    test('emits event to consumer', async done => {
-      const client = runClient();
+    test('emits event', async done => {
+      const client = await runClient();
       const server = await runServer();
 
       server.message$.subscribe(async msg => {
@@ -33,13 +35,12 @@ describe('#messagingClient', () => {
         done();
       });
 
-      const result = await client.emit({ test: 'test' }).toPromise();
-      expect(result).toEqual(true);
-      await client.close().toPromise();
+      await client.emit({ test: 'test' });
+      await client.close();
     });
 
-    test('sends command to consumer', async () => {
-      const client = runClient();
+    test('sends command', async () => {
+      const client = await runClient();
       const server = await runServer();
 
       server.message$.subscribe(async msg => {
@@ -51,8 +52,22 @@ describe('#messagingClient', () => {
       });
 
       const result = await client.send(1).toPromise();
+
       expect(result).toEqual(2);
-      await client.close().toPromise();
+
+      await client.close();
+    });
+
+    test('timeouts sent command', async () => {
+      const client = await runClient();
+      const server = await runServer();
+
+      const result = client.send(1).toPromise();
+
+      await expect(result).rejects.toEqual(new TimeoutError());
+
+      await client.close();
+      await server.close();
     });
   });
 

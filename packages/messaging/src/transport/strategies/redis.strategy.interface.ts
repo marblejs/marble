@@ -10,6 +10,7 @@ export interface RedisStrategyOptions {
   channel: string;
   port?: number;
   password?: string;
+  timeout?: number;
 }
 
 

@@ -1,8 +1,8 @@
 import { logger$ } from '@marblejs/middleware-logger';
+import { requestValidator$, t } from '@marblejs/middleware-io';
 import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
 import {
   r,
-  bindTo,
   createServer,
   createContextToken,
   matchEvent,
@@ -11,10 +11,10 @@ import {
   HttpServerEffect,
   use,
   useContext,
+  bindEagerlyTo,
 } from '@marblejs/core';
 import { merge, forkJoin } from 'rxjs';
 import { tap, map, mergeMap, mapTo } from 'rxjs/operators';
-import { requestValidator$, t } from '@marblejs/middleware-io';
 
 const port = process.env.PORT
   ? Number(process.env.PORT)
@@ -37,13 +37,30 @@ const rootValiadtor$ = requestValidator$({
   }),
 });
 
-const test$ = r.pipe(
-  r.matchPath('/test'),
+const buffer$ = r.pipe(
+  r.matchPath('/buffer'),
   r.matchType('GET'),
-  r.useEffect((req$, { ask }) => req$.pipe(
-    mergeMap(() => useContext(ClientToken)(ask).emit({ type: 'TEST' })),
-    mapTo(({ body: 'OK' })),
-  )),
+  r.useEffect((req$, { ask }) => {
+    const client = useContext(ClientToken)(ask);
+
+    return req$.pipe(
+      mergeMap(() => client.emit({ type: 'BUFFER' })),
+      mapTo(({ body: 'OK' })),
+    );
+  }),
+);
+
+const timeout$ = r.pipe(
+  r.matchPath('/timeout'),
+  r.matchType('GET'),
+  r.useEffect((req$, { ask }) => {
+    const client = useContext(ClientToken)(ask);
+
+    return req$.pipe(
+      mergeMap(() => client.send({ type: 'TIMEOUT' })),
+      mapTo(({ body: 'OK' })),
+    );
+  }),
 );
 
 const fib$ = r.pipe(
@@ -78,10 +95,10 @@ export const server = createServer({
   port,
   httpListener: httpListener({
     middlewares: [logger$()],
-    effects: [test$, fib$],
+    effects: [buffer$, timeout$, fib$],
   }),
   dependencies: [
-    bindTo(ClientToken)(client),
+    bindEagerlyTo(ClientToken)(client),
   ],
   event$: (...args) => merge(
     listening$(...args),

@@ -4,6 +4,8 @@ import { RedisStrategy } from './strategies/redis.strategy.interface';
 import { AmqpStrategy } from './strategies/amqp.strategy.interface';
 import { TcpStrategy } from './strategies/tcp.strategy.interface';
 
+export const DEFAULT_TIMEOUT = 120 * 1000;
+
 export enum Transport {
   TCP,
   NATS,
@@ -28,6 +30,7 @@ export interface TransportLayer {
 export interface TransportLayerConfig {
   host: string;
   channel: string;
+  timeout: number;
 }
 
 export interface TransportLayerConnection {

@@ -12,6 +12,7 @@ export interface AmqpStrategyOptions {
   queueOptions?: Options.AssertQueue;
   prefetchCount?: number;
   expectAck?: boolean;
+  timeout?: number;
 }
 
 export enum AmqpConnectionStatus {
