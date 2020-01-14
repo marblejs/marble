@@ -2,7 +2,6 @@ import { logger$ } from '@marblejs/middleware-logger';
 import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
 import {
   r,
-  bindTo,
   createServer,
   createContextToken,
   matchEvent,
@@ -11,6 +10,7 @@ import {
   HttpServerEffect,
   use,
   useContext,
+  bindEagerlyTo,
 } from '@marblejs/core';
 import { merge, forkJoin } from 'rxjs';
 import { tap, map, mergeMap, mapTo } from 'rxjs/operators';
@@ -81,7 +81,7 @@ export const server = createServer({
     effects: [test$, fib$],
   }),
   dependencies: [
-    bindTo(ClientToken)(client),
+    bindEagerlyTo(ClientToken)(client),
   ],
   event$: (...args) => merge(
     listening$(...args),

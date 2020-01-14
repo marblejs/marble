@@ -16,7 +16,7 @@ describe('#messagingClient', () => {
       },
     };
 
-    const runClient = () => messagingClient(clientOptions)(createContext());
+    const runClient = async () => await messagingClient(clientOptions)(createContext());
     const runServer = () => createAmqpStrategy(clientOptions.options).connect({ isConsumer: true });
     const createMessage = (data: any, correlationId?: string): TransportMessage<Buffer> => ({
       data: Buffer.from(JSON.stringify(data)),
@@ -24,7 +24,7 @@ describe('#messagingClient', () => {
     });
 
     test('emits event to consumer', async done => {
-      const client = runClient();
+      const client = await runClient();
       const server = await runServer();
 
       server.message$.subscribe(async msg => {
@@ -33,13 +33,12 @@ describe('#messagingClient', () => {
         done();
       });
 
-      const result = await client.emit({ test: 'test' }).toPromise();
-      expect(result).toEqual(true);
-      await client.close().toPromise();
+      await client.emit({ test: 'test' });
+      await client.close();
     });
 
     test('sends command to consumer', async () => {
-      const client = runClient();
+      const client = await runClient();
       const server = await runServer();
 
       server.message$.subscribe(async msg => {
@@ -52,7 +51,7 @@ describe('#messagingClient', () => {
 
       const result = await client.send(1).toPromise();
       expect(result).toEqual(2);
-      await client.close().toPromise();
+      await client.close();
     });
   });
 
