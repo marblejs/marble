@@ -26,7 +26,6 @@ const test$: MsgEffect = event$ =>
     mapTo({ type: 'TEST_RESULT' }),
   );
 
-
 const timeout$: MsgEffect = event$ =>
   event$.pipe(
     matchEvent('TIMEOUT'),
