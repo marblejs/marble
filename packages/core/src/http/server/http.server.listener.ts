@@ -8,7 +8,7 @@ import { factorizeRoutingWithDefaults } from '../router/http.router.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { useContext } from '../../context/context.hook';
 import { createListener } from '../../listener/listener.factory';
-import { ServerClientToken } from './http.server.tokens';
+import { HttpServerClientToken } from './http.server.tokens';
 
 export interface HttpListenerConfig {
   effects?: (RouteEffect | RouteEffectGroup)[];
@@ -30,7 +30,7 @@ export const httpListener = createListener<HttpListenerConfig, HttpListener>(con
     error$,
   } = config ?? {};
 
-  const client = useContext(ServerClientToken)(ask);
+  const client = useContext(HttpServerClientToken)(ask);
   const effectContext = createEffectContext({ ask, client });
   const routing = factorizeRoutingWithDefaults(effects, middlewares ?? []);
   const { resolve } = resolveRouting(routing, effectContext)(output$, error$);

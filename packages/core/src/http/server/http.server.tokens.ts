@@ -1,11 +1,12 @@
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { createContextToken } from '../../context/context.token.factory';
-import { HttpServer } from '../http.interface';
+import { HttpServer, HttpRequest } from '../http.interface';
 import { Routing } from '../router/http.router.interface';
 import { AllServerEvents } from './http.server.event';
 import { ServerRequestMetadataStorage } from './http.server.metadata.storage';
 
-export const ServerEventStreamToken = createContextToken<Observable<AllServerEvents>>('ServerEventStreamToken');
-export const ServerClientToken = createContextToken<HttpServer>('ServerClientToken');
-export const ServerRoutingToken = createContextToken<Routing>('ServerRoutingToken');
-export const ServerRequestMetadataStorageToken = createContextToken<ServerRequestMetadataStorage>('ServerRequestMetadataStorageToken');
+export const HttpServerEventStreamToken = createContextToken<Observable<AllServerEvents>>('HttpServerEventStreamToken');
+export const HttpServerClientToken = createContextToken<HttpServer>('HttpServerClientToken');
+export const HttpRoutingToken = createContextToken<Routing>('HttpServerRoutingToken');
+export const HttpRequestMetadataStorageToken = createContextToken<ServerRequestMetadataStorage>('HttpServerRequestMetadataStorageToken');
+export const HttpRequestBusToken = createContextToken<Subject<HttpRequest>>('HttpRequestBusToken');
