@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import { map, tap, mergeMap, bufferCount, mapTo, catchError } from 'rxjs/operators';
+import { map, tap, mergeMap, bufferCount, mapTo, catchError, delay } from 'rxjs/operators';
 import { matchEvent, use, Event } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { createMicroservice, messagingListener, Transport, MsgEffect } from '@marblejs/messaging';
@@ -26,6 +26,16 @@ const test$: MsgEffect = event$ =>
     mapTo({ type: 'TEST_RESULT' }),
   );
 
+
+const timeout$: MsgEffect = event$ =>
+  event$.pipe(
+    matchEvent('TIMEOUT'),
+    mergeMap(event => of(event).pipe(
+      delay(40 * 1000),
+      mapTo({ ...event, type: 'TIMEOUT_RESULT' } as Event),
+    )),
+  );
+
 export const microservice = createMicroservice({
   transport: Transport.AMQP,
   options: {
@@ -34,7 +44,7 @@ export const microservice = createMicroservice({
     queueOptions: { durable: false },
   },
   messagingListener: messagingListener({
-    effects: [fibonacci$, test$],
+    effects: [fibonacci$, test$, timeout$],
   }),
 });
 

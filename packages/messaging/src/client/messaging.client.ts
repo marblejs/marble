@@ -3,8 +3,8 @@ import * as R from 'fp-ts/lib/Reader';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { reader, ServerEventStreamToken,  matchEvent, ServerEvent, AllServerEvents } from '@marblejs/core';
 import { from, Observable, EMPTY } from 'rxjs';
-import { mergeMap, take, map } from 'rxjs/operators';
-import { TransportMessage, TransportLayerConnection } from '../transport/transport.interface';
+import { mergeMap, take, map, timeout } from 'rxjs/operators';
+import { TransportMessage, TransportLayerConnection, TransportLayerConfig } from '../transport/transport.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MessagingClient, MessagingClientConfig } from './messaging.client.interface';
@@ -23,8 +23,9 @@ export const messagingClient = (config: MessagingClientConfig) => {
     );
   }
 
-  const send = (conn: TransportLayerConnection) => <T, U>(msg: T): Observable<U> =>
+  const send = (config: TransportLayerConfig, conn: TransportLayerConnection) => <T, U>(msg: T): Observable<U> =>
     from(conn.sendMessage(conn.getChannel(), { data: msgTransformer.encode(msg as any) })).pipe(
+      timeout(config.timeout),
       map(m => m as TransportMessage<Buffer>),
       map(m => msgTransformer.decode(m.data) as U),
       take(1),
@@ -53,7 +54,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
 
     return {
       emit: emit(connection),
-      send: send(connection),
+      send: send(transportLayer.config, connection),
       close: close(connection),
     } as MessagingClient;
   }));

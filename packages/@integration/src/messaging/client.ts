@@ -46,6 +46,15 @@ const test$ = r.pipe(
   )),
 );
 
+const timeout$ = r.pipe(
+  r.matchPath('/timeout'),
+  r.matchType('GET'),
+  r.useEffect((req$, { ask }) => req$.pipe(
+    mergeMap(() => useContext(ClientToken)(ask).send({ type: 'TIMEOUT' })),
+    mapTo(({ body: 'OK' })),
+  )),
+);
+
 const fib$ = r.pipe(
   r.matchPath('/fib/:number'),
   r.matchType('GET'),
@@ -78,7 +87,7 @@ export const server = createServer({
   port,
   httpListener: httpListener({
     middlewares: [logger$()],
-    effects: [test$, fib$],
+    effects: [test$, timeout$, fib$],
   }),
   dependencies: [
     bindEagerlyTo(ClientToken)(client),
