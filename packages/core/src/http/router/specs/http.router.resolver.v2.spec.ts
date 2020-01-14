@@ -1,7 +1,10 @@
-import { mapTo, take, toArray } from 'rxjs/operators';
+/* eslint-disable @typescript-eslint/camelcase */
+
+import { of } from 'rxjs';
+import { mapTo, take, toArray, delay, mergeMap, map } from 'rxjs/operators';
 import { createMockEffectContext, createHttpRequest, createHttpResponse } from '../../../+internal';
 import { HttpEffect } from '../../effects/http.effects.interface';
-import { Routing } from '../http.router.interface';
+import { Routing, RoutingItem } from '../http.router.interface';
 import { resolveRouting } from '../http.router.resolver.v2';
 import { factorizeRegExpWithParams } from '../http.router.params.factory';
 
@@ -86,5 +89,104 @@ describe('#resolveRouting', () => {
 
     // then
     expect(subject).toBeUndefined();
+  });
+
+  test('handles concurrent requests for the same path', done => {
+    // given
+    const delays = [10, 20, 30, 40];
+    const ctx = createMockEffectContext();
+    const path = factorizeRegExpWithParams('/delay/:delay');
+    const testData = delays.map(delay => createHttpRequest(({ url: `/delay/${delay}`, method: 'GET' })));
+
+    const effect: HttpEffect = req$ =>
+      req$.pipe(
+        map(req => req.params as { delay: number }),
+        mergeMap(params => of({}).pipe(
+          delay(params.delay),
+          mapTo({ body: `delay_${params.delay}` }),
+        )),
+      );
+
+    const routing: Routing = [{
+      regExp: path.regExp,
+      path: path.path,
+      methods: { GET: { effect: effect, middlewares: [], parameters: ['delay'] } },
+    }];
+
+    // when
+    const { resolve, outputSubject } = resolveRouting(routing, ctx)();
+    const run = () => {
+      resolve(testData[0]); // 10 delay
+      resolve(testData[3]); // 40 delay
+      resolve(testData[2]); // 30 delay
+      resolve(testData[1]); // 20 delay
+    };
+
+    // then
+    outputSubject.pipe(take(4), toArray()).subscribe(
+      result => {
+        expect(result[0].res).toEqual({ body: 'delay_10', request: testData[0] });
+        expect(result[1].res).toEqual({ body: 'delay_20', request: testData[1] });
+        expect(result[2].res).toEqual({ body: 'delay_30', request: testData[2] });
+        expect(result[3].res).toEqual({ body: 'delay_40', request: testData[3] });
+        done();
+      },
+    );
+
+    run();
+  });
+
+  test('handles concurrent requests for different paths', done => {
+    const createRoute = (routeDelay: number) => {
+      const req = createHttpRequest(({ url: `/delay_${routeDelay}`, method: 'GET' }));
+      const path = factorizeRegExpWithParams(`/delay_${routeDelay}`);
+
+      const effect: HttpEffect = req$ =>
+        req$.pipe(
+          delay(routeDelay),
+          mapTo({ body: `delay_${routeDelay}` }),
+        );
+
+      const item: RoutingItem = {
+        regExp: path.regExp,
+        path: path.path,
+        methods: { 'GET': { effect, middlewares: [] } },
+      };
+
+      return { req, path, effect, item };
+    };
+
+    // given
+    const delays = [10, 20, 30, 40];
+    const ctx = createMockEffectContext();
+
+    // [0] GET /delay_10
+    // [1] GET /delay_20
+    // [2] GET /delay_30
+    // [3] GET /delay_40
+    const testData = delays.map(createRoute);
+    const routing: Routing = testData.map(route => route.item);
+
+    // when
+    const { resolve, outputSubject } = resolveRouting(routing, ctx)();
+    const run = () => {
+      resolve(testData[0].req); // 10 delay
+      resolve(testData[3].req); // 40 delay
+      resolve(testData[2].req); // 30 delay
+      resolve(testData[1].req); // 20 delay
+    };
+
+    // then
+    outputSubject.pipe(take(4), toArray()).subscribe(
+      result => {
+        expect(result[0].res).toEqual({ body: 'delay_10', request: testData[0].req });
+        expect(result[1].res).toEqual({ body: 'delay_20', request: testData[1].req });
+        expect(result[2].res).toEqual({ body: 'delay_30', request: testData[2].req });
+        expect(result[3].res).toEqual({ body: 'delay_40', request: testData[3].req });
+        done();
+      },
+    );
+
+    run();
   });
 });
