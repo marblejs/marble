@@ -23,13 +23,16 @@ export const messagingClient = (config: MessagingClientConfig) => {
     );
   }
 
-  const send = (config: TransportLayerConfig, conn: TransportLayerConnection) => <T, U>(msg: T): Observable<U> =>
-    from(conn.sendMessage(conn.getChannel(), { data: msgTransformer.encode(msg as any) })).pipe(
+  const send = (config: TransportLayerConfig, conn: TransportLayerConnection) => <T, U>(msg: T): Observable<U> => {
+    const channel = conn.getChannel();
+    const message: TransportMessage<Buffer> = { data: msgTransformer.encode(msg as any) };
+
+    return from(conn.sendMessage(channel, message)).pipe(
       timeout(config.timeout),
-      map(m => m as TransportMessage<Buffer>),
       map(m => msgTransformer.decode(m.data) as U),
       take(1),
     );
+  }
 
   const close = (conn: TransportLayerConnection) => async () => {
     await conn.close();

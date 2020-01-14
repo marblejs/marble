@@ -1,3 +1,4 @@
+import { TimeoutError } from 'rxjs';
 import { createContext } from '@marblejs/core';
 import { Transport, TransportMessage } from '../transport/transport.interface';
 import { createAmqpStrategy } from '../transport/strategies/amqp.strategy';
@@ -13,6 +14,7 @@ describe('#messagingClient', () => {
         host: 'amqp://localhost:5672',
         queue: 'test_queue_client',
         queueOptions: { durable: false },
+        timeout: 1000,
       },
     };
 
@@ -23,7 +25,7 @@ describe('#messagingClient', () => {
       correlationId: correlationId,
     });
 
-    test('emits event to consumer', async done => {
+    test('emits event', async done => {
       const client = await runClient();
       const server = await runServer();
 
@@ -37,7 +39,7 @@ describe('#messagingClient', () => {
       await client.close();
     });
 
-    test('sends command to consumer', async () => {
+    test('sends command', async () => {
       const client = await runClient();
       const server = await runServer();
 
@@ -50,8 +52,22 @@ describe('#messagingClient', () => {
       });
 
       const result = await client.send(1).toPromise();
+
       expect(result).toEqual(2);
+
       await client.close();
+    });
+
+    test('timeouts sent command', async () => {
+      const client = await runClient();
+      const server = await runServer();
+
+      const result = client.send(1).toPromise();
+
+      await expect(result).rejects.toEqual(new TimeoutError());
+
+      await client.close();
+      await server.close();
     });
   });
 

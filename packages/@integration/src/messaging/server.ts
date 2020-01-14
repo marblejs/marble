@@ -19,11 +19,11 @@ const fibonacci$: MsgEffect = event$ =>
     )),
   );
 
-const test$: MsgEffect = event$ =>
+const buffer$: MsgEffect = event$ =>
   event$.pipe(
-    matchEvent('TEST'),
+    matchEvent('BUFFER'),
     bufferCount(2),
-    mapTo({ type: 'TEST_RESULT' }),
+    mapTo({ type: 'BUFFER_RESULT' }),
   );
 
 const timeout$: MsgEffect = event$ =>
@@ -43,7 +43,7 @@ export const microservice = createMicroservice({
     queueOptions: { durable: false },
   },
   messagingListener: messagingListener({
-    effects: [fibonacci$, test$, timeout$],
+    effects: [fibonacci$, buffer$, timeout$],
   }),
 });
 
