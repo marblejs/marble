@@ -1,4 +1,4 @@
-import { getArrayFromEnum } from '../../+internal';
+import { getArrayFromEnum } from '../../+internal/utils';
 import { coreErrorFactory, CoreErrorOptions } from '../../error/error.factory';
 import { HttpEffect } from '../effects/http.effects.interface';
 import { RouteEffect } from '../router/http.router.interface';

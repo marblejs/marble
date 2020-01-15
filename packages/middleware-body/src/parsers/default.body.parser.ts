@@ -1,4 +1,4 @@
-import { ContentType, getContentType } from '@marblejs/core/dist/+internal';
+import { ContentType, getContentType } from '@marblejs/core/dist/+internal/http';
 import { RequestBodyParser } from '../body.model';
 import { jsonParser } from './json.body.parser';
 import { textParser } from './text.body.parser';

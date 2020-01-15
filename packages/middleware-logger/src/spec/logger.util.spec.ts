@@ -1,7 +1,6 @@
-import { join } from 'path';
-import { createWriteStream } from 'fs';
+import { HttpRequest } from '@marblejs/core';
 import { createHttpRequest, createHttpResponse } from '@marblejs/core/dist/+internal/testing';
-import { formatTime, getTimeDifferenceInMs, filterResponse, isNotSilent, writeToStream } from '../logger.util';
+import { formatTime, getTimeDifferenceInMs, filterResponse, isNotSilent } from '../logger.util';
 
 describe('Logger util', () => {
   test('#formatTime formats time to miliseconds or seconds', () => {
@@ -14,8 +13,8 @@ describe('Logger util', () => {
     const formattedMilisecond = formatTime(lessThanSecond);
 
     // then
-    expect(formattedSecond).toBe('1.2s');
-    expect(formattedMilisecond).toBe('800ms');
+    expect(formattedSecond).toBe('+1.2s');
+    expect(formattedMilisecond).toBe('+800ms');
   });
 
   test('#getTimeDifferenceInMs returns time difference in miliseconds', () => {
@@ -32,13 +31,13 @@ describe('Logger util', () => {
 
   test('#filterResponse filters response by given predicate function', () => {
     // given
-    const req = createHttpRequest({ url: '/bar' });
-    const res = createHttpResponse({ statusCode: 404 });
-    const predicate = res => res.status < 400;
+    const response = createHttpResponse({ statusCode: 404 });
+    const req = createHttpRequest({ url: '/bar', response });
+    const predicate = (req: HttpRequest) => req.response.statusCode < 400;
 
     // when
-    const resultWithPredicateFunction = filterResponse({ filter: predicate })({ req, res });
-    const resultWithoutPredicateFunction = filterResponse({})({ req, res });
+    const resultWithPredicateFunction = filterResponse({ filter: predicate })(req);
+    const resultWithoutPredicateFunction = filterResponse({})(req);
 
     // then
     expect(resultWithPredicateFunction).toEqual(false);
@@ -47,13 +46,13 @@ describe('Logger util', () => {
 
   test('#filterResponse filters request by given predicate function', () => {
     // given
-    const req = createHttpRequest({ url: '/bar' });
-    const res = createHttpResponse({ statusCode: 404 });
-    const predicate = (res, req) => req.url.includes('/foo');
+    const response = createHttpResponse({ statusCode: 404 });
+    const req = createHttpRequest({ url: '/bar', response });
+    const predicate = (req: HttpRequest) => req.url.includes('/foo');
 
     // when
-    const resultWithPredicateFunction = filterResponse({ filter: predicate })({ req, res });
-    const resultWithoutPredicateFunction = filterResponse({})({ req, res });
+    const resultWithPredicateFunction = filterResponse({ filter: predicate })(req);
+    const resultWithoutPredicateFunction = filterResponse({})(req);
 
     // then
     expect(resultWithPredicateFunction).toEqual(false);
@@ -63,29 +62,13 @@ describe('Logger util', () => {
   test('#isNotSilent checks if options "silent" flag is set', () => {
     // given
     const req = createHttpRequest();
-    const res = createHttpResponse();
     const optsSilent = isNotSilent({ silent: true });
     const optsNotSilent = isNotSilent({ silent: false });
     const optsWithoutSilent = isNotSilent({});
 
     // then
-    expect(optsSilent({ req, res })).toEqual(false);
-    expect(optsNotSilent({ req, res })).toEqual(true);
-    expect(optsWithoutSilent({ req, res })).toEqual(true);
-  });
-
-  test('#writeToStream writes to stream passed data chunk', () => {
-    // given
-    const writePath = join(__dirname, 'test.log');
-    const stream = createWriteStream(writePath, { flags: 'a' });
-    const data = 'AAA';
-    const expectedWriteCall = 'AAA\n\n';
-
-    // when
-    jest.spyOn(stream, 'write').mockImplementation(jest.fn());
-    writeToStream(stream, data);
-
-    // then
-    expect(stream.write).toHaveBeenCalledWith(expectedWriteCall);
+    expect(optsSilent(req)).toEqual(false);
+    expect(optsNotSilent(req)).toEqual(true);
+    expect(optsWithoutSilent(req)).toEqual(true);
   });
 });

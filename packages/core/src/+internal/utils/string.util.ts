@@ -14,6 +14,11 @@ export const trim = (strings: TemplateStringsArray, ...values: any[]) => {
   return interpolation.trim();
 };
 
+export const trunc = (n: number) => (input: string) =>
+  (input.length > n)
+    ? input.substr(0, n-1) + '…'
+    : input;
+
 export const stringify = (value: any): string =>
   typeof value === 'function'
     ? (value.displayName || value.name)

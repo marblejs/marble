@@ -6,8 +6,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { contramap, ordString, Ord } from 'fp-ts/lib/Ord';
 import { ContextToken } from './context.token.factory';
 
-const ordContextToken: Ord<ContextToken<any>> = contramap((t: ContextToken) => t._id)(ordString);
-const setoidContextToken: E.Eq<ContextToken> = { equals: ordContextToken.equals };
+export const ordContextToken: Ord<ContextToken<any>> = contramap((t: ContextToken) => t._id)(ordString);
+export const setoidContextToken: E.Eq<ContextToken> = { equals: ordContextToken.equals };
 
 export interface Context extends Map<ContextToken, ContextDependency | any> {}
 

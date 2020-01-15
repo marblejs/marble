@@ -2,7 +2,7 @@
 
 import { of } from 'rxjs';
 import { mapTo, take, toArray, delay, mergeMap, map } from 'rxjs/operators';
-import { createMockEffectContext, createHttpRequest, createHttpResponse } from '../../../+internal';
+import { createMockEffectContext, createHttpRequest, createHttpResponse } from '../../../+internal/testing';
 import { HttpEffect } from '../../effects/http.effects.interface';
 import { Routing, RoutingItem } from '../http.router.interface';
 import { resolveRouting } from '../http.router.resolver.v2';

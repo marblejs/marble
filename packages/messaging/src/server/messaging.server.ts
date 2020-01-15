@@ -1,14 +1,15 @@
 import { Subject } from 'rxjs';
 import { takeWhile, takeUntil, take } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
-import { createContext, registerAll, bindTo, createEffectContext, lookup, combineEffects, resolve } from '@marblejs/core';
+import { createContext, registerAll, bindTo, createEffectContext, lookup, combineEffects, resolve, ServerIO } from '@marblejs/core';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { statusLogger$ } from '../middlewares/messaging.statusLogger.middleware';
-import { CreateMicroserviceConfig, Microservice } from './messaging.server.interface';
+import { TransportLayerConnection } from '../transport/transport.interface';
+import { CreateMicroserviceConfig } from './messaging.server.interface';
 import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
 import { AllServerEvents, isCloseEvent, ServerEvent } from './messaging.server.events';
 
-export const createMicroservice = async (config: CreateMicroserviceConfig): Promise<Microservice> => {
+export const createMicroservice = async (config: CreateMicroserviceConfig) => {
   const {
     event$,
     options,
@@ -38,7 +39,7 @@ export const createMicroservice = async (config: CreateMicroserviceConfig): Prom
 
   combinedEvents(serverEvent$, ctx).subscribe();
 
-  const listen = async () => {
+  const listen: ServerIO<TransportLayerConnection> = async () => {
     const { host, channel } = transportLayer.config;
     const connection = await transportLayer.connect({ isConsumer: true });
 

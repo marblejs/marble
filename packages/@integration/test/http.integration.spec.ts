@@ -1,6 +1,7 @@
 import * as request from 'supertest';
 import { HttpStatus } from '@marblejs/core';
-import { ContentType, createHttpServerTestBed } from '@marblejs/core/dist/+internal';
+import { ContentType } from '@marblejs/core/dist/+internal/http';
+import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
 import { server } from '../src/http';
 
 describe('API integration', () => {

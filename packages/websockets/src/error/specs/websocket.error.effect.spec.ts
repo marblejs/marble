@@ -1,5 +1,5 @@
 import { EventError } from '@marblejs/core';
-import { Marbles } from '@marblejs/core/dist/+internal';
+import { Marbles } from '@marblejs/core/dist/+internal/testing';
 import { defaultError$ } from '../websocket.error.effect';
 
 describe('defaultError$', () => {

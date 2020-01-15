@@ -1,6 +1,6 @@
 import { HttpRequest } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
-import { createMockEffectContext } from '@marblejs/core/dist/+internal';
+import { createMockEffectContext } from '@marblejs/core/dist/+internal/testing';
 import { of } from 'rxjs';
 import { validator$, Joi } from '../../src';
 

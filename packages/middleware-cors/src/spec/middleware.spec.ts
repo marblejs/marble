@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import { Marbles } from '@marblejs/core/dist/+internal';
+import { Marbles } from '@marblejs/core/dist/+internal/testing';
 import { cors$, CORSOptions } from '../middleware';
 import { createMockRequest, createMockEffectContext } from '../util';
 
