@@ -2,7 +2,7 @@ import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { Subject, fromEvent, merge } from 'rxjs';
 import { map, mapTo, take } from 'rxjs/operators';
 import { RedisClient, ClientOpts } from 'redis';
-import { TransportLayer, TransportLayerConnection, TransportMessage, Transport } from '../transport.interface';
+import { TransportLayer, TransportLayerConnection, TransportMessage, Transport, DEFAULT_TIMEOUT } from '../transport.interface';
 import { throwUnsupportedError } from '../transport.error';
 import { RedisStrategyOptions, RedisConnectionStatus } from './redis.strategy.interface';
 import * as RedisHelper from './redis.strategy.helper';
@@ -117,6 +117,7 @@ class RedisStrategy implements TransportLayer {
     return ({
       host: this.options.host,
       channel: this.options.channel,
+      timeout: this.options.timeout ?? DEFAULT_TIMEOUT,
     });
   }
 
