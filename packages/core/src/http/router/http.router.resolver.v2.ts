@@ -10,6 +10,8 @@ import {
   errorNotBoundToRequestErrorFactory,
   responseNotBoundToRequestErrorFactory,
 } from '../error/http.error.model';
+import { useContext } from '../../context/context.hook';
+import { HttpRequestBusToken } from '../server/http.server.tokens';
 import { Routing, BootstrappedRoutingItem } from './http.router.interface';
 import { queryParamsFactory } from './http.router.query.factory';
 import { matchRoute } from './http.router.matcher';
@@ -24,6 +26,7 @@ export const resolveRouting = (
   output$?: HttpOutputEffect,
   error$?: HttpErrorEffect,
 ) => {
+  const requestBusSubject = useContext(HttpRequestBusToken)(ctx.ask);
   const close$ = fromEvent(ctx.client, 'close').pipe(take(1), share());
   const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
   const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
@@ -123,6 +126,7 @@ export const resolveRouting = (
     req.meta.path = resolvedRoute.path;
 
     resolvedRoute.subject.next(req);
+    requestBusSubject.next(req);
   };
 
   return {

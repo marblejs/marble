@@ -1,5 +1,6 @@
 import * as http from 'http';
 import { EventEmitter } from 'events';
+import { Subject } from 'rxjs';
 import {
   HttpRequest,
   HttpResponse,
@@ -9,9 +10,10 @@ import {
   QueryParameters,
   HttpServer,
 } from '../../http/http.interface';
-import { createContext, lookup } from '../../context/context.factory';
+import { createContext, lookup, registerAll, bindTo } from '../../context/context.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { Server } from '../../http/server/http.server.interface';
+import { HttpRequestBusToken, HttpServerClientToken } from '../../http/server/http.server.tokens';
 
 interface HttpRequestMockParams {
   url?: string;
@@ -62,7 +64,11 @@ export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
   } as any as HttpResponse;
 
 export const createMockEffectContext = () => {
-  const context = createContext();
+  const dependencies = [
+    bindTo(HttpRequestBusToken)(() => new Subject<HttpRequest>()),
+    bindTo(HttpServerClientToken)(() => http.createServer()),
+  ];
+  const context = registerAll(dependencies)(createContext());
   const client = http.createServer();
   return createEffectContext({ ask: lookup(context), client });
 };

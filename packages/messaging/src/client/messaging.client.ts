@@ -1,7 +1,7 @@
 import * as O from 'fp-ts/lib/Option';
 import * as R from 'fp-ts/lib/Reader';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { reader, ServerEventStreamToken,  matchEvent, ServerEvent, AllServerEvents } from '@marblejs/core';
+import { reader, HttpServerEventStreamToken,  matchEvent, ServerEvent, AllServerEvents } from '@marblejs/core';
 import { from, Observable, EMPTY } from 'rxjs';
 import { mergeMap, take, map, timeout } from 'rxjs/operators';
 import { TransportMessage, TransportLayerConnection, TransportLayerConfig } from '../transport/transport.interface';
@@ -50,7 +50,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
     const connection = await transportLayer.connect({ isConsumer: false });
 
     pipe(
-      ask(ServerEventStreamToken),
+      ask(HttpServerEventStreamToken),
       O.map(teardownOnClose$(connection)),
       O.getOrElse(() => EMPTY as Observable<any>),
     ).subscribe();

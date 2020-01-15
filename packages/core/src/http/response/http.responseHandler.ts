@@ -2,11 +2,12 @@ import * as url from 'url';
 import { EMPTY } from 'rxjs';
 import { fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { constVoid } from 'fp-ts/lib/function';
 import { HttpEffectResponse } from '../effects/http.effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { isStream } from '../../+internal/utils';
 import { ContextProvider } from '../../context/context.factory';
-import { ServerRequestMetadataStorageToken } from '../server/http.server.tokens';
+import { HttpRequestMetadataStorageToken } from '../server/http.server.tokens';
 import { getTestingRequestIdHeader, isTestingMetadataOn } from '../../+internal/testing';
 import { headersFactory } from './http.responseHeaders.factory';
 import { bodyFactory } from './http.responseBody.factory';
@@ -27,8 +28,8 @@ export const handleResponse = (ask: ContextProvider) => (res: HttpResponse) => (
 
   if (isTestingMetadataOn()) {
     pipe(
-      ask(ServerRequestMetadataStorageToken),
-      fold(() => undefined, storage => storage.set(testingHeader, req.meta)),
+      ask(HttpRequestMetadataStorageToken),
+      fold(constVoid, storage => storage.set(testingHeader, req.meta)),
     );
   }
 

@@ -1,11 +1,13 @@
 import * as http from 'http';
 import * as https from 'https';
 import { flow } from 'fp-ts/lib/function';
+import { Subject } from 'rxjs';
 import { createContext, lookup, registerAll, bindTo, resolve } from '../../context/context.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { insertIf, isTestingMetadataOn } from '../../+internal';
+import { HttpRequest } from '../http.interface';
 import { subscribeServerEvents } from './http.server.event.subscriber';
-import { ServerClientToken, ServerEventStreamToken, ServerRequestMetadataStorageToken } from './http.server.tokens';
+import { HttpServerClientToken, HttpServerEventStreamToken, HttpRequestMetadataStorageToken, HttpRequestBusToken } from './http.server.tokens';
 import { serverRequestMetadataStorage } from './http.server.metadata.storage';
 import { CreateServerConfig, Server } from './http.server.interface';
 
@@ -17,15 +19,17 @@ export const createServer = async (config: CreateServerConfig): Promise<Server> 
   const server = options.httpsOptions ? https.createServer(options.httpsOptions) : http.createServer();
   const serverEvent$ = subscribeServerEvents(hostname || DEFAULT_HOSTNAME)(server);
 
-  const boundServerEvent$ = bindTo(ServerEventStreamToken)(() => serverEvent$);
-  const boundServer = bindTo(ServerClientToken)(() => server);
-  const boundServerRequestMetadataStorage = bindTo(ServerRequestMetadataStorageToken)(serverRequestMetadataStorage);
+  const boundHttpServerEvent = bindTo(HttpServerEventStreamToken)(() => serverEvent$);
+  const boundHttpServerClient = bindTo(HttpServerClientToken)(() => server);
+  const boundHttpRequestMetadataStorage = bindTo(HttpRequestMetadataStorageToken)(serverRequestMetadataStorage);
+  const boundHttpRequestBus = bindTo(HttpRequestBusToken)(() => new Subject<HttpRequest>());
 
   const context = await flow(
     registerAll([
-      boundServer,
-      boundServerEvent$,
-      ...insertIf(isTestingMetadataOn(), boundServerRequestMetadataStorage),
+      boundHttpServerClient,
+      boundHttpServerEvent,
+      boundHttpRequestBus,
+      ...insertIf(isTestingMetadataOn(), boundHttpRequestMetadataStorage),
       ...dependencies,
     ]),
     resolve,
