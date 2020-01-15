@@ -7,8 +7,10 @@ import { createMicroservice, messagingListener, Transport, MsgEffect } from '@ma
 const fib = (n: number): number =>
   (n === 0 || n === 1) ? n : fib(n - 1) + fib(n - 2);
 
-const fibonacci$: MsgEffect = event$ =>
-  event$.pipe(
+const fibonacci$: MsgEffect = event$ => {
+  console.log('Bootstrapped effect: "fibonacci$"');
+
+  return event$.pipe(
     matchEvent('FIB'),
     use(eventValidator$(t.number)),
     mergeMap(event => of(event).pipe(
@@ -18,13 +20,17 @@ const fibonacci$: MsgEffect = event$ =>
       catchError(error => of({ ...event, error: { name: error.name, message: error.message } } as Event)),
     )),
   );
+};
 
-const test$: MsgEffect = event$ =>
-  event$.pipe(
+const test$: MsgEffect = event$ => {
+  console.log('Bootstrapped effect: "test$"');
+
+  return event$.pipe(
     matchEvent('TEST'),
     bufferCount(2),
     mapTo({ type: 'TEST_RESULT' }),
   );
+};
 
 export const microservice = createMicroservice({
   transport: Transport.AMQP,

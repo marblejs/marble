@@ -1,5 +1,5 @@
 import { Observable, fromEvent, of } from 'rxjs';
-import { map, takeUntil, publish } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import {
   combineEffects,
   combineMiddlewares,
@@ -8,6 +8,7 @@ import {
   Event,
   EventError,
 } from '@marblejs/core';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { WsEffect, WsErrorEffect, WsMiddlewareEffect, WsOutputEffect } from '../effects/websocket.effects.interface';
 import { jsonTransformer } from '../transformer/websocket.json.transformer';
 import { EventTransformer } from '../transformer/websocket.transformer.interface';
@@ -44,25 +45,29 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
 
   const handle = (client: WebSocketClientConnection) => {
     const ctx = createEffectContext({ ask, client });
+    const close$ = fromEvent(client, 'close');
+    const message$ = fromEvent<MessageEvent>(client, 'message');
 
-    const event$ = fromEvent<MessageEvent>(client, 'message').pipe(
-      takeUntil(fromEvent(client, 'close')),
-      map(e => eventTransformer.decode(e.data)),
-      publish(e$ => middleware$(e$, ctx)),
-      publish(e$ => effect$(e$, ctx)),
-      publish(e$ => output$(e$, ctx)),
+    const stream = pipe(
+      message$,
+      e$ => e$.pipe(map(e => eventTransformer.decode(e.data))),
+      e$ => middleware$(e$, ctx),
+      e$ => effect$(e$, ctx),
+      e$ => output$(e$, ctx),
     );
 
     const subscribe = (input$: Observable<Event>) =>
-      input$.subscribe(
-        (event: Event) => client.sendResponse(event),
-        (error: EventError) => {
-          error$(of({ event: error.event, error }), ctx).subscribe(client.sendResponse);
-          subscribe(event$);
-        },
-      );
+      input$
+        .pipe(takeUntil(close$))
+        .subscribe(
+          (event: Event) => client.sendResponse(event),
+          (error: EventError) => {
+            error$(of({ event: error.event, error }), ctx).subscribe(client.sendResponse);
+            subscribe(stream);
+          },
+        );
 
-    subscribe(event$);
+    subscribe(stream);
   };
 
   handle.eventTransformer = eventTransformer;

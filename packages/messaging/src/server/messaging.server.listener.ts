@@ -5,7 +5,8 @@ import {
   createEffectContext,
   createListener,
 } from '@marblejs/core';
-import { of, Observable} from 'rxjs';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { of, Observable } from 'rxjs';
 import { map, publish, catchError, takeUntil } from 'rxjs/operators';
 import {
   TransportMessage,
@@ -46,58 +47,64 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
     msgTransformer = jsonTransformer,
   } = config ?? {};
 
+  const combinedEffects = combineEffects(...effects);
+  const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
+
+  const decode = (msg: TransportMessage<Buffer>): Event => ({
+    ...msgTransformer.decode(msg.data),
+    metadata: {
+      replyTo: msg.replyTo,
+      correlationId: msg.correlationId,
+      raw: msg,
+    }
+  });
+
+  const send = (connection: TransportLayerConnection) => (event: Event): void => {
+    const { metadata, type, payload, error } = event;
+
+    if (metadata && metadata.replyTo) {
+      const { replyTo, correlationId, raw } = metadata;
+
+      connection.emitMessage(replyTo, {
+        data: msgTransformer.encode({ type, payload, error }),
+        correlationId,
+        raw,
+      });
+    }
+  };
+
   return connection => {
-    const combinedEffects = combineEffects(...effects);
-    const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
     const ctx = createEffectContext({ ask, client: connection });
 
-    const decode = (msg: TransportMessage<Buffer>): Event => ({
-      ...msgTransformer.decode(msg.data),
-      metadata: {
-        replyTo: msg.replyTo,
-        correlationId: msg.correlationId,
-        raw: msg,
-      }
-    });
-
-    const stream = connection.message$.pipe(
-      takeUntil(connection.close$),
-      map(decode),
-      publish(e$ => combinedMiddlewares(e$, ctx)),
-      publish(e$ => combinedEffects(e$, ctx)),
-      publish(e$ => output$(e$, ctx)),
-      publish(e$ => outputLogger$(e$, ctx)),
-      catchError(error => {
-        const e$ = of(error);
-        return error$(e$, ctx).pipe(
-          publish(e$ => errorLogger$(e$, ctx)),
-        );
-      }),
+    const stream = pipe(
+      connection.message$.pipe(map(decode)),
+      e$ => combinedMiddlewares(e$, ctx),
+      e$ => combinedEffects(e$, ctx),
+      e$ => output$(e$, ctx),
+      e$ => outputLogger$(e$, ctx),
+      e$ => e$.pipe(
+        catchError(error => {
+          const e$ = of(error);
+          return error$(e$, ctx).pipe(
+            publish(e$ => errorLogger$(e$, ctx)),
+          );
+        }),
+      )
     );
 
     const subscribe = (event$: Observable<Event<unknown, any, string>>) =>
-      event$.subscribe(
-        event => {
-          const { metadata, type, payload, error } = event;
-
-          if (metadata && metadata.replyTo) {
-            const { replyTo, correlationId, raw } = metadata;
-
-            connection.emitMessage(replyTo, {
-              data: msgTransformer.encode({ type, payload, error }),
-              correlationId,
-              raw,
-            });
-          }
-        },
-        () => {
-          console.error('Unexpected stream error!'); // @TODO: handle unexpected error
-          subscribe(event$);
-        },
-        () => {
-          subscribe(event$);
-        },
-      );
+      event$
+        .pipe(takeUntil(connection.close$))
+        .subscribe(
+          send(connection),
+          () => {
+            console.error('Unexpected stream error!'); // @TODO: handle unexpected error
+            subscribe(event$);
+          },
+          () => {
+            subscribe(event$);
+          },
+        );
 
     subscribe(stream);
   };
