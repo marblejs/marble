@@ -29,20 +29,17 @@ const formatDate = (date: Date): string => date
   .replace(/\..+/, '');
 
 export const logger = createReader<Logger>(() => opts => {
-  const truncLength = 15;
-  const padLength = truncLength;
   const sep = ' - ';
-
-  const truncItem = trunc(truncLength);
+  const truncItem = trunc(15);
   const colorize = colorizeText(opts.level ?? LoggerLevel.INFO);
 
   const sign = chalk.magenta('λ');
   const now: string = formatDate(new Date());
   const pid: string = chalk.green((process.pid.toString() ?? '-'));
-  const tag: string = chalk.gray(truncItem(opts.tag)) + ' ' + colorize(`[${truncItem(opts.type)}]`.padEnd(padLength + 1)) + ' ';
+  const tag: string = chalk.gray(truncItem(opts.tag)) + ' ' + colorize(`[${truncItem(opts.type)}]`);
   const message: string = opts.level === LoggerLevel.ERROR ? chalk.red(opts.message) : opts.message;
 
-  return print(sign + sep + pid + sep + now + sep + tag + message);
+  return print(sign + sep + pid + sep + now + sep + tag + sep + message);
 });
 
 export const mockLogger = createReader<Logger>(() => _ => io.of(constUndefined));
