@@ -1,4 +1,4 @@
-import { EventError, HttpStatus } from '@marblejs/core';
+import { HttpStatus, Event } from '@marblejs/core';
 import { throwError, fromEvent, forkJoin, merge } from 'rxjs';
 import { tap, map, mergeMap, first, toArray, take, mergeMapTo, mapTo } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.server.listener';
@@ -41,7 +41,7 @@ describe('WebSocket server', () => {
       const echo$: WsEffect = (event$, { client }) => event$.pipe(
         mergeMap(event => client.sendBroadcastResponse(event).pipe(mapTo(event))),
       );
-      const event = JSON.stringify({ type: 'EVENT', payload: 'test' });
+      const event = { type: 'EVENT', payload: 'test' } as Event;
       const listener = webSocketListener({ effects: [echo$] });
       const server = testBed.getServer();
       const targetClient = testBed.getClient(0);
@@ -50,15 +50,15 @@ describe('WebSocket server', () => {
       const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
       await app();
 
-      targetClient.on('open', () => targetClient.send(event));
+      targetClient.on('open', () => targetClient.send(JSON.stringify(event)));
 
       // then
       const client1$ = fromEvent(testBed.getClient(0), 'message').pipe(first());
       const client2$ = fromEvent(testBed.getClient(1), 'message').pipe(first());
 
       forkJoin(client1$, client2$).subscribe(([ message1, message2 ]: [any, any]) => {
-        expect(message1.data).toEqual(event);
-        expect(message2.data).toEqual(event);
+        expect(JSON.parse(message1.data)).toEqual(expect.objectContaining(event));
+        expect(JSON.parse(message2.data)).toEqual(expect.objectContaining(event));
         done();
       });
     });
@@ -122,8 +122,8 @@ describe('WebSocket server', () => {
       // given
       const incomingEvent = '{ some: wrong JSON object }';
       const outgoingEvent = JSON.stringify({
-        type: 'ERROR',
-        error: { message: 'Unexpected token s in JSON at position 2' },
+        type: 'UNHANDLED_ERROR',
+        error: { name: 'SyntaxError', message: 'Unexpected token s in JSON at position 2' },
       });
       const targetClient = testBed.getClient(0);
       const server = testBed.getServer();
@@ -151,10 +151,13 @@ describe('WebSocket server', () => {
     test('passes error (thrown by effect) through stream multiple times', async done => {
       // given
       const incomingEvent = JSON.stringify({ type: 'EVENT' });
-      const outgoingEvent = JSON.stringify({ type: 'EVENT', error: { message: 'test message' } });
-      const effect$: WsEffect = event$ => event$.pipe(
-        mergeMap(event => throwError(new EventError(event, 'test message'))),
-      );
+      const outgoingEvent = JSON.stringify({ type: 'UNHANDLED_ERROR', error: { name: 'Error', message: 'test_message' } });
+
+      const effect$: WsEffect = event$ =>
+        event$.pipe(
+          mergeMapTo(throwError(new Error('test_message'))),
+        );
+
       const targetClient = testBed.getClient(0);
       const server = testBed.getServer();
       const listener = webSocketListener({ effects: [effect$] });
@@ -239,14 +242,18 @@ describe('WebSocket server', () => {
     test('operates over binary events', async done => {
       // given
       const targetClient = testBed.getClient();
-      const decodedMessage = 'hello world';
-      const eventTransformer: EventTransformer<any, Buffer> = {
-        decode: event => event,
-        encode: event => event,
+      const message = 'hello world';
+
+      const eventTransformer: EventTransformer<Buffer> = {
+        decode: event => ({ type: 'BUFFER_EVENT', payload: event }),
+        encode: event => event.payload as Buffer,
       };
-      const effect$: WsEffect<Buffer, string> = event$ => event$.pipe(
-        map(event => event.toString('utf8'))
-      );
+
+      const effect$: WsEffect<Event<Buffer>, Event<Buffer>> = event$ =>
+        event$.pipe(
+          map(event => ({ ...event, payload: Buffer.from(message) })),
+        );
+
       const server = testBed.getServer();
       const listener = webSocketListener({ effects: [effect$], eventTransformer });
 
@@ -255,12 +262,12 @@ describe('WebSocket server', () => {
       await app();
 
       targetClient.once('open', () => {
-        targetClient.send(Buffer.from(decodedMessage));
+        targetClient.send(Buffer.from(message));
       });
 
       // then
-      targetClient.once('message', incomingMessage => {
-        expect(incomingMessage).toEqual(decodedMessage);
+      targetClient.once('message', (incomingMessage: Buffer) => {
+        expect(incomingMessage.toString('utf8')).toEqual(message);
         done();
       });
     });

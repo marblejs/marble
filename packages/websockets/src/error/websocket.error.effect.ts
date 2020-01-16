@@ -1,20 +1,27 @@
-import { EventError } from '@marblejs/core';
 import { map } from 'rxjs/operators';
+import { Event, isEventError, EventError } from '@marblejs/core';
 import { WsErrorEffect } from '../effects/websocket.effects.interface';
 
-const DEFAULT_ERROR_CHANNEL = 'ERROR';
-
-const errorFactory = (message: string | undefined, data: any | undefined) => ({
-  message, data,
+const mapError = (error: Error | undefined): Event => ({
+  type: 'UNHANDLED_ERROR',
+  error: {
+    name: error?.name,
+    message: error?.message,
+  },
 });
 
-export const defaultError$: WsErrorEffect<EventError> = event$ =>
+const mapEventError = (error: EventError): Event => ({
+  type: error.event.type,
+  error: {
+    name: error.name,
+    message: error.message,
+    data: error.data,
+  },
+});
+
+export const defaultError$: WsErrorEffect = event$ =>
   event$.pipe(
-    map(({ error, event }) => ({
-      type: event ? event.type : DEFAULT_ERROR_CHANNEL,
-      error: errorFactory(
-        error ? error.message : undefined,
-        error ? error.data : undefined,
-      )
-    })),
+    map(error => error && isEventError(error)
+      ? mapEventError(error)
+      : mapError(error)),
   );

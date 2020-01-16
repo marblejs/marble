@@ -1,9 +1,10 @@
 import { Observable } from 'rxjs';
 import { mergeMap, map, mapTo } from 'rxjs/operators';
+import { Event } from '@marblejs/core';
 import { WebSocketClientConnection } from '../../server/websocket.server.interface';
 
 export const broadcast =
-  <Input, T>(client: WebSocketClientConnection, fn: (input: Input) => T) =>
+  <Input extends Event, T extends Event>(client: WebSocketClientConnection, fn: (input: Input) => T) =>
     (input$: Observable<Input>): Observable<T> =>
       input$.pipe(
         map(fn),

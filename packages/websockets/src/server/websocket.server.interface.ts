@@ -1,6 +1,6 @@
 import * as WebSocket from 'ws';
 import { Observable } from 'rxjs';
-import { BoundDependency } from '@marblejs/core';
+import { BoundDependency, Event } from '@marblejs/core';
 import { WsConnectionEffect } from '../effects/websocket.effects.interface';
 import { webSocketListener } from './websocket.server.listener';
 
@@ -12,11 +12,13 @@ export interface WebSocketServerConfig {
 }
 
 export interface WebSocketServerConnection extends WebSocket.Server {
-  sendBroadcastResponse: <T>(response: T) => Observable<boolean>;
+  sendBroadcastResponse: <T extends Event>(response: T) => Observable<boolean>;
 }
 
 export interface WebSocketClientConnection extends WebSocket {
+  id: string;
+  address: string;
   isAlive: boolean;
-  sendResponse: <T>(response: T) => Observable<boolean>;
-  sendBroadcastResponse: <T>(response: T) => Observable<boolean>;
+  sendResponse: <T extends Event>(response: T) => Observable<boolean>;
+  sendBroadcastResponse: <T extends Event>(response: T) => Observable<boolean>;
 }

@@ -83,7 +83,7 @@ export const resolveRouting = (
       logger({
         tag: LoggerTag.HTTP,
         type: 'Router',
-        message: `Effect mapped: ${item.path} ${method}`,
+        message: `Effect mapped: ${item.path || '/'} ${method}`,
       })();
 
       const input$ = subject.asObservable();
