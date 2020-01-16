@@ -233,7 +233,7 @@ describe('WebSocket server', () => {
     });
   });
 
-  describe.only('binary transformer', () => {
+  describe('binary transformer', () => {
     const testBed = createWebSocketsTestBed();
 
     beforeEach(testBed.bootstrap);
