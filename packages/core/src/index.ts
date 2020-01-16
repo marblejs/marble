@@ -37,7 +37,8 @@ export * from './listener/listener.factory';
 export * from './listener/listener.interface';
 
 // core - context
-export * from './context/context.factory';
 export * from './context/context.hook';
+export * from './context/context.logger';
+export * from './context/context.factory';
 export * from './context/context.reader.factory';
 export * from './context/context.token.factory';

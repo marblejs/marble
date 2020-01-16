@@ -1,5 +1,6 @@
 import * as http from 'http';
 import * as https from 'https';
+import * as net from 'net';
 import { flow } from 'fp-ts/lib/function';
 import { Subject } from 'rxjs';
 import { createContext, lookup, registerAll, bindTo, resolve } from '../../context/context.factory';
@@ -46,12 +47,6 @@ export const createServer = async (config: CreateServerConfig) => {
   const ask = lookup(context);
   const providedLogger = useContext(LoggerToken)(ask);
   const listener = httpListener(context);
-  const logServerListening = providedLogger({
-    tag: LoggerTag.HTTP,
-    type: 'Server',
-    message: `Server running @ http://${hostname ?? DEFAULT_HOSTNAME}:${port}/ 🚀`,
-  });
-
 
   if (event$) {
     const ctx = createEffectContext({ ask, client: server });
@@ -67,7 +62,11 @@ export const createServer = async (config: CreateServerConfig) => {
     runningServer.once('error', error => reject(error));
     runningServer.once('close', runningServer.removeAllListeners);
     runningServer.once('listening', () => {
-      logServerListening();
+      const { port } = runningServer.address() as net.AddressInfo;
+      const message = `Server running @ http://${hostname ?? DEFAULT_HOSTNAME}:${port}/ 🚀`;
+      const log = providedLogger({ tag: LoggerTag.HTTP, type: 'Server', message });
+
+      log();
       resolve(runningServer);
     });
   });
