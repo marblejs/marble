@@ -18,19 +18,20 @@ import { WsEffect, WsErrorEffect, WsMiddlewareEffect, WsOutputEffect } from '../
 import { jsonTransformer } from '../transformer/websocket.json.transformer';
 import { EventTransformer } from '../transformer/websocket.transformer.interface';
 import { defaultError$ } from '../error/websocket.error.effect';
+import { inputLogger$, outputLogger$, errorLogger$ } from '../middlewares/websockets.eventLogger.middleware';
 import { WebSocketClientConnection } from './websocket.server.interface';
 
 export interface WebSocketListenerConfig {
   effects?: WsEffect<any, any>[];
   middlewares?: WsMiddlewareEffect<any, any>[];
   error$?: WsErrorEffect;
-  eventTransformer?: EventTransformer<Event, any>;
+  eventTransformer?: EventTransformer<any>;
   output$?: WsOutputEffect;
 }
 
 export interface WebSocketListener {
   (connection: WebSocketClientConnection): void;
-  eventTransformer: EventTransformer<Event, any>;
+  eventTransformer: EventTransformer<any>;
 }
 
 const defaultEffect$: WsEffect = msg$ => msg$;
@@ -42,18 +43,18 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
     effects = [defaultEffect$],
     error$ = defaultError$,
     output$ = defaultOutput$,
-    eventTransformer = jsonTransformer as EventTransformer<Event, any>,
+    eventTransformer = jsonTransformer,
   } = config ?? {};
 
   const logger = useContext(LoggerToken)(ask);
-  const combinedMiddlewares = combineMiddlewares(...middlewares); // @TODO: create inputLogger$
+  const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
   const combinedEffects = combineEffects(...effects);
 
   const processError$ = (ctx: EffectContext<WebSocketClientConnection>) => (error: Error) =>
     pipe(
       of(error),
       e$ => error$(e$, ctx),
-      // e$ => errorLogger$(e$, ctx), // @TODO
+      e$ => errorLogger$(e$, ctx),
     );
 
   const handle = (client: WebSocketClientConnection) => {
@@ -62,9 +63,18 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
     const close$ = fromEvent(client, 'close');
     const message$ = fromEvent<MessageEvent>(client, 'message');
 
+    const applyMetadata = (event: Event): Event => ({
+      ...event,
+      metadata: {
+        replyTo: client.address,
+        correlationId: client.id,
+      },
+    });
+
     const incomingEvent$ = pipe(
       message$,
-      e$ => e$.pipe(map(e => eventTransformer.decode(e.data))),
+      e$ => e$.pipe(map(msg => eventTransformer.decode(msg.data))),
+      e$ => e$.pipe(map(applyMetadata)),
       e$ => combinedMiddlewares(e$, ctx),
       e$ => e$.pipe(catchError(processError$(ctx))),
     );
@@ -73,7 +83,10 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
       eventSubject.asObservable(),
       e$ => combinedEffects(e$, ctx),
       e$ => output$(e$, ctx),
-      // e$ => outputLogger$(e$, ctx), // @TODO
+      e$ => e$.pipe(map(applyMetadata)),
+      e$ => outputLogger$(e$, ctx),
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      e$ => e$.pipe(map(({ metadata, ...event }) => event)),
       e$ => e$.pipe(catchError(processError$(ctx))),
     );
 

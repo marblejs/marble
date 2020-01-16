@@ -37,6 +37,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     const expectedError = {
       type: 'POST_USER',
       error: {
+        name: 'EventError',
         message: 'Validation error',
         data: [{ path: 'age', expected: 'number', got: '"100"' }],
       },

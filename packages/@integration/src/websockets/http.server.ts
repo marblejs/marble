@@ -38,13 +38,6 @@ const upgrade$: HttpServerEffect = (event$, { ask }) =>
     }),
   );
 
-const listening$: HttpServerEffect = event$ =>
-  event$.pipe(
-    matchEvent(ServerEvent.listening),
-    map(event => event.payload),
-    tap(({ port, host }) => console.log(`Server running @ http://${host}:${port}/ 🚀`)),
-  );
-
 export const server = createServer({
   port: 1337,
   httpListener: httpListener({
@@ -58,7 +51,6 @@ export const server = createServer({
     }),
   ],
   event$: (...args) => merge(
-    listening$(...args),
     upgrade$(...args),
   ),
 });

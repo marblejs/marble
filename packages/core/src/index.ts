@@ -15,7 +15,7 @@ export * from './http/http.interface';
 
 // core - error
 export { coreErrorFactory, CoreErrorOptions } from './error/error.factory';
-export { CoreError, EventError } from './error/error.model';
+export { CoreError, EventError, isCoreError, isEventError } from './error/error.model';
 
 // core - effects
 export { combineEffects, combineMiddlewares } from './effects/effects.combiner';

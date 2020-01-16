@@ -1,7 +1,7 @@
 import * as WebSocket from 'ws';
 import { EMPTY, fromEvent, merge, SchedulerLike, throwError, interval, from, iif, of } from 'rxjs';
 import { takeUntil, catchError, tap, mapTo, timeout, map, mergeMap, mergeMapTo } from 'rxjs/operators';
-import { WebSocketStatus, WebSocketConnectionLiveness, WebSocketData } from '../websocket.interface';
+import { WebSocketStatus, WebSocketConnectionLiveness } from '../websocket.interface';
 import { WebSocketConnectionError } from '../error/websocket.error.model';
 import { EventTransformer } from '../transformer/websocket.transformer.interface';
 import { handleBroadcastResponse } from '../response/websocket.response.handler';
@@ -10,7 +10,7 @@ import { WebSocketServerConnection, WebSocketClientConnection } from './websocke
 export const HEART_BEAT_INTERVAL = 10 * 1000;
 export const HEART_BEAT_TERMINATE_INTERVAL = HEART_BEAT_INTERVAL + 1000;
 
-export const createServer = (options: WebSocket.ServerOptions, eventTransformer: EventTransformer<any, WebSocketData>) => {
+export const createServer = (options: WebSocket.ServerOptions, eventTransformer: EventTransformer<any>) => {
   const server = new WebSocket.Server(options) as WebSocketServerConnection;
   server.sendBroadcastResponse = handleBroadcastResponse(server, eventTransformer);
   return server;
