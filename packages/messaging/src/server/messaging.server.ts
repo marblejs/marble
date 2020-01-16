@@ -1,7 +1,22 @@
 import { Subject } from 'rxjs';
 import { takeWhile, takeUntil, take } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
-import { createContext, registerAll, bindTo, createEffectContext, lookup, combineEffects, resolve, ServerIO } from '@marblejs/core';
+import {
+  bindTo,
+  createContext,
+  createEffectContext,
+  combineEffects,
+  registerAll,
+  resolve,
+  ServerIO,
+  mockLogger,
+  LoggerToken,
+  lookup,
+  logContext,
+  logger,
+  LoggerTag,
+} from '@marblejs/core';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { statusLogger$ } from '../middlewares/messaging.statusLogger.middleware';
 import { TransportLayerConnection } from '../transport/transport.interface';
@@ -20,15 +35,18 @@ export const createMicroservice = async (config: CreateMicroserviceConfig) => {
 
   const serverEventsSubject = new Subject<AllServerEvents>();
   const transportLayer = provideTransportLayer(transport, options);
+  const boundLogger = bindTo(LoggerToken)(isTestEnv() ? mockLogger : logger);
   const boundTransportLayer = bindTo(TransportLayerToken)(() => transportLayer);
   const boundServerEvents = bindTo(ServerEventsToken)(() => serverEventsSubject);
 
   const context = await flow(
     registerAll([
+      boundLogger,
       boundTransportLayer,
       boundServerEvents,
       ...dependencies,
     ]),
+    logContext(LoggerTag.MESSAGING),
     resolve,
   )(createContext());
 

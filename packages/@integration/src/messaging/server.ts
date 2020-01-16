@@ -8,7 +8,6 @@ const fib = (n: number): number =>
   (n === 0 || n === 1) ? n : fib(n - 1) + fib(n - 2);
 
 const fibonacci$: MsgEffect = event$ => {
-  console.log('Bootstrapped effect: "fibonacci$"');
 
   return event$.pipe(
     matchEvent('FIB'),
@@ -23,7 +22,6 @@ const fibonacci$: MsgEffect = event$ => {
 };
 
 const buffer$: MsgEffect = event$ => {
-  console.log('Bootstrapped effect: "buffer$"');
 
   return event$.pipe(
     matchEvent('BUFFER'),
@@ -33,12 +31,11 @@ const buffer$: MsgEffect = event$ => {
 };
 
 const timeout$: MsgEffect = event$ => {
-  console.log('Bootstrapped effect: "timeout$"');
 
   return event$.pipe(
     matchEvent('TIMEOUT'),
     mergeMap(event => of(event).pipe(
-      delay(40 * 1000),
+      delay(180 * 1000),
       mapTo({ ...event, type: 'TIMEOUT_RESULT' } as Event),
     )),
   );

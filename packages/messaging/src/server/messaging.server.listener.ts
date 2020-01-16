@@ -4,10 +4,15 @@ import {
   combineEffects,
   createEffectContext,
   createListener,
+  EffectContext,
+  useContext,
+  LoggerToken,
+  LoggerTag,
+  LoggerLevel,
 } from '@marblejs/core';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { of, Observable } from 'rxjs';
-import { map, publish, catchError, takeUntil } from 'rxjs/operators';
+import { of, Observable, Subject } from 'rxjs';
+import { map, catchError, takeUntil } from 'rxjs/operators';
 import {
   TransportMessage,
   TransportMessageTransformer,
@@ -47,6 +52,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
     msgTransformer = jsonTransformer,
   } = config ?? {};
 
+  const logger = useContext(LoggerToken)(ask);
   const combinedEffects = combineEffects(...effects);
   const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
 
@@ -73,39 +79,65 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
     }
   };
 
+  const processError$ = (ctx: EffectContext<TransportLayerConnection>) => (error: Error) =>
+    pipe(
+      of(error),
+      e$ => error$(e$, ctx),
+      e$ => errorLogger$(e$, ctx),
+    );
+
   return connection => {
+    const eventSubject = new Subject<Event>();
     const ctx = createEffectContext({ ask, client: connection });
 
-    const stream = pipe(
-      connection.message$.pipe(map(decode)),
+    const incomingEvent$ = pipe(
+      connection.message$,
+      e$ => e$.pipe(map(decode)),
       e$ => combinedMiddlewares(e$, ctx),
+      e$ => e$.pipe(catchError(processError$(ctx))),
+    );
+
+    const outgoingEvent$ = pipe(
+      eventSubject.asObservable(),
       e$ => combinedEffects(e$, ctx),
       e$ => output$(e$, ctx),
       e$ => outputLogger$(e$, ctx),
-      e$ => e$.pipe(
-        catchError(error => {
-          const e$ = of(error);
-          return error$(e$, ctx).pipe(
-            publish(e$ => errorLogger$(e$, ctx)),
-          );
-        }),
-      )
+      e$ => e$.pipe(catchError(processError$(ctx))),
     );
 
-    const subscribe = (event$: Observable<Event<unknown, any, string>>) =>
+    const subscribeIncomingEvent = (event$: Observable<Event<unknown, any, string>>) =>
       event$
         .pipe(takeUntil(connection.close$))
         .subscribe(
-          send(connection),
-          () => {
-            console.error('Unexpected stream error!'); // @TODO: handle unexpected error
-            subscribe(event$);
+          event => eventSubject.next(event),
+          (error: Error) => {
+            const type = 'ServerListener';
+            const message = `Unexpected error for IncomingEvent stream: "${error.name}", "${error.message}"`;
+            logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.ERROR })();
+            subscribeIncomingEvent(event$);
           },
           () => {
-            subscribe(event$);
+            subscribeIncomingEvent(event$);
           },
         );
 
-    subscribe(stream);
+    const subscribeOutgoingEvent = (event$: Observable<Event<unknown, any, string>>) =>
+      event$
+        .pipe(takeUntil(connection.close$))
+        .subscribe(
+          event => send(connection)(event),
+          (error: Error) => {
+            const type = 'ServerListener';
+            const message = `Unexpected error OutgoingEvent stream: "${error.name}", "${error.message}"`;
+            logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.ERROR })();
+            subscribeOutgoingEvent(event$);
+          },
+          () => {
+            subscribeOutgoingEvent(event$);
+          },
+        );
+
+    subscribeIncomingEvent(incomingEvent$);
+    subscribeOutgoingEvent(outgoingEvent$);
   };
 });

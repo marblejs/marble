@@ -1,20 +1,9 @@
 import { logger$ } from '@marblejs/middleware-logger';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
-import {
-  r,
-  createServer,
-  createContextToken,
-  matchEvent,
-  ServerEvent,
-  httpListener,
-  HttpServerEffect,
-  use,
-  useContext,
-  bindEagerlyTo,
-} from '@marblejs/core';
-import { merge, forkJoin } from 'rxjs';
-import { tap, map, mergeMap, mapTo } from 'rxjs/operators';
+import { r, createServer, createContextToken, httpListener, use, useContext, bindEagerlyTo } from '@marblejs/core';
+import { forkJoin } from 'rxjs';
+import { map, mergeMap, mapTo } from 'rxjs/operators';
 
 const port = process.env.PORT
   ? Number(process.env.PORT)
@@ -84,13 +73,6 @@ const fib$ = r.pipe(
   }),
 );
 
-const listening$: HttpServerEffect = event$ =>
-  event$.pipe(
-    matchEvent(ServerEvent.listening),
-    map(event => event.payload),
-    tap(({ port, host }) => console.log(`Server running @ http://${host}:${port}/ 🚀`)),
-  );
-
 export const server = createServer({
   port,
   httpListener: httpListener({
@@ -100,9 +82,6 @@ export const server = createServer({
   dependencies: [
     bindEagerlyTo(ClientToken)(client),
   ],
-  event$: (...args) => merge(
-    listening$(...args),
-  ),
 });
 
 export const bootstrap = async () => {

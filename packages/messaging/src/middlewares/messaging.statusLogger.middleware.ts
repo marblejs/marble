@@ -1,6 +1,5 @@
-import { matchEvent, useContext, combineEffects } from '@marblejs/core';
+import { matchEvent, useContext, combineEffects, LoggerToken, LoggerLevel } from '@marblejs/core';
 import { map, distinctUntilChanged, filter, tap } from 'rxjs/operators';
-import { provideLogger, LoggerLevel } from '../server/messaging.server.logger';
 import { Transport } from '../transport/transport.interface';
 import { AmqpConnectionStatus } from '../transport/strategies/amqp.strategy.interface';
 import { RedisConnectionStatus } from '../transport/strategies/redis.strategy.interface';
@@ -20,7 +19,7 @@ const serverStatusMap = {
 };
 
 const connect$: MsgServerEffect = (event$, ctx) => {
-  const logger = provideLogger(ctx.ask);
+  const logger = useContext(LoggerToken)(ctx.ask);
   const transportLayer = useContext(TransportLayerToken)(ctx.ask);
 
   return event$.pipe(
@@ -29,16 +28,16 @@ const connect$: MsgServerEffect = (event$, ctx) => {
     distinctUntilChanged((p, c) => p.type === c.type),
     filter(({ type }) => type === serverStatusMap.connect[transportLayer.type]),
     tap(({ host, channel }) => logger({
-      tag: 'CONNECTED',
+      type: 'CONNECTED',
       message: `Connected server to host: ${host}`,
       level: LoggerLevel.INFO,
-      channel,
-    })),
+      tag: channel,
+    })()),
   );
 };
 
 const disconnect$: MsgServerEffect = (event$, ctx) => {
-  const logger = provideLogger(ctx.ask);
+  const logger = useContext(LoggerToken)(ctx.ask);
   const transportLayer = useContext(TransportLayerToken)(ctx.ask);
 
   return event$.pipe(
@@ -47,27 +46,27 @@ const disconnect$: MsgServerEffect = (event$, ctx) => {
     distinctUntilChanged((p, c) => p.type === c.type),
     filter(({ type }) => type === serverStatusMap.disconnect[transportLayer.type]),
     tap(({ host, channel }) => logger({
-      tag: 'DISCONNECTED',
+      type: 'DISCONNECTED',
       message: `Disconnected server from host: ${host}`,
       level: LoggerLevel.ERROR,
-      channel,
-    }))
+      tag: channel,
+    })())
   );
 };
 
 const error$: MsgServerEffect = (event$, ctx) => {
-  const logger = provideLogger(ctx.ask);
+  const logger = useContext(LoggerToken)(ctx.ask);
   const transportLayer = useContext(TransportLayerToken)(ctx.ask);
 
   return event$.pipe(
     matchEvent(ServerEvent.error),
     map(event => event.payload),
     tap(({ error }) => logger({
-      tag: 'ERROR',
+      type: 'ERROR',
       message: `${error.name}, ${error.message}`,
       level: LoggerLevel.ERROR,
-      channel: transportLayer.config.channel,
-    }))
+      tag: transportLayer.config.channel,
+    })())
   );
 };
 
