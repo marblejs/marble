@@ -1,4 +1,4 @@
-import { Marbles } from '@marblejs/core/dist/+internal';
+import { Marbles } from '@marblejs/core/dist/+internal/testing';
 import { of } from 'rxjs';
 import { WsEffect } from '../../effects/websocket.effects.interface';
 import { broadcast } from './websocket.broadcast.operator';

@@ -1,1 +1,1 @@
-export { logger$, loggerWithOpts$ } from './logger.middleware';
+export { logger$ } from './logger.middleware';

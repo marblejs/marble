@@ -25,6 +25,9 @@ export * from './effects/effects.interface';
 // core - operators
 export * from './operators';
 
+// core - logger
+export * from './logger';
+
 // core - event
 export * from './event/event.factory';
 export * from './event/event.interface';

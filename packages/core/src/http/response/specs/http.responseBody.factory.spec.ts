@@ -1,4 +1,4 @@
-import { ContentType } from '../../../+internal';
+import { ContentType } from '../../../+internal/http';
 import { bodyFactory } from '../http.responseBody.factory';
 
 describe('Response body factory', () => {

@@ -12,6 +12,7 @@ import {
 } from '../error/http.error.model';
 import { useContext } from '../../context/context.hook';
 import { HttpRequestBusToken } from '../server/http.server.tokens';
+import { LoggerToken, LoggerTag } from '../../logger';
 import { Routing, BootstrappedRoutingItem } from './http.router.interface';
 import { queryParamsFactory } from './http.router.query.factory';
 import { matchRoute } from './http.router.matcher';
@@ -27,6 +28,8 @@ export const resolveRouting = (
   error$?: HttpErrorEffect,
 ) => {
   const requestBusSubject = useContext(HttpRequestBusToken)(ctx.ask);
+  const logger = useContext(LoggerToken)(ctx.ask);
+
   const close$ = fromEvent(ctx.client, 'close').pipe(take(1), share());
   const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
   const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
@@ -76,6 +79,12 @@ export const resolveRouting = (
       const { middlewares, effect, parameters, meta } = methodItem;
       const subject = new Subject<HttpRequest>();
       const decorate = !meta?.continuous;
+
+      logger({
+        tag: LoggerTag.HTTP,
+        type: 'Router',
+        message: `Effect mapped: ${item.path} ${method}`,
+      })();
 
       const input$ = subject.asObservable();
       const middleware$ = combineRouteMiddlewares(decorate)(...middlewares)(input$, ctx);

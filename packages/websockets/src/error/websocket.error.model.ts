@@ -1,4 +1,4 @@
-import { ExtendableError } from '@marblejs/core/dist/+internal';
+import { ExtendableError } from '@marblejs/core/dist/+internal/utils';
 import { WebSocketStatus } from '../websocket.interface';
 
 export class WebSocketConnectionError extends ExtendableError {

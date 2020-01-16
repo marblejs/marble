@@ -12,8 +12,9 @@ import {
 } from '../../http/http.interface';
 import { createContext, lookup, registerAll, bindTo } from '../../context/context.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
-import { Server } from '../../http/server/http.server.interface';
 import { HttpRequestBusToken, HttpServerClientToken } from '../../http/server/http.server.tokens';
+import { ServerIO } from '../../listener/listener.interface';
+import { LoggerToken, mockLogger } from '../../logger';
 
 interface HttpRequestMockParams {
   url?: string;
@@ -65,6 +66,7 @@ export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
 
 export const createMockEffectContext = () => {
   const dependencies = [
+    bindTo(LoggerToken)(mockLogger),
     bindTo(HttpRequestBusToken)(() => new Subject<HttpRequest>()),
     bindTo(HttpServerClientToken)(() => http.createServer()),
   ];
@@ -73,7 +75,7 @@ export const createMockEffectContext = () => {
   return createEffectContext({ ask: lookup(context), client });
 };
 
-export const createHttpServerTestBed = (server: Promise<Server>) => {
+export const createHttpServerTestBed = (server: Promise<ServerIO<HttpServer>>) => {
   let httpServer: HttpServer;
 
   const getInstance = () => httpServer;

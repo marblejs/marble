@@ -1,26 +1,29 @@
-import { HttpRequest } from '@marblejs/core';
-import { fromEvent, Timestamp } from 'rxjs';
-import { take, filter, mapTo, map } from 'rxjs/operators';
+import { HttpRequest, Logger, LoggerTag, LoggerLevel } from '@marblejs/core';
+import { fromEvent, Timestamp, Observable } from 'rxjs';
+import { take, filter, mapTo, map, tap } from 'rxjs/operators';
 import { factorizeLog } from './logger.factory';
 import { LoggerOptions } from './logger.model';
-import { writeToStream, isNotSilent, filterResponse } from './logger.util';
+import { isNotSilent, filterResponse } from './logger.util';
 
-export const loggerHandler = (opts: LoggerOptions) => (stamp: Timestamp<HttpRequest>) =>
-  fromEvent(stamp.value.response, 'finish')
-    .pipe(
-      take(1),
-      mapTo(stamp.value),
-      map(req => ({ req, res: req.response })),
-      filter(isNotSilent(opts)),
-      filter(filterResponse(opts)),
-    )
-    .subscribe(({ res }) => {
-      const { info } = console;
-      const log = factorizeLog(res, stamp);
-      const streamLog = log({ colorize: false, timestamp: true });
-      const consoleLog = log({ colorize: true });
+export const loggerHandler = (opts: LoggerOptions, logger: Logger) => (stamp: Timestamp<HttpRequest>): Observable<string> => {
+  const req = stamp.value;
+  const res = req.response;
 
-      opts.stream
-        ? writeToStream(opts.stream, streamLog)
-        : info(consoleLog);
-    });
+  return fromEvent(res, 'finish').pipe(
+    take(1),
+    mapTo(req),
+    filter(isNotSilent(opts)),
+    filter(filterResponse(opts)),
+    map(factorizeLog(stamp)),
+    tap(message => {
+      const level = res.statusCode >= 500
+        ? LoggerLevel.ERROR
+        : res.statusCode >= 400
+          ? LoggerLevel.WARN
+          : LoggerLevel.INFO;
+
+      const log = logger({ tag: LoggerTag.HTTP, type: 'RequestLogger', message, level });
+      return log();
+    })
+  );
+}

@@ -19,7 +19,6 @@ const getUserList$ = r.pipe(
   r.matchPath('/'),
   r.matchType('GET'),
   r.useEffect(req$ => {
-    console.log('Effect bootstrapped: "getUserList$"');
 
     return req$.pipe(
       mergeMap(Dao.getUsers),
@@ -31,7 +30,6 @@ const getUser$ = r.pipe(
   r.matchPath('/:id'),
   r.matchType('GET'),
   r.useEffect(req$ => {
-    console.log('Effect bootstrapped: "getUser$"');
 
     return req$.pipe(
       use(getUserValidator$),
@@ -49,7 +47,6 @@ const getUserBuffered$ = r.pipe(
   r.matchPath('/:id/buffered'),
   r.matchType('GET'),
   r.useEffect(req$ => {
-    console.log('Effect bootstrapped: "getUserBuffered$"');
 
     return req$.pipe(
       bufferCount(2),
@@ -73,7 +70,6 @@ const postUser$ = r.pipe(
   r.matchPath('/'),
   r.matchType('POST'),
   r.useEffect(req$ => {
-    console.log('Effect bootstrapped: "postUser$"');
 
     return req$.pipe(
       use(postUserValidator$),

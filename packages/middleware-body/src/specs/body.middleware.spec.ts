@@ -2,8 +2,8 @@ import * as qs from 'qs';
 import * as MockReq from 'mock-req';
 import { of } from 'rxjs';
 import { HttpRequest } from '@marblejs/core';
-import { createMockEffectContext } from '@marblejs/core/dist/+internal/testing';
-import { Marbles, ContentType } from '@marblejs/core/dist/+internal';
+import { ContentType } from '@marblejs/core/dist/+internal/http';
+import { Marbles, createMockEffectContext } from '@marblejs/core/dist/+internal/testing';
 import { bodyParser$ } from '../body.middleware';
 
 describe('bodyParser$ middleware', () => {

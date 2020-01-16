@@ -1,4 +1,4 @@
-import { insertIf } from '../../+internal';
+import { insertIf } from '../../+internal/utils';
 import { HttpMiddlewareEffect } from '../effects/http.effects.interface';
 import { isRouteEffectGroup } from './http.router.helpers';
 import {
@@ -40,7 +40,7 @@ export const factorizeRouting = (
       meta: route.meta,
       middlewares: [
         ...middlewares,
-        ...insertIf(!!route.middleware, route.middleware),
+        ...insertIf(!!route.middleware)(route.middleware),
       ],
     };
 

@@ -3,13 +3,13 @@ import * as WebSocket from 'ws';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
-import { lookup, registerAll, createContext, createEffectContext, Context, resolve } from '@marblejs/core';
+import { lookup, registerAll, createContext, createEffectContext, Context, resolve, ServerIO } from '@marblejs/core';
 import { createServer, handleServerBrokenConnections, handleClientBrokenConnection } from '../server/websocket.server.helper';
 import { handleBroadcastResponse, handleResponse } from '../response/websocket.response.handler';
 import { WebSocketConnectionError } from '../error/websocket.error.model';
-import { WebSocketServerConfig, WebSocketServer, WebSocketClientConnection } from './websocket.server.interface';
+import { WebSocketServerConfig, WebSocketClientConnection, WebSocketServerConnection } from './websocket.server.interface';
 
-export const createWebSocketServer = async (config: WebSocketServerConfig): Promise<WebSocketServer> => {
+export const createWebSocketServer = async (config: WebSocketServerConfig) => {
   const {
     options,
     dependencies = [],
@@ -39,7 +39,7 @@ export const createWebSocketServer = async (config: WebSocketServerConfig): Prom
     ...options
   }, listener.eventTransformer);
 
-  const listen = async () => {
+  const listen: ServerIO<WebSocketServerConnection> = async () => {
     server.on('connection', (client: WebSocketClientConnection) => {
       client.sendResponse = handleResponse(client, listener.eventTransformer);
       client.sendBroadcastResponse = handleBroadcastResponse(server, listener.eventTransformer);

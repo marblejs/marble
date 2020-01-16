@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import { HttpResponse, HttpStatus } from '../../http.interface';
 import { handleResponse } from '../http.responseHandler';
 import { DEFAULT_HEADERS } from '../http.responseHeaders.factory';
-import { ContentType, createMockEffectContext, createHttpResponse, createHttpRequest } from '../../../+internal';
+import { createMockEffectContext, createHttpResponse, createHttpRequest } from '../../../+internal/testing';
+import { ContentType } from '../../../+internal/http';
 
 describe('Response handler', () => {
   const effectContext = createMockEffectContext();

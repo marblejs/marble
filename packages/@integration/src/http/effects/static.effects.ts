@@ -4,7 +4,7 @@ import { r, combineRoutes, use } from '@marblejs/core';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { multipart$ } from '@marblejs/middleware-multipart';
 import { streamFileTo } from '@marblejs/middleware-multipart/dist/multipart.util';
-import { readFile } from '@marblejs/core/dist/+internal';
+import { readFile } from '@marblejs/core/dist/+internal/files';
 import { map, mergeMap } from 'rxjs/operators';
 
 const STATIC_PATH = path.resolve(__dirname, '../../../../../assets');
@@ -18,7 +18,6 @@ const postFile$ = r.pipe(
   r.matchPath('/upload'),
   r.matchType('POST'),
   r.useEffect(req$ => {
-    console.log('Effect bootstrapped: "postFile$"');
 
     return req$.pipe(
       use(multipart$({
@@ -38,7 +37,6 @@ const getFileStream$ = r.pipe(
   r.matchPath('/stream/:dir*'),
   r.matchType('GET'),
   r.useEffect(req$ => {
-    console.log('Effect bootstrapped: "getFileStream$"');
 
     return req$.pipe(
       use(getFileValidator$),
@@ -52,7 +50,6 @@ const getFile$ = r.pipe(
   r.matchPath('/:dir*'),
   r.matchType('GET'),
   r.useEffect(req$ => {
-    console.log('Effect bootstrapped: "getFile$"');
 
     return req$.pipe(
       use(getFileValidator$),

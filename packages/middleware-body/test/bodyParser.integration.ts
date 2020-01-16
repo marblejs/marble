@@ -1,7 +1,7 @@
 import { EffectFactory, httpListener, combineRoutes } from '@marblejs/core';
+import { ContentType } from '@marblejs/core/dist/+internal/http';
 import { map } from 'rxjs/operators';
 import { bodyParser$, urlEncodedParser, jsonParser, textParser, rawParser } from '../src';
-import { ContentType } from '@marblejs/core/dist/+internal';
 
 const effect$ = EffectFactory
   .matchPath('/')
