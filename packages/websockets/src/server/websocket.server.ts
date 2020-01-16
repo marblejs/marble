@@ -3,7 +3,22 @@ import * as WebSocket from 'ws';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
-import { lookup, registerAll, createContext, createEffectContext, Context, resolve, ServerIO } from '@marblejs/core';
+import {
+  bindTo,
+  Context,
+  createContext,
+  createEffectContext,
+  registerAll,
+  resolve,
+  ServerIO,
+  mockLogger,
+  LoggerToken,
+  LoggerTag,
+  lookup,
+  logger,
+  logContext,
+} from '@marblejs/core';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
 import { createServer, handleServerBrokenConnections, handleClientBrokenConnection } from '../server/websocket.server.helper';
 import { handleBroadcastResponse, handleResponse } from '../response/websocket.response.handler';
 import { WebSocketConnectionError } from '../error/websocket.error.model';
@@ -26,8 +41,14 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
       );
   };
 
+  const boundLogger = bindTo(LoggerToken)(isTestEnv() ? mockLogger : logger);
+
   const context = await flow(
-    registerAll([ ...dependencies ]),
+    registerAll([
+      boundLogger,
+      ...dependencies,
+    ]),
+    logContext(LoggerTag.WEBSOCKETS),
     resolve,
   )(createContext());
 
@@ -40,10 +61,14 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
   }, listener.eventTransformer);
 
   const listen: ServerIO<WebSocketServerConnection> = async () => {
+    // @TODO: log message that WebSocket server started listening
+
     server.on('connection', (client: WebSocketClientConnection) => {
       client.sendResponse = handleResponse(client, listener.eventTransformer);
       client.sendBroadcastResponse = handleBroadcastResponse(server, listener.eventTransformer);
       client.isAlive = true;
+
+      // @TODO: log message that there is an incoming WebSocket connection
 
       handleClientBrokenConnection(client).subscribe();
       listener(client);
