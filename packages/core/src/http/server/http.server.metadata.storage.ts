@@ -1,17 +1,13 @@
-import * as R from 'fp-ts/lib/Reader';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { reader } from '../../context/context.factory';
 import { HttpRequestMetadata } from '../http.interface';
+import { createReader } from '../../context/context.reader.factory';
 
-export type ServerRequestMetadataStorage = ReturnType<typeof serverRequestMetadataStorage>;
+export type HttpRequestMetadataStorage = ReturnType<typeof httpRequestMetadataStorage>;
 
-export const serverRequestMetadataStorage = pipe(reader, R.map(() => {
+export const httpRequestMetadataStorage = createReader(() => {
   const storage = new Map<string, HttpRequestMetadata>();
 
   const set = (key: string | undefined, metadata: HttpRequestMetadata | undefined) => {
-    if (key && metadata) {
-      storage.set(key, metadata);
-    }
+    if (key && metadata) storage.set(key, metadata);
   }
 
   const get = (key: string) => {
@@ -20,8 +16,12 @@ export const serverRequestMetadataStorage = pipe(reader, R.map(() => {
     return metadata;
   }
 
+  const size = () =>
+    storage.size;
+
   return {
     set,
     get,
+    size,
   }
-}));
+});
