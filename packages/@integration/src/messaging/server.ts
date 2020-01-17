@@ -3,6 +3,8 @@ import { map, tap, mergeMap, bufferCount, mapTo, catchError, delay } from 'rxjs/
 import { matchEvent, use, Event } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { createMicroservice, messagingListener, Transport, MsgEffect } from '@marblejs/messaging';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
+import { IO } from 'fp-ts/lib/IO';
 
 const fib = (n: number): number =>
   (n === 0 || n === 1) ? n : fib(n - 1) + fib(n - 2);
@@ -53,10 +55,7 @@ export const microservice = createMicroservice({
   }),
 });
 
-export const bootstrap = async () => {
-  const app = await microservice;
+const main: IO<void> = async () =>
+  !isTestEnv() && await (await microservice)();
 
-  if (process.env.NODE_ENV !== 'test') app();
-};
-
-bootstrap();
+main();

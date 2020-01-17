@@ -1,4 +1,6 @@
+import { IO } from 'fp-ts/lib/IO';
 import { createServer } from '@marblejs/core';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
 import httpListener from './http.listener';
 
 const port = process.env.PORT
@@ -10,10 +12,7 @@ export const server = createServer({
   httpListener,
 });
 
-export const bootstrap = async () => {
-  const app = await server;
+const main: IO<void> = async () =>
+  !isTestEnv() && await (await server)();
 
-  if (process.env.NODE_ENV !== 'test') app();
-};
-
-bootstrap();
+main();
