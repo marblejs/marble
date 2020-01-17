@@ -11,6 +11,8 @@ import {
 } from '@marblejs/core';
 import { mapToServer, WebSocketServerConnection } from '@marblejs/websockets';
 import { logger$ } from '@marblejs/middleware-logger';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
+import { IO } from 'fp-ts/lib/IO';
 import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { webSocketServer } from './websockets.server';
@@ -55,10 +57,7 @@ export const server = createServer({
   ),
 });
 
-export const bootstrap = async () => {
-  const app = await server;
+const main: IO<void> = async () =>
+  !isTestEnv() && await (await server)();
 
-  if (process.env.NODE_ENV !== 'test') app();
-};
-
-bootstrap();
+main();

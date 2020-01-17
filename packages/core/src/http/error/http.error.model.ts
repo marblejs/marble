@@ -6,6 +6,7 @@ import { coreErrorFactory } from '../../error/error.factory';
 
 export enum HttpErrorType {
   HTTP_ERROR = 'HttpError',
+  HTTP_REQUEST_ERROR = 'HttpRequestError',
 }
 
 export class HttpError extends ExtendableError {
@@ -20,8 +21,20 @@ export class HttpError extends ExtendableError {
   }
 }
 
+export class HttpRequestError extends ExtendableError {
+  constructor(
+    public readonly request: HttpRequest,
+    public readonly error: Error,
+  ) {
+    super(HttpErrorType.HTTP_REQUEST_ERROR, 'An error occured while processing a request');
+  }
+}
+
 export const isHttpError = (error: Error): error is HttpError =>
   error.name === HttpErrorType.HTTP_ERROR;
+
+export const isHttpRequestError = (error: Error): error is HttpRequestError =>
+  error.name === HttpErrorType.HTTP_REQUEST_ERROR;
 
 export const unexpectedErrorWhileSendingErrorFactory = (error: Error) => {
   const message = `An unexpected error ${chalk.red(`"${error.message}"`)} occured while sending an error response. Please check your error effect.`;

@@ -14,7 +14,7 @@ import { logContext } from '../../context/context.logger';
 import { ServerIO } from '../../listener/listener.interface';
 import { subscribeServerEvents } from './http.server.event.subscriber';
 import { HttpServerClientToken, HttpServerEventStreamToken, HttpRequestMetadataStorageToken, HttpRequestBusToken } from './http.server.tokens';
-import { serverRequestMetadataStorage } from './http.server.metadata.storage';
+import { httpRequestMetadataStorage } from './http.server.metadata.storage';
 import { CreateServerConfig } from './http.server.interface';
 
 const DEFAULT_HOSTNAME = '127.0.0.1';
@@ -28,7 +28,7 @@ export const createServer = async (config: CreateServerConfig) => {
   const boundLogger = bindTo(LoggerToken)(isTestEnv() ? mockLogger : logger);
   const boundHttpServerEvent = bindTo(HttpServerEventStreamToken)(() => serverEvent$);
   const boundHttpServerClient = bindTo(HttpServerClientToken)(() => server);
-  const boundHttpRequestMetadataStorage = bindTo(HttpRequestMetadataStorageToken)(serverRequestMetadataStorage);
+  const boundHttpRequestMetadataStorage = bindTo(HttpRequestMetadataStorageToken)(httpRequestMetadataStorage);
   const boundHttpRequestBus = bindTo(HttpRequestBusToken)(() => new Subject<HttpRequest>());
 
   const context = await flow(

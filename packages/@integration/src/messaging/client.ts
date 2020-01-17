@@ -2,6 +2,8 @@ import { logger$ } from '@marblejs/middleware-logger';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
 import { r, createServer, createContextToken, httpListener, use, useContext, bindEagerlyTo } from '@marblejs/core';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
+import { IO } from 'fp-ts/lib/IO';
 import { forkJoin } from 'rxjs';
 import { map, mergeMap, mapTo } from 'rxjs/operators';
 
@@ -84,10 +86,7 @@ export const server = createServer({
   ],
 });
 
-export const bootstrap = async () => {
-  const app = await server;
+const main: IO<void> = async () =>
+  !isTestEnv() && await (await server)();
 
-  if (process.env.NODE_ENV !== 'test') app();
-};
-
-bootstrap();
+main();
