@@ -18,7 +18,7 @@ const errorFactory = (status: HttpStatus, error: Error) =>
     ? { error: { status, message: error.message, data: error.data, context: error.context } }
     : { error: { status, message: error.message } };
 
-export const defaultError$: HttpErrorEffect<Error> = req$ =>
+export const defaultError$: HttpErrorEffect = req$ =>
   req$.pipe(
     map(({ error = defaultHttpError }) => {
       const status = getStatusCode(error);

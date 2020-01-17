@@ -1,7 +1,7 @@
 // http
 export { EffectFactory } from './http/effects/http.effects.factory';
 export { defaultError$ } from './http/error/http.error.effect';
-export { HttpError, isHttpError } from './http/error/http.error.model';
+export { HttpError, HttpRequestError, isHttpError, isHttpRequestError } from './http/error/http.error.model';
 export { combineRoutes } from './http/router/http.router.combiner';
 export { r } from './http/router/http.router.ixbuilder';
 export * from './http/router/http.router.interface';
