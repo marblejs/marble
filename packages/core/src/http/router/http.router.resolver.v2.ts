@@ -9,6 +9,7 @@ import {
   unexpectedErrorWhileSendingOutputFactory,
   errorNotBoundToRequestErrorFactory,
   responseNotBoundToRequestErrorFactory,
+  isHttpRequestError,
 } from '../error/http.error.model';
 import { useContext } from '../../context/context.hook';
 import { HttpRequestBusToken } from '../server/http.server.tokens';
@@ -46,6 +47,7 @@ export const resolveRouting = (
 
   const errorFlow$ = errorSubject.asObservable().pipe(
     takeUntil(close$),
+    map(data => isHttpRequestError(data.error) ? { ...data, error: data.error } : data),
     mergeMap(data => {
       const stream = error$ ? error$(of(data), ctx) : defaultError$(of(data), ctx);
       return stream.pipe(
@@ -94,19 +96,13 @@ export const resolveRouting = (
       const subscribe = (stream$: Observable<HttpEffectResponse>) =>
         stream$.subscribe(
           res => {
-            if (res.request) {
-              outputSubject.next({ res, req: res.request });
-            } else {
-              throw responseNotBoundToRequestErrorFactory(res);
-            }
+            if (!res.request) throw responseNotBoundToRequestErrorFactory(res);
+            outputSubject.next({ res, req: res.request });
           },
           error => {
-            if (error.request) {
-              errorSubject.next({ error, req: error.request });
-              subscribe(stream$);
-            } else {
-              throw errorNotBoundToRequestErrorFactory(error);
-            }
+            if (!error.request) throw errorNotBoundToRequestErrorFactory(error);
+            errorSubject.next({ error, req: error.request });
+            subscribe(stream$);
           },
         );
 
