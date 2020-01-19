@@ -1,13 +1,25 @@
-import { Subject, zip, OperatorFunction, of, fromEvent, Observable } from 'rxjs';
-import { publish, catchError, map, filter, takeUntil, share, take} from 'rxjs/operators';
+import { Subject, of, fromEvent, Observable } from 'rxjs';
+import { takeUntil, share, take, mergeMap, map } from 'rxjs/operators';
 import { EffectContext } from '../../effects/effects.interface';
 import { HttpServer, HttpRequest } from '../http.interface';
 import { defaultError$ } from '../error/http.error.effect';
 import { HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http.effects.interface';
-import { isError } from '../../+internal/utils';
+import {
+  unexpectedErrorWhileSendingErrorFactory,
+  unexpectedErrorWhileSendingOutputFactory,
+  errorNotBoundToRequestErrorFactory,
+  responseNotBoundToRequestErrorFactory,
+  isHttpRequestError,
+} from '../error/http.error.model';
+import { useContext } from '../../context/context.hook';
+import { HttpRequestBusToken } from '../server/http.server.tokens';
+import { LoggerToken, LoggerTag } from '../../logger';
 import { Routing, BootstrappedRoutingItem } from './http.router.interface';
 import { queryParamsFactory } from './http.router.query.factory';
 import { matchRoute } from './http.router.matcher';
+import { ROUTE_NOT_FOUND_ERROR } from './http.router.effects';
+import { decorateEffect } from './http.router.helpers';
+import { combineRouteMiddlewares } from './http.router.combiner';
 
 export const resolveRouting = (
   routing: Routing,
@@ -16,53 +28,45 @@ export const resolveRouting = (
   output$?: HttpOutputEffect,
   error$?: HttpErrorEffect,
 ) => {
+  const requestBusSubject = useContext(HttpRequestBusToken)(ctx.ask);
+  const logger = useContext(LoggerToken)(ctx.ask);
+
   const close$ = fromEvent(ctx.client, 'close').pipe(take(1), share());
-
   const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
-  const outputStream$ = outputSubject.asObservable().pipe(takeUntil(close$));
-
   const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
-  const errorStream$ = errorSubject.asObservable().pipe(takeUntil(close$));
 
-  const outputEffect = output$
-    ? output$(outputStream$, ctx).pipe(catchError(error => of(error)))
-    : outputStream$.pipe(map(({ res }) => res));
-
-  const errorEffect = error$
-    ? error$(errorStream$, ctx)
-    : defaultError$(errorStream$, ctx);
-
-  const errorGuard: OperatorFunction<[HttpEffectResponse, HttpRequest], [HttpEffectResponse, HttpRequest]> =
-    filter(response => {
-      if (isError(response[0])) {
-        errorSubject.next({ error: response[0], req: response[1] });
-        return false;
-      }
-
-      return true;
-    });
-
-  const outputFlow$ = zip(
-    outputEffect,
-    outputStream$.pipe(map(out => out.req)),
+  const outputFlow$ = outputSubject.asObservable().pipe(
+    takeUntil(close$),
+    mergeMap(data => {
+      const stream = output$ ? output$(of(data), ctx) : of(data.res);
+      return stream.pipe(
+        map(res => ([res, data.req] as [HttpEffectResponse, HttpRequest])),
+      );
+    }),
   );
 
-  const errorFlow$ = zip(
-    errorEffect,
-    errorStream$.pipe(map(err => err.req)),
+  const errorFlow$ = errorSubject.asObservable().pipe(
+    takeUntil(close$),
+    map(data => isHttpRequestError(data.error) ? { ...data, error: data.error } : data),
+    mergeMap(data => {
+      const stream = error$ ? error$(of(data), ctx) : defaultError$(of(data), ctx);
+      return stream.pipe(
+        map(res => ([res, data.req] as [HttpEffectResponse, HttpRequest])),
+      );
+    }),
   );
 
-  const subscribeOutput = (stream$: Observable<any>) =>
+  const subscribeOutput = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
     stream$.subscribe(
       ([res, req]) => req.response.send(res),
-      undefined,
+      error => { throw unexpectedErrorWhileSendingOutputFactory(error) },
       () => subscribeOutput(stream$),
     );
 
-  const subscribeError = (stream$: Observable<any>) =>
+  const subscribeError = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
     stream$.subscribe(
       ([res, req]) => req.response.send(res),
-      undefined,
+      error => { throw unexpectedErrorWhileSendingErrorFactory(error) },
       () => subscribeError(stream$),
     );
 
@@ -74,30 +78,40 @@ export const resolveRouting = (
     methods: Object.entries(item.methods).reduce((acc, [method, methodItem]) => {
       if (!methodItem) return { [method]: undefined };
 
-      const { middleware, effect, parameters } = methodItem;
+      const { middlewares, effect, parameters, meta } = methodItem;
+      const subject = new Subject<HttpRequest>();
+      const decorate = !meta?.continuous;
 
-      const inputSubject = new Subject<HttpRequest>();
-      const inputStream$ = inputSubject.asObservable().pipe(takeUntil(close$));
+      logger({
+        tag: LoggerTag.HTTP,
+        type: 'Router',
+        message: `Effect mapped: ${item.path || '/'} ${method}`,
+      })();
 
-      const subscribe = (stream$: Observable<any>) =>
+      const input$ = subject.asObservable();
+      const middleware$ = combineRouteMiddlewares(decorate)(...middlewares)(input$, ctx);
+      const effect$ = decorate ? decorateEffect(middleware$) : middleware$;
+      const output$ = effect(effect$, ctx).pipe(takeUntil(close$));
+
+      const subscribe = (stream$: Observable<HttpEffectResponse>) =>
         stream$.subscribe(
-          ([res, req]) => outputSubject.next({ req, res }),
-          undefined,
-          () => subscribe(stream$),
+          res => {
+            if (!res.request) throw responseNotBoundToRequestErrorFactory(res);
+            outputSubject.next({ res, req: res.request });
+          },
+          error => {
+            if (!error.request) throw errorNotBoundToRequestErrorFactory(error);
+            errorSubject.next({ error, req: error.request });
+            subscribe(stream$);
+          },
         );
 
-      const flow$ = zip(
-        inputStream$.pipe(
-          publish(req$ => middleware ? middleware(req$, ctx) : req$),
-          publish(req$ => effect(req$, ctx)),
-          catchError(error => of(error)),
-        ),
-        inputStream$,
-      ).pipe(errorGuard)
+      subscribe(output$);
 
-      subscribe(flow$);
-
-      return { ...acc, [method]: { subject: inputSubject, parameters } };
+      return {
+        ...acc,
+        [method]: { subject, parameters },
+      };
     }, {}),
   }));
 
@@ -107,14 +121,17 @@ export const resolveRouting = (
     const [urlPath, urlQuery] = req.url.split('?');
     const resolvedRoute = find(urlPath, req.method);
 
-    if (!resolvedRoute) { return; }
+    if (!resolvedRoute) {
+      return errorSubject.next({ req, error: ROUTE_NOT_FOUND_ERROR });
+    }
 
     req.query = queryParamsFactory(urlQuery);
     req.params = resolvedRoute.params;
     req.meta = {};
     req.meta.path = resolvedRoute.path;
 
-    return resolvedRoute.subject;
+    resolvedRoute.subject.next(req);
+    requestBusSubject.next(req);
   };
 
   return {

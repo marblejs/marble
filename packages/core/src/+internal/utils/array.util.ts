@@ -15,5 +15,8 @@ export const filterArray = <T>(f: (v: T) => boolean) => (array: T[]) =>
 export const mapArray = <T, R>(f: (v: T) => R) => (array: T[]) =>
   array.map(f);
 
-export const insertIf = <T>(condition: boolean, ...elements: T[]) =>
-  condition ? elements : [];
+export const insertIf = (condition: boolean) => <T>(...elements: T[]) =>
+  condition ? elements as NonNullable<T>[] : [];
+
+export const insertIfElse = (condition: boolean) => <T>(...elements: T[]) => <U>(...elseElements: U[]) =>
+  condition ? elements as NonNullable<T>[] : elseElements as NonNullable<U>[];

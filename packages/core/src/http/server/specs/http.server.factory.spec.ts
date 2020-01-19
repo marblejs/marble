@@ -20,7 +20,7 @@ import {
 import { lookup } from '../../../context/context.factory';
 import { useContext } from '../../../context/context.hook';
 import { HttpServer } from '../../http.interface';
-import { ServerClientToken } from '../http.server.tokens';
+import { HttpServerClientToken } from '../http.server.tokens';
 
 describe('#createServer', () => {
   let server: HttpServer;
@@ -93,7 +93,7 @@ describe('#createServer', () => {
     server = await app();
 
     const ask = lookup(app.context);
-    const boundServer = useContext(ServerClientToken)(ask);
+    const boundServer = useContext(HttpServerClientToken)(ask);
 
     expect(boundServer).toBeDefined();
   });

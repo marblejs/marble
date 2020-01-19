@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { ContentType } from '../../../+internal';
+import { ContentType } from '../../../+internal/http';
 import { DEFAULT_CONTENT_TYPE, contentTypeFactory, getMimeType } from '../http.responseContentType.factory';
 
 describe('Response content-type factory', () => {

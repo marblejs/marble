@@ -1,3 +1,4 @@
+import { IO } from 'fp-ts/lib/IO';
 import { Reader } from 'fp-ts/lib/Reader';
 import { Effect } from '../effects/effects.interface';
 import { Context } from '../context/context.factory';
@@ -15,7 +16,6 @@ export interface Listener<T extends ListenerConfig, U extends ListenerHandler> {
   (config?: T): Reader<Context, U>;
 }
 
-export interface ListenerServer<T> {
-  (): Promise<T>;
+export interface ServerIO<T> extends IO<Promise<T>> {
   context: Context;
 }

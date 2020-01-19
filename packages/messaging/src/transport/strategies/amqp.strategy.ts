@@ -1,9 +1,9 @@
 import { Subject, fromEvent, merge, from } from 'rxjs';
-import { map, filter, take, mapTo, first, mergeMap } from 'rxjs/operators';
-import { Channel, ConsumeMessage } from 'amqplib';
+import { map, filter, take, mapTo, first, mergeMap, share } from 'rxjs/operators';
+import { Channel, ConsumeMessage, Replies } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
-import { TransportLayer, TransportMessage, TransportLayerConnection, Transport } from '../transport.interface';
+import { TransportLayer, TransportMessage, TransportLayerConnection, Transport, DEFAULT_TIMEOUT } from '../transport.interface';
 import { AmqpStrategyOptions, AmqpConnectionStatus } from './amqp.strategy.interface';
 
 class AmqpStrategyConnection implements TransportLayerConnection {
@@ -42,6 +42,7 @@ class AmqpStrategyConnection implements TransportLayerConnection {
 
   get message$() {
     return this.msgSubject$.asObservable().pipe(
+      share(),
       map(raw => ({
         data: raw.content,
         replyTo: raw.properties.replyTo,
@@ -54,6 +55,7 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   sendMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
     const { data } = msg;
     const correlationId = createUuid();
+    const timeout = this.options.timeout ?? DEFAULT_TIMEOUT;
     const replyToSubject = new Subject<string>();
     const resSubject$ = new Subject<{ msg: ConsumeMessage; tag: string }>();
 
@@ -70,13 +72,20 @@ class AmqpStrategyConnection implements TransportLayerConnection {
       const replyQueue = await channel.assertQueue('', {
         exclusive: true,
         autoDelete: true,
+        expires: timeout,
       });
 
-      const consumer = await channel.consume(
+      const consumer: Replies.Consume = await channel.consume(
         replyQueue.queue,
         msg => msg && resSubject$.next({ msg, tag: consumer.consumerTag }),
         { noAck: true },
       );
+
+      setTimeout(() => {
+        channel
+          .cancel(consumer.consumerTag)
+          .catch(error => resSubject$.error(error));
+      }, timeout);
 
       replyToSubject.next(replyQueue.queue);
     });
@@ -138,6 +147,7 @@ class AmqpStrategy implements TransportLayer {
     return ({
       host: this.options.host,
       channel: this.options.queue,
+      timeout: this.options.timeout ?? DEFAULT_TIMEOUT,
     });
   }
 

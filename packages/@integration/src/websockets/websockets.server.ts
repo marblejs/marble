@@ -1,13 +1,12 @@
 import {
   WsEffect,
-  WsMiddlewareEffect,
   WsConnectionEffect,
   WebSocketConnectionError,
   webSocketListener,
   createWebSocketServer,
 } from '@marblejs/websockets';
 import { iif, throwError, of } from 'rxjs';
-import { tap, mergeMap, buffer, map } from 'rxjs/operators';
+import { mergeMap, buffer, map } from 'rxjs/operators';
 import { matchEvent, use } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 
@@ -25,11 +24,6 @@ const add$: WsEffect = (event$, ctx) =>
     map(payload => ({ type: 'SUM_RESULT', payload })),
   );
 
-const logger$: WsMiddlewareEffect = event$ =>
-  event$.pipe(
-    tap(e => console.log(`type: ${e.type}, payload: ${e.payload}`)),
-  );
-
 const connection$: WsConnectionEffect = req$ =>
   req$.pipe(
     mergeMap(req => iif(
@@ -42,7 +36,7 @@ const connection$: WsConnectionEffect = req$ =>
 export const webSocketServer = createWebSocketServer({
   connection$,
   webSocketListener: webSocketListener({
-    middlewares: [logger$],
+    middlewares: [],
     effects: [add$],
   }),
 });

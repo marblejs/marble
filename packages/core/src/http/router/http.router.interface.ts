@@ -4,6 +4,8 @@ import { HttpEffect, HttpMiddlewareEffect, HttpEffectResponse } from '../effects
 
 // Route
 export interface RouteMeta extends Record<string, any> {
+  name?: string;
+  continuous?: boolean;
   overridable?: boolean;
 }
 
@@ -36,8 +38,9 @@ export interface ParametricRegExp {
 
 export interface RoutingMethod {
   parameters?: string[];
-  middleware?: HttpMiddlewareEffect | undefined;
+  middlewares: HttpMiddlewareEffect[];
   effect: HttpEffect;
+  meta?: RouteMeta;
 }
 
 export interface RoutingItem {

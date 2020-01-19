@@ -11,6 +11,8 @@ import {
 } from '@marblejs/core';
 import { mapToServer, WebSocketServerConnection } from '@marblejs/websockets';
 import { logger$ } from '@marblejs/middleware-logger';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
+import { IO } from 'fp-ts/lib/IO';
 import { merge } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { webSocketServer } from './websockets.server';
@@ -38,13 +40,6 @@ const upgrade$: HttpServerEffect = (event$, { ask }) =>
     }),
   );
 
-const listening$: HttpServerEffect = event$ =>
-  event$.pipe(
-    matchEvent(ServerEvent.listening),
-    map(event => event.payload),
-    tap(({ port, host }) => console.log(`Server running @ http://${host}:${port}/ 🚀`)),
-  );
-
 export const server = createServer({
   port: 1337,
   httpListener: httpListener({
@@ -58,15 +53,11 @@ export const server = createServer({
     }),
   ],
   event$: (...args) => merge(
-    listening$(...args),
     upgrade$(...args),
   ),
 });
 
-export const bootstrap = async () => {
-  const app = await server;
+const main: IO<void> = async () =>
+  !isTestEnv() && await (await server)();
 
-  if (process.env.NODE_ENV !== 'test') app();
-};
-
-bootstrap();
+main();

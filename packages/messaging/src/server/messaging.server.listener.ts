@@ -3,12 +3,16 @@ import {
   combineMiddlewares,
   combineEffects,
   createEffectContext,
-  EventError,
   createListener,
+  EffectContext,
+  useContext,
+  LoggerToken,
+  LoggerTag,
+  LoggerLevel,
 } from '@marblejs/core';
-import { flow } from 'fp-ts/lib/function';
-import { Observable, Subscription, Subject, of, zip, OperatorFunction} from 'rxjs';
-import { map, publish, takeUntil, catchError, mergeMapTo } from 'rxjs/operators';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { of, Observable, Subject } from 'rxjs';
+import { map, catchError, takeUntil } from 'rxjs/operators';
 import {
   TransportMessage,
   TransportMessageTransformer,
@@ -17,8 +21,6 @@ import {
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { inputLogger$, outputLogger$, errorLogger$ } from '../middlewares/messaging.eventLogger.middleware';
-
-type ProcessOperator = OperatorFunction<TransportMessage<any>, TransportMessage<any>>;
 
 export interface MessagingListenerConfig {
   effects?: MsgEffect<any, any>[];
@@ -32,113 +34,110 @@ export interface MessagingListener {
   (connection: TransportLayerConnection): void;
 }
 
-const defaultOutput$: MsgOutputEffect = msg$ => msg$.pipe(map(m => m.event));
-const defaultError$: MsgErrorEffect = msg$ => msg$;
-const defaultEffect$: MsgEffect = msg$ => msg$;
+const defaultEffect$: MsgEffect = msg$ =>
+  msg$;
+
+const defaultOutput$: MsgOutputEffect = msg$ =>
+  msg$;
+
+const defaultError$: MsgErrorEffect = msg$ =>
+  msg$.pipe(map(error => ({ type: 'UNHANDLED_ERROR', error: { name: error.name, message: error.message } } as Event)));
 
 export const messagingListener = createListener<MessagingListenerConfig, MessagingListener>(config => ask => {
   const {
-    effects = [defaultEffect$],
     middlewares = [],
+    effects = [defaultEffect$],
     output$ = defaultOutput$,
     error$ = defaultError$,
     msgTransformer = jsonTransformer,
   } = config ?? {};
 
-  return connection => {
-    let effectsSub: Subscription;
+  const logger = useContext(LoggerToken)(ask);
+  const combinedEffects = combineEffects(...effects);
+  const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
 
-    const errorSubject = new Subject<Error>();
-    const combinedEffects = combineEffects(...effects);
-    const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
+  const decode = (msg: TransportMessage<Buffer>): Event => ({
+    ...msgTransformer.decode(msg.data),
+    metadata: {
+      replyTo: msg.replyTo,
+      correlationId: msg.correlationId,
+      raw: msg,
+    }
+  });
+
+  const send = (connection: TransportLayerConnection) => (event: Event): void => {
+    const { metadata, type, payload, error } = event;
+
+    if (metadata && metadata.replyTo) {
+      const { replyTo, correlationId, raw } = metadata;
+
+      connection.emitMessage(replyTo, {
+        data: msgTransformer.encode({ type, payload, error }),
+        correlationId,
+        raw,
+      });
+    }
+  };
+
+  const processError$ = (ctx: EffectContext<TransportLayerConnection>) => (error: Error) =>
+    pipe(
+      of(error),
+      e$ => error$(e$, ctx),
+      e$ => errorLogger$(e$, ctx),
+    );
+
+  return connection => {
+    const eventSubject = new Subject<Event>();
     const ctx = createEffectContext({ ask, client: connection });
 
-    const toUnhandledErrorEvent = ({ name, message }: Error): Observable<Event> =>
-      of({ type: 'UNHANDLED_ERROR', error: { name, message } });
-
-    const decode = (msg: TransportMessage<Buffer>): TransportMessage<Event> => ({
-      ...msg,
-      data: { ...msgTransformer.decode(msg.data), raw: msg },
-    });
-
-    const processMiddlewares: ProcessOperator = flow(
-      publish(msg$ => zip(
-        combinedMiddlewares(msg$.pipe(map(m => m.data)), ctx).pipe(
-          catchError(toUnhandledErrorEvent),
-        ),
-        msg$,
-      )),
-      map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
+    const incomingEvent$ = pipe(
+      connection.message$,
+      e$ => e$.pipe(map(decode)),
+      e$ => combinedMiddlewares(e$, ctx),
+      e$ => e$.pipe(catchError(processError$(ctx))),
     );
 
-    const processEffects: ProcessOperator = flow(
-      publish(msg$ => zip(
-        combinedEffects(msg$.pipe(map(m => m.data)), ctx).pipe(
-          catchError(toUnhandledErrorEvent),
-        ),
-        msg$,
-      )),
-      map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
+    const outgoingEvent$ = pipe(
+      eventSubject.asObservable(),
+      e$ => combinedEffects(e$, ctx),
+      e$ => output$(e$, ctx),
+      e$ => outputLogger$(e$, ctx),
+      e$ => e$.pipe(catchError(processError$(ctx))),
     );
 
-    const processOutput: ProcessOperator = flow(
-      publish(msg$ => zip(
-        outputLogger$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), ctx).pipe(
-          catchError(toUnhandledErrorEvent),
-        ),
-        msg$,
-      )),
-      map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-      publish(msg$ => zip(
-        output$(msg$.pipe(map(m => ({ event: m.data, initiator: m }))), ctx).pipe(
-          catchError(toUnhandledErrorEvent),
-        ),
-        msg$,
-      )),
-      map(([data, msg]) => ({ ...msg, data } as TransportMessage<any>)),
-    );
-
-    const message$ = connection.message$.pipe(
-      map(decode),
-      processMiddlewares,
-      processEffects,
-      processOutput,
-      catchError((error: EventError) => {
-        const e$ = of({ event: error.event, error });
-        return errorLogger$(e$, ctx).pipe(
-          mergeMapTo(error$(e$, ctx)),
-          map(data => ({ data } as TransportMessage<any>)),
+    const subscribeIncomingEvent = (event$: Observable<Event<unknown, any, string>>) =>
+      event$
+        .pipe(takeUntil(connection.close$))
+        .subscribe(
+          event => eventSubject.next(event),
+          (error: Error) => {
+            const type = 'ServerListener';
+            const message = `Unexpected error for IncomingEvent stream: "${error.name}", "${error.message}"`;
+            logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.ERROR })();
+            subscribeIncomingEvent(event$);
+          },
+          () => {
+            subscribeIncomingEvent(event$);
+          },
         );
-      }),
-    );
 
-    const onSubscribeEffectsOutput = (conn: TransportLayerConnection) => (msg: TransportMessage<any>) => {
-      if (msg.replyTo) {
-        conn.emitMessage(msg.replyTo, {
-          data: msgTransformer.encode(msg.data),
-          correlationId: msg.correlationId,
-          raw: msg.raw,
-        });
-      }
-    }
+    const subscribeOutgoingEvent = (event$: Observable<Event<unknown, any, string>>) =>
+      event$
+        .pipe(takeUntil(connection.close$))
+        .subscribe(
+          event => send(connection)(event),
+          (error: Error) => {
+            const type = 'ServerListener';
+            const message = `Unexpected error OutgoingEvent stream: "${error.name}", "${error.message}"`;
+            logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.ERROR })();
+            subscribeOutgoingEvent(event$);
+          },
+          () => {
+            subscribeOutgoingEvent(event$);
+          },
+        );
 
-    const onSubscribeEffectsError = (errorSubject: Subject<Error>) => (error: Error) => {
-      errorSubject.next(error);
-      if (effectsSub.closed) { effectsSub = subscribeEffects(message$); }
-    }
-
-    const onSubscribeEffectsClose = () => {
-      effectsSub = subscribeEffects(message$);
-    }
-
-    const subscribeEffects = (input$: Observable<TransportMessage<any>>) => input$
-      .pipe(takeUntil(connection.close$))
-      .subscribe(
-        onSubscribeEffectsOutput(connection),
-        onSubscribeEffectsError(errorSubject),
-        onSubscribeEffectsClose,
-      );
-
-    effectsSub = subscribeEffects(message$);
+    subscribeIncomingEvent(incomingEvent$);
+    subscribeOutgoingEvent(outgoingEvent$);
   };
 });

@@ -5,7 +5,7 @@
   "scripts": {
     "build": "lerna run build",
     "postbuild": "rimraf packages/**/*.spec.js packages/**/*.spec.d.ts",
-    "benchmark": "make -C benchmarks",
+    "benchmark": "NODE_ENV=test make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
     "lint": "eslint ./packages/**/src --ext .ts",
     "pretest": "yarn lint",

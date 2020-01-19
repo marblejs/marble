@@ -2,7 +2,7 @@ import { of } from 'rxjs';
 import { tap, mapTo, filter } from 'rxjs/operators';
 import { HttpMiddlewareEffect, HttpEffect } from '../../http/effects/http.effects.interface';
 import { combineMiddlewares, combineEffects } from '../effects.combiner';
-import { Marbles, createHttpRequest, createMockEffectContext } from '../../+internal';
+import { Marbles, createHttpRequest, createMockEffectContext } from '../../+internal/testing';
 
 describe('#combineMiddlewares', () => {
   test('combines middlewares into one stream', async () => {

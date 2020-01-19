@@ -1,35 +1,30 @@
 import { tap } from 'rxjs/operators';
-import { useContext, LoggerToken, LoggerLevel } from '@marblejs/core';
-import { MsgMiddlewareEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
-import { TransportLayerToken } from '../server/messaging.server.tokens';
+import { useContext, LoggerToken, LoggerLevel, LoggerTag } from '@marblejs/core';
+import { WsMiddlewareEffect } from '../effects/websocket.effects.interface';
 
-export const inputLogger$: MsgMiddlewareEffect = (event$, ctx) => {
+export const inputLogger$: WsMiddlewareEffect = (event$, ctx) => {
   const logger = useContext(LoggerToken)(ctx.ask);
-  const transportLayer = useContext(TransportLayerToken)(ctx.ask);
 
   return event$.pipe(
     tap(event => {
-      const tag = transportLayer.config.channel;
       const message = `${event.type}, id: ${event.metadata?.correlationId}`;
 
       logger({
-        tag,
         message,
         type: 'EVENT_IN',
+        tag: LoggerTag.WEBSOCKETS,
         level: LoggerLevel.INFO,
       })();
     }),
   );
 };
 
-export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
+export const outputLogger$: WsMiddlewareEffect = (event$, ctx) => {
   const logger = useContext(LoggerToken)(ctx.ask);
-  const transportLayer = useContext(TransportLayerToken)(ctx.ask);
 
   return event$.pipe(
     tap(event => {
       const { error, metadata, type } = event;
-      const tag = transportLayer.config.channel;
       const message = error
         ? `"${error.name}", "${error.message}" for event ${type}`
         : metadata?.replyTo
@@ -37,28 +32,26 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
           : `${event.type}, id: ${metadata?.correlationId ?? '-'}`;
 
       logger({
-        tag,
         message,
-        level: event.error ? LoggerLevel.ERROR : LoggerLevel.INFO,
         type: 'EVENT_OUT',
+        tag: LoggerTag.WEBSOCKETS,
+        level: event.error ? LoggerLevel.ERROR : LoggerLevel.INFO,
       })();
     }),
   );
 };
 
-export const errorLogger$: MsgMiddlewareEffect = (event$, ctx) => {
+export const errorLogger$: WsMiddlewareEffect = (event$, ctx) => {
   const logger = useContext(LoggerToken)(ctx.ask);
-  const transportLayer = useContext(TransportLayerToken)(ctx.ask);
-  const tag = transportLayer.config.channel;
 
   return event$.pipe(
     tap(event => {
       const message = `"${event.error?.name ?? '-'}: ${event.error?.message ?? '-' }" for event ${event.type}`;
 
       return logger({
-        tag,
         message,
         type: 'ERROR',
+        tag: LoggerTag.WEBSOCKETS,
         level: LoggerLevel.ERROR,
       })();
     }),

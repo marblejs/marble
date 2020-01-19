@@ -1,6 +1,6 @@
 import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/core';
 import { of, throwError, iif } from 'rxjs';
-import { catchError, map, switchMap, tap, mapTo, mergeMap } from 'rxjs/operators';
+import { catchError, map, tap, mapTo, mergeMap } from 'rxjs/operators';
 import { defaultParser } from './parsers';
 import { RequestBodyParser } from './body.model';
 import { matchType, getBody, hasBody, isMultipart } from './body.util';
@@ -17,7 +17,7 @@ export const bodyParser$ = ({
   parser = defaultParser,
 }: BodyParserOptions = {}): HttpMiddlewareEffect => req$ =>
   req$.pipe(
-    switchMap(req => iif(
+    mergeMap(req => iif(
       () =>
         PARSEABLE_METHODS.includes(req.method)
         && !hasBody(req)
@@ -29,7 +29,7 @@ export const bodyParser$ = ({
         tap(body => req.body = body),
         mapTo(req),
         catchError(() => throwError(
-          new HttpError('Request body parse error', HttpStatus.BAD_REQUEST),
+          new HttpError('Request body parse error', HttpStatus.BAD_REQUEST, undefined, req),
         ))
       ),
       of(req),

@@ -1,6 +1,7 @@
 import * as typeIs from 'type-is';
 import { HttpRequest } from '@marblejs/core';
-import { fromReadableStream, getContentType } from '@marblejs/core/dist/+internal';
+import { getContentType } from '@marblejs/core/dist/+internal/http';
+import { fromReadableStream } from '@marblejs/core/dist/+internal/observable';
 import { map, toArray } from 'rxjs/operators';
 
 export const matchType = (type: string[]) => (req: HttpRequest) =>

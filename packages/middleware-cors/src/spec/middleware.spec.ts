@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import { Marbles } from '@marblejs/core/dist/+internal';
+import { Marbles } from '@marblejs/core/dist/+internal/testing';
 import { cors$, CORSOptions } from '../middleware';
 import { createMockRequest, createMockEffectContext } from '../util';
 
@@ -28,10 +28,14 @@ describe('CORS middleware', () => {
 
     const middleware$ = cors$();
 
-    middleware$(request$, ctx).subscribe(() => {
-      expect(request.response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
-      done();
-    });
+    middleware$(request$, ctx).subscribe(
+      () => fail('Should not return any further value.'),
+      undefined,
+      () => {
+        expect(request.response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
+        done();
+      },
+    );
   });
 
   test('handle CORS request', done => {

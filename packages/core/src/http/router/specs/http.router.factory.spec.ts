@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { of } from 'rxjs';
-import { mapTo, tap } from 'rxjs/operators';
+import { mapTo } from 'rxjs/operators';
 import { RouteEffect, RouteEffectGroup, Routing } from '../http.router.interface';
 import { factorizeRouting, factorizeRoutingWithDefaults } from '../http.router.factory';
-import { createHttpRequest, createMockEffectContext } from '../../../+internal';
 import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http.effects.interface';
 import { factorizeRegExpWithParams } from '../http.router.params.factory';
 import { r } from '../http.router.ixbuilder';
@@ -86,75 +84,39 @@ describe('#factorizeRouting', () => {
         regExp: getRegExp('/'),
         path: '',
         methods: {
-          GET: { effect: e1$, middleware: undefined, parameters: undefined, },
+          GET: { middlewares: [], effect: e1$, parameters: undefined, meta: undefined },
         },
       },
       {
         regExp: getRegExp('/level_1'),
         path: '/level_1',
         methods: {
-          GET: { middleware: expect.any(Function), effect: e2$, parameters: undefined, },
+          GET: { middlewares: [m$, m$], effect: e2$, parameters: undefined, meta: undefined },
         },
       },
       {
         regExp: getRegExp('/level_1/:id1'),
         path: '/level_1/:id1',
         methods: {
-          POST: { middleware: expect.any(Function), effect: e3$, parameters: ['id1'] },
-          DELETE: { middleware: expect.any(Function), effect: e3$, parameters: ['id2'] },
+          POST: { middlewares: [m$, m$, m$], effect: e3$, parameters: ['id1'], meta: undefined},
+          DELETE: { middlewares: [m$, m$, m$], effect: e3$, parameters: ['id2'], meta: undefined },
         },
       },
       {
         regExp: getRegExp('/level_1/level_2'),
         path: '/level_1/level_2',
         methods: {
-          GET: { middleware: expect.any(Function), effect: e4$, parameters: undefined, },
+          GET: { middlewares: [m$, m$, m$, m$], effect: e4$, parameters: undefined, meta: undefined },
         },
       },
       {
         regExp: getRegExp('/level_1/*'),
         path: '/level_1/(.*)',
         methods: {
-          '*': { middleware: expect.any(Function), effect: e5$ },
+          '*': { middlewares: [m$, m$], effect: e5$, meta: undefined },
         },
       },
     ] as Routing);
-  });
-
-  test('composes routed middlewares', async () => {
-    // given
-    const spy = jest.fn();
-    const req = createHttpRequest();
-    const ctx = createMockEffectContext();
-    const m$: HttpMiddlewareEffect = req$ => req$.pipe(tap(spy));
-    const e$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
-
-    const routeEffect: RouteEffect = {
-      path: '/',
-      method: 'GET',
-      effect: e$,
-      middleware: m$,
-    };
-
-    const routeGroupNested: RouteEffectGroup = {
-      path: '/nested',
-      effects: [routeEffect],
-      middlewares: [m$],
-    };
-
-    const routing: (RouteEffect | RouteEffectGroup)[] = [{
-      path: '/test',
-      effects: [routeGroupNested],
-      middlewares: [m$, m$],
-    }];
-
-    // when
-    const factorizedRouting = factorizeRouting(routing);
-    const middleware$ = factorizedRouting[0].methods.GET!.middleware!;
-    await middleware$(of(req), ctx).toPromise();
-
-    // then
-    expect(spy).toHaveBeenCalledTimes(4);
   });
 
   test('throws error if route is redefined', () => {
@@ -188,8 +150,9 @@ describe('#factorizeRoutingWithDefaults', () => {
         methods: {
           '*': {
             effect: expect.any(Function),
-            middleware: undefined,
+            middlewares: [],
             parameters: undefined,
+            meta: { overridable: true },
           },
         },
       },
@@ -211,7 +174,7 @@ describe('#factorizeRoutingWithDefaults', () => {
         methods: {
           [fallback$.method]: {
             effect: fallback$.effect,
-            middleware: undefined,
+            middlewares: [],
             parameters: undefined,
           },
         },

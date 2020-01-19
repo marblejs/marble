@@ -1,5 +1,5 @@
 import { TimeoutError } from 'rxjs';
-import { Marbles } from '@marblejs/core/dist/+internal';
+import { Marbles } from '@marblejs/core/dist/+internal/testing';
 import { WebSocketStatus, WebSocketConnectionLiveness } from '../../websocket.interface';
 import { WebSocketConnectionError } from '../../error/websocket.error.model';
 import {

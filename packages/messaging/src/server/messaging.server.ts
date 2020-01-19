@@ -1,14 +1,30 @@
 import { Subject } from 'rxjs';
 import { takeWhile, takeUntil, take } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
-import { createContext, registerAll, bindTo, createEffectContext, lookup, combineEffects, resolve } from '@marblejs/core';
+import {
+  bindTo,
+  createContext,
+  createEffectContext,
+  combineEffects,
+  registerAll,
+  resolve,
+  ServerIO,
+  mockLogger,
+  LoggerToken,
+  lookup,
+  logContext,
+  logger,
+  LoggerTag,
+} from '@marblejs/core';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { statusLogger$ } from '../middlewares/messaging.statusLogger.middleware';
-import { CreateMicroserviceConfig, Microservice } from './messaging.server.interface';
+import { TransportLayerConnection } from '../transport/transport.interface';
+import { CreateMicroserviceConfig } from './messaging.server.interface';
 import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
 import { AllServerEvents, isCloseEvent, ServerEvent } from './messaging.server.events';
 
-export const createMicroservice = async (config: CreateMicroserviceConfig): Promise<Microservice> => {
+export const createMicroservice = async (config: CreateMicroserviceConfig) => {
   const {
     event$,
     options,
@@ -19,15 +35,18 @@ export const createMicroservice = async (config: CreateMicroserviceConfig): Prom
 
   const serverEventsSubject = new Subject<AllServerEvents>();
   const transportLayer = provideTransportLayer(transport, options);
+  const boundLogger = bindTo(LoggerToken)(isTestEnv() ? mockLogger : logger);
   const boundTransportLayer = bindTo(TransportLayerToken)(() => transportLayer);
   const boundServerEvents = bindTo(ServerEventsToken)(() => serverEventsSubject);
 
   const context = await flow(
     registerAll([
+      boundLogger,
       boundTransportLayer,
       boundServerEvents,
       ...dependencies,
     ]),
+    logContext(LoggerTag.MESSAGING),
     resolve,
   )(createContext());
 
@@ -38,7 +57,7 @@ export const createMicroservice = async (config: CreateMicroserviceConfig): Prom
 
   combinedEvents(serverEvent$, ctx).subscribe();
 
-  const listen = async () => {
+  const listen: ServerIO<TransportLayerConnection> = async () => {
     const { host, channel } = transportLayer.config;
     const connection = await transportLayer.connect({ isConsumer: true });
 

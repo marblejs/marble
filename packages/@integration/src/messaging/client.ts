@@ -1,20 +1,11 @@
 import { logger$ } from '@marblejs/middleware-logger';
-import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
-import {
-  r,
-  bindTo,
-  createServer,
-  createContextToken,
-  matchEvent,
-  ServerEvent,
-  httpListener,
-  HttpServerEffect,
-  use,
-  useContext,
-} from '@marblejs/core';
-import { merge, forkJoin } from 'rxjs';
-import { tap, map, mergeMap, mapTo } from 'rxjs/operators';
 import { requestValidator$, t } from '@marblejs/middleware-io';
+import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
+import { r, createServer, createContextToken, httpListener, use, useContext, bindEagerlyTo } from '@marblejs/core';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
+import { IO } from 'fp-ts/lib/IO';
+import { forkJoin } from 'rxjs';
+import { map, mergeMap, mapTo } from 'rxjs/operators';
 
 const port = process.env.PORT
   ? Number(process.env.PORT)
@@ -37,13 +28,30 @@ const rootValiadtor$ = requestValidator$({
   }),
 });
 
-const test$ = r.pipe(
-  r.matchPath('/test'),
+const buffer$ = r.pipe(
+  r.matchPath('/buffer'),
   r.matchType('GET'),
-  r.useEffect((req$, { ask }) => req$.pipe(
-    mergeMap(() => useContext(ClientToken)(ask).emit({ type: 'TEST' })),
-    mapTo(({ body: 'OK' })),
-  )),
+  r.useEffect((req$, { ask }) => {
+    const client = useContext(ClientToken)(ask);
+
+    return req$.pipe(
+      mergeMap(() => client.emit({ type: 'BUFFER' })),
+      mapTo(({ body: 'OK' })),
+    );
+  }),
+);
+
+const timeout$ = r.pipe(
+  r.matchPath('/timeout'),
+  r.matchType('GET'),
+  r.useEffect((req$, { ask }) => {
+    const client = useContext(ClientToken)(ask);
+
+    return req$.pipe(
+      mergeMap(() => client.send({ type: 'TIMEOUT' })),
+      mapTo(({ body: 'OK' })),
+    );
+  }),
 );
 
 const fib$ = r.pipe(
@@ -67,31 +75,18 @@ const fib$ = r.pipe(
   }),
 );
 
-const listening$: HttpServerEffect = event$ =>
-  event$.pipe(
-    matchEvent(ServerEvent.listening),
-    map(event => event.payload),
-    tap(({ port, host }) => console.log(`Server running @ http://${host}:${port}/ 🚀`)),
-  );
-
 export const server = createServer({
   port,
   httpListener: httpListener({
     middlewares: [logger$()],
-    effects: [test$, fib$],
+    effects: [buffer$, timeout$, fib$],
   }),
   dependencies: [
-    bindTo(ClientToken)(client),
+    bindEagerlyTo(ClientToken)(client),
   ],
-  event$: (...args) => merge(
-    listening$(...args),
-  ),
 });
 
-export const bootstrap = async () => {
-  const app = await server;
+const main: IO<void> = async () =>
+  !isTestEnv() && await (await server)();
 
-  if (process.env.NODE_ENV !== 'test') app();
-};
-
-bootstrap();
+main();

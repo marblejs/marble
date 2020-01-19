@@ -1,4 +1,4 @@
-import { Marbles, createHttpResponse, createHttpRequest } from '../../../+internal';
+import { Marbles, createHttpResponse, createHttpRequest } from '../../../+internal/testing';
 import { defaultError$ } from '../http.error.effect';
 import { HttpError } from '../http.error.model';
 

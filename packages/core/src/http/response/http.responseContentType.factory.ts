@@ -1,7 +1,7 @@
 import * as fileType from 'file-type';
 import * as mime from 'mime';
 import { HttpStatus } from '../http.interface';
-import { ContentType } from '../../+internal';
+import { ContentType } from '../../+internal/http';
 
 export const DEFAULT_CONTENT_TYPE = ContentType.APPLICATION_JSON;
 

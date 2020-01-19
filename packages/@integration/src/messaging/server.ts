@@ -1,19 +1,47 @@
-import { matchEvent, use } from '@marblejs/core';
+import { of } from 'rxjs';
+import { map, tap, mergeMap, bufferCount, mapTo, catchError, delay } from 'rxjs/operators';
+import { matchEvent, use, Event } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { createMicroservice, messagingListener, Transport, MsgEffect } from '@marblejs/messaging';
-import { map, tap } from 'rxjs/operators';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
+import { IO } from 'fp-ts/lib/IO';
 
 const fib = (n: number): number =>
   (n === 0 || n === 1) ? n : fib(n - 1) + fib(n - 2);
 
-const fibonacci$: MsgEffect = event$ =>
-  event$.pipe(
+const fibonacci$: MsgEffect = event$ => {
+
+  return event$.pipe(
     matchEvent('FIB'),
     use(eventValidator$(t.number)),
-    tap(event => { if (event.payload >= 45) throw new Error('Too high number!') }),
-    map(event => fib(event.payload)),
-    map(payload => ({ type: 'FIB_RESULT', payload })),
+    mergeMap(event => of(event).pipe(
+      tap(event => { if (event.payload >= 45) throw new Error('Too high number!') }),
+      map(event => fib(event.payload)),
+      map(payload => ({ ...event, type: 'FIB_RESULT', payload } as Event)),
+      catchError(error => of({ ...event, error: { name: error.name, message: error.message } } as Event)),
+    )),
   );
+};
+
+const buffer$: MsgEffect = event$ => {
+
+  return event$.pipe(
+    matchEvent('BUFFER'),
+    bufferCount(2),
+    mapTo({ type: 'BUFFER_RESULT' }),
+  );
+};
+
+const timeout$: MsgEffect = event$ => {
+
+  return event$.pipe(
+    matchEvent('TIMEOUT'),
+    mergeMap(event => of(event).pipe(
+      delay(180 * 1000),
+      mapTo({ ...event, type: 'TIMEOUT_RESULT' } as Event),
+    )),
+  );
+};
 
 export const microservice = createMicroservice({
   transport: Transport.AMQP,
@@ -23,14 +51,11 @@ export const microservice = createMicroservice({
     queueOptions: { durable: false },
   },
   messagingListener: messagingListener({
-    effects: [fibonacci$],
+    effects: [fibonacci$, buffer$, timeout$],
   }),
 });
 
-export const bootstrap = async () => {
-  const app = await microservice;
+const main: IO<void> = async () =>
+  !isTestEnv() && await (await microservice)();
 
-  if (process.env.NODE_ENV !== 'test') app();
-};
-
-bootstrap();
+main();

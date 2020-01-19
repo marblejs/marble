@@ -1,5 +1,6 @@
 import { HttpHeaders } from '../http.interface';
-import { ContentType, getContentType, isStream } from '../../+internal';
+import { ContentType, getContentType } from '../../+internal/http';
+import { isStream } from '../../+internal/utils';
 
 export type ResponseBodyFactory = (headers: HttpHeaders) => (body: any) => any;
 

@@ -1,31 +1,18 @@
-import { createServer, matchEvent, ServerEvent, HttpServerEffect } from '@marblejs/core';
-import { merge } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { IO } from 'fp-ts/lib/IO';
+import { createServer } from '@marblejs/core';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
 import httpListener from './http.listener';
 
 const port = process.env.PORT
   ? Number(process.env.PORT)
   : undefined;
 
-const listening$: HttpServerEffect = event$ =>
-  event$.pipe(
-    matchEvent(ServerEvent.listening),
-    map(event => event.payload),
-    tap(({ port, host }) => console.log(`Server running @ http://${host}:${port}/ 🚀`)),
-  );
-
 export const server = createServer({
   port,
   httpListener,
-  event$: (...args) => merge(
-    listening$(...args),
-  ),
 });
 
-export const bootstrap = async () => {
-  const app = await server;
+const main: IO<void> = async () =>
+  !isTestEnv() && await (await server)();
 
-  if (process.env.NODE_ENV !== 'test') app();
-};
-
-bootstrap();
+main();

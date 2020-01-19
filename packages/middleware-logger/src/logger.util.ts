@@ -1,26 +1,24 @@
 import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { flow } from 'fp-ts/lib/function';
-import { LoggerOptions, LoggerCtx, WritableLike } from './logger.model';
+import { HttpRequest } from '@marblejs/core';
+import { LoggerOptions } from './logger.model';
 
 export const getDateFromTimestamp = (t: number) => new Date(t);
 
-export const isNotSilent = (opts: LoggerOptions) => (_: LoggerCtx) =>
+export const isNotSilent = (opts: LoggerOptions) => (_: HttpRequest) =>
   !opts.silent;
 
-export const filterResponse = (opts: LoggerOptions) => (ctx: LoggerCtx) => pipe(
+export const filterResponse = (opts: LoggerOptions) => (req: HttpRequest) => pipe(
   O.fromNullable(opts.filter),
-  O.map(filter => filter(ctx.res, ctx.req)), // @TODO: use only HttpRequest
+  O.map(filter => filter(req)),
   O.getOrElse(() => true),
 );
 
-export const writeToStream = (writable: WritableLike, chunk: string) =>
-  writable.write(`${chunk}\n\n`);
-
 export const formatTime = (timeInMms: number) =>
   timeInMms > 1000
-    ? `${timeInMms / 1000}s`
-    : `${timeInMms}ms`;
+    ? `+${timeInMms / 1000}s`
+    : `+${timeInMms}ms`;
 
 export const getTimeDifferenceInMs = (startDate: Date): number =>
   new Date().getTime() - startDate.getTime();
