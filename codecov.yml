@@ -4,4 +4,4 @@ coverage:
       enabled: false
       target: auto
       threshold: 5%
-    patch: no
+    patch: off
