@@ -22,7 +22,7 @@
     "publish:canary:minor": "lerna publish --no-push --dist-tag dev --canary minor --preid dev --force-publish=* --ignore-scripts",
     "publish:canary:major": "lerna publish --no-push --dist-tag next --canary major --preid next --force-publish=* --ignore-scripts",
     "publish:canary:major:github": "lerna publish --dist-tag next --canary major --preid next --yes --force-publish=* --no-verify-access --no-git-reset --ignore-scripts",
-    "publish:rc": "lerna publish premajor --no-push --dist-tag rc --preid rc --force-publish=* --ignore-scripts",
+    "publish:rc": "lerna publish prerelease --no-push --dist-tag rc --preid rc --force-publish=* --ignore-scripts",
     "precommit": "lint-staged"
   },
   "lint-staged": {
