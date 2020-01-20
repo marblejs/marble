@@ -47,7 +47,7 @@ export const resolveRouting = (
 
   const errorFlow$ = errorSubject.asObservable().pipe(
     takeUntil(close$),
-    map(data => isHttpRequestError(data.error) ? { ...data, error: data.error } : data),
+    map(data => isHttpRequestError(data.error) ? { ...data, error: data.error.error } : data),
     mergeMap(data => {
       const stream = error$ ? error$(of(data), ctx) : defaultError$(of(data), ctx);
       return stream.pipe(
