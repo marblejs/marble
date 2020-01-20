@@ -3,6 +3,7 @@ import { Event } from '@marblejs/core';
 import { RedisStrategy } from './strategies/redis.strategy.interface';
 import { AmqpStrategy } from './strategies/amqp.strategy.interface';
 import { TcpStrategy } from './strategies/tcp.strategy.interface';
+import { LocalStrategy } from './strategies/local.strategy.interface';
 
 export const DEFAULT_TIMEOUT = 120 * 1000;
 
@@ -13,16 +14,18 @@ export enum Transport {
   REDIS,
   MQTT,
   GRPC,
+  LOCAL,
 }
 
 export type TransportStrategy =
   | AmqpStrategy
   | RedisStrategy
   | TcpStrategy
+  | LocalStrategy
   ;
 
 export interface TransportLayer {
-  connect: (opts: { isConsumer: boolean }) => Promise<TransportLayerConnection>;
+  connect: (opts?: { isConsumer: boolean }) => Promise<TransportLayerConnection>;
   type: Transport;
   config: TransportLayerConfig;
 }

@@ -126,17 +126,17 @@ class RedisStrategy implements TransportLayer {
     return { url: host, port, password };
   }
 
-  async connect(data: { isConsumer: boolean }) {
-    const { isConsumer } = data;
+  async connect(data?: { isConsumer: boolean }) {
     const { channel } = this.options;
 
+    const isConsumer = !!data?.isConsumer;
     const publisher = await RedisHelper.connectClient(this.clientOpts);
     const subscriber = await RedisHelper.connectClient(this.clientOpts);
     const rpcSubscriber = await RedisHelper.connectClient(this.clientOpts);
 
     await RedisHelper.setExpirationForChannel(publisher)(channel)(1);
 
-    if (data.isConsumer) {
+    if (isConsumer) {
       await RedisHelper.setExpirationForChannel(subscriber)(channel)(1);
       await RedisHelper.subscribeChannel(subscriber)(channel);
     }

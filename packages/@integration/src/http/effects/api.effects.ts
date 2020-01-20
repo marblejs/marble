@@ -1,8 +1,9 @@
-import { r, HttpError, HttpStatus, combineRoutes, use, switchToProtocol } from '@marblejs/core';
+import { r, HttpError, HttpStatus, combineRoutes, use } from '@marblejs/core';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { user$ } from './user.effects';
+import { eventBus$ } from './event.effect';
 import { static$ } from './static.effects';
 
 const rootValiadtor$ = requestValidator$({
@@ -33,13 +34,6 @@ const notImplemented$ = r.pipe(
     )),
   )));
 
-const webSockets$ = r.pipe(
-  r.matchPath('/ws'),
-  r.matchType('GET'),
-  r.useEffect(req$ => req$.pipe(
-    switchToProtocol('websocket')
-  )));
-
 const notFound$ = r.pipe(
   r.matchPath('*'),
   r.matchType('*'),
@@ -51,5 +45,5 @@ const notFound$ = r.pipe(
 
 export const api$ = combineRoutes(
   '/api/:version',
-  [ root$, user$, static$, notImplemented$, webSockets$, notFound$ ],
+  [ root$, user$, eventBus$, static$, notImplemented$, notFound$ ],
 );

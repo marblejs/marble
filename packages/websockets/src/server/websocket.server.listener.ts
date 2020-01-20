@@ -40,15 +40,17 @@ const defaultOutput$: WsOutputEffect = (out$: Observable<Event>) => out$;
 export const webSocketListener = createListener<WebSocketListenerConfig, WebSocketListener>(config => ask => {
   const {
     middlewares = [],
-    effects = [defaultEffect$],
+    effects = [],
     error$ = defaultError$,
     output$ = defaultOutput$,
     eventTransformer = jsonTransformer,
   } = config ?? {};
 
+  const getEffects = () => effects.length ? effects : [defaultEffect$];
+
   const logger = useContext(LoggerToken)(ask);
   const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
-  const combinedEffects = combineEffects(...effects);
+  const combinedEffects = combineEffects(...getEffects());
 
   const processError$ = (ctx: EffectContext<WebSocketClientConnection>) => (error: Error) =>
     pipe(
@@ -101,7 +103,7 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
             logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.ERROR })();
             subscribeIncomingEvent(input$);
           },
-          () => subscribeIncomingEvent(input$),
+          () => subscribeOutgoingEvent(input$),
         );
 
     const subscribeOutgoingEvent = (input$: Observable<Event>) =>
@@ -111,7 +113,7 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
           (event: Event) => client.sendResponse(event),
           (error: EventError) => {
             const type = 'ServerListener';
-            const message = `Unexpected error OutgoingEvent stream: "${error.name}", "${error.message}"`;
+            const message = `Unexpected error for OutgoingEvent stream: "${error.name}", "${error.message}"`;
             logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.ERROR })();
             subscribeOutgoingEvent(input$);
           },

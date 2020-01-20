@@ -46,14 +46,16 @@ const defaultError$: MsgErrorEffect = msg$ =>
 export const messagingListener = createListener<MessagingListenerConfig, MessagingListener>(config => ask => {
   const {
     middlewares = [],
-    effects = [defaultEffect$],
+    effects = [],
     output$ = defaultOutput$,
     error$ = defaultError$,
     msgTransformer = jsonTransformer,
   } = config ?? {};
 
+  const getEffects = () => effects.length ? effects : [defaultEffect$];
+
   const logger = useContext(LoggerToken)(ask);
-  const combinedEffects = combineEffects(...effects);
+  const combinedEffects = combineEffects(...getEffects());
   const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
 
   const decode = (msg: TransportMessage<Buffer>): Event => ({
@@ -74,6 +76,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
       connection.emitMessage(replyTo, {
         data: msgTransformer.encode({ type, payload, error }),
         correlationId,
+        replyTo,
         raw,
       });
     }
@@ -116,9 +119,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
             logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.ERROR })();
             subscribeIncomingEvent(event$);
           },
-          () => {
-            subscribeIncomingEvent(event$);
-          },
+          () => subscribeOutgoingEvent(event$),
         );
 
     const subscribeOutgoingEvent = (event$: Observable<Event<unknown, any, string>>) =>
@@ -128,13 +129,10 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
           event => send(connection)(event),
           (error: Error) => {
             const type = 'ServerListener';
-            const message = `Unexpected error OutgoingEvent stream: "${error.name}", "${error.message}"`;
+            const message = `Unexpected error for OutgoingEvent stream: "${error.name}", "${error.message}"`;
             logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.ERROR })();
-            subscribeOutgoingEvent(event$);
           },
-          () => {
-            subscribeOutgoingEvent(event$);
-          },
+          () => subscribeOutgoingEvent(event$),
         );
 
     subscribeIncomingEvent(incomingEvent$);
