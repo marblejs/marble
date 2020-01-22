@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start:http": "PORT=1337 ts-node --project tsconfig.json src/http/index.ts",
+    "start:cqrs": "PORT=1337 ts-node --project tsconfig.json src/cqrs/index.ts",
     "start:websockets": "ts-node --project tsconfig.json src/websockets/http.server.ts",
     "start:messaging:server": "PORT=1337 ts-node --project tsconfig.json src/messaging/server.ts",
     "start:messaging:client": "ts-node --project tsconfig.json src/messaging/client.ts",

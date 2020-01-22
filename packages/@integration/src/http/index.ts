@@ -1,21 +1,25 @@
 import { IO } from 'fp-ts/lib/IO';
-import { createServer, bindEagerlyTo } from '@marblejs/core';
-import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
-import { EventBusToken, EventBusClientToken, eventBus, eventBusClient } from '@marblejs/messaging';
-import httpListener from './http.listener';
-import messagingListener from './event.listener';
+import { createServer, httpListener } from '@marblejs/core';
+import { isTestEnv, getPortEnv } from '@marblejs/core/dist/+internal/utils';
+import { logger$ } from '@marblejs/middleware-logger';
+import { bodyParser$ } from '@marblejs/middleware-body';
+import { api$ } from './effects/api.effects';
+import { cors$ } from './middlewares/cors.middleware';
 
-const port = process.env.PORT
-  ? Number(process.env.PORT)
-  : undefined;
+const httpListenerReader = httpListener({
+  middlewares: [
+    logger$({ silent: isTestEnv() }),
+    bodyParser$(),
+    cors$,
+  ],
+  effects: [
+    api$,
+  ],
+});
 
 export const server = createServer({
-  port,
-  httpListener,
-  dependencies: [
-    bindEagerlyTo(EventBusClientToken)(eventBusClient),
-    bindEagerlyTo(EventBusToken)(eventBus({ messagingListener })),
-  ],
+  port: getPortEnv(),
+  httpListener: httpListenerReader,
 });
 
 const main: IO<void> = async () =>
