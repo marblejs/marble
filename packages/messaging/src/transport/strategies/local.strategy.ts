@@ -3,7 +3,7 @@ import { share, take, filter } from 'rxjs/operators';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { TransportLayer, TransportLayerConnection, TransportMessage, Transport, DEFAULT_TIMEOUT, TransportLayerConfig } from '../transport.interface';
 import { throwUnsupportedError } from '../transport.error';
-import { LocalStrategyOptions } from './local.strategy.interface';
+import { LocalStrategyOptions, EVENT_BUS_CHANNEL } from './local.strategy.interface';
 
 class LocalStrategyConnection implements TransportLayerConnection {
   private errorSubject$ = new Subject<Error>();
@@ -82,7 +82,7 @@ class LocalStrategy implements TransportLayer {
   get config() {
     return ({
       host: 'localhost',
-      channel: 'event_bus',
+      channel: EVENT_BUS_CHANNEL,
       timeout: this.options.timeout ?? DEFAULT_TIMEOUT,
     });
   }

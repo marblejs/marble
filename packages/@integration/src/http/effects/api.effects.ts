@@ -3,7 +3,6 @@ import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { user$ } from './user.effects';
-import { eventBus$ } from './event.effect';
 import { static$ } from './static.effects';
 
 const rootValiadtor$ = requestValidator$({
@@ -45,5 +44,5 @@ const notFound$ = r.pipe(
 
 export const api$ = combineRoutes(
   '/api/:version',
-  [ root$, user$, eventBus$, static$, notImplemented$, notFound$ ],
+  [ root$, user$, static$, notImplemented$, notFound$ ],
 );
