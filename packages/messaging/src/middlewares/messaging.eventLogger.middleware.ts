@@ -10,7 +10,8 @@ export const inputLogger$: MsgMiddlewareEffect = (event$, ctx) => {
   return event$.pipe(
     tap(event => {
       const tag = transportLayer.config.channel;
-      const message = `${event.type}, id: ${event.metadata?.correlationId}`;
+      const id = event.metadata?.correlationId;
+      const message = id ? `${event.type}, id: ${id}` : event.type;
 
       logger({
         tag,
@@ -33,8 +34,10 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
       const message = error
         ? `"${error.name}", "${error.message}" for event ${type}`
         : metadata?.replyTo
-          ? `${event.type}, id: ${metadata?.correlationId ?? '-'} and sent to ${metadata?.replyTo ?? '-'}`
-          : `${event.type}, id: ${metadata?.correlationId ?? '-'}`;
+          ? `${event.type}, id: ${metadata?.correlationId || '-'} and sent to "${metadata.replyTo || '-'}"`
+          : metadata?.correlationId
+            ? `${event.type}, id: ${metadata.correlationId}`
+            : event.type
 
       logger({
         tag,
@@ -53,7 +56,7 @@ export const errorLogger$: MsgMiddlewareEffect = (event$, ctx) => {
 
   return event$.pipe(
     tap(event => {
-      const message = `"${event.error?.name ?? '-'}: ${event.error?.message ?? '-' }" for event ${event.type}`;
+      const message = `"${event.error?.name || '-'}: ${event.error?.message || '-' }" for event ${event.type}`;
 
       return logger({
         tag,

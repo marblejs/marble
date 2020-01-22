@@ -36,7 +36,7 @@ export const logger = createReader<Logger>(() => opts => {
   const sign = chalk.magenta('λ');
   const now: string = formatDate(new Date());
   const pid: string = chalk.green((process.pid.toString() ?? '-'));
-  const tag: string = chalk.gray(truncItem(opts.tag)) + ' ' + colorize(`[${truncItem(opts.type)}]`);
+  const tag: string = chalk.gray(truncItem(opts.tag)) + ' ' + colorize(`[${opts.type}]`);
   const message: string = opts.level === LoggerLevel.ERROR ? chalk.red(opts.message) : opts.message;
 
   return print(sign + sep + pid + sep + now + sep + tag + sep + message);
