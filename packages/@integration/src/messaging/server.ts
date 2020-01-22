@@ -43,6 +43,15 @@ const timeout$: MsgEffect = event$ => {
   );
 };
 
+const error$: MsgEffect = event$ => {
+
+  return event$.pipe(
+    matchEvent('ERROR'),
+    tap(() => { throw new Error('test_error'); }),
+  );
+};
+
+
 export const microservice = createMicroservice({
   transport: Transport.AMQP,
   options: {
@@ -51,7 +60,7 @@ export const microservice = createMicroservice({
     queueOptions: { durable: false },
   },
   messagingListener: messagingListener({
-    effects: [fibonacci$, buffer$, timeout$],
+    effects: [fibonacci$, buffer$, timeout$, error$],
   }),
 });
 

@@ -54,6 +54,19 @@ const timeout$ = r.pipe(
   }),
 );
 
+const error$ = r.pipe(
+  r.matchPath('/error'),
+  r.matchType('GET'),
+  r.useEffect((req$, { ask }) => {
+    const client = useContext(ClientToken)(ask);
+
+    return req$.pipe(
+      mergeMap(() => client.send({ type: 'ERROR' })),
+      mapTo(({ body: 'OK' })),
+    );
+  }),
+);
+
 const fib$ = r.pipe(
   r.matchPath('/fib/:number'),
   r.matchType('GET'),
@@ -79,7 +92,7 @@ export const server = createServer({
   port,
   httpListener: httpListener({
     middlewares: [logger$()],
-    effects: [buffer$, timeout$, fib$],
+    effects: [buffer$, timeout$, error$, fib$],
   }),
   dependencies: [
     bindEagerlyTo(ClientToken)(client),

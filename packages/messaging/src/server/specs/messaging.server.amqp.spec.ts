@@ -1,7 +1,7 @@
 import { Event, matchEvent, use, combineEffects } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { Subject, throwError } from 'rxjs';
-import { map, tap, mergeMapTo, delay, bufferCount } from 'rxjs/operators';
+import { map, tap, delay, bufferCount, mergeMap } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
 import { MsgEffect, MsgErrorEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
 import { AmqpStrategyOptions } from '../../transport/strategies/amqp.strategy.interface';
@@ -113,7 +113,7 @@ describe('messagingServer::AMQP', () => {
     const event1$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent(event1.type),
-        mergeMapTo(throwError(error)),
+        mergeMap(() => throwError(error)),
       );
 
     const event2$: MsgEffect = event$ =>
