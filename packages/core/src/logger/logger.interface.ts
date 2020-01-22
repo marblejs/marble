@@ -15,5 +15,6 @@ export const enum LoggerTag {
   CORE = 'core',
   HTTP = 'http',
   MESSAGING = 'messaging',
+  EVENT_BUS = 'event_bus',
   WEBSOCKETS = 'websockets',
 };

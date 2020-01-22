@@ -7,7 +7,8 @@ export const inputLogger$: WsMiddlewareEffect = (event$, ctx) => {
 
   return event$.pipe(
     tap(event => {
-      const message = `${event.type}, id: ${event.metadata?.correlationId}`;
+      const id = event.metadata?.correlationId;
+      const message = id ? `${event.type}, id: ${id}` : event.type;
 
       logger({
         message,
@@ -28,8 +29,10 @@ export const outputLogger$: WsMiddlewareEffect = (event$, ctx) => {
       const message = error
         ? `"${error.name}", "${error.message}" for event ${type}`
         : metadata?.replyTo
-          ? `${event.type}, id: ${metadata?.correlationId ?? '-'} and sent to ${metadata?.replyTo ?? '-'}`
-          : `${event.type}, id: ${metadata?.correlationId ?? '-'}`;
+          ? `${event.type}, id: ${metadata?.correlationId || '-'} and sent to "${metadata.replyTo || '-'}"`
+          : metadata?.correlationId
+            ? `${event.type}, id: ${metadata.correlationId}`
+            : event.type;
 
       logger({
         message,
@@ -46,7 +49,7 @@ export const errorLogger$: WsMiddlewareEffect = (event$, ctx) => {
 
   return event$.pipe(
     tap(event => {
-      const message = `"${event.error?.name ?? '-'}: ${event.error?.message ?? '-' }" for event ${event.type}`;
+      const message = `"${event.error?.name || '-'}: ${event.error?.message || '-' }" for event ${event.type}`;
 
       return logger({
         message,
