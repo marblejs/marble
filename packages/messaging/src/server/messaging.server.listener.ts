@@ -4,14 +4,13 @@ import {
   combineEffects,
   createEffectContext,
   createListener,
-  EffectContext,
   useContext,
   LoggerToken,
   LoggerTag,
   LoggerLevel,
 } from '@marblejs/core';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { of, Observable, Subject } from 'rxjs';
+import { Observable, Subject, defer } from 'rxjs';
 import { map, catchError, takeUntil } from 'rxjs/operators';
 import {
   TransportMessage,
@@ -34,9 +33,6 @@ export interface MessagingListener {
   (connection: TransportLayerConnection): void;
 }
 
-const defaultEffect$: MsgEffect = msg$ =>
-  msg$;
-
 const defaultOutput$: MsgOutputEffect = msg$ =>
   msg$;
 
@@ -46,7 +42,7 @@ const defaultError$: MsgErrorEffect = msg$ =>
 export const messagingListener = createListener<MessagingListenerConfig, MessagingListener>(config => ask => {
   const {
     middlewares = [],
-    effects = [defaultEffect$],
+    effects = [],
     output$ = defaultOutput$,
     error$ = defaultError$,
     msgTransformer = jsonTransformer,
@@ -74,19 +70,14 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
       connection.emitMessage(replyTo, {
         data: msgTransformer.encode({ type, payload, error }),
         correlationId,
+        replyTo,
         raw,
       });
     }
   };
 
-  const processError$ = (ctx: EffectContext<TransportLayerConnection>) => (error: Error) =>
-    pipe(
-      of(error),
-      e$ => error$(e$, ctx),
-      e$ => errorLogger$(e$, ctx),
-    );
-
   return connection => {
+    const errorSubject = new Subject<Error>();
     const eventSubject = new Subject<Event>();
     const ctx = createEffectContext({ ask, client: connection });
 
@@ -94,7 +85,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
       connection.message$,
       e$ => e$.pipe(map(decode)),
       e$ => combinedMiddlewares(e$, ctx),
-      e$ => e$.pipe(catchError(processError$(ctx))),
+      e$ => e$.pipe(catchError(error => defer(() => processError(incomingEvent$)(error)))),
     );
 
     const outgoingEvent$ = pipe(
@@ -102,8 +93,19 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
       e$ => combinedEffects(e$, ctx),
       e$ => output$(e$, ctx),
       e$ => outputLogger$(e$, ctx),
-      e$ => e$.pipe(catchError(processError$(ctx))),
+      e$ => e$.pipe(catchError(error => defer(() => processError(outgoingEvent$)(error)))),
     );
+
+    const errorEvent$ = pipe(
+      errorSubject.asObservable(),
+      e$ => error$(e$, ctx),
+      e$ => errorLogger$(e$, ctx),
+    );
+
+    const processError = (originStream$: Observable<any>) => (error: Error) => {
+      errorSubject.next(error);
+      return originStream$;
+    };
 
     const subscribeIncomingEvent = (event$: Observable<Event<unknown, any, string>>) =>
       event$
@@ -117,7 +119,9 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
             subscribeIncomingEvent(event$);
           },
           () => {
-            subscribeIncomingEvent(event$);
+            const type = 'ServerListener';
+            const message = `IncomingEvent stream completes`;
+            logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.DEBUG })();
           },
         );
 
@@ -128,16 +132,18 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
           event => send(connection)(event),
           (error: Error) => {
             const type = 'ServerListener';
-            const message = `Unexpected error OutgoingEvent stream: "${error.name}", "${error.message}"`;
+            const message = `Unexpected error for OutgoingEvent stream: "${error.name}", "${error.message}"`;
             logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.ERROR })();
-            subscribeOutgoingEvent(event$);
           },
           () => {
-            subscribeOutgoingEvent(event$);
+            const type = 'ServerListener';
+            const message = `OutgoingEvent stream completes`;
+            logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.DEBUG })();
           },
         );
 
     subscribeIncomingEvent(incomingEvent$);
     subscribeOutgoingEvent(outgoingEvent$);
+    subscribeOutgoingEvent(errorEvent$);
   };
 });

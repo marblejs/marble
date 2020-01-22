@@ -6,5 +6,5 @@ export interface TcpStrategy {
 }
 
 export interface TcpStrategyOptions {
-  // @TODO
+  timeout?: number;
 }

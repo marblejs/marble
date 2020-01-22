@@ -155,7 +155,7 @@ describe('WebSocket server', () => {
 
       const effect$: WsEffect = event$ =>
         event$.pipe(
-          mergeMapTo(throwError(new Error('test_message'))),
+          mergeMap(() => throwError(new Error('test_message'))),
         );
 
       const targetClient = testBed.getClient(0);

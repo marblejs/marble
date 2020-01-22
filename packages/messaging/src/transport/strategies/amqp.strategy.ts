@@ -151,7 +151,7 @@ class AmqpStrategy implements TransportLayer {
     });
   }
 
-  async connect(opts: { isConsumer: boolean }) {
+  async connect(opts?: { isConsumer: boolean }) {
     const { host, queue, queueOptions, prefetchCount } = this.options;
     const msgSubject$ = new Subject<ConsumeMessage>();
 
@@ -166,7 +166,7 @@ class AmqpStrategy implements TransportLayer {
         await channel.prefetch(prefetchCount || 1);
         await channel.assertQueue(queue, queueOptions);
 
-        if (opts.isConsumer) {
+        if (opts?.isConsumer) {
           await channel.consume(
             this.options.queue,
             msg => msg && msgSubject$.next(msg),

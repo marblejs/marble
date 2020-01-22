@@ -1,4 +1,4 @@
-import { Observable, fromEvent, of, Subject } from 'rxjs';
+import { Observable, fromEvent, Subject, defer } from 'rxjs';
 import { map, takeUntil, catchError } from 'rxjs/operators';
 import {
   combineEffects,
@@ -7,7 +7,6 @@ import {
   createListener,
   Event,
   EventError,
-  EffectContext,
   LoggerTag,
   useContext,
   LoggerToken,
@@ -34,13 +33,12 @@ export interface WebSocketListener {
   eventTransformer: EventTransformer<any>;
 }
 
-const defaultEffect$: WsEffect = msg$ => msg$;
 const defaultOutput$: WsOutputEffect = (out$: Observable<Event>) => out$;
 
 export const webSocketListener = createListener<WebSocketListenerConfig, WebSocketListener>(config => ask => {
   const {
     middlewares = [],
-    effects = [defaultEffect$],
+    effects = [],
     error$ = defaultError$,
     output$ = defaultOutput$,
     eventTransformer = jsonTransformer,
@@ -50,14 +48,8 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
   const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
   const combinedEffects = combineEffects(...effects);
 
-  const processError$ = (ctx: EffectContext<WebSocketClientConnection>) => (error: Error) =>
-    pipe(
-      of(error),
-      e$ => error$(e$, ctx),
-      e$ => errorLogger$(e$, ctx),
-    );
-
   const handle = (client: WebSocketClientConnection) => {
+    const errorSubject = new Subject<Error>();
     const eventSubject = new Subject<Event>();
     const ctx = createEffectContext({ ask, client });
     const close$ = fromEvent(client, 'close');
@@ -76,7 +68,7 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
       e$ => e$.pipe(map(msg => eventTransformer.decode(msg.data))),
       e$ => e$.pipe(map(applyMetadata)),
       e$ => combinedMiddlewares(e$, ctx),
-      e$ => e$.pipe(catchError(processError$(ctx))),
+      e$ => e$.pipe(catchError(error => defer(() => processError(incomingEvent$)(error)))),
     );
 
     const outgoingEvent$ = pipe(
@@ -87,8 +79,19 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
       e$ => outputLogger$(e$, ctx),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       e$ => e$.pipe(map(({ metadata, ...event }) => event)),
-      e$ => e$.pipe(catchError(processError$(ctx))),
+      e$ => e$.pipe(catchError(error => defer(() => processError(outgoingEvent$)(error)))),
     );
+
+    const errorEvent$ = pipe(
+      errorSubject.asObservable(),
+      e$ => error$(e$, ctx),
+      e$ => errorLogger$(e$, ctx),
+    );
+
+    const processError = (originStream$: Observable<any>) => (error: Error) => {
+      errorSubject.next(error);
+      return originStream$;
+    };
 
     const subscribeIncomingEvent = (input$: Observable<Event>) =>
       input$
@@ -101,7 +104,11 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
             logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.ERROR })();
             subscribeIncomingEvent(input$);
           },
-          () => subscribeIncomingEvent(input$),
+          () => {
+            const type = 'ServerListener';
+            const message = `OutgoingEvent stream completes`;
+            logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.DEBUG })();
+          },
         );
 
     const subscribeOutgoingEvent = (input$: Observable<Event>) =>
@@ -111,15 +118,20 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
           (event: Event) => client.sendResponse(event),
           (error: EventError) => {
             const type = 'ServerListener';
-            const message = `Unexpected error OutgoingEvent stream: "${error.name}", "${error.message}"`;
+            const message = `Unexpected error for OutgoingEvent stream: "${error.name}", "${error.message}"`;
             logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.ERROR })();
             subscribeOutgoingEvent(input$);
           },
-          () => subscribeOutgoingEvent(input$),
+          () => {
+            const type = 'ServerListener';
+            const message = `OutgoingEvent stream completes`;
+            logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.DEBUG })();
+          },
         );
 
       subscribeIncomingEvent(incomingEvent$);
       subscribeOutgoingEvent(outgoingEvent$);
+      subscribeOutgoingEvent(errorEvent$);
   };
 
   handle.eventTransformer = eventTransformer;

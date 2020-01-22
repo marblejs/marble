@@ -17,7 +17,7 @@ const colorizeText = (level: LoggerLevel): ((s: string) => string) =>
       [LoggerLevel.ERROR]: chalk.red,
       [LoggerLevel.INFO]: chalk.green,
       [LoggerLevel.WARN]: chalk.yellow,
-      [LoggerLevel.DEBUG]: identity,
+      [LoggerLevel.DEBUG]: chalk.magenta,
       [LoggerLevel.VERBOSE]: identity,
     }[level]),
     O.getOrElse(() => identity),

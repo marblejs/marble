@@ -24,6 +24,12 @@ const add$: WsEffect = (event$, ctx) =>
     map(payload => ({ type: 'SUM_RESULT', payload })),
   );
 
+const error$: WsEffect = event$ =>
+  event$.pipe(
+    matchEvent('ERROR'),
+    mergeMap(() => throwError(new Error('some_error_message'))),
+  );
+
 const connection$: WsConnectionEffect = req$ =>
   req$.pipe(
     mergeMap(req => iif(
@@ -37,6 +43,6 @@ export const webSocketServer = createWebSocketServer({
   connection$,
   webSocketListener: webSocketListener({
     middlewares: [],
-    effects: [add$],
+    effects: [add$, error$],
   }),
 });
