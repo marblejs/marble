@@ -1,8 +1,8 @@
 import { of } from 'rxjs';
 import { map, tap, mergeMap, bufferCount, mapTo, catchError, delay } from 'rxjs/operators';
-import { matchEvent, use, Event } from '@marblejs/core';
+import { matchEvent, use } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { createMicroservice, messagingListener, Transport, MsgEffect } from '@marblejs/messaging';
+import { createMicroservice, messagingListener, Transport, MsgEffect, reply } from '@marblejs/messaging';
 import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
 import { IO } from 'fp-ts/lib/IO';
 
@@ -17,8 +17,8 @@ const fibonacci$: MsgEffect = event$ => {
     mergeMap(event => of(event).pipe(
       tap(event => { if (event.payload >= 45) throw new Error('Too high number!') }),
       map(event => fib(event.payload)),
-      map(payload => ({ ...event, type: 'FIB_RESULT', payload } as Event)),
-      catchError(error => of({ ...event, error: { name: error.name, message: error.message } } as Event)),
+      map(payload => reply(event)({ type: 'FIB_RESULT', payload })),
+      catchError(error => of(reply(event)({ type: 'FIB_ERROR', error: { name: error.name, message: error.message } }))),
     )),
   );
 };
@@ -38,7 +38,7 @@ const timeout$: MsgEffect = event$ => {
     matchEvent('TIMEOUT'),
     mergeMap(event => of(event).pipe(
       delay(180 * 1000),
-      mapTo({ ...event, type: 'TIMEOUT_RESULT' } as Event),
+      mapTo(reply(event)({ type: 'TIMEOUT_RESULT' })),
     )),
   );
 };
