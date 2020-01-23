@@ -52,5 +52,5 @@ export const subscribeServerEvents = (hostname?: string) => (httpServer: HttpSer
 
   return event$
     .asObservable()
-    .pipe(takeWhile(e => !isCloseEvent(e)));
+    .pipe(takeWhile(e => !isCloseEvent(e), true));
 };
