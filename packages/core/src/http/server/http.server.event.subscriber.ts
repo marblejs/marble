@@ -4,8 +4,9 @@ import { Subject, Observable } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { HttpServer } from '../http.interface';
 import { ServerEventType, ServerEvent, AllServerEvents, isCloseEvent } from './http.server.event';
+import { DEFAULT_HOSTNAME } from './http.server.interface';
 
-export const subscribeServerEvents = (hostname: string) => (httpServer: HttpServer): Observable<AllServerEvents> => {
+export const subscribeServerEvents = (hostname?: string) => (httpServer: HttpServer): Observable<AllServerEvents> => {
   const event$ = new Subject<AllServerEvents>();
 
   httpServer.on(ServerEventType.CONNECT, (req: http.IncomingMessage, socket: net.Socket, head: Buffer) =>
@@ -46,7 +47,7 @@ export const subscribeServerEvents = (hostname: string) => (httpServer: HttpServ
 
   httpServer.on(ServerEventType.LISTENING, () => {
     const serverAddressInfo = httpServer.address() as net.AddressInfo;
-    event$.next(ServerEvent.listening(serverAddressInfo.port, hostname));
+    event$.next(ServerEvent.listening(serverAddressInfo.port, hostname ?? DEFAULT_HOSTNAME));
   });
 
   return event$
