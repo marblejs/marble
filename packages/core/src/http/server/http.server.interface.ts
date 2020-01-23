@@ -3,6 +3,8 @@ import { HttpServerEffect } from '../effects/http.effects.interface';
 import { BoundDependency } from '../../context/context.factory';
 import { httpListener } from './http.server.listener';
 
+export const DEFAULT_HOSTNAME = '127.0.0.1';
+
 export interface CreateServerConfig {
   port?: number;
   hostname?: string;

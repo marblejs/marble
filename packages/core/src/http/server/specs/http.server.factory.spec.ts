@@ -16,6 +16,7 @@ import {
   isCheckContinueEvent,
   isCheckExpectationEvent,
   isClientErrorEvent,
+  isCloseEvent,
 } from '../http.server.event';
 import { lookup } from '../../../context/context.factory';
 import { useContext } from '../../../context/context.hook';
@@ -104,6 +105,7 @@ describe('#createServer', () => {
       event$: event$ => forkJoin(
         event$.pipe(filter(isErrorEvent), take(1)),
         event$.pipe(filter(isClientErrorEvent), take(1)),
+        event$.pipe(filter(isCloseEvent), take(1)),
         event$.pipe(filter(isConnectEvent), take(1)),
         event$.pipe(filter(isConnectionEvent), take(1)),
         event$.pipe(filter(isListeningEvent), take(1)),
@@ -117,7 +119,7 @@ describe('#createServer', () => {
 
     server = await app();
 
-    server.emit(ServerEventType.ERROR);
+    server.emit(ServerEventType.ERROR, new Error('test_error'));
     server.emit(ServerEventType.CLIENT_ERROR);
     server.emit(ServerEventType.CONNECT);
     server.emit(ServerEventType.CONNECTION, new EventEmitter());
@@ -125,5 +127,6 @@ describe('#createServer', () => {
     server.emit(ServerEventType.UPGRADE);
     server.emit(ServerEventType.CHECK_CONTINUE);
     server.emit(ServerEventType.CHECK_EXPECTATION);
+    server.emit(ServerEventType.CLOSE);
   });
 });
