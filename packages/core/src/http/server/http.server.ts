@@ -17,7 +17,7 @@ import { httpRequestMetadataStorage } from './http.server.metadata.storage';
 import { CreateServerConfig } from './http.server.interface';
 
 export const createServer = async (config: CreateServerConfig) => {
-  const { httpListener, event$, port, hostname, dependencies = [], options = {} } = config;
+  const { listener, event$, port, hostname, dependencies = [], options = {} } = config;
 
   const server = options.httpsOptions ? https.createServer(options.httpsOptions) : http.createServer();
   const serverEvent$ = subscribeServerEvents(hostname)(server);
@@ -43,7 +43,7 @@ export const createServer = async (config: CreateServerConfig) => {
 
   const ask = lookup(context);
   const ctx = createEffectContext({ ask, client: server });
-  const listener = httpListener(context);
+  const httpListener = listener(context);
 
   merge(
     event$ ? event$(serverEvent$, ctx) : EMPTY,
@@ -57,7 +57,7 @@ export const createServer = async (config: CreateServerConfig) => {
 
     // @TODO: bind Routing
 
-    runningServer.on('request', listener);
+    runningServer.on('request', httpListener);
     runningServer.on('close', runningServer.removeAllListeners);
     runningServer.on('error', reject);
     runningServer.on('listening', () => resolve(runningServer));

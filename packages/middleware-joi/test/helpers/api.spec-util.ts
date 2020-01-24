@@ -1,7 +1,7 @@
-import { validator$, Joi } from '../../src';
 import { httpListener, use, EffectFactory, combineRoutes } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { map } from 'rxjs/operators';
+import { validator$, Joi } from '../../src';
 
 const getPost$ = EffectFactory
   .matchPath('/post')
@@ -68,4 +68,4 @@ const middlewares = [
 
 const effects = [api$];
 
-export const app = httpListener({ middlewares, effects });
+export const listener = httpListener({ middlewares, effects });

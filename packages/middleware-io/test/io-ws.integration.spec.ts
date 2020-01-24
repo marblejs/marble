@@ -16,7 +16,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     const targetClient = testBed.getClient();
 
     // when
-    const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+    const app = await createWebSocketServer({ options: { server }, listener });
     await app();
 
     targetClient.once('open', () => targetClient.send(event));
@@ -44,7 +44,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     };
 
     // when
-    const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+    const app = await createWebSocketServer({ options: { server }, listener });
     await app();
 
     targetClient.once('open', () => targetClient.send(event));

@@ -29,11 +29,9 @@ effects.push(
   ),
 );
 
-const app = httpListener({ middlewares, effects });
-
 const server = createServer({
   port: 1337,
-  httpListener: httpListener({ middlewares, effects }),
+  listener: httpListener({ middlewares, effects }),
 });
 
 const bootstrap = async () => {

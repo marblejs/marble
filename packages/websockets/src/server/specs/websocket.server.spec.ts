@@ -24,7 +24,7 @@ describe('WebSocket server', () => {
       const listener = webSocketListener({ effects: [echo$] });
 
       // when
-      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      const app = await createWebSocketServer({ options: { server }, listener });
       await app();
 
       targetClient.once('open', () => targetClient.send(event));
@@ -47,7 +47,7 @@ describe('WebSocket server', () => {
       const targetClient = testBed.getClient(0);
 
       // when
-      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      const app = await createWebSocketServer({ options: { server }, listener });
       await app();
 
       targetClient.on('open', () => targetClient.send(JSON.stringify(event)));
@@ -72,7 +72,7 @@ describe('WebSocket server', () => {
       const targetClient = testBed.getClient(0);
 
       // when
-      const app = await createWebSocketServer({ webSocketListener: listener });
+      const app = await createWebSocketServer({ listener });
       const webSocketServer = await app();
 
       server.on('upgrade', (request, socket, head) => {
@@ -106,7 +106,7 @@ describe('WebSocket server', () => {
       });
 
       // when
-      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener })
+      const app = await createWebSocketServer({ options: { server }, listener })
       await app();
 
       targetClient.once('open', () => targetClient.send(incomingEvent));
@@ -130,7 +130,7 @@ describe('WebSocket server', () => {
       const listener = webSocketListener();
 
       // when
-      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      const app = await createWebSocketServer({ options: { server }, listener });
       await app();
 
       targetClient.once('open', () => {
@@ -163,7 +163,7 @@ describe('WebSocket server', () => {
       const listener = webSocketListener({ effects: [effect$] });
 
       // when
-      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      const app = await createWebSocketServer({ options: { server }, listener });
       await app();
 
       targetClient.once('open', () => {
@@ -190,7 +190,7 @@ describe('WebSocket server', () => {
       const server = testBed.getServer();
 
       // when
-      const app = await createWebSocketServer({ options: { server }, connection$, webSocketListener: listener });
+      const app = await createWebSocketServer({ options: { server }, connection$, listener });
       await app();
 
       // then
@@ -212,7 +212,7 @@ describe('WebSocket server', () => {
       const server = testBed.getServer();
 
       // when
-      const app = await createWebSocketServer({ options: { server }, connection$, webSocketListener: listener });
+      const app = await createWebSocketServer({ options: { server }, connection$, listener });
       await app();
 
       // then
@@ -258,7 +258,7 @@ describe('WebSocket server', () => {
       const listener = webSocketListener({ effects: [effect$], eventTransformer });
 
       // when
-      const app = await createWebSocketServer({ options: { server }, webSocketListener: listener });
+      const app = await createWebSocketServer({ options: { server }, listener });
       await app();
 
       targetClient.once('open', () => {

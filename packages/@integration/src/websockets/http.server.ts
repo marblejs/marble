@@ -42,7 +42,7 @@ const upgrade$: HttpServerEffect = (event$, { ask }) =>
 
 export const server = createServer({
   port: 1337,
-  httpListener: httpListener({
+  listener: httpListener({
     middlewares: [logger$()],
     effects: [root$],
   }),

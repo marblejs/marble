@@ -1,6 +1,6 @@
-import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
 import { HttpRequest, RouteParameters } from '@marblejs/core';
+import { validator$, Joi } from '../../src';
 
 const reqMatched = (
   url: string,

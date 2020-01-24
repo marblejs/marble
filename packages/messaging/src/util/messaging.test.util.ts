@@ -9,7 +9,9 @@ export const runServer = (transport: any, options: any) => (effect$?: MsgEffect,
   createMicroservice({
     options,
     transport,
-    messagingListener: messagingListener(effect$ ? { effects: [effect$], output$, error$ } : undefined),
+    listener: messagingListener(effect$
+      ? { effects: [effect$], output$, error$ }
+      : undefined),
   }).then(app => app());
 
 export const runClient = (transport: Transport, transportOptions: any) =>

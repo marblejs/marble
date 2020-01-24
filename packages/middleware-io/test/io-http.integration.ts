@@ -19,7 +19,7 @@ const effect$ = EffectFactory
     map(req => ({ body: req.body.user })),
   ));
 
-export const app = httpListener({
+export const listener = httpListener({
   middlewares: [bodyParser$()],
   effects: [effect$],
 });

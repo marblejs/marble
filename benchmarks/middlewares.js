@@ -21,7 +21,7 @@ for (let i = 0; i < n; i++) {
 
 const server = createServer({
   port: 1337,
-  httpListener: httpListener({ effects, middlewares }),
+  listener: httpListener({ effects, middlewares }),
 });
 
 const bootstrap = async () => {

@@ -7,7 +7,7 @@
     "postbuild": "rimraf packages/**/*.spec.js packages/**/*.spec.d.ts",
     "benchmark": "NODE_ENV=test make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
-    "lint": "eslint ./packages/**/src --ext .ts",
+    "lint": "eslint ./packages/**/src ./packages/**/test --ext .ts",
     "pretest": "yarn lint",
     "link:all": "lerna exec -- yarn link",
     "unlink:all": "lerna exec -- yarn unlink",

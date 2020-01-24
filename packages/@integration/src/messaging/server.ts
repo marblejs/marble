@@ -59,7 +59,7 @@ export const microservice = createMicroservice({
     queue: 'test_queue',
     queueOptions: { durable: false },
   },
-  messagingListener: messagingListener({
+  listener: messagingListener({
     effects: [fibonacci$, buffer$, timeout$, error$],
   }),
 });

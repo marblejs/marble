@@ -1,11 +1,11 @@
 import * as request from 'supertest';
 import { createServer } from '@marblejs/core';
 import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
-import { app } from '../helpers/api.spec-util';
+import { listener } from '../helpers/api.spec-util';
 
 describe('Joi middleware - Integration', () => {
   const token = '181782881DB38D84';
-  const server = createServer({ httpListener: app });
+  const server = createServer({ listener });
   const httpTestBed = createHttpServerTestBed(server);
 
   beforeEach(() => {

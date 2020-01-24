@@ -6,7 +6,7 @@ import { webSocketListener } from './websocket.server.listener';
 
 export interface WebSocketServerConfig {
   options?: WebSocket.ServerOptions;
-  webSocketListener: ReturnType<typeof webSocketListener>;
+  listener: ReturnType<typeof webSocketListener>;
   dependencies?: BoundDependency<any>[];
   connection$?: WsConnectionEffect;
 }
