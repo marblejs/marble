@@ -20,7 +20,7 @@ const route =
   new IxBuilder<Ready, Empty, RouteEffectSpec>({});
 
 const matchPath = (path: string) => ichainCurry((spec: RouteEffectSpec) =>
-  new IxBuilder<Empty, PathApplied, RouteEffectSpec>({ ...spec, path }));
+  new IxBuilder<Empty | MetaApplied, PathApplied, RouteEffectSpec>({ ...spec, path }));
 
 const matchType = (method: HttpMethod) => ichainCurry((spec: RouteEffectSpec) =>
   new IxBuilder<PathApplied, TypeApplied, RouteEffectSpec>({ ...spec, method }));

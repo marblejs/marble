@@ -43,6 +43,7 @@ describe('#IxRouteBuilder', () => {
     const e$: HttpEffect = req$ => req$;
 
     const route = r.pipe(
+      r.applyMeta({ test0: 0 }),
       r.matchPath('/'),
       r.matchType('GET'),
       r.useEffect(e$),
@@ -53,6 +54,6 @@ describe('#IxRouteBuilder', () => {
     expect(route.path).toEqual('/');
     expect(route.method).toEqual('GET');
     expect(route.effect).toEqual(e$);
-    expect(route.meta).toEqual({ test1: 1, test2: 2 });
+    expect(route.meta).toEqual({ test0: 0, test1: 1, test2: 2 });
   });
 });

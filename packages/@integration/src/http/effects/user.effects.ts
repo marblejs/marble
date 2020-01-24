@@ -40,10 +40,10 @@ const getUser$ = r.pipe(
         new HttpError('User does not exist', HttpStatus.NOT_FOUND)
       )),
     );
-  }),
-);
+  }));
 
 const getUserBuffered$ = r.pipe(
+  r.applyMeta({ continuous: true }),
   r.matchPath('/:id/buffered'),
   r.matchType('GET'),
   r.useEffect(req$ => {
@@ -62,9 +62,7 @@ const getUserBuffered$ = r.pipe(
         )),
       )),
     );
-  }),
-  r.applyMeta({ continuous: true }),
-);
+  }));
 
 const postUser$ = r.pipe(
   r.matchPath('/'),
