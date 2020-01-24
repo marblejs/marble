@@ -90,7 +90,7 @@ const fib$ = r.pipe(
 
 export const server = createServer({
   port,
-  httpListener: httpListener({
+  listener: httpListener({
     middlewares: [logger$()],
     effects: [buffer$, timeout$, error$, fib$],
   }),

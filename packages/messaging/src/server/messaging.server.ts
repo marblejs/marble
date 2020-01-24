@@ -30,7 +30,7 @@ export const createMicroservice = async (config: CreateMicroserviceConfig) => {
     options,
     transport,
     dependencies = [],
-    messagingListener,
+    listener,
   } = config;
 
   const serverEventsSubject = new Subject<AllServerEvents>();
@@ -50,7 +50,7 @@ export const createMicroservice = async (config: CreateMicroserviceConfig) => {
     resolve,
   )(createContext());
 
-  const listener = messagingListener(context);
+  const messagingListener = listener(context);
   const serverEvent$ = serverEventsSubject.asObservable().pipe(takeWhile(e => !isCloseEvent(e)));
   const ctx = createEffectContext({ ask: lookup(context), client: undefined });
   const combinedEvents = event$ ? combineEffects(statusLogger$, event$) : statusLogger$;
@@ -61,7 +61,7 @@ export const createMicroservice = async (config: CreateMicroserviceConfig) => {
     const { host, channel } = transportLayer.config;
     const connection = await transportLayer.connect({ isConsumer: true });
 
-    listener(connection);
+    messagingListener(connection);
 
     connection.status$
       .pipe(takeUntil(connection.close$))

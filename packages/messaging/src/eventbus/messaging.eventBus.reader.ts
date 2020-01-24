@@ -11,7 +11,7 @@ import { MessagingClient } from '../client/messaging.client.interface';
 import { messagingClient } from '../client/messaging.client';
 
 interface EventBusConfig {
-  messagingListener: ReturnType<typeof messagingListener>;
+  listener: ReturnType<typeof messagingListener>;
 }
 
 export const EventBusToken = createContextToken<TransportLayerConnection>('EventBusToken');
@@ -20,13 +20,14 @@ export const EventBusClientToken = createContextToken<MessagingClient>('EventBus
 export const eventBus = (config: EventBusConfig) => pipe(
   R.ask<Context>(),
   R.map(async rootContext => {
+    const { listener } = config;
     const ctx = deleteAt(setoidContextToken)(EventBusToken)(rootContext);
     const transportLayer = provideTransportLayer(Transport.LOCAL);
     const transportLayerConnection = await transportLayer.connect();
     const boundTransportLayer = bindTo(TransportLayerToken)(() => transportLayer);
     const context = await flow(register(boundTransportLayer), resolve)(ctx);
 
-    config.messagingListener(context)(transportLayerConnection);
+    listener(context)(transportLayerConnection);
 
     return transportLayerConnection;
   }),

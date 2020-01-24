@@ -2,10 +2,10 @@ import { ContentType } from '@marblejs/core/dist/+internal/http';
 import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
 import { createServer } from '@marblejs/core';
 import * as request from 'supertest';
-import { app } from './bodyParser.integration';
+import { listener } from './bodyParser.integration';
 
 describe('@marblejs/middleware-body - integration', () => {
-  const server = createServer({ httpListener: app });
+  const server = createServer({ listener });
   const httpTestBed = createHttpServerTestBed(server);
 
   describe('POST /default-parser', () => {

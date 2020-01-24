@@ -1,13 +1,13 @@
 import * as request from 'supertest';
-import { verifyToken } from '../src';
-import { app, SECRET_KEY } from './jwt.integration';
 import { createServer } from '@marblejs/core';
 import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
+import { verifyToken } from '../src';
+import { listener, SECRET_KEY } from './jwt.integration';
 
 const LOGIN_CREDENTIALS = { email: 'admin@admin.com', password: 'admin' };
 
 describe('@marblejs/middleware-jwt - HTTP integration', () => {
-  const server = createServer({ httpListener: app });
+  const server = createServer({ listener });
   const httpTestBed = createHttpServerTestBed(server);
 
   test('POST /api/login returns token and verifies its correctness', async () =>

@@ -1,10 +1,10 @@
 import * as request from 'supertest';
 import { createServer } from '@marblejs/core';
 import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
-import { app } from './io-http.integration';
+import { listener } from './io-http.integration';
 
 describe('@marblejs/middleware-io - HTTP integration', () => {
-  const server = createServer({ httpListener: app });
+  const server = createServer({ listener });
   const httpTestBed = createHttpServerTestBed(server);
 
   test('POST / returns 200 with user object', async () => {

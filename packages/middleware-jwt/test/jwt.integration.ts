@@ -1,11 +1,11 @@
-import { authorize$ as authorizeMiddleware$, generateToken } from '../src';
 import { httpListener, EffectFactory, combineRoutes } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { map, flatMap } from 'rxjs/operators';
 import { of, iif, throwError } from 'rxjs';
+import { authorize$ as authorizeMiddleware$, generateToken } from '../src';
 
-type LoginCredentials = { email: string, password: string };
-type Payload = { id: string, email: string};
+type LoginCredentials = { email: string; password: string };
+type Payload = { id: string; email: string};
 
 export const SECRET_KEY = 'SOME_SSH_KEY';
 
@@ -50,4 +50,4 @@ const api$ = combineRoutes('/api', [login$, secured$]);
 const middlewares = [bodyParser$()];
 const effects = [api$];
 
-export const app = httpListener({ middlewares, effects });
+export const listener = httpListener({ middlewares, effects });

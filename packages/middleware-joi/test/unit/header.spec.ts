@@ -1,18 +1,20 @@
-import { validator$, Joi } from '../../src';
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 import { of } from 'rxjs';
 import { HttpRequest } from '@marblejs/core';
-const MockReq = require('mock-req');
+import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
+import { validator$, Joi } from '../../src';
 
 describe('Joi middleware - Header', () => {
-  it('should throws an error if dont pass a required field', done => {
+  test('should throws an error if dont pass a required field', done => {
     expect.assertions(2);
 
-    const request = new MockReq({
+    const request = createHttpRequest({
       method: 'GET',
       headers: {}
     });
 
-    const req$ = of(request as HttpRequest);
+    const req$ = of(request);
     const schema = {
       headers: Joi.object({
         token: Joi.string()
@@ -35,17 +37,15 @@ describe('Joi middleware - Header', () => {
     );
   });
 
-  it('should throws an error if pass a unknown field', done => {
+  test('should throws an error if pass a unknown field', done => {
     expect.assertions(2);
 
-    const request = new MockReq({
+    const request = createHttpRequest({
       method: 'GET',
-      headers: {
-        end: 1
-      }
+      headers: { end: 1 }
     });
 
-    const req$ = of(request as HttpRequest);
+    const req$ = of(request);
     const schema = {
       headers: Joi.object({
         start: Joi.date()
@@ -66,15 +66,12 @@ describe('Joi middleware - Header', () => {
     );
   });
 
-  it('should validates header with unknown field', done => {
+  test('should validates header with unknown field', done => {
     expect.assertions(2);
 
-    const request = new MockReq({
+    const request = createHttpRequest({
       method: 'GET',
-      headers: {
-        end: 1,
-        start: '2018'
-      }
+      headers: { end: 1, start: '2018' },
     });
 
     const req$ = of(request as HttpRequest);
@@ -92,10 +89,10 @@ describe('Joi middleware - Header', () => {
     });
   });
 
-  it('should validates header with two fields', done => {
+  test('should validates header with two fields', done => {
     expect.assertions(1);
 
-    const request = new MockReq({
+    const request = createHttpRequest({
       method: 'GET',
       headers: {
         token: '181782881DB38D84',

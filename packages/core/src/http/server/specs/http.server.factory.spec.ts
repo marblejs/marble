@@ -43,7 +43,7 @@ describe('#createServer', () => {
     const hostname = '127.0.0.1';
     const app = await createServer({
       hostname,
-      httpListener: httpListener(),
+      listener: httpListener(),
     });
 
     // when
@@ -56,7 +56,7 @@ describe('#createServer', () => {
   test('creates http server and starts listening without specified port and hostname', async () => {
     // given
     const app = await createServer({
-      httpListener: httpListener(),
+      listener: httpListener(),
     });
 
     // when
@@ -73,7 +73,7 @@ describe('#createServer', () => {
       cert: fs.readFileSync(path.resolve(__dirname, '../../../../../../assets/cert.pem')),
     };
     const app = await createServer({
-      httpListener: httpListener(),
+      listener: httpListener(),
       options: { httpsOptions },
     });
 
@@ -87,7 +87,7 @@ describe('#createServer', () => {
   test('returns server via context', async () => {
     // given
     const app = await createServer({
-      httpListener: httpListener(),
+      listener: httpListener(),
     });
 
     // when
@@ -101,7 +101,7 @@ describe('#createServer', () => {
 
   test(`emits server events`, async done => {
     const app = await createServer({
-      httpListener: httpListener(),
+      listener: httpListener(),
       event$: event$ => forkJoin(
         event$.pipe(filter(isErrorEvent), take(1)),
         event$.pipe(filter(isClientErrorEvent), take(1)),

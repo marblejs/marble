@@ -4,7 +4,7 @@ import { TransportStrategy, TransportLayerConnection } from '../transport/transp
 import { messagingListener } from './messaging.server.listener';
 
 type ConfigurationBase =  {
-  messagingListener: ReturnType<typeof messagingListener>;
+  listener: ReturnType<typeof messagingListener>;
   dependencies?: BoundDependency<any>[];
   event$?: MsgServerEffect;
 }

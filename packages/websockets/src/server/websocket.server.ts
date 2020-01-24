@@ -30,7 +30,7 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
   const {
     options,
     dependencies = [],
-    webSocketListener,
+    listener,
     connection$ = (req$: Observable<http.IncomingMessage>) => req$,
   } = config;
 
@@ -55,20 +55,20 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
   )(createContext());
   const ask = lookup(context);
   const providedLogger = useContext(LoggerToken)(ask);
-  const listener = webSocketListener(context);
+  const webSocketListener = listener(context);
 
   const server = createServer({
     noServer: true,
     verifyClient: verifyClient(context),
     ...options
-  }, listener.eventTransformer);
+  }, webSocketListener.eventTransformer);
 
   const listen: ServerIO<WebSocketServerConnection> = () => new Promise((resolve, reject) => {
     handleServerBrokenConnections(server).subscribe();
 
     server.on('connection', (client: WebSocketClientConnection, req: http.IncomingMessage) => {
-      client.sendResponse = handleResponse(client, listener.eventTransformer);
-      client.sendBroadcastResponse = handleBroadcastResponse(server, listener.eventTransformer);
+      client.sendResponse = handleResponse(client, webSocketListener.eventTransformer);
+      client.sendBroadcastResponse = handleBroadcastResponse(server, webSocketListener.eventTransformer);
       client.isAlive = true;
       client.id = createUuid();
       client.address = req.connection.remoteAddress ?? '-';
@@ -77,7 +77,7 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
       const log = providedLogger({ tag: LoggerTag.WEBSOCKETS, type: 'Server', message });
 
       handleClientBrokenConnection(client).subscribe();
-      listener(client);
+      webSocketListener(client);
       log();
     });
 

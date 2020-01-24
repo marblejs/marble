@@ -1,6 +1,6 @@
-import { validator$, Joi } from '../../src';
 import { of } from 'rxjs';
 import { HttpRequest, RouteParameters, QueryParameters } from '@marblejs/core';
+import { validator$, Joi } from '../../src';
 
 const reqMatched = (
   url: string,
@@ -10,7 +10,7 @@ const reqMatched = (
 ) => ({ url, matchers, params, query } as any as HttpRequest);
 
 describe('Joi middleware - Query', () => {
-  it('should throws an error if dont pass a required field', done => {
+  test('should throws an error if dont pass a required field', done => {
     expect.assertions(2);
 
     const req$ = of(reqMatched('/test', undefined, {}, {}));
@@ -36,7 +36,7 @@ describe('Joi middleware - Query', () => {
     );
   });
 
-  it('should throws an error if pass a invalid field', done => {
+  test('should throws an error if pass a invalid field', done => {
     expect.assertions(2);
 
     const req$ = of(reqMatched('/test', undefined, {}, { id: '@@@' }));
@@ -62,7 +62,7 @@ describe('Joi middleware - Query', () => {
     );
   });
 
-  it('should validates query with a valid value', done => {
+  test('should validates query with a valid value', done => {
     expect.assertions(2);
 
     const req$ = of(reqMatched('/test', undefined, {}, { id: '181782881DB38D84' }));

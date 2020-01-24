@@ -8,7 +8,7 @@ export const DEFAULT_HOSTNAME = '127.0.0.1';
 export interface CreateServerConfig {
   port?: number;
   hostname?: string;
-  httpListener: ReturnType<typeof httpListener>;
+  listener: ReturnType<typeof httpListener>;
   event$?: HttpServerEffect;
   options?: ServerOptions;
   dependencies?: BoundDependency<any>[];

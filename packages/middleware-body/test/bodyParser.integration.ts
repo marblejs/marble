@@ -37,7 +37,7 @@ const multipleParsers$ = combineRoutes('/multiple-parsers', {
   effects: [effect$],
 });
 
-export const app = httpListener({
+export const listener = httpListener({
   effects: [
     defaultParser$,
     multipleParsers$,
