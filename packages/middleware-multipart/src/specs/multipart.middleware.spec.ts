@@ -121,6 +121,19 @@ describe('multipart$', () => {
       });
   });
 
+  test('parses multipart/form-data request with fields only (no files)', async () =>
+    request(httpTestBed.getInstance())
+      .post('/memory')
+      .field('field_1', 'test_1')
+      .field('field_2', 'test_2')
+      .expect(200)
+      .then(({ body }) => {
+        // field_1, field_2
+        expect(body.fields.field_1).toEqual('test_1');
+        expect(body.fields.field_2).toEqual('test_2');
+      }),
+  );
+
   test('throws an error if incoming request is not multipart/form-data', async () =>
     request(httpTestBed.getInstance())
       .post('/memory')

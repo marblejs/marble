@@ -3,7 +3,7 @@ import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
 import { isNonNullable } from '@marblejs/core/dist/+internal/utils';
 import { fromReadableStream } from '@marblejs/core/dist/+internal/observable';
 import { fromEvent, Observable, of, throwError, merge, iif } from 'rxjs';
-import { mapTo, map, mergeMap, takeUntil, toArray, tap, mergeMapTo, ignoreElements } from 'rxjs/operators';
+import { mapTo, map, mergeMap, takeUntil, toArray, tap, mergeMapTo, ignoreElements, defaultIfEmpty } from 'rxjs/operators';
 import { FileIncomingData, ParserOpts } from './multipart.interface';
 import { setRequestData, shouldParseFieldname } from './multipart.util';
 
@@ -46,4 +46,6 @@ export const parseFile = (req: HttpRequest) => (opts: ParserOpts) => (event$: Ob
           mapTo(data),
         ),
     ),
+    mapTo(req),
+    defaultIfEmpty(req),
   );
