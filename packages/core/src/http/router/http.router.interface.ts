@@ -2,6 +2,11 @@ import { Subject } from 'rxjs';
 import { HttpMethod, HttpRequest } from '../http.interface';
 import { HttpEffect, HttpMiddlewareEffect, HttpEffectResponse } from '../effects/http.effects.interface';
 
+export type ErrorSubject = Subject<{
+  error: Error;
+  req: HttpRequest<unknown, unknown, unknown>;
+}>;
+
 // Route
 export interface RouteMeta extends Record<string, any> {
   name?: string;

@@ -1,5 +1,6 @@
 import { Subject, of, fromEvent, Observable } from 'rxjs';
-import { takeUntil, share, take, mergeMap, map } from 'rxjs/operators';
+import { takeUntil, share, take, mergeMap, map, catchError } from 'rxjs/operators';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { EffectContext } from '../../effects/effects.interface';
 import { HttpServer, HttpRequest } from '../http.interface';
 import { defaultError$ } from '../error/http.error.effect';
@@ -13,7 +14,7 @@ import {
 } from '../error/http.error.model';
 import { useContext } from '../../context/context.hook';
 import { HttpRequestBusToken } from '../server/http.server.tokens';
-import { LoggerToken, LoggerTag } from '../../logger';
+import { LoggerToken, LoggerTag, LoggerLevel } from '../../logger';
 import { Routing, BootstrappedRoutingItem } from './http.router.interface';
 import { queryParamsFactory } from './http.router.query.factory';
 import { matchRoute } from './http.router.matcher';
@@ -79,6 +80,7 @@ export const resolveRouting = (
       const { middlewares, effect, parameters, meta } = methodItem;
       const subject = new Subject<HttpRequest>();
       const decorate = !meta?.continuous;
+      const middleware = combineRouteMiddlewares(decorate, errorSubject)(...middlewares);
 
       logger({
         tag: LoggerTag.HTTP,
@@ -86,10 +88,22 @@ export const resolveRouting = (
         message: `Effect mapped: ${item.path || '/'} ${method}`,
       })();
 
-      const input$ = subject.asObservable();
-      const middleware$ = combineRouteMiddlewares(decorate)(...middlewares)(input$, ctx);
-      const effect$ = decorate ? decorateEffect(middleware$) : middleware$;
-      const output$ = effect(effect$, ctx).pipe(takeUntil(close$));
+      const output$ = pipe(
+        subject.asObservable(),
+        e$ => middleware(e$, ctx),
+        e$ => decorate ? decorateEffect(e$, errorSubject) : e$,
+        e$ => effect(e$, ctx),
+        e$ => e$.pipe(
+          takeUntil(close$),
+          catchError((error, stream) => processError(stream)(error)),
+        ),
+      );
+
+      const processError = (originStream$: Observable<any>) => (error: any) => {
+        if (!error.request) throw errorNotBoundToRequestErrorFactory(error);
+        errorSubject.next({ error, req: error.request });
+        return originStream$;
+      };
 
       const subscribe = (stream$: Observable<HttpEffectResponse>) =>
         stream$.subscribe(
@@ -98,10 +112,15 @@ export const resolveRouting = (
             outputSubject.next({ res, req: res.request });
           },
           error => {
-            if (!error.request) throw errorNotBoundToRequestErrorFactory(error);
-            errorSubject.next({ error, req: error.request });
-            subscribe(stream$);
+            const type = 'RouterResolver';
+            const message = `Unexpected error for Output stream: "${error.name}", "${error.message}"`;
+            logger({ tag: LoggerTag.HTTP, type, message, level: LoggerLevel.ERROR })();
           },
+          () => {
+            const type = 'RouterResolver';
+            const message = `Output stream completes`;
+            logger({ tag: LoggerTag.HTTP, type, message, level: LoggerLevel.DEBUG })();
+          }
         );
 
       subscribe(output$);
