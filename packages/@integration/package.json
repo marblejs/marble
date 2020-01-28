@@ -34,6 +34,7 @@
     "@marblejs/websockets": "^3.0.0-rc.4",
     "@types/node": "^10.1.2",
     "rxjs": "^6.5.3",
+    "fp-ts": "^2.4.3",
     "typescript": "~3.0.3"
   },
   "devDependencies": {

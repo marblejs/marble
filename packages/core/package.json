@@ -31,7 +31,8 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "rxjs": "^6.5.3"
+    "rxjs": "^6.5.3",
+    "fp-ts": "^2.4.2"
   },
   "dependencies": {
     "@types/json-schema": "^7.0.3",
