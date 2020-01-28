@@ -3,6 +3,7 @@ import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError, from, of } from 'rxjs';
 import { map, switchMap, catchError, mergeMap, bufferCount } from 'rxjs/operators';
 import { Dao } from '../fakes/dao.fake';
+import { simulateRandomFailure, simulateRandomDelay } from '../fakes/random';
 import { authorize$ } from '../middlewares/auth.middleware';
 
 const getUserValidator$ = requestValidator$({
@@ -34,11 +35,15 @@ const getUser$ = r.pipe(
     return req$.pipe(
       use(getUserValidator$),
       map(req => req.params.id),
-      switchMap(Dao.getUserById),
-      map(user => ({ body: user })),
-      catchError(() => throwError(
-        new HttpError('User does not exist', HttpStatus.NOT_FOUND)
+      mergeMap(id => Dao
+        .getUserById(id)
+        .pipe(catchError(() => throwError(
+          new HttpError('User does not exist', HttpStatus.NOT_FOUND)
+        )),
       )),
+      simulateRandomDelay,
+      simulateRandomFailure,
+      map(user => ({ body: user })),
     );
   }));
 

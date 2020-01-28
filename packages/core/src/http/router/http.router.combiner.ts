@@ -1,5 +1,5 @@
 import { HttpMiddlewareEffect } from '../effects/http.effects.interface';
-import { RouteCombinerConfig, RouteEffectGroup, RouteEffect } from './http.router.interface';
+import { RouteCombinerConfig, RouteEffectGroup, RouteEffect, ErrorSubject } from './http.router.interface';
 import { isRouteCombinerConfig, decorateMiddleware } from './http.router.helpers';
 
 export function combineRoutes(path: string, config: RouteCombinerConfig): RouteEffectGroup;
@@ -20,8 +20,8 @@ export function combineRoutes(
 }
 
 export const combineRouteMiddlewares =
-  (decorate: boolean) => (...middlewares: HttpMiddlewareEffect[]): HttpMiddlewareEffect => (input$, ctx) =>
+  (decorate: boolean, errorSubject: ErrorSubject) => (...middlewares: HttpMiddlewareEffect[]): HttpMiddlewareEffect => (input$, ctx) =>
     middlewares.reduce(
-      (i$, middleware) => middleware(decorate ? decorateMiddleware(i$) : i$, ctx),
-      decorate ? decorateMiddleware(input$) : input$,
+      (i$, middleware) => middleware(decorate ? decorateMiddleware(i$, errorSubject) : i$, ctx),
+      decorate ? decorateMiddleware(input$, errorSubject) : input$,
     );
