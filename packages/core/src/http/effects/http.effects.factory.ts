@@ -7,6 +7,11 @@ import { HttpMethod, HttpMethodType } from '../http.interface';
 const httpMethods = getArrayFromEnum(HttpMethodType);
 const coreErrorOptions: CoreErrorOptions =  { contextMethod: 'EffectFactory' };
 
+/**
+ * @deprecated since version 3.0, use pipable builder instead
+ *
+ * #EffectFactory will be deleted in the next major version (v4.0),
+ */
 export const EffectFactory = {
    matchPath: (path: string) => {
     if (!path) {
