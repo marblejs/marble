@@ -1,5 +1,6 @@
 import { insertIf } from '../../+internal/utils';
 import { HttpMiddlewareEffect } from '../effects/http.effects.interface';
+import { coreErrorFactory } from '../../error/error.factory';
 import { isRouteEffectGroup } from './http.router.helpers';
 import {
   Routing,
@@ -46,7 +47,11 @@ export const factorizeRouting = (
 
     if (foundRoute) {
       if (!canOverrideRoute(route) && foundRoute.methods[route.method]) {
-        throw new Error(`Redefinition of route at "${route.method}: ${parentPath + route.path}"`);
+        const routePath = (parentPath + route.path).replace(/\/\//g, '/');
+        throw coreErrorFactory(
+          `Redefinition of route at "${route.method}: ${routePath}"`,
+          { contextMethod: 'factorizeRouting', offset: 1, printStacktrace: false },
+        );
       }
 
       if (canOverrideRoute(route) && foundRoute.methods[route.method]) {
