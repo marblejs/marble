@@ -25,26 +25,6 @@ describe('#act operator', () => {
     ]);
   });
 
-  test('emits output event from async (Promise) call function', () => {
-    // given
-    const event1: Event = { type: 'TEST_EVENT_1', payload: 1 };
-    const event2: Event = { type: 'TEST_EVENT_2', payload: 2 };
-    const event3: Event = { type: 'TEST_EVENT_3', payload: 3 };
-    const event4: Event = { type: 'TEST_EVENT_4', payload: 4 };
-
-    // when
-    const effect$ = (event$: Observable<Event>) =>
-      event$.pipe(
-        act(async event => event),
-      );
-
-    // then
-    Marbles.assertEffect(effect$, [
-      ['-a-b-c-d---', { a: event1, b: event2, c: event3, d: event4 }],
-      ['-a-b-c-d---', { a: event1, b: event2, c: event3, d: event4 }],
-    ]);
-  });
-
   test('emits multiple output events', () => {
     // given
     const event1: Event = { type: 'TEST_EVENT_1', payload: 1 };

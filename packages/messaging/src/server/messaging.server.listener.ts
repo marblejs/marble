@@ -10,7 +10,7 @@ import {
   LoggerLevel,
 } from '@marblejs/core';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, defer } from 'rxjs';
 import { map, catchError, takeUntil } from 'rxjs/operators';
 import {
   TransportMessage,
@@ -85,7 +85,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
       connection.message$,
       e$ => e$.pipe(map(decode)),
       e$ => combinedMiddlewares(e$, ctx),
-      e$ => processError(e$),
+      e$ => defer(() => processError(e$)),
     );
 
     const outgoingEvent$ = pipe(
@@ -93,22 +93,22 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
       e$ => combinedEffects(e$, ctx),
       e$ => output$(e$, ctx),
       e$ => outputLogger$(e$, ctx),
-      e$ => processError(e$),
+      e$ => defer(() => processError(e$)),
     );
 
     const errorEvent$ = pipe(
       errorSubject.asObservable(),
       e$ => error$(e$, ctx),
-      e$ => errorLogger$(e$, ctx),
+      e$ => defer(() => errorLogger$(e$, ctx)),
     );
 
-    const processError = (origin$: Observable<any>) =>
+    const processError = <T>(origin$: Observable<T>): Observable<T> =>
       origin$.pipe(catchError(error => {
         errorSubject.next(error);
         return processError(origin$);
       }));
 
-    const subscribeIncomingEvent = (event$: Observable<Event<unknown, any, string>>) =>
+    const subscribeIncomingEvent = (event$: Observable<Event>) =>
       event$
         .pipe(takeUntil(connection.close$))
         .subscribe(
