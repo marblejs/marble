@@ -1,6 +1,7 @@
 import * as http from 'http';
 import { EventEmitter } from 'events';
 import { Subject } from 'rxjs';
+import { delay, tap, mapTo } from 'rxjs/operators';
 import {
   HttpRequest,
   HttpResponse,
@@ -15,6 +16,9 @@ import { createEffectContext } from '../../effects/effectsContext.factory';
 import { HttpRequestBusToken, HttpServerClientToken } from '../../http/server/http.server.tokens';
 import { ServerIO } from '../../listener/listener.interface';
 import { LoggerToken, mockLogger } from '../../logger';
+import { factorizeRegExpWithParams } from '../../http/router/http.router.params.factory';
+import { HttpEffect } from '../../http/effects/http.effects.interface';
+import { RoutingItem } from '../../http/router/http.router.interface';
 
 interface HttpRequestMockParams {
   url?: string;
@@ -73,6 +77,29 @@ export const createMockEffectContext = () => {
   const context = registerAll(dependencies)(createContext());
   const client = http.createServer();
   return createEffectContext({ ask: lookup(context), client });
+};
+
+export const createTestRoute = (opts?: { throwError?: boolean; delay?: number; method?: HttpMethod }) => {
+  const routeMethod = opts?.method ?? 'GET';
+  const routeDelay = opts?.delay ?? 0;
+
+  const req = createHttpRequest(({ url: `/delay_${routeDelay}`, method: 'GET' }));
+  const path = factorizeRegExpWithParams(`/delay_${routeDelay}`);
+
+  const effect: HttpEffect = req$ =>
+    req$.pipe(
+      delay(routeDelay),
+      tap(() => { if (opts?.throwError) throw new Error(); }),
+      mapTo({ body: `delay_${routeDelay}` }),
+    );
+
+  const item: RoutingItem = {
+    regExp: path.regExp,
+    path: path.path,
+    methods: { [routeMethod]: { effect, middlewares: [] } },
+  };
+
+  return { req, path, effect, item };
 };
 
 export const createHttpServerTestBed = (server: Promise<ServerIO<HttpServer>>) => {
