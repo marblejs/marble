@@ -1,4 +1,4 @@
-import { isNonNullable, isNullable } from '../any.util';
+import { isNonNullable, isNullable, getPortEnv } from '../any.util';
 
 test('#isNonNullable', () => {
   expect(isNonNullable({})).toBe(true);
@@ -18,4 +18,9 @@ test('#isNullable', () => {
   expect(isNullable(false)).toBe(false);
   expect(isNullable(null)).toBe(true);
   expect(isNullable(undefined)).toBe(true);
+});
+
+test('#getPortEnv', () => {
+  process.env.PORT = '8000';
+  expect(getPortEnv()).toEqual(8000);
 });

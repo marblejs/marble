@@ -1,6 +1,6 @@
 import { getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getArrayFromEnum, getHead, getLast, filterArray, mapArray } from '../array.util';
+import { getArrayFromEnum, getHead, getLast, filterArray, mapArray, insertIf, insertIfElse } from '../array.util';
 
 describe('Array util', () => {
   test('#getArrayFromEnum returns array from simple enumerable', () => {
@@ -83,5 +83,15 @@ describe('Array util', () => {
 
     // then
     expect(result).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  test('#insertIf inserts element conditionally', () => {
+    expect([ 1, ...insertIf(1 === 1)(2), 3]).toEqual([ 1, 2, 3 ]);
+    expect([ 1, ...insertIf(1 !== 1)(2), 3]).toEqual([ 1, 3 ]);
+  });
+
+  test('#insertIfElse inserts element conditionally or sets default', () => {
+    expect([ 1, ...insertIfElse(1 === 1)(2)(0), 3]).toEqual([ 1, 2, 3 ]);
+    expect([ 1, ...insertIfElse(1 !== 1)(2)(0), 3]).toEqual([ 1, 0, 3 ]);
   });
 });

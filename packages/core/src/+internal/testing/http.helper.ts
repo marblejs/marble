@@ -80,10 +80,10 @@ export const createMockEffectContext = () => {
 };
 
 export const createTestRoute = (opts?: { throwError?: boolean; delay?: number; method?: HttpMethod }) => {
-  const routeMethod = opts?.method ?? 'GET';
+  const method = opts?.method ?? 'GET';
   const routeDelay = opts?.delay ?? 0;
 
-  const req = createHttpRequest(({ url: `/delay_${routeDelay}`, method: 'GET' }));
+  const req = createHttpRequest(({ url: `/delay_${routeDelay}`, method }));
   const path = factorizeRegExpWithParams(`/delay_${routeDelay}`);
 
   const effect: HttpEffect = req$ =>
@@ -96,7 +96,7 @@ export const createTestRoute = (opts?: { throwError?: boolean; delay?: number; m
   const item: RoutingItem = {
     regExp: path.regExp,
     path: path.path,
-    methods: { [routeMethod]: { effect, middlewares: [] } },
+    methods: { [method]: { effect, middlewares: [] } },
   };
 
   return { req, path, effect, item };
