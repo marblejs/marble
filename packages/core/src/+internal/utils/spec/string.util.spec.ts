@@ -1,12 +1,33 @@
-import { isString, trim, stringify, createUuid } from '../string.util';
+import { isString, trim, stringify, createUuid, trunc } from '../string.util';
 
-test('#isString check is given argument is of string type', () => {
-  expect(isString('some string value')).toBe(true);
-  expect(isString(7)).toBe(false);
-  expect(isString(true)).toBe(false);
-  expect(isString({})).toBe(false);
-  expect(isString(null)).toBe(false);
-  expect(isString(undefined)).toBe(false);
+describe('#isString', () => {
+  const cases: [any, boolean][] = [
+    [6, false],
+    ['6', true],
+    [{}, false],
+    [null, false],
+    [true, false],
+    [undefined, false],
+    ['', true],
+    ['some value', true],
+  ];
+
+  test.each(cases)('given %p as argument, returns %p', (data, expected) =>
+    expect(isString(data)).toEqual(expected));
+});
+
+describe('#trunc', () => {
+  const cases: [number, string, string][] = [
+    [0, '', ''],
+    [0, 'abc', ''],
+    [1, 'abc', 'a…'],
+    [2, 'abc', 'ab…'],
+    [3, 'abc', 'abc'],
+    [4, 'abc', 'abc'],
+  ];
+
+  test.each(cases)('given %p and %p as arguments, returns %p', (n, input, expected) =>
+    expect(trunc(n)(input)).toEqual(expected));
 });
 
 test('#trim trims whitespaces and removes nil values', () => {

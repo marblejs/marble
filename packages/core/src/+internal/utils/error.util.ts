@@ -5,4 +5,4 @@ export class ExtendableError extends Error {
 }
 
 export const isError = (data: any): data is Error =>
-  !!data.stack && !!data.name;
+  !!data?.stack && !!data?.name;

@@ -16,7 +16,7 @@ export const trim = (strings: TemplateStringsArray, ...values: any[]) => {
 
 export const trunc = (n: number) => (input: string) =>
   (input.length > n)
-    ? input.substr(0, n-1) + '…'
+    ? input.substr(0, n) + '…'
     : input;
 
 export const stringify = (value: any): string =>
