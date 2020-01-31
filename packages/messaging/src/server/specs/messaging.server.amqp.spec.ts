@@ -5,7 +5,7 @@ import { map, tap, delay, bufferCount, mergeMap } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
 import { MsgEffect, MsgErrorEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
 import { AmqpStrategyOptions } from '../../transport/strategies/amqp.strategy.interface';
-import { runClient, runServer, createMessage } from '../../util/messaging.test.util';
+import { runMicroserviceClient, runMicroservice, createMessage } from '../../util/messaging.test.util';
 
 const createOptions = (config: { expectAck?: boolean; queue?: string } = {}): AmqpStrategyOptions => ({
   host: 'amqp://localhost:5672',
@@ -25,8 +25,8 @@ describe('messagingServer::AMQP', () => {
       );
 
     const options = createOptions({ expectAck: false });
-    const client = await runClient(Transport.AMQP, options);
-    const server = await runServer(Transport.AMQP, options)(rpc$);
+    const client = await runMicroserviceClient(Transport.AMQP, options);
+    const microservice = await runMicroservice(Transport.AMQP, options)(rpc$);
 
     const result = await Promise.all([
       client.sendMessage(options.queue, createMessage({ type: 'RPC_TEST', payload: 1 })),
@@ -39,7 +39,7 @@ describe('messagingServer::AMQP', () => {
     expect(parsedResult0).toEqual({ type: 'RPC_TEST_RESULT', payload: 2 });
     expect(parsedResult1).toEqual({ type: 'RPC_TEST_RESULT', payload: 11 });
 
-    await server.close();
+    await microservice.close();
   });
 
   test('handles published event', async done => {
@@ -47,7 +47,7 @@ describe('messagingServer::AMQP', () => {
 
     eventSubject.subscribe(event => {
       expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
-      setTimeout(() => server.close().then(done), 1000);
+      setTimeout(() => microservice.close().then(done), 1000);
     });
 
     const event$: MsgEffect = event$ =>
@@ -60,8 +60,8 @@ describe('messagingServer::AMQP', () => {
       );
 
     const options = createOptions({ expectAck: false });
-    const client = await runClient(Transport.AMQP, options);
-    const server = await runServer(Transport.AMQP, options)(event$);
+    const client = await runMicroserviceClient(Transport.AMQP, options);
+    const microservice = await runMicroservice(Transport.AMQP, options)(event$);
     const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
 
     await client.emitMessage(options.queue, message);
@@ -72,7 +72,7 @@ describe('messagingServer::AMQP', () => {
 
     eventSubject.subscribe(event => {
       expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
-      setTimeout(() => server.close().then(done), 1000);
+      setTimeout(() => microservice.close().then(done), 1000);
     });
 
     const event$: MsgEffect = (event$, { client }) =>
@@ -87,8 +87,8 @@ describe('messagingServer::AMQP', () => {
       );
 
     const options = createOptions({ expectAck: true, queue: 'test_ack_queue_server' });
-    const client = await runClient(Transport.AMQP, options);
-    const server = await runServer(Transport.AMQP, options)(event$);
+    const client = await runMicroserviceClient(Transport.AMQP, options);
+    const microservice = await runMicroservice(Transport.AMQP, options)(event$);
     const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
 
     await client.emitMessage(options.queue, message);
@@ -107,7 +107,7 @@ describe('messagingServer::AMQP', () => {
         expect(data[0][1]).toEqual(error);
         expect(data[1][0]).toEqual(event2);
         expect(data[1][1]).toBeUndefined();
-        setTimeout(() => server.close().then(done), 1000);
+        setTimeout(() => microservice.close().then(done), 1000);
       });
 
     const event1$: MsgEffect = event$ =>
@@ -134,8 +134,8 @@ describe('messagingServer::AMQP', () => {
       );
 
     const options = createOptions({ expectAck: false });
-    const client = await runClient(Transport.AMQP, options);
-    const server = await runServer(Transport.AMQP, options)(combineEffects(event1$, event2$), output$, error$);
+    const client = await runMicroserviceClient(Transport.AMQP, options);
+    const microservice = await runMicroservice(Transport.AMQP, options)(combineEffects(event1$, event2$), output$, error$);
 
     await client.emitMessage(options.queue, createMessage(event1));
     await client.emitMessage(options.queue, createMessage(event2));

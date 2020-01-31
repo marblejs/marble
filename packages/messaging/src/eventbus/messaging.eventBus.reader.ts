@@ -10,7 +10,7 @@ import { messagingListener } from '../server/messaging.server.listener';
 import { MessagingClient } from '../client/messaging.client.interface';
 import { messagingClient } from '../client/messaging.client';
 
-interface EventBusConfig {
+export interface EventBusConfig {
   listener: ReturnType<typeof messagingListener>;
 }
 
