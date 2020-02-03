@@ -19,7 +19,7 @@ describe('#isString', () => {
 describe('#trunc', () => {
   const cases: [number, string, string][] = [
     [0, '', ''],
-    [0, 'abc', ''],
+    [0, 'abc', '…'],
     [1, 'abc', 'a…'],
     [2, 'abc', 'ab…'],
     [3, 'abc', 'abc'],

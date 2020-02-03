@@ -39,8 +39,8 @@ export class EventError extends ExtendableError {
   }
 }
 
-export const isCoreError = (error: Error): error is CoreError =>
-  error.name === ErrorType.CORE_ERROR;
+export const isCoreError = (error: Error | undefined): error is CoreError =>
+  error?.name === ErrorType.CORE_ERROR;
 
-export const isEventError = (error: Error): error is EventError =>
-  error.name === ErrorType.EVENT_ERROR;
+export const isEventError = (error: Error | undefined): error is EventError =>
+  error?.name === ErrorType.EVENT_ERROR;

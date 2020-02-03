@@ -4,5 +4,8 @@ export class ExtendableError extends Error {
   }
 }
 
+export const isExtendableError = (data: any): data is ExtendableError =>
+  !!data?.name && !!data?.message;
+
 export const isError = (data: any): data is Error =>
   !!data?.stack && !!data?.name;
