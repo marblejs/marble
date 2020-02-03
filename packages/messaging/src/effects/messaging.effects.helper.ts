@@ -1,7 +1,7 @@
 import { Event, EventMetadata } from '@marblejs/core';
-import { isString, ExtendableError } from '@marblejs/core/dist/+internal/utils';
+import { isString, NamedError } from '@marblejs/core/dist/+internal/utils';
 
-export class MissingEventTypeError extends ExtendableError {
+export class MissingEventTypeError extends NamedError {
   constructor() {
     super('MissingEventTypeError', `#reply - Missing type literal`);
   }

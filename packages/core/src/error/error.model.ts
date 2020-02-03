@@ -1,5 +1,5 @@
 import { Event } from '../event/event.interface';
-import { ExtendableError } from '../+internal/utils';
+import { NamedError } from '../+internal/utils';
 
 export enum ErrorType {
   CORE_ERROR = 'CoreError',
@@ -7,7 +7,7 @@ export enum ErrorType {
   EVENT_ERROR = 'EventError',
 }
 
-export class CoreError extends ExtendableError {
+export class CoreError extends NamedError {
   constructor(
     public readonly message: string,
     options: {
@@ -21,7 +21,7 @@ export class CoreError extends ExtendableError {
   }
 }
 
-export class ContextError extends ExtendableError {
+export class ContextError extends NamedError {
   constructor(
     public readonly message: string,
   ) {
@@ -29,7 +29,7 @@ export class ContextError extends ExtendableError {
   }
 }
 
-export class EventError extends ExtendableError {
+export class EventError extends NamedError {
   constructor(
     public readonly event: Event,
     public readonly message: string,

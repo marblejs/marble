@@ -2,7 +2,7 @@ import { Observable, of, concat } from 'rxjs';
 import { filter, tap, mergeMap } from 'rxjs/operators';
 import { Event } from '../../event/event.interface';
 import { Marbles } from '../../+internal/testing';
-import { ExtendableError } from '../../+internal/utils';
+import { NamedError } from '../../+internal/utils';
 import { act } from './act.operator';
 
 describe('#act operator', () => {
@@ -85,7 +85,7 @@ describe('#act operator', () => {
     const effect$ = (event$: Observable<Event>) =>
       event$.pipe(
         act((event: any) => of(event).pipe(
-          tap(e => { if (e.payload === 2) throw new ExtendableError(error.name, error.message) }),
+          tap(e => { if (e.payload === 2) throw new NamedError(error.name, error.message) }),
         )),
       );
 
