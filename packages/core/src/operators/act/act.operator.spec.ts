@@ -2,6 +2,7 @@ import { Observable, of, concat } from 'rxjs';
 import { filter, tap, mergeMap } from 'rxjs/operators';
 import { Event } from '../../event/event.interface';
 import { Marbles } from '../../+internal/testing';
+import { NamedError } from '../../+internal/utils';
 import { act } from './act.operator';
 
 describe('#act operator', () => {
@@ -73,17 +74,18 @@ describe('#act operator', () => {
 
   test('catches errored event => maps to default => continues stream', () => {
     // given
-    const event1: Event = { type: 'TEST_EVENT_1', payload: 1 };
-    const event2: Event = { type: 'TEST_EVENT_2', payload: 2 };
-    const event3: Event = { type: 'TEST_EVENT_3', payload: 3 };
-    const event4: Event = { type: 'TEST_EVENT_4', payload: 4 };
-    const eventErrored: Event = { type: 'TEST_EVENT_2', error: { name: 'Error', message: 'something went wrong' } };
+    const error = { name: 'TestError', message: 'TestErrorMessage' };
+    const event1: Event = { type: 'TEST_EVENT_1', payload: 1, metadata: { replyTo: 'channel_1' } };
+    const event2: Event = { type: 'TEST_EVENT_2', payload: 2, metadata: { replyTo: 'channel_2' } };
+    const event3: Event = { type: 'TEST_EVENT_3', payload: 3, metadata: { replyTo: 'channel_3' } };
+    const event4: Event = { type: 'TEST_EVENT_4', payload: 4, metadata: { replyTo: 'channel_4' } };
+    const eventErrored: Event = { type: 'TEST_EVENT_2', error, metadata: { replyTo: 'channel_2' } };
 
     // when
     const effect$ = (event$: Observable<Event>) =>
       event$.pipe(
         act((event: any) => of(event).pipe(
-          tap(e => { if (e.payload === 2) throw new Error('something went wrong') }),
+          tap(e => { if (e.payload === 2) throw new NamedError(error.name, error.message) }),
         )),
       );
 

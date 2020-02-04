@@ -11,13 +11,12 @@ import { eventBus, eventBusClient } from '../eventbus/messaging.eventBus.reader'
 // event bus
 export const runEventBus =
   async (effect$?: MsgEffect, output$?: MsgOutputEffect, error$?: MsgErrorEffect) => {
-    const boundLogger = bindTo(LoggerToken)(mockLogger);
-    const context = flow(register(boundLogger))(createContext());
+    const context = createTestContext();
     const listener = messagingListener({ effects: effect$ ? [effect$] : [], output$, error$ });
     return eventBus({ listener })(context);
   };
 
-export const runEventBusClient = () => eventBusClient(createContext());
+export const runEventBusClient = () => eventBusClient(createTestContext());
 
 // microservice
 export const runMicroservice = (transport: any, options: any) =>
@@ -35,3 +34,7 @@ export const createMessage = (data: any): TransportMessage<Buffer> => ({
   correlationId: uuid(),
 });
 
+export const createTestContext = () => {
+  const boundLogger = bindTo(LoggerToken)(mockLogger);
+  return flow(register(boundLogger))(createContext());
+};

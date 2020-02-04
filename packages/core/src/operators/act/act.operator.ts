@@ -29,9 +29,10 @@ export function act<
   errorFn?: (error: any, event: InputEvent) => ErrorEvent | Observable<ErrorEvent>,
 ) {
 
-  const getDefaultErrorEvent = (error: Error) => (event: Event) => of({
+  const getDefaultErrorEvent = (error: any) => (event: Event) => of({
     type: event.type,
-    error: { name: error.name, message: error.message },
+    error: { name: error.name, message: error.message, data: error.data },
+    metadata: event.metadata,
   } as ErrorEvent);
 
   return (source: Observable<InputEvent>): Observable<CallEvent | ErrorEvent> =>

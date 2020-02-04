@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { HttpStatus, HttpRequest } from '../http.interface';
-import { ExtendableError } from '../../+internal/utils';
+import { NamedError } from '../../+internal/utils';
 import { HttpEffectResponse } from '../effects/http.effects.interface';
 import { coreErrorFactory } from '../../error/error.factory';
 
@@ -9,7 +9,7 @@ export enum HttpErrorType {
   HTTP_REQUEST_ERROR = 'HttpRequestError',
 }
 
-export class HttpError extends ExtendableError {
+export class HttpError extends NamedError {
   constructor(
     public readonly message: string,
     public readonly status: HttpStatus,
@@ -21,7 +21,7 @@ export class HttpError extends ExtendableError {
   }
 }
 
-export class HttpRequestError extends ExtendableError {
+export class HttpRequestError extends NamedError {
   constructor(
     public readonly request: HttpRequest,
     public readonly error: Error,

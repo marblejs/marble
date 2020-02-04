@@ -1,11 +1,11 @@
 import { coreErrorFactory, CoreErrorOptions } from '@marblejs/core';
-import { ExtendableError } from '@marblejs/core/dist/+internal/utils';
+import { NamedError } from '@marblejs/core/dist/+internal/utils';
 
 export enum ErrorType {
   UNSUPPORTED_ERROR = 'UnsupportedError',
 }
 
-export class UnsupportedError extends ExtendableError {
+export class UnsupportedError extends NamedError {
   constructor(public readonly message: string) {
     super(ErrorType.UNSUPPORTED_ERROR, message);
   }
