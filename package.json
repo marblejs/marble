@@ -22,12 +22,17 @@
     "publish:canary:minor": "lerna publish --no-push --dist-tag dev --canary minor --preid dev --force-publish=* --ignore-scripts",
     "publish:canary:major": "lerna publish --no-push --dist-tag next --canary major --preid next --force-publish=* --ignore-scripts",
     "publish:canary:major:github": "lerna publish --dist-tag next --canary major --preid next --yes --force-publish=* --no-verify-access --no-git-reset --ignore-scripts",
-    "publish:rc": "lerna publish prerelease --no-push --dist-tag rc --preid rc --force-publish=* --ignore-scripts",
-    "precommit": "lint-staged"
+    "publish:rc": "lerna publish prerelease --no-push --dist-tag rc --preid rc --force-publish=* --ignore-scripts"
   },
-  "lint-staged": {
-    "*.ts": [
-      "yarn lint"
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn lint",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
     ]
   },
   "private": true,
@@ -59,18 +64,19 @@
     "rxjs": "^6.5.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
     "@types/jest": "~24.0.19",
     "@types/node": "^12.7.12",
+    "@types/rimraf": "^2.0.2",
     "@types/supertest": "^2.0.7",
     "@typescript-eslint/eslint-plugin": "~2.9.0",
     "@typescript-eslint/parser": "~2.9.0",
-    "@types/rimraf": "^2.0.2",
     "eslint": "~6.7.1",
     "eslint-plugin-import": "~2.19.1",
-    "husky": "^0.14.0",
+    "husky": "^4.2.1",
     "jest": "~24.9.0",
     "lerna": "^3.20.2",
-    "lint-staged": "~8.1.0",
     "mock-req": "^0.2.0",
     "rimraf": "^2.6.2",
     "supertest": "^3.0.0",
