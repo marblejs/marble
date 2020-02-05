@@ -1,8 +1,8 @@
-import * as pathToRegexp from 'path-to-regexp';
+import { pathToRegexp, Key } from 'path-to-regexp';
 import { ParametricRegExp } from './http.router.interface';
 
 export const factorizeRegExpWithParams = (path: string): ParametricRegExp => {
-  const keys: pathToRegexp.Key[] = [];
+  const keys: Key[] = [];
   const preparedPath = path
     .replace(/\/\*/g, '/(.*)') /* Transfer wildcards */
     .replace(/\/\/+/g, '/') /* Remove repeated backslashes */

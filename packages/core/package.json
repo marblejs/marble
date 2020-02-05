@@ -36,18 +36,18 @@
   },
   "dependencies": {
     "@types/json-schema": "^7.0.3",
-    "@types/qs": "^6.5.1",
-    "@types/uuid": "^3.4.4",
-    "chalk": "~2.4.1",
+    "@types/qs": "^6.9.0",
+    "@types/uuid": "^3.4.7",
+    "chalk": "^3.0.0",
     "file-type": "^8.0.0",
-    "mime": "^2.3.1",
-    "path-to-regexp": "^2.4.0",
-    "qs": "^6.6.0",
-    "uuid": "^3.3.2"
+    "mime": "^2.4.4",
+    "path-to-regexp": "^6.1.0",
+    "qs": "^6.9.1",
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
     "@types/file-type": "^5.2.1",
-    "@types/mime": "^2.0.0"
+    "@types/mime": "^2.0.1"
   },
   "publishConfig": {
     "access": "public"

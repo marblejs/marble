@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import { HttpStatus, HttpRequest } from '../http.interface';
 import { NamedError } from '../../+internal/utils';
 import { HttpEffectResponse } from '../effects/http.effects.interface';
