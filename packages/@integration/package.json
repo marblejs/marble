@@ -38,8 +38,8 @@
     "typescript": "~3.0.3"
   },
   "devDependencies": {
-    "concurrently": "^4.1.0",
-    "nodemon": "^1.17.3",
-    "ts-node": "^7.0.1"
+    "concurrently": "^5.1.0",
+    "nodemon": "^2.0.2",
+    "ts-node": "^8.6.2"
   }
 }
