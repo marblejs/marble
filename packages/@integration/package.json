@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/integration",
-  "version": "3.0.0-rc.4",
+  "version": "3.0.0-rc.5",
   "description": "Marble.js integration tests",
   "main": "src/index.ts",
   "scripts": {
@@ -25,16 +25,16 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "@marblejs/core": "^3.0.0-rc.4",
-    "@marblejs/middleware-body": "^3.0.0-rc.4",
-    "@marblejs/middleware-cors": "^3.0.0-rc.4",
-    "@marblejs/middleware-io": "^3.0.0-rc.4",
-    "@marblejs/middleware-logger": "^3.0.0-rc.4",
-    "@marblejs/middleware-multipart": "^3.0.0-rc.4",
-    "@marblejs/websockets": "^3.0.0-rc.4",
+    "@marblejs/core": "^3.0.0-rc.5",
+    "@marblejs/middleware-body": "^3.0.0-rc.5",
+    "@marblejs/middleware-cors": "^3.0.0-rc.5",
+    "@marblejs/middleware-io": "^3.0.0-rc.5",
+    "@marblejs/middleware-logger": "^3.0.0-rc.5",
+    "@marblejs/middleware-multipart": "^3.0.0-rc.5",
+    "@marblejs/websockets": "^3.0.0-rc.5",
     "@types/node": "^10.1.2",
-    "rxjs": "^6.5.3",
     "fp-ts": "^2.4.3",
+    "rxjs": "^6.5.3",
     "typescript": "~3.0.3"
   },
   "devDependencies": {
