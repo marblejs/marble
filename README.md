@@ -94,8 +94,8 @@ To view the example project, visit the [example](https://github.com/marblejs/exa
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/Edouardbozon" style="color: white">
-        <img src="https://github.com/Edouardbozon.png?s=150" width="100"/>
+      <a href="https://github.com/edbzn" style="color: white">
+        <img src="https://github.com/edbzn.png?s=150" width="100"/>
         <p style="text-align: center"><small>Edouard Bozon</small></p>
       </a>
     </td>
