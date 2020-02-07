@@ -41,7 +41,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
       );
     }
 
-    const send = <T, U extends Event>(msg: T): Observable<U> => {
+    const send = <T extends Event, U>(msg: U): Observable<T> => {
       const channel = connection.getChannel();
       const message: TransportMessage<Buffer> = { data: msgTransformer.encode(msg as any) };
 
@@ -72,7 +72,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
 
       return from(connection.sendMessage(channel, message)).pipe(
         timeout(config.options.timeout || DEFAULT_TIMEOUT),
-        map(m => msgTransformer.decode(m.data) as U),
+        map(m => msgTransformer.decode(m.data) as T),
         mergeMap(catchErrorEvent),
         take(1),
       );
