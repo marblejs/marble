@@ -63,17 +63,14 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
 
   const send = (connection: TransportLayerConnection) => (event: Event): void => {
     const { metadata, type, payload, error } = event;
+    const { replyTo, correlationId, raw } = metadata ?? {};
 
-    if (metadata && metadata.replyTo) {
-      const { replyTo, correlationId, raw } = metadata;
-
-      connection.emitMessage(replyTo, {
-        data: msgTransformer.encode({ type, payload, error }),
-        correlationId,
-        replyTo,
-        raw,
-      });
-    }
+    connection.emitMessage(replyTo ?? '', {
+      data: msgTransformer.encode({ type, payload, error }),
+      correlationId,
+      replyTo,
+      raw,
+    });
   };
 
   return connection => {
