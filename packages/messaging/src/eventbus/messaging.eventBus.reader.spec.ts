@@ -2,7 +2,7 @@ import { Event, matchEvent, use, combineEffects, act, EventError } from '@marble
 import { wait, NamedError } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { throwError, of } from 'rxjs';
-import { delay, map, tap } from 'rxjs/operators';
+import { delay, map, tap, ignoreElements } from 'rxjs/operators';
 import { MsgEffect } from '../effects/messaging.effects.interface';
 import { runEventBus, runEventBusClient } from '../util/messaging.test.util';
 import { reply } from '../effects/messaging.effects.helper';
@@ -119,6 +119,7 @@ describe('#eventBus', () => {
           await eventBusClient.close();
           done();
         }),
+        ignoreElements(),
       );
 
     const eventBus = await runEventBus(foo$);
