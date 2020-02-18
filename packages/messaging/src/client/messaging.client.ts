@@ -15,7 +15,7 @@ import {
   createReader,
 } from '@marblejs/core';
 import { isNamedError, NamedError } from '@marblejs/core/dist/+internal/utils';
-import { from, Observable, EMPTY, throwError, of } from 'rxjs';
+import { from, Observable, EMPTY, throwError, of, defer } from 'rxjs';
 import { mergeMap, take, map, timeout } from 'rxjs/operators';
 import { TransportMessage, DEFAULT_TIMEOUT } from '../transport/transport.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
@@ -70,12 +70,12 @@ export const messagingClient = (config: MessagingClientConfig) => {
         return throwError(new Error(parsedError));
       }
 
-      return from(connection.sendMessage(channel, message)).pipe(
+      return defer(() => from(connection.sendMessage(channel, message)).pipe(
         timeout(config.options.timeout || DEFAULT_TIMEOUT),
         map(m => msgTransformer.decode(m.data) as T),
         mergeMap(catchErrorEvent),
         take(1),
-      );
+      ));
     }
 
     const close = async () => {
