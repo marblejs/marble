@@ -1,7 +1,7 @@
-import * as uuid from 'uuid';
+import { createUuid } from '../+internal/utils';
 
 export class ContextToken<T = any> {
-  _id = uuid();
+  _id = createUuid();
   _T!: T;
   constructor(public name?: string) {}
 }
