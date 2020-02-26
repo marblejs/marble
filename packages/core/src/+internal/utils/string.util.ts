@@ -1,4 +1,4 @@
-import * as uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { flow } from 'fp-ts/lib/function';
 import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
 
@@ -24,4 +24,4 @@ export const stringify = (value: any): string =>
     ? (value.displayName || value.name)
     : JSON.stringify(value);
 
-export const createUuid = () => uuid.v4();
+export const createUuid = () => uuid();

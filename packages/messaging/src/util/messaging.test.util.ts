@@ -1,4 +1,4 @@
-import * as uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { createContext, register, bindTo, LoggerToken, mockLogger } from '@marblejs/core';
 import { flow } from 'fp-ts/lib/function';
 import { createMicroservice } from '../server/messaging.server';
