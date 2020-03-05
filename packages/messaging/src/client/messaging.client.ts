@@ -1,10 +1,23 @@
 import * as O from 'fp-ts/lib/Option';
-import * as R from 'fp-ts/lib/Reader';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { reader, HttpServerEventStreamToken,  matchEvent, ServerEvent, AllServerEvents } from '@marblejs/core';
-import { from, Observable, EMPTY } from 'rxjs';
+import {
+  Event,
+  HttpServerEventStreamToken,
+  matchEvent,
+  ServerEvent,
+  AllServerEvents,
+  useContext,
+  LoggerToken,
+  LoggerTag,
+  LoggerLevel,
+  isEventError,
+  EventError,
+  createReader,
+} from '@marblejs/core';
+import { isNamedError, NamedError } from '@marblejs/core/dist/+internal/utils';
+import { from, Observable, EMPTY, throwError, of, defer } from 'rxjs';
 import { mergeMap, take, map, timeout } from 'rxjs/operators';
-import { TransportMessage, TransportLayerConnection, DEFAULT_TIMEOUT } from '../transport/transport.interface';
+import { TransportMessage, DEFAULT_TIMEOUT } from '../transport/transport.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MessagingClient, MessagingClientConfig } from './messaging.client.interface';
@@ -16,49 +29,76 @@ export const messagingClient = (config: MessagingClientConfig) => {
     msgTransformer = jsonTransformer,
   } = config;
 
-  const emit = (conn: TransportLayerConnection) => async <T>(msg: T) => {
-    await conn.emitMessage(
-      conn.getChannel(),
-      { data: msgTransformer.encode(msg as any) },
-    );
-  }
-
-  const send = (conn: TransportLayerConnection) => <T, U extends Event>(msg: T): Observable<U> => {
-    const channel = conn.getChannel();
-    const message: TransportMessage<Buffer> = { data: msgTransformer.encode(msg as any) };
-
-    return from(conn.sendMessage(channel, message)).pipe(
-      timeout(config.options.timeout || DEFAULT_TIMEOUT),
-      map(m => msgTransformer.decode(m.data) as U),
-      take(1),
-    );
-  }
-
-  const close = (conn: TransportLayerConnection) => async () => {
-    await conn.close();
-  }
-
-  const teardownOnClose$ = (conn: TransportLayerConnection) => (event$: Observable<AllServerEvents>) =>
-    event$.pipe(
-      matchEvent(ServerEvent.close),
-      take(1),
-      mergeMap(() => conn.close()),
-    );
-
-  return pipe(reader, R.map(async ask => {
+  return createReader(async ask => {
+    const logger = useContext(LoggerToken)(ask);
     const transportLayer = provideTransportLayer(transport, options);
     const connection = await transportLayer.connect({ isConsumer: false });
 
+    const emit = async <T>(msg: T) => {
+      await connection.emitMessage(
+        connection.getChannel(),
+        { data: msgTransformer.encode(msg as any) },
+      );
+    }
+
+    const send = <T extends Event, U>(msg: U): Observable<T> => {
+      const channel = connection.getChannel();
+      const message: TransportMessage<Buffer> = { data: msgTransformer.encode(msg as any) };
+
+      const catchErrorEvent = <V extends Event>(e: V) => {
+        if (!e.error) {
+          return of(e);
+        }
+
+        if (isEventError(e.error)) {
+          return throwError(new EventError(e, e.error.message, e.error.data));
+        }
+
+        if (isNamedError(e.error)) {
+          return throwError(new NamedError(e.error.name, e.error.message));
+        }
+
+        const parsedError = JSON.stringify(e.error);
+
+        logger({
+          tag: LoggerTag.MESSAGING,
+          type: 'messagingClient',
+          message: `Caught an error with invalid structure: ${parsedError}`,
+          level: LoggerLevel.WARN,
+        })();
+
+        return throwError(new Error(parsedError));
+      }
+
+      return defer(() => from(connection.sendMessage(channel, message)).pipe(
+        timeout(config.options.timeout || DEFAULT_TIMEOUT),
+        map(m => msgTransformer.decode(m.data) as T),
+        mergeMap(catchErrorEvent),
+        take(1),
+      ));
+    }
+
+    const close = async () => {
+      await connection.close();
+    }
+
+    const teardownOnClose = (event$: Observable<AllServerEvents>) =>
+      event$.pipe(
+        matchEvent(ServerEvent.close),
+        take(1),
+        mergeMap(() => connection.close()),
+      );
+
     pipe(
       ask(HttpServerEventStreamToken),
-      O.map(teardownOnClose$(connection)),
+      O.map(teardownOnClose),
       O.getOrElse(() => EMPTY as Observable<any>),
     ).subscribe();
 
     return {
-      emit: emit(connection),
-      send: send(connection),
-      close: close(connection),
+      emit,
+      send,
+      close,
     } as MessagingClient;
-  }));
+  });
 };

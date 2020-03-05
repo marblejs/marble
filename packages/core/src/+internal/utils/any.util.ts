@@ -15,3 +15,8 @@ export const getPortEnv = () => pipe(
   O.map(Number),
   O.toUndefined,
 );
+
+export const wait = (seconds = 1) =>
+  new Promise(res => {
+    setTimeout(() => res(), seconds * 1000);
+  });

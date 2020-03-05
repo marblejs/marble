@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { TransportMessageTransformer, TransportStrategy } from '../transport/transport.interface';
 
 export interface MessagingClient {
-  send: <T, U>(data: T) => Observable<U>;
+  send: <T, U>(data: U) => Observable<T>;
   emit: <T>(data: T) => Promise<void>;
   close: () => Promise<void>;
 }

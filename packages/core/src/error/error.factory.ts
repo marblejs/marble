@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import { CoreError } from './error.model';
 
 export type CoreErrorOptions = {

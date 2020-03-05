@@ -1,4 +1,4 @@
-import * as uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { flow } from 'fp-ts/lib/function';
 import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
 
@@ -16,7 +16,7 @@ export const trim = (strings: TemplateStringsArray, ...values: any[]) => {
 
 export const trunc = (n: number) => (input: string) =>
   (input.length > n)
-    ? input.substr(0, n-1) + '…'
+    ? input.substr(0, n) + '…'
     : input;
 
 export const stringify = (value: any): string =>
@@ -24,4 +24,4 @@ export const stringify = (value: any): string =>
     ? (value.displayName || value.name)
     : JSON.stringify(value);
 
-export const createUuid = () => uuid.v4();
+export const createUuid = () => uuid();

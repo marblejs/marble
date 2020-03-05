@@ -63,17 +63,14 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
 
   const send = (connection: TransportLayerConnection) => (event: Event): void => {
     const { metadata, type, payload, error } = event;
+    const { replyTo, correlationId, raw } = metadata ?? {};
 
-    if (metadata && metadata.replyTo) {
-      const { replyTo, correlationId, raw } = metadata;
-
-      connection.emitMessage(replyTo, {
-        data: msgTransformer.encode({ type, payload, error }),
-        correlationId,
-        replyTo,
-        raw,
-      });
-    }
+    connection.emitMessage(replyTo ?? '', {
+      data: msgTransformer.encode({ type, payload, error }),
+      correlationId,
+      replyTo,
+      raw,
+    });
   };
 
   return connection => {
@@ -85,7 +82,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
       connection.message$,
       e$ => e$.pipe(map(decode)),
       e$ => combinedMiddlewares(e$, ctx),
-      e$ => e$.pipe(catchError(error => defer(() => processError(incomingEvent$)(error)))),
+      e$ => defer(() => processError(e$)),
     );
 
     const outgoingEvent$ = pipe(
@@ -93,21 +90,22 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
       e$ => combinedEffects(e$, ctx),
       e$ => output$(e$, ctx),
       e$ => outputLogger$(e$, ctx),
-      e$ => e$.pipe(catchError(error => defer(() => processError(outgoingEvent$)(error)))),
+      e$ => defer(() => processError(e$)),
     );
 
     const errorEvent$ = pipe(
       errorSubject.asObservable(),
       e$ => error$(e$, ctx),
-      e$ => errorLogger$(e$, ctx),
+      e$ => defer(() => errorLogger$(e$, ctx)),
     );
 
-    const processError = (originStream$: Observable<any>) => (error: Error) => {
-      errorSubject.next(error);
-      return originStream$;
-    };
+    const processError = <T>(origin$: Observable<T>): Observable<T> =>
+      origin$.pipe(catchError(error => {
+        errorSubject.next(error);
+        return processError(origin$);
+      }));
 
-    const subscribeIncomingEvent = (event$: Observable<Event<unknown, any, string>>) =>
+    const subscribeIncomingEvent = (event$: Observable<Event>) =>
       event$
         .pipe(takeUntil(connection.close$))
         .subscribe(

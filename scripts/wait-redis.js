@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const redis = require('redis');
-const chalk = require('chalk').default;
+const chalk = require('chalk');
 const SECOND = 1000;
 
 const log = msg => console.info(chalk.yellow(msg));

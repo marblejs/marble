@@ -1,6 +1,7 @@
+import { of } from 'rxjs';
 import { map, tap, delay } from 'rxjs/operators';
-import { matchEvent, useContext, LoggerToken, LoggerTag } from '@marblejs/core';
-import { MsgEffect, EVENT_BUS_CHANNEL, reply } from '@marblejs/messaging';
+import { act, matchEvent, useContext, LoggerToken, LoggerTag } from '@marblejs/core';
+import { MsgEffect } from '@marblejs/messaging';
 import { OfferCommand } from '../domain/Offer.command';
 import { OfferEvent } from '../domain/Offer.event';
 
@@ -11,11 +12,11 @@ export const generateOfferDocument$: MsgEffect = (event$, ctx) => {
 
   return event$.pipe(
     matchEvent(OfferCommand.generateOffer),
-    map(event => event.payload.offerId),
-    tap(logger({ tag, type: 'generateOfferDocument$', message: 'Generating offer document...'})),
-    delay(5 * 1000),
-    map(offerId => reply(EVENT_BUS_CHANNEL)(
-      OfferEvent.offerDocumentCreated(offerId),
+    act(event => of(event).pipe(
+      map(event => event.payload.offerId),
+      tap(logger({ tag, type: 'generateOfferDocument$', message: 'Generating offer document...'})),
+      delay(5 * 1000),
+      map(offerId => OfferEvent.offerDocumentCreated(offerId)),
     )),
   );
 }
@@ -25,9 +26,11 @@ export const saveOfferDocument$: MsgEffect = (event$, ctx) => {
 
   return event$.pipe(
     matchEvent(OfferEvent.offerDocumentCreated),
-    map(event => event.payload.offerId),
-    tap(logger({ tag, type: 'saveOfferDocument$', message: 'Saving offer document...'})),
-    delay(5 * 1000),
-    map(OfferEvent.offerDocumentSaved),
+    act(event => of(event).pipe(
+      map(event => event.payload.offerId),
+      tap(logger({ tag, type: 'saveOfferDocument$', message: 'Saving offer document...'})),
+      delay(5 * 1000),
+      map(OfferEvent.offerDocumentSaved),
+    )),
   );
 }

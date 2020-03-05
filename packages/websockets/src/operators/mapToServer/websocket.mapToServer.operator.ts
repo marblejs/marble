@@ -1,7 +1,7 @@
 import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { ServerEvent, ServerEventType } from '@marblejs/core';
-import * as pathToRegexp from 'path-to-regexp';
+import { pathToRegexp } from 'path-to-regexp';
 import { Observable, from, EMPTY } from 'rxjs';
 import { filter, mergeMap, map, tap, mapTo, toArray, mergeMapTo } from 'rxjs/operators';
 import { WebSocketServerConnection } from '../../server/websocket.server.interface';

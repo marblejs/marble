@@ -1,10 +1,10 @@
-import { ExtendableError } from '@marblejs/core/dist/+internal/utils';
+import { NamedError } from '@marblejs/core/dist/+internal/utils';
 
 export enum ErrorType {
   IO_ERROR = 'IOError',
 }
 
-export class IOError extends ExtendableError {
+export class IOError extends NamedError {
   constructor(
     public readonly message: string,
     public readonly data: object,

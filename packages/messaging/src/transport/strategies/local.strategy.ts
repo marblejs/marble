@@ -36,7 +36,7 @@ class LocalStrategyConnection implements TransportLayerConnection {
   }
 
   emitMessage = async (channel: string, message: TransportMessage<Buffer>) => {
-    if (channel !== this.opts.channel) {
+    if (channel && channel !== this.opts.channel) {
       this.rpcSubject$.next(message);
     } else {
       this.msgSubject$.next(message);
