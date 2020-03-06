@@ -11,7 +11,7 @@ import {
 } from '@marblejs/core';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Observable, Subject, defer } from 'rxjs';
-import { map, catchError, takeUntil } from 'rxjs/operators';
+import { map, catchError, takeUntil, filter } from 'rxjs/operators';
 import {
   TransportMessage,
   TransportMessageTransformer,
@@ -80,7 +80,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
 
     const incomingEvent$ = pipe(
       connection.message$,
-      e$ => e$.pipe(map(decode)),
+      e$ => e$.pipe(map(decode), filter(event => !event.error)),
       e$ => combinedMiddlewares(e$, ctx),
       e$ => defer(() => processError(e$)),
     );

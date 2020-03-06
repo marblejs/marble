@@ -30,7 +30,7 @@ export function act<
 ) {
 
   const getDefaultErrorEvent = (error: any) => (event: Event) => of({
-    type: `${event.type} [error]`,
+    type: event.type,
     error: { name: error.name, message: error.message, data: error.data },
     metadata: event.metadata,
   } as ErrorEvent);
