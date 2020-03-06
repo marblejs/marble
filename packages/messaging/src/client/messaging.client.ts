@@ -29,19 +29,19 @@ export const messagingClient = (config: MessagingClientConfig) => {
     msgTransformer = jsonTransformer,
   } = config;
 
-  return createReader(async ask => {
+  return createReader<Promise<MessagingClient>>(async ask => {
     const logger = useContext(LoggerToken)(ask);
     const transportLayer = provideTransportLayer(transport, options);
     const connection = await transportLayer.connect({ isConsumer: false });
 
-    const emit = async <T>(msg: T) => {
+    const emit: MessagingClient['emit'] = async msg => {
       await connection.emitMessage(
         connection.getChannel(),
         { data: msgTransformer.encode(msg as any) },
       );
     }
 
-    const send = <T extends Event, U>(msg: U): Observable<T> => {
+    const send: MessagingClient['send'] = msg => {
       const channel = connection.getChannel();
       const message: TransportMessage<Buffer> = { data: msgTransformer.encode(msg as any) };
 
@@ -72,13 +72,13 @@ export const messagingClient = (config: MessagingClientConfig) => {
 
       return defer(() => from(connection.sendMessage(channel, message)).pipe(
         timeout(config.options.timeout || DEFAULT_TIMEOUT),
-        map(m => msgTransformer.decode(m.data) as T),
+        map(m => msgTransformer.decode(m.data)),
         mergeMap(catchErrorEvent),
         take(1),
       ));
     }
 
-    const close = async () => {
+    const close: MessagingClient['close'] = async () => {
       await connection.close();
     }
 
@@ -99,6 +99,6 @@ export const messagingClient = (config: MessagingClientConfig) => {
       emit,
       send,
       close,
-    } as MessagingClient;
+    };
   });
 };
