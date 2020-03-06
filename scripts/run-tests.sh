@@ -15,4 +15,8 @@ else
   jest --expand --detectOpenHandles --runInBand
 fi
 
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+
 docker-compose -f docker-compose.yml down
