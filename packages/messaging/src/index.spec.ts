@@ -8,5 +8,6 @@ describe('@marblejs/messaging', () => {
     expect(API.createMicroservice).toBeDefined();
     expect(API.messagingClient).toBeDefined();
     expect(API.messagingListener).toBeDefined();
+    expect(API.reply).toBeDefined();
   });
 });

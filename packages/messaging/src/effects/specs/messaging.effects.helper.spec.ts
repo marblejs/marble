@@ -1,5 +1,5 @@
 import { Event, EventMetadata } from '@marblejs/core';
-import { reply, MissingEventTypeError } from '../messaging.effects.helper';
+import { reply, MissingEventTypeError, UNKNOWN_TAG } from '../messaging.effects.helper';
 
 describe('#reply', () => {
   test('creates success response based on originated event', () => {
@@ -82,6 +82,25 @@ describe('#reply', () => {
       metadata: {
         replyTo,
       },
+    });
+  });
+
+  test(`creates response and applies ${UNKNOWN_TAG} to "replyTo" attribute if incoming event routing metadata is undefined`, () => {
+    // given
+    const origin: Event = {
+      type: 'TEST',
+      metadata: {},
+    };
+
+    // when
+    const response = reply(origin)({
+      type: 'TEST_RESPONSE',
+    });
+
+    // then
+    expect(response).toEqual({
+      type: 'TEST_RESPONSE',
+      metadata: { replyTo: '_UNKNOWN_' },
     });
   });
 
