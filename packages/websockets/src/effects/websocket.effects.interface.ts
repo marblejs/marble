@@ -15,6 +15,9 @@ export interface WsConnectionEffect<
   T extends http.IncomingMessage = http.IncomingMessage
 > extends WsEffect<T, T, undefined> {}
 
+export interface WsServerEffect<T extends Event = Event>
+  extends WsEffect<T, any, undefined> {}
+
 export interface WsOutputEffect<
   T extends Event = Event
 > extends WsEffect<T, Event> {}

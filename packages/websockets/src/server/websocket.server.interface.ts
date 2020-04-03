@@ -1,13 +1,15 @@
 import * as WebSocket from 'ws';
 import { Observable } from 'rxjs';
-import { BoundDependency, Event } from '@marblejs/core';
-import { WsConnectionEffect } from '../effects/websocket.effects.interface';
+import { Event, ServerConfig } from '@marblejs/core';
+import { WsConnectionEffect, WsServerEffect } from '../effects/websocket.effects.interface';
 import { webSocketListener } from './websocket.server.listener';
 
-export interface WebSocketServerConfig {
+export const DEFAULT_HOSTNAME = '127.0.0.1';
+
+type WebSocketListenerFn = ReturnType<typeof webSocketListener>;
+
+export interface WebSocketServerConfig extends ServerConfig<WsServerEffect, WebSocketListenerFn> {
   options?: WebSocket.ServerOptions;
-  listener: ReturnType<typeof webSocketListener>;
-  dependencies?: BoundDependency<any>[];
   connection$?: WsConnectionEffect;
 }
 
