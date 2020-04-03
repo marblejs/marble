@@ -9,7 +9,7 @@ describe('logger$', () => {
 
   beforeEach(() => {
     const client = jest.fn() as any as HttpServer;
-    logger = jest.fn() as any as Logger;
+    logger = jest.fn(() => jest.fn());
 
     const boundLogger = bindTo(LoggerToken)(() => logger);
     const context = register(boundLogger)(createContext());

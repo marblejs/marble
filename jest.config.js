@@ -4,6 +4,7 @@ const config = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
+  testEnvironment: 'node',
   testRegex: 'spec\.ts$',
   coverageDirectory: './coverage/',
   coveragePathIgnorePatterns: [
