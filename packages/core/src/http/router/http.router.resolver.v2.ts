@@ -37,17 +37,16 @@ export const resolveRouting = (
   const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
 
   const outputFlow$ = outputSubject.asObservable().pipe(
-    takeUntil(close$),
     mergeMap(data => {
       const stream = output$ ? output$(of(data), ctx) : of(data.res);
       return stream.pipe(
         map(res => ([res, data.req] as [HttpEffectResponse, HttpRequest])),
       );
     }),
+    takeUntil(close$),
   );
 
   const errorFlow$ = errorSubject.asObservable().pipe(
-    takeUntil(close$),
     map(data => isHttpRequestError(data.error) ? { ...data, error: data.error.error } : data),
     mergeMap(data => {
       const stream = error$ ? error$(of(data), ctx) : defaultError$(of(data), ctx);
@@ -55,6 +54,7 @@ export const resolveRouting = (
         map(res => ([res, data.req] as [HttpEffectResponse, HttpRequest])),
       );
     }),
+    takeUntil(close$),
   );
 
   const subscribeOutput = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
@@ -93,10 +93,8 @@ export const resolveRouting = (
         e$ => middleware(e$, ctx),
         e$ => decorate ? decorateEffect(e$, errorSubject) : e$,
         e$ => effect(e$, ctx),
-        e$ => e$.pipe(
-          takeUntil(close$),
-          catchError((error, stream) => processError(stream)(error)),
-        ),
+        catchError((error, stream) => processError(stream)(error)),
+        takeUntil(close$),
       );
 
       const processError = (originStream$: Observable<any>) => (error: any) => {
@@ -118,7 +116,7 @@ export const resolveRouting = (
           },
           () => {
             const type = 'RouterResolver';
-            const message = `Output stream completes`;
+            const message = `Effect stream completes`;
             logger({ tag: LoggerTag.HTTP, type, message, level: LoggerLevel.DEBUG })();
           }
         );
