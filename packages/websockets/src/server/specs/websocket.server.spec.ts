@@ -25,14 +25,14 @@ describe('WebSocket server', () => {
 
       // when
       const app = await createWebSocketServer({ options: { server }, listener });
-      await app();
+      const webSocketServer = await app();
 
       targetClient.once('open', () => targetClient.send(event));
 
       // then
       targetClient.once('message', message => {
         expect(message).toEqual(event);
-        done();
+        webSocketServer.close(done);
       });
     });
 
@@ -48,7 +48,7 @@ describe('WebSocket server', () => {
 
       // when
       const app = await createWebSocketServer({ options: { server }, listener });
-      await app();
+      const webSocketServer = await app();
 
       targetClient.on('open', () => targetClient.send(JSON.stringify(event)));
 
@@ -59,7 +59,7 @@ describe('WebSocket server', () => {
       forkJoin(client1$, client2$).subscribe(([ message1, message2 ]: [any, any]) => {
         expect(JSON.parse(message1.data)).toEqual(expect.objectContaining(event));
         expect(JSON.parse(message2.data)).toEqual(expect.objectContaining(event));
-        done();
+        webSocketServer.close(done);
       });
     });
 
@@ -86,7 +86,7 @@ describe('WebSocket server', () => {
       // then
       targetClient.once('message', message => {
         expect(message).toEqual(event);
-        done();
+        webSocketServer.close(done);
       });
     });
 
@@ -107,14 +107,14 @@ describe('WebSocket server', () => {
 
       // when
       const app = await createWebSocketServer({ options: { server }, listener })
-      await app();
+      const webSocketServer = await app();
 
       targetClient.once('open', () => targetClient.send(incomingEvent));
 
       // then
       targetClient.once('message', message => {
         expect(message).toEqual(outgoingEvent);
-        done();
+        webSocketServer.close(done);
       });
     });
 
@@ -131,7 +131,7 @@ describe('WebSocket server', () => {
 
       // when
       const app = await createWebSocketServer({ options: { server }, listener });
-      await app();
+      const webSocketServer = await app();
 
       targetClient.once('open', () => {
         targetClient.send(incomingEvent);
@@ -144,7 +144,7 @@ describe('WebSocket server', () => {
         .subscribe((messages: any[]) => {
           expect(messages[0].data).toEqual(outgoingEvent);
           expect(messages[1].data).toEqual(outgoingEvent);
-          done();
+          webSocketServer.close(done);
         });
     });
 
@@ -164,7 +164,7 @@ describe('WebSocket server', () => {
 
       // when
       const app = await createWebSocketServer({ options: { server }, listener });
-      await app();
+      const webSocketServer = await app();
 
       targetClient.once('open', () => {
         targetClient.send(incomingEvent);
@@ -177,7 +177,7 @@ describe('WebSocket server', () => {
         .subscribe((messages: any[]) => {
           expect(messages[0].data).toEqual(outgoingEvent);
           expect(messages[1].data).toEqual(outgoingEvent);
-          done();
+          webSocketServer.close(done);
         });
     });
 
@@ -191,7 +191,7 @@ describe('WebSocket server', () => {
 
       // when
       const app = await createWebSocketServer({ options: { server }, connection$, listener });
-      await app();
+      const webSocketServer = await app();
 
       // then
       merge(
@@ -199,7 +199,7 @@ describe('WebSocket server', () => {
         fromEvent(targetClient2, 'open'),
       )
       .pipe(take(2), toArray())
-      .subscribe(() => done());
+      .subscribe(() => webSocketServer.close(done));
     });
 
     test('triggers connection error', async done => {
@@ -213,7 +213,7 @@ describe('WebSocket server', () => {
 
       // when
       const app = await createWebSocketServer({ options: { server }, connection$, listener });
-      await app();
+      const webSocketServer = await app();
 
       // then
       merge(
@@ -227,7 +227,7 @@ describe('WebSocket server', () => {
           expect(data[1][1].statusCode).toEqual(error.status);
           expect(data[0][1].statusMessage).toEqual(error.message);
           expect(data[1][1].statusMessage).toEqual(error.message);
-          done();
+          webSocketServer.close(done);
         },
       );
     });
@@ -259,7 +259,7 @@ describe('WebSocket server', () => {
 
       // when
       const app = await createWebSocketServer({ options: { server }, listener });
-      await app();
+      const webSocketServer = await app();
 
       targetClient.once('open', () => {
         targetClient.send(Buffer.from(message));
@@ -268,7 +268,7 @@ describe('WebSocket server', () => {
       // then
       targetClient.once('message', (incomingMessage: Buffer) => {
         expect(incomingMessage.toString('utf8')).toEqual(message);
-        done();
+        webSocketServer.close(done);
       });
     });
   });

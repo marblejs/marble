@@ -12,6 +12,7 @@ const createOptions = (config: { expectAck?: boolean; queue?: string } = {}): Am
   queue: config.queue || 'test_queue_server',
   expectAck: config.expectAck,
   queueOptions: { durable: false },
+  timeout: 500,
 });
 
 describe('messagingServer::AMQP', () => {
@@ -40,6 +41,7 @@ describe('messagingServer::AMQP', () => {
     expect(parsedResult1).toEqual({ type: 'RPC_TEST_RESULT', payload: 11 });
 
     await microservice.close();
+    await client.close();
   });
 
   test('handles published event', async done => {
@@ -47,7 +49,11 @@ describe('messagingServer::AMQP', () => {
 
     eventSubject.subscribe(event => {
       expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
-      setTimeout(() => microservice.close().then(done), 1000);
+      setTimeout(async () => {
+        await microservice.close();
+        await client.close();
+        done();
+      }, 1000);
     });
 
     const event$: MsgEffect = event$ =>
@@ -72,7 +78,11 @@ describe('messagingServer::AMQP', () => {
 
     eventSubject.subscribe(event => {
       expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
-      setTimeout(() => microservice.close().then(done), 1000);
+      setTimeout(async () => {
+        await microservice.close();
+        await client.close();
+        done();
+      }, 1000);
     });
 
     const event$: MsgEffect = (event$, { client }) =>
@@ -107,7 +117,11 @@ describe('messagingServer::AMQP', () => {
         expect(data[0][1]).toEqual(error);
         expect(data[1][0]).toEqual(event2);
         expect(data[1][1]).toBeUndefined();
-        setTimeout(() => microservice.close().then(done), 1000);
+        setTimeout(async () => {
+          await microservice.close();
+          await client.close();
+          done();
+        }, 1000);
       });
 
     const event1$: MsgEffect = event$ =>

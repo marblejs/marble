@@ -1,9 +1,8 @@
 import * as http from 'http';
 import * as net from 'net';
 import { Subject, Observable } from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
 import { HttpServer } from '../http.interface';
-import { ServerEventType, ServerEvent, AllServerEvents, isCloseEvent } from './http.server.event';
+import { ServerEventType, ServerEvent, AllServerEvents } from './http.server.event';
 import { DEFAULT_HOSTNAME } from './http.server.interface';
 
 export const subscribeServerEvents = (hostname?: string) => (httpServer: HttpServer): Observable<AllServerEvents> => {
@@ -50,7 +49,5 @@ export const subscribeServerEvents = (hostname?: string) => (httpServer: HttpSer
     event$.next(ServerEvent.listening(serverAddressInfo.port, hostname ?? DEFAULT_HOSTNAME));
   });
 
-  return event$
-    .asObservable()
-    .pipe(takeWhile(e => !isCloseEvent(e), true));
+  return event$.asObservable();
 };

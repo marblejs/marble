@@ -9,9 +9,8 @@ import { IO } from 'fp-ts/lib/IO';
 const fib = (n: number): number =>
   (n === 0 || n === 1) ? n : fib(n - 1) + fib(n - 2);
 
-const fibonacci$: MsgEffect = event$ => {
-
-  return event$.pipe(
+const fibonacci$: MsgEffect = event$ =>
+  event$.pipe(
     matchEvent('FIB'),
     use(eventValidator$(t.number)),
     mergeMap(event => of(event).pipe(
@@ -21,36 +20,28 @@ const fibonacci$: MsgEffect = event$ => {
       catchError(error => of(reply(event)({ type: 'FIB_ERROR', error: { name: error.name, message: error.message } }))),
     )),
   );
-};
 
-const buffer$: MsgEffect = event$ => {
-
-  return event$.pipe(
+const buffer$: MsgEffect = event$ =>
+  event$.pipe(
     matchEvent('BUFFER'),
     bufferCount(2),
     mapTo({ type: 'BUFFER_RESULT' }),
   );
-};
 
-const timeout$: MsgEffect = event$ => {
-
-  return event$.pipe(
+const timeout$: MsgEffect = event$ =>
+  event$.pipe(
     matchEvent('TIMEOUT'),
     mergeMap(event => of(event).pipe(
       delay(180 * 1000),
       mapTo(reply(event)({ type: 'TIMEOUT_RESULT' })),
     )),
   );
-};
 
-const error$: MsgEffect = event$ => {
-
-  return event$.pipe(
+const error$: MsgEffect = event$ =>
+  event$.pipe(
     matchEvent('ERROR'),
     tap(() => { throw new Error('test_error'); }),
   );
-};
-
 
 export const microservice = createMicroservice({
   transport: Transport.AMQP,
@@ -58,6 +49,9 @@ export const microservice = createMicroservice({
     host: 'amqp://localhost:5672',
     queue: 'test_queue',
     queueOptions: { durable: false },
+    timeout: isTestEnv()
+      ? 500
+      : 30 * 1000
   },
   listener: messagingListener({
     effects: [fibonacci$, buffer$, timeout$, error$],

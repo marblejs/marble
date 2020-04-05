@@ -19,6 +19,9 @@ const client = messagingClient({
     host: 'amqp://localhost:5672',
     queue: 'test_queue',
     queueOptions: { durable: false },
+    timeout: isTestEnv()
+      ? 500
+      : 30 * 1000,
   },
 });
 

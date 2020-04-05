@@ -17,14 +17,14 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
 
     // when
     const app = await createWebSocketServer({ options: { server }, listener });
-    await app();
+    const webSocketServer = await app();
 
     targetClient.once('open', () => targetClient.send(event));
 
     // then
     targetClient.once('message', message => {
       expect(message).toEqual(event);
-      done();
+      webSocketServer.close(done);
     });
   });
 
@@ -45,7 +45,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
 
     // when
     const app = await createWebSocketServer({ options: { server }, listener });
-    await app();
+    const webSocketServer = await app();
 
     targetClient.once('open', () => targetClient.send(event));
 
@@ -53,7 +53,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     targetClient.once('message', message => {
       const parsedMessage = JSON.parse(message);
       expect(parsedMessage).toEqual(expectedError);
-      done();
+      webSocketServer.close(done);
     });
   });
 });

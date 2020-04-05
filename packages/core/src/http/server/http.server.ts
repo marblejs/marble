@@ -2,6 +2,7 @@ import * as http from 'http';
 import * as https from 'https';
 import { flow } from 'fp-ts/lib/function';
 import { Subject, merge, EMPTY } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 import { createContext, lookup, registerAll, bindTo, resolve } from '../../context/context.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { isTestingMetadataOn } from '../../+internal/testing';
@@ -15,6 +16,7 @@ import { subscribeServerEvents } from './http.server.event.subscriber';
 import { HttpServerClientToken, HttpServerEventStreamToken, HttpRequestMetadataStorageToken, HttpRequestBusToken } from './http.server.tokens';
 import { httpRequestMetadataStorage } from './http.server.metadata.storage';
 import { CreateServerConfig } from './http.server.interface';
+import { isCloseEvent } from './http.server.event';
 
 export const createServer = async (config: CreateServerConfig) => {
   const { listener, event$, port, hostname, dependencies = [], options = {} } = config;
@@ -50,6 +52,8 @@ export const createServer = async (config: CreateServerConfig) => {
     listening$(serverEvent$, ctx),
     error$(serverEvent$, ctx),
     close$(serverEvent$, ctx),
+  ).pipe(
+    takeWhile(e => !isCloseEvent(e), true)
   ).subscribe();
 
   const listen: ServerIO<HttpServer> = () => new Promise((resolve, reject) => {

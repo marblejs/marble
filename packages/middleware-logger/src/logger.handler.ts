@@ -17,13 +17,13 @@ export const loggerHandler = (opts: LoggerOptions, logger: Logger) => (stamp: Ti
     map(factorizeLog(stamp)),
     tap(message => {
       const level = res.statusCode >= 500
-        ? LoggerLevel.ERROR
-        : res.statusCode >= 400
-          ? LoggerLevel.WARN
-          : LoggerLevel.INFO;
+      ? LoggerLevel.ERROR
+      : res.statusCode >= 400
+        ? LoggerLevel.WARN
+        : LoggerLevel.INFO;
 
       const log = logger({ tag: LoggerTag.HTTP, type: 'RequestLogger', message, level });
       return log();
-    })
+    }),
   );
 }
