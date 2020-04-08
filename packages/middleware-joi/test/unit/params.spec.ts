@@ -15,6 +15,10 @@ const reqMatched = (
   } as any) as HttpRequest);
 
 describe('Joi middleware - Params', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => jest.fn());
+  });
+
   it('should throws an error if dont pass a required field', done => {
     expect.assertions(2);
 
@@ -31,7 +35,6 @@ describe('Joi middleware - Params', () => {
     http$.subscribe(
       () => {
         fail('Exceptions should be thrown');
-        done();
       },
       error => {
         expect(error).toBeDefined();
@@ -55,7 +58,6 @@ describe('Joi middleware - Params', () => {
     http$.subscribe(
       () => {
         fail('Exceptions should be thrown');
-        done();
       },
       error => {
         expect(error).toBeDefined();

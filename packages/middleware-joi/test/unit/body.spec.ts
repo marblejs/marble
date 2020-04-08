@@ -10,6 +10,10 @@ const MockReq = require('mock-req');
 describe('Joi middleware - Body', () => {
   const ctx = createMockEffectContext();
 
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => jest.fn());
+  });
+
   it(`throws an error if doesn't pass a required field`, done => {
     expect.assertions(2);
 
