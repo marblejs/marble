@@ -10,6 +10,10 @@ const reqMatched = (
 ) => ({ url, matchers, params, query } as any as HttpRequest);
 
 describe('Joi middleware - Query', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => jest.fn());
+  });
+
   test('should throws an error if dont pass a required field', done => {
     expect.assertions(2);
 
