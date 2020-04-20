@@ -29,9 +29,9 @@ export const runMicroserviceClient = (transport: Transport, transportOptions: an
   provideTransportLayer(transport, transportOptions).connect({ isConsumer: false });
 
 // other
-export const createMessage = (data: any): TransportMessage<Buffer> => ({
+export const createMessage = (data: any, correlationId?: string): TransportMessage<Buffer> => ({
   data: Buffer.from(JSON.stringify(data)),
-  correlationId: uuid(),
+  correlationId: correlationId ?? uuid(),
 });
 
 export const createTestContext = () => {
