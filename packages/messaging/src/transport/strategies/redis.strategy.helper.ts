@@ -15,11 +15,6 @@ export const quitClient = (client: RedisClient): Promise<undefined> =>
     client.quit(error => error ? reject() : resolve());
   });
 
-export const setExpirationForChannel = (client: RedisClient) => (channel: string) => (seconds: number): Promise<undefined> =>
-  new Promise((resolve, reject) => {
-    client.expire(channel, seconds, error => error ? reject() : resolve());
-  });
-
 export const subscribeChannel = (client: RedisClient) => (channel: string): Promise<undefined> =>
   new Promise((resolve, reject) => {
     client.subscribe(channel, error => error ? reject() : resolve());

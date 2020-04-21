@@ -18,7 +18,7 @@ class RedisStrategyConnection implements TransportLayerConnection {
   private closeSubject$ = new Subject();
 
   constructor(
-    private opts: { channel: string; isConsumer: boolean },
+    private opts: { channel: string; isConsumer: boolean; timeout: number },
     private publisher: RedisClient,
     private subscriber: RedisClient,
     private rpcSubscriber: RedisClient,
@@ -31,16 +31,16 @@ class RedisStrategyConnection implements TransportLayerConnection {
   }
 
   get status$() {
-    const ready$ = merge(fromEvent(this.subscriber, 'ready'), fromEvent(this.publisher, 'ready'))
+    const ready$ = merge(fromEvent(this.subscriber, 'ready'))
       .pipe(mapTo(RedisConnectionStatus.READY));
 
-    const connect$ = merge(fromEvent(this.subscriber, 'connect'), fromEvent(this.publisher, 'connect'))
+    const connect$ = merge(fromEvent(this.subscriber, 'connect'))
       .pipe(mapTo(RedisConnectionStatus.CONNECT));
 
-    const reconnecting$ = merge(fromEvent(this.subscriber, 'reconnecting'), fromEvent(this.publisher, 'reconnecting'))
+    const reconnecting$ = merge(fromEvent(this.subscriber, 'reconnecting'))
       .pipe(mapTo(RedisConnectionStatus.RECONNECTING));
 
-    const end$ = merge(fromEvent(this.subscriber, 'end'), fromEvent(this.publisher, 'end'))
+    const end$ = merge(fromEvent(this.subscriber, 'end'))
       .pipe(mapTo(RedisConnectionStatus.END));
 
     return merge(ready$, connect$, reconnecting$, end$).pipe(
@@ -131,21 +131,18 @@ class RedisStrategy implements TransportLayer {
   }
 
   async connect(data?: { isConsumer: boolean }) {
-    const { channel } = this.options;
+    const { channel, timeout } = this.options;
 
     const isConsumer = !!data?.isConsumer;
     const publisher = await RedisHelper.connectClient(this.clientOpts);
     const subscriber = await RedisHelper.connectClient(this.clientOpts);
     const rpcSubscriber = await RedisHelper.connectClient(this.clientOpts);
 
-    await RedisHelper.setExpirationForChannel(publisher)(channel)(1);
-
     if (isConsumer) {
-      await RedisHelper.setExpirationForChannel(subscriber)(channel)(1);
       await RedisHelper.subscribeChannel(subscriber)(channel);
     }
 
-    return new RedisStrategyConnection({ isConsumer, channel }, publisher, subscriber, rpcSubscriber);
+    return new RedisStrategyConnection({ isConsumer, channel, timeout: timeout ?? DEFAULT_TIMEOUT }, publisher, subscriber, rpcSubscriber);
   }
 }
 
