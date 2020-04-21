@@ -1,27 +1,31 @@
 import { logger$ } from '@marblejs/middleware-logger';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
-import { r, createServer, createContextToken, httpListener, use, useContext, bindEagerlyTo } from '@marblejs/core';
-import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
+import { r, createServer, createContextToken, httpListener, use, useContext, bindEagerlyTo, combineRoutes, ContextToken } from '@marblejs/core';
+import { isTestEnv, getPortEnv } from '@marblejs/core/dist/+internal/utils';
 import { IO } from 'fp-ts/lib/IO';
 import { forkJoin } from 'rxjs';
-import { map, mergeMap, mapTo } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
-const port = process.env.PORT
-  ? Number(process.env.PORT)
-  : undefined;
+const AmqpClientToken = createContextToken<MessagingClient>('AmqpMessagingClient');
+const RedisClientToken = createContextToken<MessagingClient>('RedisMessagingClient');
 
-const ClientToken = createContextToken<MessagingClient>('MessagingClient');
-
-const client = messagingClient({
+const amqpClient = messagingClient({
   transport: Transport.AMQP,
   options: {
     host: 'amqp://localhost:5672',
     queue: 'test_queue',
     queueOptions: { durable: false },
-    timeout: isTestEnv()
-      ? 500
-      : 30 * 1000,
+    timeout: isTestEnv() ? 500 : 30 * 1000,
+  },
+});
+
+const redisClient = messagingClient({
+  transport: Transport.REDIS,
+  options: {
+    host: 'redis://127.0.0.1:6379',
+    channel: 'test_channel',
+    timeout: isTestEnv() ? 500 : 30 * 1000,
   },
 });
 
@@ -31,50 +35,11 @@ const rootValiadtor$ = requestValidator$({
   }),
 });
 
-const buffer$ = r.pipe(
-  r.matchPath('/buffer'),
-  r.matchType('GET'),
-  r.useEffect((req$, { ask }) => {
-    const client = useContext(ClientToken)(ask);
-
-    return req$.pipe(
-      mergeMap(() => client.emit({ type: 'BUFFER' })),
-      mapTo(({ body: 'OK' })),
-    );
-  }),
-);
-
-const timeout$ = r.pipe(
-  r.matchPath('/timeout'),
-  r.matchType('GET'),
-  r.useEffect((req$, { ask }) => {
-    const client = useContext(ClientToken)(ask);
-
-    return req$.pipe(
-      mergeMap(() => client.send({ type: 'TIMEOUT' })),
-      mapTo(({ body: 'OK' })),
-    );
-  }),
-);
-
-const error$ = r.pipe(
-  r.matchPath('/error'),
-  r.matchType('GET'),
-  r.useEffect((req$, { ask }) => {
-    const client = useContext(ClientToken)(ask);
-
-    return req$.pipe(
-      mergeMap(() => client.send({ type: 'ERROR' })),
-      mapTo(({ body: 'OK' })),
-    );
-  }),
-);
-
-const fib$ = r.pipe(
+const fib$ = (clientToken: ContextToken<MessagingClient>) => r.pipe(
   r.matchPath('/fib/:number'),
   r.matchType('GET'),
   r.useEffect((req$, ctx) => {
-    const client = useContext(ClientToken)(ctx.ask);
+    const client = useContext(clientToken)(ctx.ask);
 
     return req$.pipe(
       use(rootValiadtor$),
@@ -91,14 +56,23 @@ const fib$ = r.pipe(
   }),
 );
 
+const amqp$ = combineRoutes('/amqp', [
+  fib$(AmqpClientToken),
+]);
+
+const redis$ = combineRoutes('/redis', [
+  fib$(RedisClientToken),
+]);
+
 export const server = createServer({
-  port,
+  port: getPortEnv(),
   listener: httpListener({
     middlewares: [logger$()],
-    effects: [buffer$, timeout$, error$, fib$],
+    effects: [amqp$, redis$],
   }),
   dependencies: [
-    bindEagerlyTo(ClientToken)(client),
+    bindEagerlyTo(AmqpClientToken)(amqpClient),
+    bindEagerlyTo(RedisClientToken)(redisClient),
   ],
 });
 
