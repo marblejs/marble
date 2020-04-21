@@ -1,9 +1,9 @@
 import { of } from 'rxjs';
-import { map, tap, mergeMap, bufferCount, mapTo, catchError, delay } from 'rxjs/operators';
-import { matchEvent, use } from '@marblejs/core';
+import { map, tap, catchError } from 'rxjs/operators';
+import { matchEvent, use, act } from '@marblejs/core';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { createMicroservice, messagingListener, Transport, MsgEffect, reply } from '@marblejs/messaging';
-import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
 import { IO } from 'fp-ts/lib/IO';
 
 const fib = (n: number): number =>
@@ -12,8 +12,8 @@ const fib = (n: number): number =>
 const fibonacci$: MsgEffect = event$ =>
   event$.pipe(
     matchEvent('FIB'),
-    use(eventValidator$(t.number)),
-    mergeMap(event => of(event).pipe(
+    act(event => of(event).pipe(
+      use(eventValidator$(t.number)),
       tap(event => { if (event.payload >= 45) throw new Error('Too high number!') }),
       map(event => fib(event.payload)),
       map(payload => reply(event)({ type: 'FIB_RESULT', payload })),
@@ -21,44 +21,35 @@ const fibonacci$: MsgEffect = event$ =>
     )),
   );
 
-const buffer$: MsgEffect = event$ =>
-  event$.pipe(
-    matchEvent('BUFFER'),
-    bufferCount(2),
-    mapTo({ type: 'BUFFER_RESULT' }),
-  );
-
-const timeout$: MsgEffect = event$ =>
-  event$.pipe(
-    matchEvent('TIMEOUT'),
-    mergeMap(event => of(event).pipe(
-      delay(180 * 1000),
-      mapTo(reply(event)({ type: 'TIMEOUT_RESULT' })),
-    )),
-  );
-
-const error$: MsgEffect = event$ =>
-  event$.pipe(
-    matchEvent('ERROR'),
-    tap(() => { throw new Error('test_error'); }),
-  );
-
-export const microservice = createMicroservice({
+export const amqpMicroservice = createMicroservice({
   transport: Transport.AMQP,
   options: {
     host: 'amqp://localhost:5672',
     queue: 'test_queue',
     queueOptions: { durable: false },
-    timeout: isTestEnv()
-      ? 500
-      : 30 * 1000
+    timeout: isTestEnv() ? 500 : 30 * 1000
   },
   listener: messagingListener({
-    effects: [fibonacci$, buffer$, timeout$, error$],
+    effects: [fibonacci$],
+  }),
+});
+
+export const redisMicroservice = createMicroservice({
+  transport: Transport.REDIS,
+  options: {
+    host: 'redis://127.0.0.1:6379',
+    channel: 'test_channel',
+    timeout: isTestEnv() ? 500 : 30 * 1000
+  },
+  listener: messagingListener({
+    effects: [fibonacci$],
   }),
 });
 
 const main: IO<void> = async () =>
-  !isTestEnv() && await (await microservice)();
+  !isTestEnv() && await Promise.all([
+    (await amqpMicroservice)(),
+    (await redisMicroservice)(),
+  ]);
 
 main();
