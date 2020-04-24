@@ -7,6 +7,7 @@ export enum ServerEventType {
   HEADERS = 'headers',
   CONNECTION = 'connection',
   CLOSE = 'close',
+  CLOSE_CLIENT = 'close_client',
   ERROR = 'error',
 }
 
@@ -25,6 +26,10 @@ export const ServerEvent = {
   ),
   close: createEvent(
     ServerEventType.CLOSE,
+   ),
+  closeClient: createEvent(
+    ServerEventType.CLOSE_CLIENT,
+    (client: WebSocketClientConnection) => ({ client }),
   ),
   error: createEvent(
     ServerEventType.ERROR,
@@ -48,6 +53,10 @@ export function isConnectionEvent(event: Event): event is ReturnType<typeof Serv
 
 export function isCloseEvent(event: Event): event is ReturnType<typeof ServerEvent.close> {
   return event.type === ServerEventType.CLOSE;
+}
+
+export function isCloseClientEvent(event: Event): event is ReturnType<typeof ServerEvent.closeClient> {
+  return event.type === ServerEventType.CLOSE_CLIENT;
 }
 
 export function isErrorEvent(event: Event): event is ReturnType<typeof ServerEvent.error> {

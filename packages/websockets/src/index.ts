@@ -1,6 +1,7 @@
 // server
 export { webSocketListener, WebSocketListenerConfig } from './server/websocket.server.listener';
 export { createWebSocketServer } from './server/websocket.server';
+export * from './server/websocket.server.event';
 export * from './server/websocket.server.interface';
 
 // common

@@ -76,7 +76,8 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
   const listen: ServerIO<WebSocketServerConnection> = () => new Promise((resolve, reject) => {
     handleServerBrokenConnections(server).subscribe();
 
-    server.once(ServerEventType.CONNECTION, (client: WebSocketClientConnection, req: http.IncomingMessage) => {
+    server.on(ServerEventType.CONNECTION, (client: WebSocketClientConnection, req: http.IncomingMessage) => {
+      client.once('close', () => serverEventSubject.next(ServerEvent.closeClient(client)));
       client.sendResponse = handleResponse(client, webSocketListener.eventTransformer);
       client.sendBroadcastResponse = handleBroadcastResponse(server, webSocketListener.eventTransformer);
       client.isAlive = true;
