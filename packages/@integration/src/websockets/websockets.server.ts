@@ -1,12 +1,5 @@
-import {
-  WsEffect,
-  WsConnectionEffect,
-  WebSocketConnectionError,
-  webSocketListener,
-  createWebSocketServer,
-} from '@marblejs/websockets';
-import { iif, throwError, of } from 'rxjs';
-import { mergeMap, buffer, map } from 'rxjs/operators';
+import { WsEffect, webSocketListener, createWebSocketServer } from '@marblejs/websockets';
+import { buffer, map } from 'rxjs/operators';
 import { matchEvent, use } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 
@@ -24,25 +17,9 @@ const add$: WsEffect = (event$, ctx) =>
     map(payload => ({ type: 'SUM_RESULT', payload })),
   );
 
-const error$: WsEffect = event$ =>
-  event$.pipe(
-    matchEvent('ERROR'),
-    mergeMap(() => throwError(new Error('some_error_message'))),
-  );
-
-const connection$: WsConnectionEffect = req$ =>
-  req$.pipe(
-    mergeMap(req => iif(
-      () => req.headers.upgrade !== 'websocket',
-      throwError(new WebSocketConnectionError('Unauthorized', 4000)),
-      of(req),
-    )),
-  );
-
 export const webSocketServer = createWebSocketServer({
-  connection$,
   listener: webSocketListener({
     middlewares: [],
-    effects: [add$, error$],
+    effects: [add$],
   }),
 });

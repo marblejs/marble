@@ -38,13 +38,27 @@ const close$: WsServerEffect = (event$, ctx) => {
 
   return event$.pipe(
     matchEvent(ServerEvent.close),
-    map(event => event.payload),
-    tap(logger({
+    tap(() => logger({
       type: 'Server',
       message: 'Server connection was closed',
       level: LoggerLevel.INFO,
       tag: LoggerTag.WEBSOCKETS,
-    }))
+    })())
+  );
+};
+
+const closeClient$: WsServerEffect = (event$, ctx) => {
+  const logger = useContext(LoggerToken)(ctx.ask);
+
+  return event$.pipe(
+    matchEvent(ServerEvent.closeClient),
+    map(event => event.payload),
+    tap(({ client }) => logger({
+      type: 'Server',
+      message: `Closed connection form client "${client.id}" (${client.address})`,
+      level: LoggerLevel.INFO,
+      tag: LoggerTag.WEBSOCKETS,
+    })())
   );
 };
 
@@ -68,4 +82,5 @@ export const statusLogger$ = combineEffects(
   listening$,
   error$,
   close$,
+  closeClient$,
 );
