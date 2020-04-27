@@ -1,53 +1,30 @@
 import * as http from 'http';
+import * as net from 'net';
 import * as WebSocket from 'ws';
-import { WebSocketClientConnection, WebSocketServerConnection } from '../server/websocket.server.interface';
+import { ServerConfig } from '@marblejs/core';
+import { WebSocketClientConnection, WebSocketServerConnection, WebSocketServerConfig } from '../server/websocket.server.interface';
+import { createWebSocketServer } from '../server/websocket.server';
+import { WsServerEffect } from '../effects/websocket.effects.interface';
 
-export const TEST_CONFIG = {
-  PORT: 1337,
-  HOST: '127.0.0.1',
+export const bootstrapHttpServer = async (host?: string, port?: number): Promise<http.Server> =>
+  new Promise(resolve => {
+    const httpServer = http.createServer();
+    httpServer.listen(port, host, () => resolve(httpServer));
+  });
+
+export const bootstrapWebSocketClient = (httpServer: http.Server): Promise<WebSocket> => {
+  const serverAddressInfo = httpServer.address() as net.AddressInfo;
+  const host = serverAddressInfo.address === '::' ? '127.0.0.1' : serverAddressInfo.address;
+  const port = serverAddressInfo.port;
+  const client = new WebSocket(`ws://${host}:${port}`);
+  return new Promise(resolve => client.once('open', () => resolve(client)));
 };
 
-const createServer = (host: string, port: number) => (cb: () => void) =>
-  http.createServer().listen(port, host, cb);
-
-const createWebSocketClient = (host: string, port: number) => () =>
-  new WebSocket(`ws://${host}:${port}`);
-
-export const createWebSocketsTestBed = (clientsCount = 1, host = TEST_CONFIG.HOST, port = TEST_CONFIG.PORT) => {
-  let httpServer: http.Server;
-  let webSocketClients: WebSocket[] = [];
-
-  const bootstrap = (cb: () => void) => {
-    httpServer = createServer(host, port)(() => {
-      webSocketClients = Array.from(
-        { length: clientsCount },
-        createWebSocketClient(host, port)
-      );
-      cb();
-    });
-  };
-
-  const teardown = (cb: () => void) => {
-    webSocketClients.forEach(client => client.readyState === WebSocket.OPEN && client.close());
-    webSocketClients = [];
-    httpServer.close(cb);
-  };
-
-  const getClient = (index = 0) =>
-    webSocketClients[index];
-
-  const getServer = () =>
-    httpServer;
-
-  return {
-    bootstrap,
-    teardown,
-    getClient,
-    getServer,
-  };
-};
-
-export type WebSocketsTestBed = typeof createWebSocketsTestBed;
+export const bootstrapWebSocketServer = async (
+  options:  WebSocketServerConfig['options'],
+  listener: ServerConfig<any, any>['listener'],
+  event$?: WsServerEffect,
+) => (await createWebSocketServer({ options, listener, event$ }))();
 
 export const createWebSocketClientMock = (): WebSocketClientConnection => {
   class WebSocketClientMock extends WebSocket.EventEmitter {
