@@ -1,39 +1,34 @@
-import { createWebSocketsTestBed } from '@marblejs/websockets/dist/+internal';
-import { createWebSocketServer } from '@marblejs/websockets';
+import { bootstrapHttpServer, bootstrapWebSocketClient, bootstrapWebSocketServer } from '@marblejs/websockets/dist/+internal';
 import { listener } from './io-ws.integration';
 
 describe('@marblejs/middleware-io - WebSocket integration', () => {
-  const testBed = createWebSocketsTestBed();
-
-  beforeEach(testBed.bootstrap);
-  afterEach(testBed.teardown);
 
   test('[POST_USER] sends user object', async done => {
     // given
     const user = { id: 'id', age: 100, };
-    const event = JSON.stringify({ type: 'POST_USER', payload: user });
-    const server = testBed.getServer();
-    const targetClient = testBed.getClient();
+    const event = { type: 'POST_USER', payload: user };
 
     // when
-    const app = await createWebSocketServer({ options: { server }, listener });
-    const webSocketServer = await app();
+    const httpServer = await bootstrapHttpServer();
+    const webSocketServer = await bootstrapWebSocketServer({ server: httpServer}, listener);
+    const webSocketClient = await bootstrapWebSocketClient(httpServer);
 
-    targetClient.once('open', () => targetClient.send(event));
+    webSocketClient.send(JSON.stringify(event));
 
     // then
-    targetClient.once('message', message => {
-      expect(message).toEqual(event);
-      webSocketServer.close(done);
+    webSocketClient.once('message', message => {
+      expect(JSON.parse(message)).toEqual(event);
+      webSocketClient.close();
+      webSocketServer.close();
+      httpServer.close();
+      done();
     });
   });
 
   test('[POST_USER] throws an error if incoming object is invalid', async done => {
     // given
-    const server = testBed.getServer();
-    const targetClient = testBed.getClient();
     const user = { id: 'id', age: '100', };
-    const event = JSON.stringify({ type: 'POST_USER', payload: user });
+    const event = { type: 'POST_USER', payload: user };
     const expectedError = {
       type: 'POST_USER',
       error: {
@@ -44,16 +39,19 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     };
 
     // when
-    const app = await createWebSocketServer({ options: { server }, listener });
-    const webSocketServer = await app();
+    const httpServer = await bootstrapHttpServer();
+    const webSocketServer = await bootstrapWebSocketServer({ server: httpServer}, listener);
+    const webSocketClient = await bootstrapWebSocketClient(httpServer);
 
-    targetClient.once('open', () => targetClient.send(event));
+    webSocketClient.send(JSON.stringify(event));
 
     // then
-    targetClient.once('message', message => {
-      const parsedMessage = JSON.parse(message);
-      expect(parsedMessage).toEqual(expectedError);
-      webSocketServer.close(done);
+    webSocketClient.once('message', message => {
+      expect(JSON.parse(message)).toEqual(expectedError);
+      webSocketClient.close();
+      webSocketServer.close();
+      httpServer.close();
+      done();
     });
   });
 });
