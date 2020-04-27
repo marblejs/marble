@@ -9,8 +9,11 @@ export const DEFAULT_HOSTNAME = '127.0.0.1';
 type WebSocketListenerFn = ReturnType<typeof webSocketListener>;
 
 export interface WebSocketServerConfig extends ServerConfig<WsServerEffect, WebSocketListenerFn> {
-  options?: WebSocket.ServerOptions;
+  /**
+   * @deprecated: validate connection on `upgrade` or `connection` events instead
+   */
   connection$?: WsConnectionEffect;
+  options?: WebSocket.ServerOptions;
 }
 
 export interface WebSocketServerConnection extends WebSocket.Server {
