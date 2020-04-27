@@ -1,4 +1,5 @@
 import * as http from 'http';
+import * as net from 'net';
 import * as WebSocket from 'ws';
 import { Observable, of } from 'rxjs';
 import { map, takeWhile } from 'rxjs/operators';
@@ -19,7 +20,7 @@ import {
   logContext,
   combineEffects,
 } from '@marblejs/core';
-import { isTestEnv, createUuid } from '@marblejs/core/dist/+internal/utils';
+import { isTestEnv, createUuid, isNullable } from '@marblejs/core/dist/+internal/utils';
 import { createServer, handleServerBrokenConnections, handleClientBrokenConnection } from '../server/websocket.server.helper';
 import { handleBroadcastResponse, handleResponse } from '../response/websocket.response.handler';
 import { WebSocketConnectionError } from '../error/websocket.error.model';
@@ -60,10 +61,14 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
   const webSocketListener = listener(context);
   const ctx = createEffectContext({ ask: lookup(context), client: undefined });
   const combinedEvents = event$ ? combineEffects(statusLogger$, event$) : statusLogger$;
+  const noServer = true
+    && isNullable(options?.server)
+    && isNullable(options?.port)
+    && isNullable(options?.noServer);
 
   const server = createServer({
-    noServer: true,
     verifyClient: verifyClient(context),
+    noServer,
     ...options
   }, webSocketListener.eventTransformer);
 
@@ -90,8 +95,19 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
       webSocketListener(client);
     });
 
-    if (server.options.noServer) {
+    if (server.options.server) {
+      const serverAddressInfo = server.address() as net.AddressInfo;
+      const host = serverAddressInfo.address === '::' ? 'localhost' : serverAddressInfo.address;
+      const port = serverAddressInfo.port;
+      serverEventSubject.next(ServerEvent.listening(port, host));
+    }
+
+    if (server.options.noServer || server.options.server?.listening) {
       return resolve(server);
+    }
+
+    if (server.options.server) {
+      return server.options.server.once(ServerEventType.LISTENING, () => resolve(server));
     }
 
     server.once(ServerEventType.ERROR, error => reject(error));
