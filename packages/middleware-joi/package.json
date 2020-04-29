@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-joi",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "A joi validation middleware for Marble.js",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
@@ -48,8 +48,8 @@
     "joi": "~14.3.0"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.0.2",
-    "@marblejs/middleware-body": "^3.0.2"
+    "@marblejs/core": "^3.1.0",
+    "@marblejs/middleware-body": "^3.1.0"
   },
   "publishConfig": {
     "access": "public"
