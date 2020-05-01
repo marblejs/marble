@@ -1,0 +1,47 @@
+{
+  "name": "@marblejs/testing",
+  "version": "3.1.0",
+  "description": "Testing module for Marble.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start": "yarn watch",
+    "watch": "tsc -w",
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "test": "jest --config ../../jest.config.js"
+  },
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marblejs/marble.git"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "yarn": ">= 1.7.0",
+    "npm": ">= 5.0.0"
+  },
+  "author": "Józef Flakus <hello@jflakus.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marblejs/marble/issues"
+  },
+  "homepage": "https://github.com/marblejs/marble#readme",
+  "peerDependencies": {
+    "@marblejs/core": "^3.0.0",
+    "@marblejs/messaging": "^3.0.0",
+    "@marblejs/websockets": "^3.0.0",
+    "fp-ts": "^2.4.2",
+    "rxjs": "^6.5.3"
+  },
+  "devDependencies": {
+    "@marblejs/core": "^3.1.0",
+    "@marblejs/messaging": "^3.1.0",
+    "@marblejs/websockets": "^3.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
