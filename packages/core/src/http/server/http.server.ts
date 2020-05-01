@@ -1,17 +1,17 @@
 import * as http from 'http';
 import * as https from 'https';
-import { flow } from 'fp-ts/lib/function';
 import { Subject, merge, EMPTY } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
-import { createContext, lookup, registerAll, bindTo, resolve } from '../../context/context.factory';
+import { lookup, bindTo } from '../../context/context.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { isTestingMetadataOn } from '../../+internal/testing';
-import { insertIf, isTestEnv } from '../../+internal/utils';
+import { insertIf } from '../../+internal/utils';
 import { HttpRequest, HttpServer } from '../http.interface';
-import { LoggerToken, logger, LoggerTag, mockLogger } from '../../logger';
 import { logContext } from '../../context/context.logger';
+import { contextFactory } from '../../context/context.factory.helper';
 import { ServerIO } from '../../listener/listener.interface';
 import { listening$, close$, error$ } from '../effects/http.effects';
+import { LoggerTag } from '../../logger';
 import { subscribeServerEvents } from './http.server.event.subscriber';
 import { HttpServerClientToken, HttpServerEventStreamToken, HttpRequestMetadataStorageToken, HttpRequestBusToken } from './http.server.tokens';
 import { httpRequestMetadataStorage } from './http.server.metadata.storage';
@@ -24,24 +24,20 @@ export const createServer = async (config: CreateServerConfig) => {
   const server = options.httpsOptions ? https.createServer(options.httpsOptions) : http.createServer();
   const serverEvent$ = subscribeServerEvents(hostname)(server);
 
-  const boundLogger = bindTo(LoggerToken)(isTestEnv() ? mockLogger : logger);
   const boundHttpServerEvent = bindTo(HttpServerEventStreamToken)(() => serverEvent$);
   const boundHttpServerClient = bindTo(HttpServerClientToken)(() => server);
   const boundHttpRequestMetadataStorage = bindTo(HttpRequestMetadataStorageToken)(httpRequestMetadataStorage);
   const boundHttpRequestBus = bindTo(HttpRequestBusToken)(() => new Subject<HttpRequest>());
 
-  const context = await flow(
-    registerAll([
-      boundLogger,
-      boundHttpServerClient,
-      boundHttpServerEvent,
-      boundHttpRequestBus,
-      ...insertIf(isTestingMetadataOn())(boundHttpRequestMetadataStorage),
-      ...dependencies,
-    ]),
-    logContext(LoggerTag.HTTP),
-    resolve,
-  )(createContext());
+  const context = await contextFactory(
+    boundHttpServerClient,
+    boundHttpServerEvent,
+    boundHttpRequestBus,
+    ...insertIf(isTestingMetadataOn())(boundHttpRequestMetadataStorage),
+    ...dependencies,
+  );
+
+  logContext(LoggerTag.HTTP)(context);
 
   const ask = lookup(context);
   const ctx = createEffectContext({ ask, client: server });

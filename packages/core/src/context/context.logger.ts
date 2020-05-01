@@ -8,8 +8,10 @@ import { useContext } from './context.hook';
 import { ContextToken } from './context.token.factory';
 
 export const logContext = (tag: string) => (context: Context): Context => {
-  const ask = lookup(context);
-  const logger = useContext(LoggerToken)(ask);
+  const logger = pipe(
+    lookup(context),
+    useContext(LoggerToken),
+  );
 
   const log = (token: ContextToken) => logger({
     tag,
