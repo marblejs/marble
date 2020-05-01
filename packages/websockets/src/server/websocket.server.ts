@@ -3,24 +3,8 @@ import * as net from 'net';
 import * as WebSocket from 'ws';
 import { Observable, of } from 'rxjs';
 import { map, takeWhile } from 'rxjs/operators';
-import { flow } from 'fp-ts/lib/function';
-import {
-  bindTo,
-  Context,
-  createContext,
-  createEffectContext,
-  registerAll,
-  resolve,
-  ServerIO,
-  mockLogger,
-  LoggerToken,
-  LoggerTag,
-  lookup,
-  logger,
-  logContext,
-  combineEffects,
-} from '@marblejs/core';
-import { isTestEnv, createUuid, isNullable } from '@marblejs/core/dist/+internal/utils';
+import { Context, contextFactory, createEffectContext, ServerIO, LoggerTag, lookup, logContext, combineEffects } from '@marblejs/core';
+import { createUuid, isNullable } from '@marblejs/core/dist/+internal/utils';
 import { createServer, handleServerBrokenConnections, handleClientBrokenConnection } from '../server/websocket.server.helper';
 import { handleBroadcastResponse, handleResponse } from '../response/websocket.response.handler';
 import { WebSocketConnectionError } from '../error/websocket.error.model';
@@ -50,13 +34,9 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
       );
   };
 
-  const boundLogger = bindTo(LoggerToken)(isTestEnv() ? mockLogger : logger);
+  const context = await contextFactory(...dependencies);
 
-  const context = await flow(
-    registerAll([boundLogger, ...dependencies]),
-    logContext(LoggerTag.WEBSOCKETS),
-    resolve,
-  )(createContext());
+  logContext(LoggerTag.WEBSOCKETS)(context);
 
   const webSocketListener = listener(context);
   const ctx = createEffectContext({ ask: lookup(context), client: undefined });
