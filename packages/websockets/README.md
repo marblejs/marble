@@ -13,7 +13,7 @@ A WebSockets module for [Marble.js](https://github.com/marblejs/marble).
 ```
 $ npm i @marblejs/websockets
 ```
-Requires `@marblejs/core` to be installed.
+Requires `@marblejs/core`, `rxjs` and `fp-ts` to be installed.
 
 ## Documentation
 
