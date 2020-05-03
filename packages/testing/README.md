@@ -13,7 +13,7 @@ A testing module for [Marble.js](https://github.com/marblejs/marble).
 ```
 $ npm i @marblejs/testing
 ```
-Requires `@marblejs/core`, `fp-ts` and `rxjs` to be installed.
+Requires `@marblejs/core`, `@marblejs/messaging`, `@marblejs/websockets`, `fp-ts` and `rxjs` to be installed.
 
 ## Documentation
 
