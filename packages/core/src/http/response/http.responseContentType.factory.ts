@@ -18,7 +18,7 @@ export const contentTypeFactory = (data: {
   status: HttpStatus;
 }) => ({
   'Content-Type':
-    data.status === 200
+    data.status < 400
       ? getMimeType(data.body, data.path)
       : DEFAULT_CONTENT_TYPE,
 });

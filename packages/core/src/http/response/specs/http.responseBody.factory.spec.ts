@@ -3,6 +3,30 @@ import { bodyFactory } from '../http.responseBody.factory';
 
 describe('Response body factory', () => {
 
+  it('#bodyFactory factorizes body for urlencoded', () => {
+    // given
+    const headers = { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED };
+    const body = { test: 'test' };
+
+    // when
+    const factorizedBody = bodyFactory(headers)(body);
+
+    // then
+    expect(factorizedBody).toEqual('test=test');
+  });
+
+  it('#bodyFactory doesn\'t factorize body for urlencoded if body is stringified', () => {
+    // given
+    const headers = { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED };
+    const body = 'test=test';
+
+    // when
+    const factorizedBody = bodyFactory(headers)(body);
+
+    // then
+    expect(factorizedBody).toEqual('test=test');
+  });
+
   it('#bodyFactory factorizes body for JSON', () => {
     // given
     const headers = { 'Content-Type': ContentType.APPLICATION_JSON };
