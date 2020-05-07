@@ -17,9 +17,9 @@ import { setTestingMetadata } from './http.testBed.util';
 const sendRequest = async <T extends HttpMethod>(testBedRequest: HttpTestBedRequest<T>): Promise<HttpTestBedResponse> =>
   new Promise((resolve, reject) => {
     const clientRequest = request({
+      headers: testBedRequest.headers,
       port: testBedRequest.port,
       protocol: testBedRequest.protocol,
-      headers: testBedRequest.headers,
       method: testBedRequest.method,
       host: testBedRequest.host,
       path: testBedRequest.path,
@@ -45,9 +45,12 @@ const sendRequest = async <T extends HttpMethod>(testBedRequest: HttpTestBedRequ
       return testBedRequest.body.pipe(clientRequest);
     }
 
-    const body = bodyFactory(testBedRequest.headers)(testBedRequest.body);
+    if (testBedRequest.body) {
+      const body = bodyFactory(testBedRequest.headers)(testBedRequest.body);
+      return clientRequest.end(body);
+    }
 
-    return clientRequest.end(body);
+    return clientRequest.end();
   });
 
 const getRequestMetadata = (request: HttpTestBedRequest<any>) => (ask: ContextProvider): TestingMetadata => {
@@ -64,6 +67,8 @@ const getRequestMetadata = (request: HttpTestBedRequest<any>) => (ask: ContextPr
 export const createHttpTestBed = (config: HttpTestBedConfig): TestBedFactory<HttpTestBed> => async (dependencies = []) => {
   const { listener } = config;
 
+  setTestingMetadata();
+
   const app = await createServer({ listener, dependencies });
   const server = await app();
   const ask = lookup(app.context);
@@ -76,8 +81,6 @@ export const createHttpTestBed = (config: HttpTestBedConfig): TestBedFactory<Htt
     const metadata = getRequestMetadata(request)(ask);
     return { ...response, metadata };
   };
-
-  setTestingMetadata();
 
   return {
     type: TestBedType.HTTP,
