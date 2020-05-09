@@ -6,7 +6,7 @@ import { bodyParser$ } from '@marblejs/middleware-body';
 import { api$ } from './effects/api.effects';
 import { cors$ } from './middlewares/cors.middleware';
 
-const listener = httpListener({
+export const listener = httpListener({
   middlewares: [
     logger$({ silent: isTestEnv() }),
     bodyParser$(),
