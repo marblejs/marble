@@ -102,6 +102,9 @@ export const createTestRoute = (opts?: { throwError?: boolean; delay?: number; m
   return { req, path, effect, item };
 };
 
+/**
+ * @deprecated
+ */
 export const createHttpServerTestBed = (server: Promise<ServerIO<HttpServer>>) => {
   let httpServer: HttpServer;
 
