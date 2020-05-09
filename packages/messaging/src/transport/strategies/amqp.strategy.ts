@@ -158,7 +158,7 @@ class AmqpStrategy implements TransportLayer {
     await import('amqplib');
 
     const amqplib = await import('amqp-connection-manager');
-    const connectionManager = await amqplib.connect([host]);
+    const connectionManager = amqplib.connect([host]);
 
     const channelWrapper = connectionManager.createChannel({
       json: false,
@@ -177,6 +177,8 @@ class AmqpStrategy implements TransportLayer {
         }
       },
     });
+
+    await (channelWrapper as any).waitForConnect(); // not available in @types/amqp-connection-manager
 
     return new AmqpStrategyConnection(
       msgSubject$,
