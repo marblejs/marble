@@ -1,4 +1,5 @@
-import { IO } from 'fp-ts/lib/IO';
+import * as T from 'fp-ts/lib/Task';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { createServer, httpListener } from '@marblejs/core';
 import { isTestEnv, getPortEnv } from '@marblejs/core/dist/+internal/utils';
 import { logger$ } from '@marblejs/middleware-logger';
@@ -17,12 +18,13 @@ export const listener = httpListener({
   ],
 });
 
-export const server = createServer({
+export const server = () => createServer({
   port: getPortEnv(),
   listener,
 });
 
-const main: IO<void> = async () =>
-  !isTestEnv() && await (await server)();
+export const main = !isTestEnv()
+  ? pipe(server, T.map(run => run()))
+  : T.of(undefined);
 
 main();
