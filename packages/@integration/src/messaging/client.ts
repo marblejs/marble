@@ -3,7 +3,8 @@ import { requestValidator$, t } from '@marblejs/middleware-io';
 import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
 import { r, createServer, createContextToken, httpListener, use, useContext, bindEagerlyTo, combineRoutes, ContextToken } from '@marblejs/core';
 import { isTestEnv, getPortEnv } from '@marblejs/core/dist/+internal/utils';
-import { IO } from 'fp-ts/lib/IO';
+import * as T from 'fp-ts/lib/Task';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { forkJoin } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 
@@ -64,19 +65,24 @@ const redis$ = combineRoutes('/redis', [
   fib$(RedisClientToken),
 ]);
 
-export const server = createServer({
-  port: getPortEnv(),
-  listener: httpListener({
-    middlewares: [logger$()],
-    effects: [amqp$, redis$],
-  }),
-  dependencies: [
-    bindEagerlyTo(AmqpClientToken)(amqpClient),
-    bindEagerlyTo(RedisClientToken)(redisClient),
-  ],
+export const dependencies = [
+  bindEagerlyTo(AmqpClientToken)(amqpClient),
+  bindEagerlyTo(RedisClientToken)(redisClient),
+];
+
+export const listener = httpListener({
+  middlewares: [logger$()],
+  effects: [amqp$, redis$],
 });
 
-const main: IO<void> = async () =>
-  !isTestEnv() && await (await server)();
+export const server = () => createServer({
+  port: getPortEnv(),
+  listener,
+  dependencies,
+});
+
+export const main = !isTestEnv()
+  ? pipe(server, T.map(run => run()))
+  : T.of(undefined);
 
 main();

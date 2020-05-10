@@ -11,7 +11,7 @@ const useTestBedSetup = createTestBedSetup({
 describe('API integration', () => {
   const testBedSetup = useTestBedSetup()
 
-  afterEach(() => testBedSetup.cleanup());
+  afterEach(testBedSetup.cleanup);
 
   test('POST "/" returns 404 when route not found', async () => {
     const testBed = await testBedSetup.useTestBed();
