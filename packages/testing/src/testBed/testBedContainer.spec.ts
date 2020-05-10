@@ -30,7 +30,7 @@ describe('#createTestBedSetup cleanup container', () => {
   });
 
   test('automatically closes bound EventBus', async () => {
-    const { useTestBed, cleanup } = await useTestBedSetup();
+    const { useTestBed, cleanup } = useTestBedSetup();
     const testBed = await useTestBed();
 
     const eventBus = useContext(EventBusToken)(testBed.ask);
@@ -46,7 +46,7 @@ describe('#createTestBedSetup cleanup container', () => {
   });
 
   test('automatically cleanups custom dependency', async () => {
-    const { useTestBed, cleanup } = await useTestBedSetup();
+    const { useTestBed, cleanup } = useTestBedSetup();
     const testBed = await useTestBed([customDependencyBound]);
 
     const customDependency = useContext(customDependencyToken)(testBed.ask);

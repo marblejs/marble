@@ -1,4 +1,4 @@
-import { BoundDependency, contextFactory, lookup } from '@marblejs/core';
+import { BoundDependency } from '@marblejs/core';
 import { TestBedSetupConfig, TestBedSetup } from './testBedSetup.interface';
 import { createTestBedContainer } from './testBedContainer';
 import { TestBed } from './testBed.interface';
@@ -6,19 +6,12 @@ import { TestBed } from './testBed.interface';
 type CreateTestBedSetup = <T extends TestBed>
   (config: TestBedSetupConfig<T>) =>
   (prependDependencies?: readonly BoundDependency<any>[]) =>
-  Promise<TestBedSetup<T>>
+  TestBedSetup<T>
 
-export const createTestBedSetup: CreateTestBedSetup = config => async (prependDependencies = []) => {
+export const createTestBedSetup: CreateTestBedSetup = config => (prependDependencies = []) => {
   const { dependencies: defaultDependencies = [], cleanups = [] } = config;
 
   const { cleanup, register } = createTestBedContainer({ cleanups });
-
-  const boundContext = await contextFactory(
-    ...defaultDependencies,
-    ...prependDependencies,
-  );
-
-  const ask = lookup(boundContext);
 
   const useTestBed = async (dependencies: BoundDependency<any>[] = []) => {
     const testBed = await config.testBed([
@@ -33,7 +26,6 @@ export const createTestBedSetup: CreateTestBedSetup = config => async (prependDe
   };
 
   return {
-    ask,
     useTestBed,
     cleanup,
   };
