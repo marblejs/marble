@@ -14,12 +14,12 @@ describe('API integration', () => {
   afterEach(testBedSetup.cleanup);
 
   test('POST "/" returns 404 when route not found', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('POST'),
-      testBed.withPath('/'),
-      testBed.send,
+      request('POST'),
+      request.withPath('/'),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(404);
@@ -30,12 +30,12 @@ describe('API integration', () => {
   });
 
   test('GET "/api/v1" returns status 200', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v1'),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v1'),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(200);
@@ -43,12 +43,12 @@ describe('API integration', () => {
   });
 
   test('GET "/api/v2" returns status 200', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v2'),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v2'),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(200);
@@ -56,12 +56,12 @@ describe('API integration', () => {
   });
 
   test('GET "/api/v3" returns status 400 if provided version is not supported', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v3'),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v3'),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(400);
@@ -82,12 +82,12 @@ describe('API integration', () => {
   });
 
   test('GET "/api/v1/foo" triggers 404 effect', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v1/foo'),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v1/foo'),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(404);
@@ -98,12 +98,12 @@ describe('API integration', () => {
   });
 
   test('GET "/api/v1/error" returns error response', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v1/error'),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v1/error'),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(HttpStatus.NOT_IMPLEMENTED);
@@ -115,13 +115,13 @@ describe('API integration', () => {
   });
 
   test('GET "/api/v1/user" returns collection', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v1/user'),
-      testBed.withHeaders({ 'Authorization': 'Bearer FAKE' }),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v1/user'),
+      request.withHeaders({ 'Authorization': 'Bearer FAKE' }),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(200);
@@ -129,13 +129,13 @@ describe('API integration', () => {
   });
 
   test(`GET "/api/v1/user?email=test%40test.com" returns 200 with "Content-Type": "application/json" `, async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v1/user?email=test%40test.com'),
-      testBed.withHeaders({ 'Authorization': 'Bearer FAKE' }),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v1/user?email=test%40test.com'),
+      request.withHeaders({ 'Authorization': 'Bearer FAKE' }),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(200);
@@ -143,13 +143,13 @@ describe('API integration', () => {
   });
 
   test(`GET "/api/v1/user/10" returns single object`, async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v1/user/10'),
-      testBed.withHeaders({ 'Authorization': 'Bearer FAKE' }),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v1/user/10'),
+      request.withHeaders({ 'Authorization': 'Bearer FAKE' }),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(200);
@@ -157,13 +157,13 @@ describe('API integration', () => {
   });
 
   test('GET "/api/v1/user/0" returns 404 not found', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v1/user/0'),
-      testBed.withHeaders({ 'Authorization': 'Bearer FAKE' }),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v1/user/0'),
+      request.withHeaders({ 'Authorization': 'Bearer FAKE' }),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(404);
@@ -174,12 +174,12 @@ describe('API integration', () => {
   });
 
   test('GET "/api/v1/user/10" returns 401 if not authorized', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/api/v1/user/0'),
-      testBed.send,
+      request('GET'),
+      request.withPath('/api/v1/user/0'),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(401);
@@ -190,15 +190,15 @@ describe('API integration', () => {
   });
 
   test('POST "/api/v1/user" parses body and returns echo for secured route', async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
     const data = { user: { id: 'test_id' } };
 
     const response = await pipe(
-      testBed.req('POST'),
-      testBed.withPath('/api/v1/user'),
-      testBed.withHeaders({ 'Authorization': 'Bearer FAKE' }),
-      testBed.withBody(data),
-      testBed.send,
+      request('POST'),
+      request.withPath('/api/v1/user'),
+      request.withHeaders({ 'Authorization': 'Bearer FAKE' }),
+      request.withBody(data),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(200);
@@ -206,16 +206,16 @@ describe('API integration', () => {
   });
 
   test(`POST "/api/v1/user" parses ${ContentType.APPLICATION_X_WWW_FORM_URLENCODED} body and echoes back for secured route`, async () => {
-    const testBed = await testBedSetup.useTestBed();
+    const { request } = await testBedSetup.useTestBed();
     const data = { user: { id: 'test_id' } };
 
     const response = await pipe(
-      testBed.req('POST'),
-      testBed.withPath('/api/v1/user'),
-      testBed.withHeaders({ 'Authorization': 'Bearer FAKE' }),
-      testBed.withHeaders({ 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED }),
-      testBed.withBody(data),
-      testBed.send,
+      request('POST'),
+      request.withPath('/api/v1/user'),
+      request.withHeaders({ 'Authorization': 'Bearer FAKE' }),
+      request.withHeaders({ 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED }),
+      request.withBody(data),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(200);
@@ -224,12 +224,12 @@ describe('API integration', () => {
 
   describe('files', () => {
     test(`GET "/api/v1/static/index.html" returns static file as "${ContentType.TEXT_HTML}"`, async () => {
-      const testBed = await testBedSetup.useTestBed();
+      const { request } = await testBedSetup.useTestBed();
 
       const response = await pipe(
-        testBed.req('GET'),
-        testBed.withPath('/api/v1/static/index.html'),
-        testBed.send,
+        request('GET'),
+        request.withPath('/api/v1/static/index.html'),
+        request.send,
       );
 
       expect(response.statusCode).toEqual(200);
@@ -238,12 +238,12 @@ describe('API integration', () => {
     });
 
     test(`GET "/api/v1/static/img/flow.png" returns static file as "${ContentType.IMAGE_PNG}"`, async () => {
-      const testBed = await testBedSetup.useTestBed();
+      const { request } = await testBedSetup.useTestBed();
 
       const response = await pipe(
-        testBed.req('GET'),
-        testBed.withPath('/api/v1/static/img/flow.png'),
-        testBed.send,
+        request('GET'),
+        request.withPath('/api/v1/static/img/flow.png'),
+        request.send,
       );
 
       expect(response.statusCode).toEqual(200);
@@ -253,13 +253,13 @@ describe('API integration', () => {
 
   describe('CORS', () => {
     test('OPTIONS "/api/v2" returns 204', async () => {
-      const testBed = await testBedSetup.useTestBed();
+      const { request } = await testBedSetup.useTestBed();
 
       const response = await pipe(
-        testBed.req('OPTIONS'),
-        testBed.withPath('/api/v2'),
-        testBed.withHeaders({ 'Origin': 'fake-origin' }),
-        testBed.send,
+        request('OPTIONS'),
+        request.withPath('/api/v2'),
+        request.withHeaders({ 'Origin': 'fake-origin' }),
+        request.send,
       );
 
       expect(response.statusCode).toEqual(204);
@@ -271,13 +271,13 @@ describe('API integration', () => {
     });
 
     test('GET "/api/v2" returns 200', async () => {
-      const testBed = await testBedSetup.useTestBed();
+      const { request } = await testBedSetup.useTestBed();
 
       const response = await pipe(
-        testBed.req('GET'),
-        testBed.withPath('/api/v2'),
-        testBed.withHeaders({ 'Origin': 'fake-origin' }),
-        testBed.send,
+        request('GET'),
+        request.withPath('/api/v2'),
+        request.withHeaders({ 'Origin': 'fake-origin' }),
+        request.send,
       );
 
       expect(response.statusCode).toEqual(200);

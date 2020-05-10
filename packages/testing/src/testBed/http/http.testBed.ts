@@ -9,7 +9,7 @@ import { TESTING_REQUEST_ID_HEADER, TestingMetadata } from '@marblejs/core/dist/
 import { TestBedType, TestBedFactory } from '../testBed.interface';
 import { HttpTestBedConfig, HttpTestBed } from './http.testBed.interface';
 import { createRequest, withBody, withHeaders, getHeader, withPath } from './http.testBed.request';
-import { HttpTestBedRequest } from './http.testBed.request.interface';
+import { HttpTestBedRequest, HttpTestBedRequestBuilder } from './http.testBed.request.interface';
 import { HttpTestBedResponse } from './http.testBed.response.interface';
 import { createResponse } from './http.testBed.response';
 import { setTestingMetadata } from './http.testBed.util';
@@ -74,7 +74,7 @@ export const createHttpTestBed = (config: HttpTestBedConfig): TestBedFactory<Htt
   const ask = lookup(app.context);
   const finish = closeServer(server);
   const address = getServerAddress(server);
-  const req = createRequest(address.port, address.host, config.defaultHeaders);
+  const request = createRequest(address.port, address.host, config.defaultHeaders) as HttpTestBedRequestBuilder;
 
   const send: typeof sendRequest = async request => {
     const response = await sendRequest(request);
@@ -82,14 +82,16 @@ export const createHttpTestBed = (config: HttpTestBedConfig): TestBedFactory<Htt
     return { ...response, metadata };
   };
 
+  request.withHeaders = withHeaders;
+  request.withBody = withBody;
+  request.withPath = withPath;
+  request.send = send;
+
   return {
     type: TestBedType.HTTP,
-    ask,
     finish,
-    withHeaders,
-    withBody,
-    withPath,
     send,
-    req
+    ask,
+    request
   };
 };
