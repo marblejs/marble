@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { HttpStatus } from '@marblejs/core';
 import { ContentType } from '@marblejs/core/dist/+internal/http';
-import { createHttpTestBed, createTestBedSetup, TestBedSetup, HttpTestBed } from '@marblejs/testing';
+import { createHttpTestBed, createTestBedSetup } from '@marblejs/testing';
 import { listener } from '../src/http';
 
 const useTestBedSetup = createTestBedSetup({
@@ -9,15 +9,9 @@ const useTestBedSetup = createTestBedSetup({
 });
 
 describe('API integration', () => {
-  let testBedSetup: TestBedSetup<HttpTestBed>;
+  const testBedSetup = useTestBedSetup()
 
-  beforeEach(async () => {
-    testBedSetup = await useTestBedSetup();
-  });
-
-  afterEach(async () => {
-    return testBedSetup.cleanup();
-  });
+  afterEach(() => testBedSetup.cleanup());
 
   test('POST "/" returns 404 when route not found', async () => {
     const testBed = await testBedSetup.useTestBed();
