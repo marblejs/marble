@@ -21,12 +21,12 @@ describe('messaging integration', () => {
     'redis',
     'amqp',
   ])('GET /%s/fib returns 10, 11, 12, 13, 14 th fibonacci number', async type => {
-    const testBed = await httpTestBedSetup.useTestBed();
+    const { request } = await httpTestBedSetup.useTestBed();
 
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath(`/${type}/fib/10`),
-      testBed.send,
+      request('GET'),
+      request.withPath(`/${type}/fib/10`),
+      request.send,
     );
 
     expect(response.statusCode).toEqual(200);

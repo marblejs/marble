@@ -25,7 +25,7 @@ describe('TetBed - HTTP', () => {
 
     const listener = httpListener();
     const testBed = await createHttpTestBed({ listener, defaultHeaders })();
-    const req = testBed.req('GET');
+    const req = testBed.request('GET');
 
     expect(req.method).toEqual('GET');
     expect(req.port).toEqual(expect.any(Number));
@@ -50,14 +50,14 @@ describe('TetBed - HTTP', () => {
       )));
 
     const listener = httpListener({ effects: [test$] });
-    const testBed = await createHttpTestBed({ listener })();
+    const { request: req, finish } = await createHttpTestBed({ listener })();
 
     // when
     const response = await pipe(
-      testBed.req('GET'),
-      testBed.withPath('/test'),
-      testBed.withHeaders({ 'Content-Type': 'application/json' }),
-      testBed.send,
+      req('GET'),
+      req.withPath('/test'),
+      req.withHeaders({ 'Content-Type': 'application/json' }),
+      req.send,
     );
 
     // then
@@ -77,7 +77,7 @@ describe('TetBed - HTTP', () => {
       statusMessage: 'OK',
     }));
 
-    await testBed.finish();
+    await finish();
   });
 
   test('creates request with body and sends it', async () => {
@@ -99,15 +99,15 @@ describe('TetBed - HTTP', () => {
       middlewares: [bodyParser$()],
     });
 
-    const testBed = await createHttpTestBed({ listener })();
+    const { request, finish } = await createHttpTestBed({ listener })();
 
     // when
     const response = await pipe(
-      testBed.req('POST'),
-      testBed.withPath('/test'),
-      testBed.withHeaders({ 'Content-Type': 'application/json' }),
-      testBed.withBody({ foo: 'bar' }),
-      testBed.send,
+      request('POST'),
+      request.withPath('/test'),
+      request.withHeaders({ 'Content-Type': 'application/json' }),
+      request.withBody({ foo: 'bar' }),
+      request.send,
     );
 
     // then
@@ -130,6 +130,6 @@ describe('TetBed - HTTP', () => {
     expect(response.metadata.params).not.toBeDefined();
     expect(response.metadata.headers).not.toBeDefined();
 
-    await testBed.finish();
+    await finish();
   });
 });

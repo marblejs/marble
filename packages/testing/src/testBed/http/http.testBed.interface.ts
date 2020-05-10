@@ -9,7 +9,8 @@ export interface HttpTestBedConfig {
   defaultHeaders?: HttpHeaders;
 }
 
-export interface HttpTestBed extends TestBed, HttpTestBedRequestBuilder {
+export interface HttpTestBed extends TestBed {
   type: TestBedType.HTTP;
   send: <T extends HttpMethod>(req: HttpTestBedRequest<T>) => Promise<HttpTestBedResponse>;
+  request: HttpTestBedRequestBuilder;
 }
