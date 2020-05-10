@@ -13,7 +13,8 @@ import {
 import { mapToServer, WebSocketServerConnection } from '@marblejs/websockets';
 import { logger$ } from '@marblejs/middleware-logger';
 import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
-import { IO } from 'fp-ts/lib/IO';
+import * as T from 'fp-ts/lib/Task';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { tap, map } from 'rxjs/operators';
 import { webSocketServer } from './websockets.server';
 
@@ -40,23 +41,30 @@ const upgrade$: HttpServerEffect = (event$, ctx) =>
     }),
   );
 
-export const server = createServer({
-  port: 1337,
-  listener: httpListener({
-    middlewares: [logger$()],
-    effects: [root$],
-  }),
-  dependencies: [
-    bindEagerlyTo(WebSocketServerToken)(async () =>
-      (await webSocketServer)()
-    ),
-  ],
-  event$: combineEffects(
-    upgrade$,
+const event$ = combineEffects(
+  upgrade$,
+);
+
+const dependencies = [
+  bindEagerlyTo(WebSocketServerToken)(async () =>
+    (await webSocketServer)()
   ),
+];
+
+const listener = httpListener({
+  middlewares: [logger$()],
+  effects: [root$],
 });
 
-const main: IO<void> = async () =>
-  !isTestEnv() && await (await server)();
+export const server = () => createServer({
+  port: 1337,
+  listener,
+  dependencies,
+  event$,
+});
+
+export const main = !isTestEnv()
+  ? pipe(server, T.map(run => run()))
+  : T.of(undefined);
 
 main();

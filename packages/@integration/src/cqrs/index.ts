@@ -1,4 +1,5 @@
-import { IO } from 'fp-ts/lib/IO';
+import * as T from 'fp-ts/lib/Task';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { isTestEnv, getPortEnv } from '@marblejs/core/dist/+internal/utils';
 import { httpListener, createServer, bindEagerlyTo } from '@marblejs/core';
 import { messagingListener, EventBusClientToken, eventBusClient, EventBusToken, eventBus } from '@marblejs/messaging';
@@ -24,7 +25,7 @@ const listener = httpListener({
   ],
 });
 
-export const server = createServer({
+export const server = () => createServer({
   port: getPortEnv(),
   listener,
   dependencies: [
@@ -33,7 +34,8 @@ export const server = createServer({
   ],
 });
 
-const main: IO<void> = async () =>
-  !isTestEnv() && await (await server)();
+export const main = !isTestEnv()
+  ? pipe(server, T.map(run => run()))
+  : T.of(undefined);
 
 main();
