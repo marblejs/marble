@@ -1,4 +1,4 @@
-import { IO } from 'fp-ts/lib/IO';
+import { Task } from 'fp-ts/lib/Task';
 import { ContextProvider, BoundDependency } from '@marblejs/core';
 
 export enum TestBedType {
@@ -10,7 +10,7 @@ export enum TestBedType {
 export interface TestBed {
   type: TestBedType;
   ask: ContextProvider;
-  finish: IO<Promise<void>>;
+  finish: Task<void>;
 }
 
 export type TestBedFactory<T> = (dependencies?: BoundDependency<any>[]) => Promise<T>

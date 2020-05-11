@@ -1,4 +1,6 @@
 import { BoundDependency } from '@marblejs/core';
+import * as T from 'fp-ts/lib/Task';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { TestBedSetupConfig, TestBedSetup } from './testBedSetup.interface';
 import { createTestBedContainer } from './testBedContainer';
 import { TestBed } from './testBed.interface';
@@ -8,22 +10,19 @@ type CreateTestBedSetup = <T extends TestBed>
   (prependDependencies?: readonly BoundDependency<any>[]) =>
   TestBedSetup<T>
 
-export const createTestBedSetup: CreateTestBedSetup = config => (prependDependencies = []) => {
-  const { dependencies: defaultDependencies = [], cleanups = [] } = config;
+export const createTestBedSetup: CreateTestBedSetup = config => prependDependencies => {
+  const { dependencies: defaultDependencies, cleanups = [] } = config;
 
   const { cleanup, register } = createTestBedContainer({ cleanups });
 
-  const useTestBed = async (dependencies: BoundDependency<any>[] = []) => {
-    const testBed = await config.testBed([
-      ...defaultDependencies,
-      ...prependDependencies,
+  const useTestBed = async (dependencies: BoundDependency<any>[] = []) => pipe(
+    () => config.testBed([
+      ...defaultDependencies ?? [],
+      ...prependDependencies ?? [],
       ...dependencies
-    ]);
-
-    register(testBed);
-
-    return testBed;
-  };
+    ]),
+    T.chain(register),
+  )();
 
   return {
     useTestBed,
