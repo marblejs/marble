@@ -1,4 +1,4 @@
-import { IO } from 'fp-ts/lib/IO';
+import { Task } from 'fp-ts/lib/Task';
 import { ContextToken } from '@marblejs/core';
 import { TestBed } from './testBed.interface';
 
@@ -12,6 +12,6 @@ export interface TestBedContainerConfig {
 }
 
 export interface TestBedContainer {
-  cleanup: IO<Promise<void>>;
-  register: (instance: TestBed) => void;
+  cleanup: Task<void>;
+  register: <T extends TestBed>(instance: T) => Task<T>;
 }

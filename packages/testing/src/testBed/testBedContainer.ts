@@ -1,4 +1,6 @@
+import * as T from 'fp-ts/lib/Task';
 import * as O from 'fp-ts/lib/Option';
+import * as A from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { EventBusClientToken } from '@marblejs/messaging';
 import { TestBed } from './testBed.interface';
@@ -17,26 +19,31 @@ export const createTestBedContainer = (config?: TestBedContainerConfig): TestBed
     ...config?.cleanups ?? [],
   ];
 
-  const register = (testBed: TestBed) => {
+  const register = <T extends TestBed>(testBed: T): T.Task<T> => {
     instances.push(testBed);
+    return T.of(testBed);
   }
 
-  const cleanupDependency = (testBed: TestBed) => (dependencyCleanup: DependencyCleanup<any>): Promise<void> =>
-    pipe(
-      testBed.ask(dependencyCleanup.token),
-      O.map(dependencyCleanup.cleanup),
-      O.getOrElse(() => Promise.resolve()),
-    );
+  const cleanupDependency = (testBed: TestBed) => (dependencyCleanup: DependencyCleanup<any>): T.Task<void> => pipe(
+    testBed.ask(dependencyCleanup.token),
+    O.map(dependencyCleanup.cleanup),
+    O.fold(() => T.of(undefined), res => () => res),
+  );
 
-  const cleanupInstance = async (testBed: TestBed): Promise<void> => {
-    await Promise.all(registeredCleanups.map(cleanupDependency(testBed)))
-    await testBed.finish();
-  }
+  const cleanupInstance = (testBed: TestBed): T.Task<void> => pipe(
+    A.array.map(registeredCleanups, cleanupDependency(testBed)),
+    A.array.sequence(T.task),
+    T.chain(_ => testBed.finish),
+  );
 
-  const cleanup = async (): Promise<void> => {
-    await Promise.all(instances.map(cleanupInstance));
-    instances = [];
-  }
+  const cleanup: T.Task<void> = () => pipe(
+    A.array.map(instances, cleanupInstance),
+    A.array.sequence(T.task),
+    T.chain(_ => {
+      instances = [];
+      return T.of(undefined);
+    }),
+  )();
 
   return { cleanup, register };
 };
