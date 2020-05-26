@@ -7,6 +7,7 @@ import { TransportLayer, TransportMessage, TransportLayerConnection, Transport, 
 import { AmqpStrategyOptions, AmqpConnectionStatus } from './amqp.strategy.interface';
 
 class AmqpStrategyConnection implements TransportLayerConnection {
+  private statusSubject$ = new Subject<AmqpConnectionStatus>();
   private closeSubject$ = new Subject();
 
   constructor(
@@ -14,7 +15,9 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     private connectionManager: AmqpConnectionManager,
     private channelWrapper: ChannelWrapper,
     private options: AmqpStrategyOptions,
-  ) {}
+  ) {
+    process.nextTick(() => this.statusSubject$.next(AmqpConnectionStatus.CONNECTED));
+  }
 
   get close$() {
     return this.closeSubject$.asObservable();
@@ -37,7 +40,7 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     const diconnectChannel$ = fromEvent(this.channelWrapper, 'close')
       .pipe(mapTo(AmqpConnectionStatus.CHANNEL_CONNECTION_LOST));
 
-    return merge(connect$, connectChannel$, diconnect$, diconnectChannel$);
+    return merge(connect$, connectChannel$, diconnect$, diconnectChannel$, this.statusSubject$.asObservable());
   }
 
   get message$() {
