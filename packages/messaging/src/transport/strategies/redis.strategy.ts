@@ -13,6 +13,7 @@ type RedisIncomingMsg = {
 };
 
 class RedisStrategyConnection implements TransportLayerConnection {
+  private statusSubject$ = new Subject<RedisConnectionStatus>();
   private producerSubject = new Subject<RedisIncomingMsg>();
   private consumerSubject = new Subject<RedisIncomingMsg>();
   private closeSubject$ = new Subject();
@@ -28,6 +29,8 @@ class RedisStrategyConnection implements TransportLayerConnection {
     } else {
       rpcSubscriber.on('message', (channel, content) => this.producerSubject.next({ content, channel }));
     }
+
+    process.nextTick(() => this.statusSubject$.next(RedisConnectionStatus.CONNECT));
   }
 
   get status$() {
@@ -43,7 +46,7 @@ class RedisStrategyConnection implements TransportLayerConnection {
     const end$ = merge(fromEvent(this.subscriber, 'end'))
       .pipe(mapTo(RedisConnectionStatus.END));
 
-    return merge(ready$, connect$, reconnecting$, end$).pipe(
+    return merge(ready$, connect$, reconnecting$, end$, this.statusSubject$.asObservable()).pipe(
       share(),
     );
   }
