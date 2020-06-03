@@ -66,7 +66,7 @@ class RedisStrategyConnection implements TransportLayerConnection {
     return this.consumerSubject.asObservable().pipe(
       map(msg => RedisHelper.decodeMessage(msg.content)),
     );
-  }z
+  }
 
   emitMessage = async (channel: string, message: TransportMessage<Buffer>) => {
     const replyChannel = message.correlationId;
