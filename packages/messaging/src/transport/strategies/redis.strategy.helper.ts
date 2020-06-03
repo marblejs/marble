@@ -36,6 +36,7 @@ export const encodeMessage = (uuid: string | undefined) => (message: Buffer): st
 export const decodeMessage = (message: string): TransportMessage<Buffer> => {
   const splittedMsg =  message.split('::');
   return {
+    correlationId: splittedMsg[0],
     replyTo: splittedMsg[0],
     data: Buffer.from(splittedMsg[1]),
   };
