@@ -1,7 +1,7 @@
 import { Event, matchEvent, use, combineEffects } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { Subject, throwError } from 'rxjs';
-import { map, tap, delay, bufferCount, mergeMap } from 'rxjs/operators';
+import { map, tap, delay, bufferCount, mergeMap, mapTo } from 'rxjs/operators';
 import { Transport } from '../../transport/transport.interface';
 import { MsgEffect, MsgErrorEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
 import { AmqpStrategyOptions } from '../../transport/strategies/amqp.strategy.interface';
@@ -79,7 +79,7 @@ describe('messagingServer::AMQP', () => {
     eventSubject.subscribe(event => {
       expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
       setTimeout(async () => {
-        await microservice.close();
+        await consumer.close();
         await client.close();
         done();
       }, 1000);
@@ -96,17 +96,19 @@ describe('messagingServer::AMQP', () => {
         tap(event => eventSubject.next(event)),
       );
 
-    const options = createOptions({ expectAck: true, queue: 'test_ack_queue_server' });
-    const client = await runMicroserviceClient(Transport.AMQP, options);
-    const microservice = await runMicroservice(Transport.AMQP, options)(event$);
+    const optionsClient = createOptions({ queue: 'test_ack_queue_server' });
+    const optionsConsumer = createOptions({ expectAck: true, queue: 'test_ack_queue_server' });
+    const client = await runMicroserviceClient(Transport.AMQP, optionsClient);
+    const consumer = await runMicroservice(Transport.AMQP, optionsConsumer)(event$);
     const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
 
-    await client.emitMessage(options.queue, message);
+    await client.emitMessage(optionsClient.queue, message);
   });
 
   test('reacts to thrown Error and doesn\'t crash internal messages stream', async done => {
     const event1: Event = { type: 'EVENT_TEST_1' };
     const event2: Event = { type: 'EVENT_TEST_2' };
+    const event2Outgoing: Event = { type: `${event2.type}__processed` };
     const error = new Error('test_error');
     const outputSubject = new Subject<[Event | undefined, Error | undefined]>();
 
@@ -115,7 +117,7 @@ describe('messagingServer::AMQP', () => {
       .subscribe(data => {
         expect(data[0][0]).toBeUndefined();
         expect(data[0][1]).toEqual(error);
-        expect(data[1][0]).toEqual(event2);
+        expect(data[1][0]).toEqual(event2Outgoing);
         expect(data[1][1]).toBeUndefined();
         setTimeout(async () => {
           await microservice.close();
@@ -133,7 +135,7 @@ describe('messagingServer::AMQP', () => {
     const event2$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent(event2.type),
-        map(event => ({ type: event.type })),
+        mapTo(event2Outgoing),
       );
 
     const error$: MsgErrorEffect = event$ =>

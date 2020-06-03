@@ -1,4 +1,5 @@
 import { Options } from 'amqplib';
+import { NamedError } from '@marblejs/core/dist/+internal/utils';
 import { Transport } from '../transport.interface';
 
 export interface AmqpStrategy {
@@ -21,3 +22,16 @@ export enum AmqpConnectionStatus {
   CONNECTION_LOST = 'CONNECTION_LOST',
   CHANNEL_CONNECTION_LOST = 'CHANNEL_CONNECTION_LOST',
 };
+
+export enum AmqpErrorType {
+  CANNOT_SET_ACK_FOR_NON_CONSUMER_CONNECTION = 'AmqpCannotSetExpectAckForNonConsumerConnection',
+}
+
+export class AmqpCannotSetExpectAckForNonConsumerConnection extends NamedError {
+  constructor() {
+    super(
+      AmqpErrorType.CANNOT_SET_ACK_FOR_NON_CONSUMER_CONNECTION,
+      `Non consumer connections cannot set "expectAck" attribute`,
+    );
+  }
+}

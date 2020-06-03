@@ -4,7 +4,7 @@ import { Channel, ConsumeMessage, Replies } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { TransportLayer, TransportMessage, TransportLayerConnection, Transport, DEFAULT_TIMEOUT } from '../transport.interface';
-import { AmqpStrategyOptions, AmqpConnectionStatus } from './amqp.strategy.interface';
+import { AmqpStrategyOptions, AmqpConnectionStatus, AmqpCannotSetExpectAckForNonConsumerConnection } from './amqp.strategy.interface';
 
 class AmqpStrategyConnection implements TransportLayerConnection {
   private statusSubject$ = new Subject<AmqpConnectionStatus>();
@@ -110,6 +110,10 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   emitMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
     const { correlationId, data, replyTo } = msg;
 
+    // don't try to emit the message to the same channel if "ack" mode is enabled
+    if (this.options.expectAck && queue === this.getChannel())
+      return false;
+
     await this.channelWrapper.sendToQueue(queue, data, {
       replyTo,
       correlationId,
@@ -155,8 +159,11 @@ class AmqpStrategy implements TransportLayer {
   }
 
   async connect(opts?: { isConsumer: boolean }) {
-    const { host, queue, queueOptions, prefetchCount } = this.options;
+    const { host, queue, queueOptions, prefetchCount, expectAck } = this.options;
     const msgSubject$ = new Subject<ConsumeMessage>();
+
+    if (!opts?.isConsumer && expectAck)
+      throw new AmqpCannotSetExpectAckForNonConsumerConnection();
 
     await import('amqplib');
 
