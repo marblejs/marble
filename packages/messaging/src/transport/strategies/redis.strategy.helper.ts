@@ -34,11 +34,15 @@ export const encodeMessage = (uuid: string | undefined) => (message: Buffer): st
   `${uuid}::${message.toString()}`;
 
 export const decodeMessage = (message: string): TransportMessage<Buffer> => {
-  const splittedMsg =  message.split('::');
+  const [id, data] =  message.split('::');
+
+  const parseId = (id: string) => id === 'undefined' ? undefined : id;
+  const parseData = (data: string) => Buffer.from(data);
+
   return {
-    correlationId: splittedMsg[0],
-    replyTo: splittedMsg[0],
-    data: Buffer.from(splittedMsg[1]),
+    correlationId: parseId(id),
+    replyTo: parseId(id),
+    data: parseData(data),
   };
 };
 
