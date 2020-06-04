@@ -1,4 +1,5 @@
 import { Observable, merge } from 'rxjs';
+import { share } from 'rxjs/operators';
 import { Effect, EffectContext } from './effects.interface';
 
 export const combineMiddlewares = <T, U>
@@ -9,4 +10,4 @@ export const combineMiddlewares = <T, U>
 export const combineEffects = <T, U, V>
   (...effects: Effect<T, U, V>[]) =>
   (input$: Observable<T>, ctx: EffectContext<V>): Observable<U> =>
-    merge(...effects.map(effect => effect(input$, ctx)));
+    merge(...effects.map(effect => effect(input$, ctx))).pipe(share());
