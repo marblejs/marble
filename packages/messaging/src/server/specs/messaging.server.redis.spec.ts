@@ -1,109 +1,198 @@
 import { matchEvent, use } from '@marblejs/core';
-import { wait } from '@marblejs/core/dist/+internal/utils';
+import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { map, tap } from 'rxjs/operators';
-import { Transport } from '../../transport/transport.interface';
-import { MsgEffect, MsgErrorEffect } from '../../effects/messaging.effects.interface';
-import { RedisStrategyOptions } from '../../transport/strategies/redis.strategy.interface';
-import { runMicroserviceClient, runMicroservice, createMessage } from '../../util/messaging.test.util';
-
-const createOptions = (config: { channel?: string } = {}): RedisStrategyOptions => ({
-  host: 'redis://127.0.0.1:6379',
-  channel: config.channel || 'test_channel_server',
-});
+import { forkJoin, TimeoutError } from 'rxjs';
+import { map, tap, delay, mapTo } from 'rxjs/operators';
+import { TransportLayerConnection } from '../../transport/transport.interface';
+import { MsgEffect } from '../../effects/messaging.effects.interface';
+import { MessagingClient } from '../../client/messaging.client.interface';
+import { reply } from '../../effects/messaging.effects.helper';
+import * as Util from '../../util/messaging.test.util';
 
 describe('messagingServer::Redis', () => {
+  let client: MessagingClient;
+  let microservice: TransportLayerConnection;
+
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => jest.fn());
   });
 
-  test('starts a server and closes connection immediately', async () => {
-    const options = createOptions();
-    const client = await runMicroserviceClient(Transport.REDIS, options);
-    const server = await runMicroservice(Transport.REDIS, options)();
-
-    await client.close();
-    await server.close();
+  afterEach(async () => {
+    if (microservice) await microservice.close();
+    if (client) await client.close();
   });
 
-  test('handles RPC event', async () => {
-    const rpc$: MsgEffect = event$ =>
-      event$.pipe(
-        matchEvent('RPC_TEST'),
-        use(eventValidator$(t.number)),
-        map(event => ({ ...event, type: 'RPC_TEST_RESULT', payload: event.payload + 1 })),
-      );
+  test('starts a server and closes connection immediately', async () => {
+    const options = Util.createRedisOptions();
 
-    const options = createOptions();
-    const client = await runMicroserviceClient(Transport.REDIS, options);
-    const microservice = await runMicroservice(Transport.REDIS, options)(rpc$);
-    const message = createMessage({ type: 'RPC_TEST', payload: 1 });
-
-    const result = await client.sendMessage(options.channel, message);
-    const parsedResult = JSON.parse(result.data.toString());
-
-    expect(parsedResult).toEqual({ type: 'RPC_TEST_RESULT', payload: 2 });
+    const microservice = await Util.createRedisMicroservice(options)({});
+    const client = await Util.createRedisClient(options);
 
     await microservice.close();
     await client.close();
   });
 
-  test('handles published event', async done => {
-    const event$: MsgEffect = event$ =>
+  test('handles RPC communication', async () => {
+    // given
+    const options = Util.createRedisOptions();
+
+    const increment$: MsgEffect = event$ =>
       event$.pipe(
-        matchEvent('EVENT_TEST'),
+        matchEvent('INCREMENT'),
         use(eventValidator$(t.number)),
-        map(event => event.payload),
-        map(payload => ({ type: 'EVENT_TEST_RESPONSE', payload: payload + 1 })),
-        tap(async event => {
-          expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
-          await wait();
-          await microservice.close();
-          await client.close();
-          done();
-        }),
+        delay(50),
+        map(event => ({ ...event, type: 'INCREMENT_RESULT', payload: event.payload + 1 })),
       );
 
-    const options = createOptions();
-    const client = await runMicroserviceClient(Transport.REDIS, options);
-    const microservice = await runMicroservice(Transport.REDIS, options)(event$);
-    const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
+    // when
+    microservice = await Util.createRedisMicroservice(options)({ effects: [increment$] });
+    client = await Util.createRedisClient(options);
 
-    await client.emitMessage(options.channel, message);
+    const result = await forkJoin([
+      client.send({ type: 'INCREMENT', payload: 1 }),
+      client.send({ type: 'INCREMENT', payload: 10 }),
+    ]).toPromise();
+
+    // then
+    expect(result[0]).toEqual({ type: 'INCREMENT_RESULT', payload: 2 });
+    expect(result[1]).toEqual({ type: 'INCREMENT_RESULT', payload: 11 });
   });
 
-  test('throws an UnsupportedError for unsupported "ackMessage/nackMessage"', async done => {
-    const expectedEventError = {
-      name: 'UnsupportedError',
-      message: 'Unsupported operation. Method \"ackMessage\" is unsupported for Redis transport layer.',
-    };
+  test('handles RPC communication when error event is returned', async () => {
+    // given
+    const options = Util.createRedisOptions();
+    const error = new Error('test_error');
 
-    const event$: MsgEffect = (event$, ctx) =>
+    const test$: MsgEffect = event$ =>
       event$.pipe(
-        matchEvent('EVENT_TEST'),
+        matchEvent('TEST'),
+        map(event => reply(event)({ type: 'TEST_RESULT', error })),
+      );
+
+    // when
+    microservice = await Util.createRedisMicroservice(options)({ effects: [test$] });
+    client = await Util.createRedisClient(options);
+
+    const result = client.send({ type: 'TEST' }).toPromise();
+
+    // then
+    await expect(result).rejects.toEqual(error);
+  });
+
+  test('handles RPC communication when event is timeouted (eg. no event handler is defined)', async () => {
+    // given
+    const options = Util.createRedisOptions();
+
+    // when
+    microservice = await Util.createRedisMicroservice(options)();
+    client = await Util.createRedisClient(options);
+
+    const result = client.send({ type: 'TEST' }).toPromise();
+
+    // then
+    await expect(result).rejects.toEqual(new TimeoutError());
+  });
+
+  test('handles non-blocking communication and routes the event back to origin channel', async done => {
+    // given
+    const options = Util.createRedisOptions();
+
+    const increment$: MsgEffect = event$ =>
+      event$.pipe(
+        matchEvent('INCREMENT'),
+        use(eventValidator$(t.number)),
+        delay(50),
+        map(event => ({ ...event, type: 'INCREMENT_RESULT', payload: event.payload + 1 })),
+      );
+
+    // then
+    const output$ = Util.assertOutputEvent({
+      type: 'INCREMENT_RESULT',
+      payload: 2,
+      metadata: expect.objectContaining({ replyTo: options.channel, correlationId: expect.any(String) }),
+    })(done);
+
+    // when
+    microservice = await Util.createRedisMicroservice(options)({ effects: [increment$], output$ });
+    client = await Util.createRedisClient(options);
+
+    await client.emit({ type: 'INCREMENT', payload: 1 });
+  });
+
+  test('throws an "UnsupportedError" when calling "ackMessage/nackMessage"', async done => {
+    // given
+    const options = Util.createRedisOptions();
+
+    const test$: MsgEffect = (event$, ctx) =>
+      event$.pipe(
+        matchEvent('TEST'),
         tap(event => ctx.client.ackMessage(event.metadata?.raw)),
       );
 
-    const error$: MsgErrorEffect = event$ =>
+    const error$ = Util.assertError({
+      name: 'UnsupportedError',
+      message: 'Unsupported operation. Method \"ackMessage\" is unsupported for Redis transport layer.',
+    })(done);
+
+    // when
+    microservice = await Util.createRedisMicroservice(options)({ effects: [test$], error$ });
+    client = await Util.createRedisClient(options);
+
+    await client.emit({ type: 'TEST' });
+  });
+
+  test('chains events by sending back to origin channel when no reply is defined', async done => {
+    // given
+    const options = Util.createRedisOptions();
+
+    const test1$: MsgEffect = event$ =>
       event$.pipe(
-        map(error => ({ type: 'UNHANDLED_ERROR', error: { name: error.name, message: error.message }})),
-        tap(async event => {
-          expect(event.type).toEqual('UNHANDLED_ERROR');
-          expect(event.error).toEqual(expectedEventError);
-          await wait();
-          await microservice.close();
-          await client.close();
-          done();
-        }),
+        matchEvent('TEST_1'),
+        delay(25),
+        mapTo({ type: 'TEST_2' }),
       );
 
-    const options = createOptions();
-    const client = await runMicroserviceClient(Transport.REDIS, options);
-    const microservice = await runMicroservice(Transport.REDIS, options)(event$, undefined, error$);
-    const message = createMessage({ type: 'EVENT_TEST' });
+    const test2$: MsgEffect = event$ =>
+      event$.pipe(
+        matchEvent('TEST_2'),
+        delay(25),
+        mapTo({ type: 'TEST_3' }),
+      );
 
-    const emitResult = await client.emitMessage(options.channel, message);
+    // then
+    const output$ = Util.assertOutputEvent(
+      { type: 'TEST_2' },
+      { type: 'TEST_3' },
+    )(done);
 
-    expect(emitResult).toEqual(true);
+    // when
+    microservice = await Util.createRedisMicroservice(options)({ effects: [test1$, test2$], output$ });
+    client = await Util.createRedisClient(options);
+
+    await client.emit({ type: 'TEST_1' });
+  });
+
+  test('sends outgoing event to different channel and doesn\'t cause infinite loop', async done => {
+    // given
+    const options = Util.createRedisOptions();
+    const replyTo = createUuid();
+
+    const test$: MsgEffect = event$ =>
+      event$.pipe(
+        matchEvent('TEST'),
+        map(reply(replyTo)),
+      );
+
+    // then
+    const output$ = Util.assertOutputEvent({
+      type: 'TEST',
+      metadata: expect.objectContaining({ replyTo }),
+    })(done);
+
+    // when
+    microservice = await Util.createRedisMicroservice(options)({ effects: [test$], output$ });
+    client = await Util.createRedisClient(options);
+
+    await client.emit({ type: 'TEST' });
   });
 });

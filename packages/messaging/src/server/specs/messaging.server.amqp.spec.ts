@@ -1,159 +1,200 @@
-import { Event, matchEvent, use, combineEffects } from '@marblejs/core';
+import { matchEvent, use } from '@marblejs/core';
+import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { Subject, throwError } from 'rxjs';
-import { map, tap, delay, bufferCount, mergeMap, mapTo } from 'rxjs/operators';
-import { Transport } from '../../transport/transport.interface';
-import { MsgEffect, MsgErrorEffect, MsgOutputEffect } from '../../effects/messaging.effects.interface';
-import { AmqpStrategyOptions } from '../../transport/strategies/amqp.strategy.interface';
-import { runMicroserviceClient, runMicroservice, createMessage } from '../../util/messaging.test.util';
-
-const createOptions = (config: { expectAck?: boolean; queue?: string } = {}): AmqpStrategyOptions => ({
-  host: 'amqp://localhost:5672',
-  queue: config.queue || 'test_queue_server',
-  expectAck: config.expectAck,
-  queueOptions: { durable: false },
-  timeout: 500,
-});
+import { forkJoin, TimeoutError } from 'rxjs';
+import { map, tap, delay, mapTo } from 'rxjs/operators';
+import { TransportLayerConnection } from '../../transport/transport.interface';
+import { MsgEffect } from '../../effects/messaging.effects.interface';
+import { MessagingClient } from '../../client/messaging.client.interface';
+import { reply } from '../../effects/messaging.effects.helper';
+import * as Util from '../../util/messaging.test.util';
 
 describe('messagingServer::AMQP', () => {
-  test('handles RPC event', async () => {
-    const rpc$: MsgEffect = event$ =>
-      event$.pipe(
-        matchEvent('RPC_TEST'),
-        delay(50),
-        use(eventValidator$(t.number)),
-        map(event => ({ ...event, type: 'RPC_TEST_RESULT', payload: event.payload + 1 })),
-      );
+  let client: MessagingClient;
+  let microservice: TransportLayerConnection;
 
-    const options = createOptions({ expectAck: false });
-    const client = await runMicroserviceClient(Transport.AMQP, options);
-    const microservice = await runMicroservice(Transport.AMQP, options)(rpc$);
+  afterEach(async () => {
+    if (microservice) await microservice.close();
+    if (client) await client.close();
+  });
 
-    const result = await Promise.all([
-      client.sendMessage(options.queue, createMessage({ type: 'RPC_TEST', payload: 1 })),
-      client.sendMessage(options.queue, createMessage({ type: 'RPC_TEST', payload: 10 })),
-    ]);
+  test('starts a server and closes connection immediately', async () => {
+    const options = Util.createAmqpOptions();
 
-    const parsedResult0 = JSON.parse(result[0].data.toString());
-    const parsedResult1 = JSON.parse(result[1].data.toString());
-
-    expect(parsedResult0).toEqual({ type: 'RPC_TEST_RESULT', payload: 2 });
-    expect(parsedResult1).toEqual({ type: 'RPC_TEST_RESULT', payload: 11 });
+    const microservice = await Util.createAmqpMicroservice(options)({});
+    const client = await Util.createAmqpClient(options);
 
     await microservice.close();
     await client.close();
   });
 
-  test('handles published event', async done => {
-    const eventSubject = new Subject();
+  test('handles RPC communication', async () => {
+    // given
+    const options = Util.createAmqpOptions();
 
-    eventSubject.subscribe(event => {
-      expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
-      setTimeout(async () => {
-        await microservice.close();
-        await client.close();
-        done();
-      }, 1000);
-    });
-
-    const event$: MsgEffect = event$ =>
+    const increment$: MsgEffect = event$ =>
       event$.pipe(
-        matchEvent('EVENT_TEST'),
+        matchEvent('INCREMENT'),
         use(eventValidator$(t.number)),
-        map(event => event.payload),
-        map(payload => ({ type: 'EVENT_TEST_RESPONSE', payload: payload + 1 })),
-        tap(event => eventSubject.next(event)),
+        delay(50),
+        map(event => ({ ...event, type: 'INCREMENT_RESULT', payload: event.payload + 1 })),
       );
 
-    const options = createOptions({ expectAck: false });
-    const client = await runMicroserviceClient(Transport.AMQP, options);
-    const microservice = await runMicroservice(Transport.AMQP, options)(event$);
-    const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
+    // when
+    microservice = await Util.createAmqpMicroservice(options)({ effects: [increment$] });
+    client = await Util.createAmqpClient(options);
 
-    await client.emitMessage(options.queue, message);
+    const result = await forkJoin([
+      client.send({ type: 'INCREMENT', payload: 1 }),
+      client.send({ type: 'INCREMENT', payload: 10 }),
+    ]).toPromise();
+
+    // then
+    expect(result[0]).toEqual({ type: 'INCREMENT_RESULT', payload: 2 });
+    expect(result[1]).toEqual({ type: 'INCREMENT_RESULT', payload: 11 });
   });
 
-  test('acks processed event', async done => {
-    const eventSubject = new Subject();
-
-    eventSubject.subscribe(event => {
-      expect(event).toEqual({ type: 'EVENT_TEST_RESPONSE', payload: 2 });
-      setTimeout(async () => {
-        await consumer.close();
-        await client.close();
-        done();
-      }, 1000);
-    });
-
-    const event$: MsgEffect = (event$, { client }) =>
-      event$.pipe(
-        matchEvent('EVENT_TEST'),
-        use(eventValidator$(t.number)),
-        map(event => {
-          client.ackMessage(event.metadata?.raw);
-          return { type: 'EVENT_TEST_RESPONSE', payload: event.payload + 1 };
-        }),
-        tap(event => eventSubject.next(event)),
-      );
-
-    const optionsClient = createOptions({ queue: 'test_ack_queue_server' });
-    const optionsConsumer = createOptions({ expectAck: true, queue: 'test_ack_queue_server' });
-    const client = await runMicroserviceClient(Transport.AMQP, optionsClient);
-    const consumer = await runMicroservice(Transport.AMQP, optionsConsumer)(event$);
-    const message = createMessage({ type: 'EVENT_TEST', payload: 1 });
-
-    await client.emitMessage(optionsClient.queue, message);
-  });
-
-  test('reacts to thrown Error and doesn\'t crash internal messages stream', async done => {
-    const event1: Event = { type: 'EVENT_TEST_1' };
-    const event2: Event = { type: 'EVENT_TEST_2' };
-    const event2Outgoing: Event = { type: `${event2.type}__processed` };
+  test('handles RPC communication when error event is returned', async () => {
+    // given
+    const options = Util.createAmqpOptions();
     const error = new Error('test_error');
-    const outputSubject = new Subject<[Event | undefined, Error | undefined]>();
 
-    outputSubject
-      .pipe(bufferCount(2))
-      .subscribe(data => {
-        expect(data[0][0]).toBeUndefined();
-        expect(data[0][1]).toEqual(error);
-        expect(data[1][0]).toEqual(event2Outgoing);
-        expect(data[1][1]).toBeUndefined();
-        setTimeout(async () => {
-          await microservice.close();
-          await client.close();
-          done();
-        }, 1000);
-      });
-
-    const event1$: MsgEffect = event$ =>
+    const test$: MsgEffect = event$ =>
       event$.pipe(
-        matchEvent(event1.type),
-        mergeMap(() => throwError(error)),
+        matchEvent('TEST'),
+        map(event => reply(event)({ type: 'TEST_RESULT', error })),
       );
 
-    const event2$: MsgEffect = event$ =>
+    // when
+    microservice = await Util.createAmqpMicroservice(options)({ effects: [test$] });
+    client = await Util.createAmqpClient(options);
+
+    const result = client.send({ type: 'TEST' }).toPromise();
+
+    // then
+    await expect(result).rejects.toEqual(error);
+  });
+
+  test('handles RPC communication when event is timeouted (eg. no event handler is defined)', async () => {
+    // given
+    const options = Util.createAmqpOptions();
+
+    // when
+    microservice = await Util.createAmqpMicroservice(options)();
+    client = await Util.createAmqpClient(options);
+
+    const result = client.send({ type: 'TEST' }).toPromise();
+
+    // then
+    await expect(result).rejects.toEqual(new TimeoutError());
+  });
+
+  test('handles non-blocking communication and routes the event back to origin channel', async done => {
+    // given
+    const options = Util.createAmqpOptions();
+
+    const increment$: MsgEffect = event$ =>
       event$.pipe(
-        matchEvent(event2.type),
-        mapTo(event2Outgoing),
+        matchEvent('INCREMENT'),
+        use(eventValidator$(t.number)),
+        delay(50),
+        map(event => ({ ...event, type: 'INCREMENT_RESULT', payload: event.payload + 1 })),
       );
 
-    const error$: MsgErrorEffect = event$ =>
+    // then
+    const output$ = Util.assertOutputEvent({
+      type: 'INCREMENT_RESULT',
+      payload: 2,
+      metadata: expect.objectContaining({ replyTo: options.queue, correlationId: expect.any(String) }),
+    })(done);
+
+    // when
+    microservice = await Util.createAmqpMicroservice(options)({ effects: [increment$], output$ });
+    client = await Util.createAmqpClient(options);
+
+    await client.emit({ type: 'INCREMENT', payload: 1 });
+  });
+
+
+  test('acks subssequent events and doesn\'t block the consumer', async done => {
+    // given
+    const optionsMicroservice = Util.createAmqpOptions({ expectAck: true });
+    const optionsClient = Util.createAmqpOptions({ queue: optionsMicroservice.queue });
+
+    const ack$: MsgEffect = (event$, { client }) =>
       event$.pipe(
-        tap(error => outputSubject.next([undefined, error])),
-        map(() => ({ type: 'UNHANDLED' })),
+        matchEvent('ACK'),
+        delay(50),
+        tap(event => client.ackMessage(event.metadata?.raw)),
+        map(event => ({ type: 'ACK_RESPONSE', payload: event.payload })),
       );
 
-    const output$: MsgOutputEffect = event$ =>
+    // then
+    const output$ = Util.assertOutputEvent(
+      { type: 'ACK_RESPONSE' },
+      { type: 'ACK_RESPONSE' },
+    )(done);
+
+    // when
+    microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ effects: [ack$], output$ });
+    client = await Util.createAmqpClient(optionsClient);
+
+    await client.emit({ type: 'ACK', payload: 1 });
+    await client.emit({ type: 'ACK', payload: 2 });
+  });
+
+  test('chains events by sending back to origin channel when no reply is defined', async done => {
+    // given
+    const options = Util.createAmqpOptions();
+
+    const test1$: MsgEffect = event$ =>
       event$.pipe(
-        tap((event => outputSubject.next([event, undefined]))),
+        matchEvent('TEST_1'),
+        delay(25),
+        mapTo({ type: 'TEST_2' }),
       );
 
-    const options = createOptions({ expectAck: false });
-    const client = await runMicroserviceClient(Transport.AMQP, options);
-    const microservice = await runMicroservice(Transport.AMQP, options)(combineEffects(event1$, event2$), output$, error$);
+    const test2$: MsgEffect = event$ =>
+      event$.pipe(
+        matchEvent('TEST_2'),
+        delay(25),
+        mapTo({ type: 'TEST_3' }),
+      );
 
-    await client.emitMessage(options.queue, createMessage(event1));
-    await client.emitMessage(options.queue, createMessage(event2));
+    // then
+    const output$ = Util.assertOutputEvent(
+      { type: 'TEST_2' },
+      { type: 'TEST_3' },
+    )(done);
+
+    // when
+    microservice = await Util.createAmqpMicroservice(options)({ effects: [test1$, test2$], output$ });
+    client = await Util.createAmqpClient(options);
+
+    await client.emit({ type: 'TEST_1' });
+  });
+
+  test('sends outgoing event to different channel and doesn\'t cause infinite loop', async done => {
+    // given
+    const options = Util.createAmqpOptions();
+    const replyTo = createUuid();
+
+    const test$: MsgEffect = event$ =>
+      event$.pipe(
+        matchEvent('TEST'),
+        map(reply(replyTo)),
+      );
+
+    // then
+    const output$ = Util.assertOutputEvent({
+      type: 'TEST',
+      metadata: expect.objectContaining({ replyTo }),
+    })(done);
+
+    // when
+    microservice = await Util.createAmqpMicroservice(options)({ effects: [test$], output$ });
+    client = await Util.createAmqpClient(options);
+
+    await client.emit({ type: 'TEST' });
   });
 });

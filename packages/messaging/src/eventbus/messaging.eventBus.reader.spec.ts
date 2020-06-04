@@ -17,7 +17,7 @@ describe('#eventBus', () => {
         map(event => reply(event)({ type: 'RPC_TEST_RESULT', payload: event.payload + 1 })),
       );
 
-    const eventBus = await runEventBus(rpc$);
+    const eventBus = await runEventBus({ effects: [rpc$] });
     const eventBusClient = await runEventBusClient();
     const event: Event = { type: 'RPC_TEST', payload: 1 };
 
@@ -46,7 +46,7 @@ describe('#eventBus', () => {
         map(event => reply(event)({ type: 'RPC_2_TEST_RESULT', payload: event.payload + 1 })),
       );
 
-    const eventBus = await runEventBus(combineEffects(rpc1$, rpc2$));
+    const eventBus = await runEventBus({ effects: [combineEffects(rpc1$, rpc2$)] });
     const eventBusClient = await runEventBusClient();
 
     const event1: Event = { type: 'RPC_1_TEST', payload: 1 };
@@ -82,7 +82,7 @@ describe('#eventBus', () => {
         )),
       );
 
-    const eventBus = await runEventBus(rpc1$);
+    const eventBus = await runEventBus({ effects: [rpc1$] });
     const eventBusClient = await runEventBusClient();
 
     const event1: Event = { type: 'RPC_TEST', payload: 1 };
@@ -122,7 +122,7 @@ describe('#eventBus', () => {
         ignoreElements(),
       );
 
-    const eventBus = await runEventBus(foo$);
+    const eventBus = await runEventBus({ effects: [foo$] });
     const eventBusClient = await runEventBusClient();
     const event: Event = { type: 'TEST', payload: 1 };
 
@@ -144,7 +144,7 @@ describe('#eventBus', () => {
         ),
       );
 
-    const eventBus = await runEventBus(rpc$);
+    const eventBus = await runEventBus({ effects: [rpc$] });
     const eventBusClient = await runEventBusClient();
     const event: Event = { type: 'RPC_TEST' };
 
@@ -170,7 +170,7 @@ describe('#eventBus', () => {
         ),
       );
 
-    const eventBus = await runEventBus(rpc$);
+    const eventBus = await runEventBus({ effects: [rpc$] });
     const eventBusClient = await runEventBusClient();
     const event: Event = { type: 'RPC_TEST' };
 
@@ -190,7 +190,7 @@ describe('#eventBus', () => {
         act(() => throwError(error)),
       );
 
-    const eventBus = await runEventBus(rpc$);
+    const eventBus = await runEventBus({ effects: [rpc$] });
     const eventBusClient = await runEventBusClient();
     const event: Event = { type: 'RPC_TEST' };
 
