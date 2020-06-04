@@ -16,7 +16,7 @@ import { TransportMessage, TransportMessageTransformer, TransportLayerConnection
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { inputLogger$, outputLogger$, errorLogger$ } from '../middlewares/messaging.eventLogger.middleware';
-import { outputRouter$ } from '../middlewares/messaging.eventRouter.middleware';
+import { outputRouter$, outputErrorEncoder$ } from '../middlewares/messaging.eventOutput.middleware';
 
 export interface MessagingListenerConfig {
   effects?: MsgEffect<any, any>[];
@@ -88,6 +88,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
       e$ => outputRouter$(e$, ctx),
       e$ => output$(e$, ctx),
       e$ => outputLogger$(e$, ctx),
+      e$ => outputErrorEncoder$(e$, ctx),
       e$ => defer(() => processError(e$)),
     );
 
