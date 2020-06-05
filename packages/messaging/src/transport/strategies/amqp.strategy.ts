@@ -7,16 +7,20 @@ import { TransportLayer, TransportMessage, TransportLayerConnection, Transport, 
 import { AmqpStrategyOptions, AmqpConnectionStatus, AmqpCannotSetExpectAckForNonConsumerConnection } from './amqp.strategy.interface';
 
 class AmqpStrategyConnection implements TransportLayerConnection {
+  private msgSubject$ = new Subject<ConsumeMessage>();
   private statusSubject$ = new Subject<AmqpConnectionStatus>();
   private closeSubject$ = new Subject();
 
   constructor(
-    private msgSubject$: Subject<ConsumeMessage>,
+    isConsumer: boolean,
     private connectionManager: AmqpConnectionManager,
     private channelWrapper: ChannelWrapper,
     private options: AmqpStrategyOptions,
   ) {
-    process.nextTick(() => this.statusSubject$.next(AmqpConnectionStatus.CONNECTED));
+    process.nextTick(async () => {
+      if (isConsumer) await this.consumeMessages();
+      this.statusSubject$.next(AmqpConnectionStatus.CONNECTED);
+    });
   }
 
   get close$() {
@@ -54,6 +58,15 @@ class AmqpStrategyConnection implements TransportLayerConnection {
       } as TransportMessage<Buffer>)),
     );
   }
+
+  private consumeMessages = async () =>
+    this.channelWrapper.addSetup(async (channel: Channel) => {
+      await channel.consume(
+        this.options.queue,
+        msg => msg && this.msgSubject$.next(msg),
+        { noAck: !this.options.expectAck },
+      );
+    });
 
   sendMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
     const { data } = msg;
@@ -160,9 +173,9 @@ class AmqpStrategy implements TransportLayer {
 
   async connect(opts?: { isConsumer: boolean }) {
     const { host, queue, queueOptions, prefetchCount, expectAck } = this.options;
-    const msgSubject$ = new Subject<ConsumeMessage>();
+    const isConsumer = !!opts?.isConsumer;
 
-    if (!opts?.isConsumer && expectAck)
+    if (!isConsumer && expectAck)
       throw new AmqpCannotSetExpectAckForNonConsumerConnection();
 
     await import('amqplib');
@@ -175,23 +188,13 @@ class AmqpStrategy implements TransportLayer {
       setup: async (channel: Channel) => {
         await channel.prefetch(prefetchCount || 1);
         await channel.assertQueue(queue, queueOptions);
-
-        if (opts?.isConsumer) {
-          await channel.consume(
-            this.options.queue,
-            msg => msg && msgSubject$.next(msg),
-            { noAck: this.options.expectAck !== undefined
-              ? !this.options.expectAck
-              : true },
-          )
-        }
       },
     });
 
     await (channelWrapper as any).waitForConnect(); // not available in @types/amqp-connection-manager
 
     return new AmqpStrategyConnection(
-      msgSubject$,
+      isConsumer,
       connectionManager,
       channelWrapper,
       this.options,

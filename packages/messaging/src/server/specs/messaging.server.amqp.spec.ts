@@ -197,4 +197,28 @@ describe('messagingServer::AMQP', () => {
 
     await client.emit({ type: 'TEST' });
   });
+
+  test('consumes pending messages after startup', async done => {
+    // given
+    const options = Util.createAmqpOptions();
+    const replyTo = createUuid();
+
+    const test$: MsgEffect = event$ =>
+      event$.pipe(
+        matchEvent('TEST'),
+        mapTo(reply(replyTo)({ type: 'TEST_RESULT' })),
+      );
+
+    // then
+    const output$ = Util.assertOutputEvent({
+      type: 'TEST_RESULT',
+    })(done);
+
+    // when (order matters)
+    client = await Util.createAmqpClient(options);
+
+    await client.emit({ type: 'TEST' });
+
+    microservice = await Util.createAmqpMicroservice(options)({ effects: [test$], output$ });
+  });
 });
