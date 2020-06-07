@@ -33,7 +33,7 @@ export class EventError extends NamedError {
   constructor(
     public readonly event: Event,
     public readonly message: string,
-    public readonly data?: object,
+    public readonly data?: Record<string, unknown> | Array<any>,
   ) {
     super(ErrorType.EVENT_ERROR, message);
   }

@@ -68,7 +68,7 @@ export function createEvent<T extends string, Payload, Arg1, Arg2, Arg3, Arg4>(
 ): { type: T } & ((arg1: Arg1, arg2: Arg2, arg3: Arg3, arg4: Arg4) => { type: T; payload: Payload; metadata?: EventMetadata });
 
 // Any args & basic definition
-export function createEvent<T extends string, Payload extends {}>(
+export function createEvent<T extends string, Payload extends unknown>(
   type: T, eventPayloadCreator?: (...args: any[]) => Payload,
 ) {
   const creator = (...args: any[]) => ({

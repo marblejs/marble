@@ -16,7 +16,7 @@ export interface FileIncomingData {
   fieldname: string;
   encoding: string;
   mimetype: string;
-};
+}
 
 export interface WithFile<T extends string = string> {
   files: Record<T, File>;

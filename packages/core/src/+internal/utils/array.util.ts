@@ -1,6 +1,6 @@
 import { fromNullable } from 'fp-ts/lib/Option';
 
-export const getArrayFromEnum = (E: object) =>
+export const getArrayFromEnum = (E: Record<string, unknown>) =>
   Object.keys(E).filter(key => typeof E[key as any] === 'number');
 
 export const getHead = <T>(array: T[]) =>

@@ -5,7 +5,7 @@ export enum OfferEventType {
   OFFER_UPDATED = 'OFFER_UPDATED',
   OFFER_DOCUMENT_SAVED = 'OFFER_DOCUMENT_SAVED',
   OFFER_DOCUMENT_CREATED = 'OFFER_DOCUMENT_CREATED',
-};
+}
 
 export const OfferEvent = {
   offerCreated: createEvent(

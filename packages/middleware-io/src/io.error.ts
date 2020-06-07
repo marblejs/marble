@@ -7,7 +7,7 @@ export enum ErrorType {
 export class IOError extends NamedError {
   constructor(
     public readonly message: string,
-    public readonly data: object,
+    public readonly data: Record<string, unknown> | Array<any>,
     public readonly context?: string,
   ) {
     super(ErrorType.IO_ERROR, message);

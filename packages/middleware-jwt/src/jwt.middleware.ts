@@ -6,16 +6,16 @@ import { verifyToken$, VerifyOptions } from './jwt.factory';
 
 export type AuthorizeMiddlewareConfig = VerifyOptions;
 
-const assignPayloadToRequest = (req: HttpRequest) => (payload: object) => req.user = payload;
+const assignPayloadToRequest = (req: HttpRequest) => (payload: Record<string, unknown>) => req.user = payload;
 
 export const authorize$ = (
   config: AuthorizeMiddlewareConfig,
-  verifyPayload$: (payload: any) => Observable<object>,
+  verifyPayload$: (payload: any) => Observable<Record<string, unknown>>,
 ): HttpMiddlewareEffect => req$ =>
   req$.pipe(
     mergeMap(req => of(req).pipe(
       map(parseAuthorizationHeader),
-      mergeMap(verifyToken$<object>(config)),
+      mergeMap(verifyToken$<Record<string, unknown>>(config)),
       mergeMap(verifyPayload$),
       tap(assignPayloadToRequest(req)),
       mapTo(req),

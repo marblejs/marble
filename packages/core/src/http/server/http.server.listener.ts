@@ -20,7 +20,7 @@ export interface HttpListenerConfig {
 export interface HttpListener {
   (req: IncomingMessage, res: OutgoingMessage): void;
   config: { routing: Routing };
-};
+}
 
 export const httpListener = createListener<HttpListenerConfig, HttpListener>(config => ask => {
   const {
