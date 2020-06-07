@@ -66,8 +66,8 @@
     "@types/node": "^12.7.12",
     "@types/rimraf": "^2.0.2",
     "@types/supertest": "^2.0.8",
-    "@typescript-eslint/eslint-plugin": "^2.19.0",
-    "@typescript-eslint/parser": "^2.19.0",
+    "@typescript-eslint/eslint-plugin": "^3.1.0",
+    "@typescript-eslint/parser": "^3.1.0",
     "eslint": "^7.0.0",
     "eslint-plugin-import": "^2.20.2",
     "husky": "^4.2.5",
@@ -76,8 +76,8 @@
     "mock-req": "^0.2.0",
     "rimraf": "^3.0.1",
     "supertest": "^4.0.2",
-    "ts-jest": "^25.5.1",
-    "typescript": "~3.7.2"
+    "ts-jest": "^26.1.0",
+    "typescript": "~3.9.5"
   },
   "workspaces": [
     "packages/*"

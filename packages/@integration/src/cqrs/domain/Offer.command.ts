@@ -2,7 +2,7 @@ import { createEvent, EventsUnion } from '@marblejs/core';
 
 export enum OfferCommandType {
   GENERATE_OFFER_DOCUMENT = 'GENERATE_OFFER_DOCUMENT',
-};
+}
 
 export const OfferCommand = {
   generateOffer: createEvent(

@@ -21,7 +21,7 @@ export enum AmqpConnectionStatus {
   CHANNEL_CONNECTED = 'CHANNEL_CONNECTED',
   CONNECTION_LOST = 'CONNECTION_LOST',
   CHANNEL_CONNECTION_LOST = 'CHANNEL_CONNECTION_LOST',
-};
+}
 
 export enum AmqpErrorType {
   CANNOT_SET_ACK_FOR_NON_CONSUMER_CONNECTION = 'AmqpCannotSetExpectAckForNonConsumerConnection',
