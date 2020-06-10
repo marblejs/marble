@@ -1,12 +1,14 @@
 import { Observable } from 'rxjs';
 import { mapTo, map } from 'rxjs/operators';
+import * as t from 'io-ts';
 import { Marbles } from '../../+internal/testing';
+import { event } from '../../event/event';
 import { Event } from '../../event/event.interface';
 import { ServerEventType, ServerEvent, AllServerEvents, } from '../../http/server/http.server.event';
 import { matchEvent } from './matchEvent.operator';
 
 describe('#matchEvent operator', () => {
-  test(`matches string Event`, () => {
+  test('matches string Event', () => {
     // given
     const event1: Event = { type: 'TEST_EVENT_1', payload: 1 };
     const event2: Event = { type: 'TEST_EVENT_2', payload: 2 };
@@ -28,7 +30,7 @@ describe('#matchEvent operator', () => {
     ]);
   });
 
-  test(`matches object Event`, () => {
+  test('matches object Event', () => {
     // given
     const event1: Event = { type: 'TEST_EVENT_1', payload: 1 };
     const event2: Event = { type: 'TEST_EVENT_2', payload: 2 };
@@ -50,7 +52,7 @@ describe('#matchEvent operator', () => {
     ]);
   });
 
-  test(`matches EventCreator`, () => {
+  test('matches EventCreator', () => {
     // given
     const listenEvent: Event = { type: ServerEventType.LISTENING, payload: { port: 80, host: 'localhost' } };
     const closeEvent: Event = { type: ServerEventType.CLOSE, payload: {} };
@@ -70,7 +72,7 @@ describe('#matchEvent operator', () => {
     ]);
   });
 
-  test(`matches EventCreator collection`, () => {
+  test('matches EventCreator collection', () => {
     // given
     const listenEvent: Event = { type: ServerEventType.LISTENING, payload: { port: 80, host: 'localhost' } };
     const closeEvent: Event = { type: ServerEventType.CLOSE, payload: {} };
@@ -87,6 +89,66 @@ describe('#matchEvent operator', () => {
     Marbles.assertEffect(listen$, [
       ['-a-b-c---', { a: closeEvent, b: listenEvent, c: errorEvent }],
       ['---b-c---', { b: listenEvent.payload, c: errorEvent.payload }],
+    ]);
+  });
+
+  test('matches EventSchema', () => {
+    // given
+    const FooEvent = event('FOO')();
+    const BarEvent = event('BAR')();
+    const BazEvent = event('BAZ')(t.type({
+      test1: t.number,
+      test2: t.string,
+    }));
+
+    const fooEvent = FooEvent.create();
+    const barEvent = BarEvent.create();
+    const bazEvent = BazEvent.create({ test1: 100, test2: '100' });
+
+    const EventUnion = t.union([FooEvent, BarEvent, BazEvent]);
+    type EventUnion = t.TypeOf<typeof EventUnion>
+
+    // when
+    const listen$ = (event$: Observable<EventUnion>) =>
+      event$.pipe(
+        matchEvent(BazEvent),
+        map(event => event.payload),
+      );
+
+    // then
+    Marbles.assertEffect(listen$, [
+      ['-a-b-c---', { a: fooEvent, b: barEvent, c: bazEvent }],
+      ['-----c---', { c: bazEvent.payload }],
+    ]);
+  });
+
+  test('matches EventSchema collection', () => {
+    // given
+    const FooEvent = event('FOO')();
+    const BarEvent = event('BAR')();
+    const BazEvent = event('BAZ')(t.type({
+      test1: t.number,
+      test2: t.string,
+    }));
+
+    const fooEvent = FooEvent.create();
+    const barEvent = BarEvent.create();
+    const bazEvent = BazEvent.create({ test1: 100, test2: '100' });
+
+    const EventUnion = t.union([FooEvent, BarEvent, BazEvent]);
+    type EventUnion = t.TypeOf<typeof EventUnion>
+
+    // when
+    const listen$ = (event$: Observable<Event>) =>
+      event$.pipe(
+        matchEvent(FooEvent, BarEvent),
+        map(event => event.payload),
+      );
+
+    // then
+    Marbles.assertEffect(listen$, [
+      ['-a-b-c---', { a: fooEvent, b: barEvent, c: bazEvent }],
+      ['-a-b-----', { a: undefined, b: undefined }],
     ]);
   });
 });

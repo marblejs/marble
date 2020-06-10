@@ -8,5 +8,6 @@ describe('@marblejs/core public API', () => {
     expect(API.defaultError$).toBeDefined();
     expect(API.EffectFactory).toBeDefined();
     expect(API.combineRoutes).toBeDefined();
+    expect(API.event).toBeDefined();
   });
 });

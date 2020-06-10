@@ -29,6 +29,7 @@ export * from './operators';
 export * from './logger';
 
 // core - event
+export * from './event/event';
 export * from './event/event.factory';
 export * from './event/event.interface';
 
