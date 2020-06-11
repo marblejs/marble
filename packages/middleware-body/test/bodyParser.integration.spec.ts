@@ -1,75 +1,132 @@
 import { ContentType } from '@marblejs/core/dist/+internal/http';
-import { createHttpServerTestBed } from '@marblejs/core/dist/+internal/testing';
-import { createServer } from '@marblejs/core';
-import * as request from 'supertest';
+import { bufferFrom, stringifyJson } from '@marblejs/core/dist/+internal/utils';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { createHttpTestBed, createTestBedSetup } from '@marblejs/testing';
 import { listener } from './bodyParser.integration';
 
+const testBed = createHttpTestBed({ listener });
+const useTestBedSetup = createTestBedSetup({ testBed });
+
 describe('@marblejs/middleware-body - integration', () => {
-  const server = createServer({ listener });
-  const httpTestBed = createHttpServerTestBed(server);
+  const testBedSetup = useTestBedSetup();
 
-  describe('POST /default-parser', () => {
-    test(`parses ${ContentType.APPLICATION_JSON} content-type`, async () =>
-      request(httpTestBed.getInstance())
-        .post('/default-parser')
-        .set({ 'Content-Type': ContentType.APPLICATION_JSON })
-        .send({ id: 'id', name: 'name', age: 100 })
-        .expect(200, { id: 'id', name: 'name', age: 100 })
-    );
-
-    test(`parses ${ContentType.APPLICATION_X_WWW_FORM_URLENCODED} content-type`, async () =>
-      request(httpTestBed.getInstance())
-        .post('/default-parser')
-        .set({ 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED })
-        .send({ id: 'id', name: 'name', age: 100 })
-        .expect(200, { id: 'id', name: 'name', age: '100' })
-    );
+  afterEach(async () => {
+    await testBedSetup.cleanup();
   });
 
-  describe('POST /multiple-parsers', () => {
-    const body = { id: 'id', name: 'name', age: 100 };
-    const text = 'test message';
+  describe('default parser', () => {
+    test(`parses ${ContentType.APPLICATION_JSON} content-type`, async () => {
+      const { request } = await testBedSetup.useTestBed();
+      const body = { id: 'id', name: 'name', age: 100 };
 
-    test(`parses ${ContentType.APPLICATION_JSON} content-type`, async () =>
-      request(httpTestBed.getInstance())
-        .post('/multiple-parsers')
-        .set({ 'Content-Type': ContentType.APPLICATION_JSON })
-        .send(body)
-        .expect(200, body),
-    );
+      const response = await pipe(
+        request('POST'),
+        request.withPath('/default-parser'),
+        request.withHeaders({ 'Content-Type': ContentType.APPLICATION_JSON }),
+        request.withBody(body),
+        request.send,
+      );
 
-    test(`parses custom "test/json" content-type`, async () =>
-      request(httpTestBed.getInstance())
-        .post('/multiple-parsers')
-        .set({ 'Content-Type': 'test/json' })
-        .send(body)
-        .expect(200, body)
-    );
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toEqual(body);
+    });
 
-    test(`parses ${ContentType.APPLICATION_VND_API_JSON} content-type`, async () =>
-      request(httpTestBed.getInstance())
-        .post('/multiple-parsers')
-        .set({ 'Content-Type': ContentType.APPLICATION_VND_API_JSON })
-        .send(body)
-        .expect(200, body)
-    );
+    test(`parses ${ContentType.APPLICATION_X_WWW_FORM_URLENCODED} content-type`, async () => {
+      const { request } = await testBedSetup.useTestBed();
+      const body = { id: 'id', name: 'name', age: '100' };
 
-    test(`parses ${ContentType.TEXT_PLAIN} content-type`, async () =>
-      request(httpTestBed.getInstance())
-        .post('/multiple-parsers')
-        .set({ 'Content-Type': ContentType.TEXT_PLAIN })
-        .send(text)
-        .expect(200, text)
-    );
+      const response = await pipe(
+        request('POST'),
+        request.withPath('/default-parser'),
+        request.withHeaders({ 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED }),
+        request.withBody(body),
+        request.send,
+      );
 
-    test(`parses ${ContentType.APPLICATION_OCTET_STREAM} content-type`, async () =>
-      request(httpTestBed.getInstance())
-        .post('/multiple-parsers')
-        .set({ 'Content-Type': ContentType.APPLICATION_OCTET_STREAM })
-        .send(text)
-        .expect(200)
-        .then(({ body }) => expect(body).toEqual(Buffer.from(body)))
-    );
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toEqual(body);
+    });
   });
 
+  describe('multiple parsers', () => {
+    test(`parses ${ContentType.APPLICATION_JSON} content-type`, async () => {
+      const { request } = await testBedSetup.useTestBed();
+      const body = { id: 'id', name: 'name', age: 100 };
+
+      const response = await pipe(
+        request('POST'),
+        request.withPath('/multiple-parsers'),
+        request.withHeaders({ 'Content-Type': ContentType.APPLICATION_JSON }),
+        request.withBody(body),
+        request.send,
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toEqual(body);
+    });
+
+    test('parses custom "test/json" content-type', async () => {
+      const { request } = await testBedSetup.useTestBed();
+      const body = { id: 'id', name: 'name', age: 100 };
+
+      const response = await pipe(
+        request('POST'),
+        request.withPath('/multiple-parsers'),
+        request.withHeaders({ 'Content-Type': 'test/json' }),
+        request.withBody(body),
+        request.send,
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toEqual(body);
+    });
+
+    test(`parses ${ContentType.APPLICATION_VND_API_JSON} content-type`, async () => {
+      const { request } = await testBedSetup.useTestBed();
+      const body = { id: 'id', name: 'name', age: 100 };
+
+      const response = await pipe(
+        request('POST'),
+        request.withPath('/multiple-parsers'),
+        request.withHeaders({ 'Content-Type': ContentType.APPLICATION_VND_API_JSON }),
+        request.withBody(body),
+        request.send,
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toEqual(body);
+    });
+
+    test(`parses ${ContentType.TEXT_PLAIN} content-type`, async () => {
+      const { request } = await testBedSetup.useTestBed();
+      const body = 'test message';
+
+      const response = await pipe(
+        request('POST'),
+        request.withPath('/multiple-parsers'),
+        request.withHeaders({ 'Content-Type': ContentType.TEXT_PLAIN }),
+        request.withBody(body),
+        request.send,
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toEqual(body);
+    });
+
+    test(`parses ${ContentType.APPLICATION_OCTET_STREAM} content-type`, async () => {
+      const { request } = await testBedSetup.useTestBed();
+      const body = { id: 'id', name: 'name', age: 100 };
+
+      const response = await pipe(
+        request('POST'),
+        request.withPath('/multiple-parsers'),
+        request.withHeaders({ 'Content-Type': ContentType.APPLICATION_OCTET_STREAM }),
+        request.withBody(body),
+        request.send,
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toEqual(pipe(body, stringifyJson, bufferFrom));
+    });
+  });
 });

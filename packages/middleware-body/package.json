@@ -41,7 +41,8 @@
     "type-is": "~1.6.16"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.2.0"
+    "@marblejs/core": "^3.2.0",
+    "@marblejs/testing": "^3.2.0"
   },
   "publishConfig": {
     "access": "public"
