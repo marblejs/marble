@@ -48,9 +48,7 @@
     "joi": "~14.3.0"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.2.0",
-    "@marblejs/middleware-body": "^3.2.0",
-    "@marblejs/testing": "3.2.0"
+    "@marblejs/core": "^3.2.0"
   },
   "publishConfig": {
     "access": "public"
