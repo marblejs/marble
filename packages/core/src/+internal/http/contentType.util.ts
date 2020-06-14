@@ -42,3 +42,6 @@ export const getContentType = (headers: HttpHeaders): string => {
     ? Array.isArray(contentType) ? contentType[0] : String(contentType)
     : '';
 };
+
+export const isJsonContentType = (headerValue: string) =>
+  headerValue.includes('json');
