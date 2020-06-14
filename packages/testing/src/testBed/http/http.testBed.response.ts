@@ -1,6 +1,7 @@
 import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { HttpStatus } from '@marblejs/core';
+import { parseJson } from '@marblejs/core/dist/+internal/utils';
 import { getContentType, ContentType } from '@marblejs/core/dist/+internal/http/contentType.util';
 import { HttpTestBedResponseProps, HttpTestBedResponse } from './http.testBed.response.interface';
 import { HttpTestBedRequest } from './http.testBed.request.interface';
@@ -12,7 +13,7 @@ const parseResponseBody = (props: HttpTestBedResponseProps): string | Array<any>
     O.map(body => {
       switch (getContentType(props.headers)) {
         case ContentType.APPLICATION_JSON:
-          return JSON.parse(body);
+          return parseJson(body);
         default:
           return body;
       }

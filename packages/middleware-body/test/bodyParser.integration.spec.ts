@@ -59,7 +59,7 @@ describe('@marblejs/middleware-body - integration', () => {
         .post('/multiple-parsers')
         .set({ 'Content-Type': ContentType.TEXT_PLAIN })
         .send(text)
-        .expect(200, `"${text}"`)
+        .expect(200, text)
     );
 
     test(`parses ${ContentType.APPLICATION_OCTET_STREAM} content-type`, async () =>
@@ -68,7 +68,7 @@ describe('@marblejs/middleware-body - integration', () => {
         .set({ 'Content-Type': ContentType.APPLICATION_OCTET_STREAM })
         .send(text)
         .expect(200)
-        .then(({ body }) => expect(body.type).toBe('Buffer'))
+        .then(({ body }) => expect(body).toEqual(Buffer.from(body)))
     );
   });
 
