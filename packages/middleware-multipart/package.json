@@ -46,7 +46,10 @@
     "rxjs": "^6.5.3"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.2.0"
+    "@types/form-data": "^2.5.0",
+    "@marblejs/core": "^3.2.0",
+    "@marblejs/testing": "^3.2.0",
+    "form-data": "^3.0.0"
   },
   "publishConfig": {
     "access": "public"
