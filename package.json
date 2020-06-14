@@ -4,7 +4,7 @@
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "build": "lerna run build",
-    "postbuild": "rimraf packages/**/*.spec.js packages/**/*.spec.d.ts",
+    "postbuild": "rimraf packages/**/*.spec.js packages/**/*.spec.d.ts packages/**/*.spec.d.ts.map",
     "benchmark": "NODE_ENV=test make -C benchmarks",
     "watch": "lerna run --parallel --stream watch",
     "lint": "eslint ./packages/**/src ./packages/**/test --ext .ts",
