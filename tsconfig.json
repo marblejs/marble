@@ -19,7 +19,6 @@
     "strict": true,
     "target": "es6",
     "lib": [
-      "dom",
       "es2019"
     ],
     "baseUrl": "."
