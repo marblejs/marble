@@ -1,14 +1,9 @@
-import { createEvent, EventsUnion } from '@marblejs/core';
+import * as t from 'io-ts';
+import { event } from '@marblejs/core';
 
 export enum OfferCommandType {
   GENERATE_OFFER_DOCUMENT = 'GENERATE_OFFER_DOCUMENT',
 }
 
-export const OfferCommand = {
-  generateOffer: createEvent(
-    OfferCommandType.GENERATE_OFFER_DOCUMENT,
-    (offerId: string) => ({ offerId }),
-  ),
-};
-
-export type OfferCommand = EventsUnion<typeof OfferCommand>;
+export const GenerateOfferDocumentCommand =
+  event(OfferCommandType.GENERATE_OFFER_DOCUMENT)(t.type({ offerId: t.string }));
