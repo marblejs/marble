@@ -6,12 +6,12 @@ import { messagingListener, EventBusClientToken, eventBusClient, EventBusToken, 
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { logger$ } from '@marblejs/middleware-logger';
 import { postDocumentsGenerate$ } from './effects/http.effects';
-import { generateOfferDocument$, saveOfferDocument$ } from './effects/eventbus.effects';
+import { generateOfferDocument$, offerDocumentCreated$ } from './effects/eventbus.effects';
 
 const eventBusListener = messagingListener({
   effects: [
     generateOfferDocument$,
-    saveOfferDocument$,
+    offerDocumentCreated$,
   ],
 });
 

@@ -1,28 +1,13 @@
-import { createEvent, EventsUnion } from '@marblejs/core';
+import * as t from 'io-ts';
+import { event } from '@marblejs/core';
 
-export enum OfferEventType {
-  OFFER_CREATED = 'OFFER_CREATED',
-  OFFER_UPDATED = 'OFFER_UPDATED',
+export const enum OfferEventType {
   OFFER_DOCUMENT_SAVED = 'OFFER_DOCUMENT_SAVED',
   OFFER_DOCUMENT_CREATED = 'OFFER_DOCUMENT_CREATED',
 }
 
-export const OfferEvent = {
-  offerCreated: createEvent(
-    OfferEventType.OFFER_CREATED,
-    (offerId: string) => ({ offerId }),
-  ),
-  offerUpdated: createEvent(
-    OfferEventType.OFFER_UPDATED,
-    (offerId: string) => ({ offerId }),
-  ),
-  offerDocumentCreated: createEvent(
-    OfferEventType.OFFER_DOCUMENT_CREATED,
-    (offerId: string) => ({ offerId }),
-  ),
-  offerDocumentSaved: createEvent(
-    OfferEventType.OFFER_DOCUMENT_SAVED,
-  ),
-};
+export const OfferDocumentCreatedEvent =
+  event(OfferEventType.OFFER_DOCUMENT_CREATED)(t.type({ offerId: t.string }));
 
-export type OfferEvent = EventsUnion<typeof OfferEvent>;
+export const OfferDocumentSavedEvent =
+  event(OfferEventType.OFFER_DOCUMENT_SAVED)();
