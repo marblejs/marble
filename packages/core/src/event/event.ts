@@ -1,8 +1,4 @@
 import * as t from 'io-ts';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import * as E from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity, flow } from 'fp-ts/lib/function';
 import { Event, EventWithPayload, EventWithoutPayload } from './event.interface';
 
 type Payload =
@@ -54,19 +50,8 @@ export const event = <T extends string>(type: T) => <P extends Payload | undefin
     payload: payload ?? t.undefined,
   }, 'EventSchema');
 
-  const create = (payload?: any): Event => {
-    const result = schema.decode({ type, payload });
-    const reportError = flow(
-      PathReporter.report,
-      report => report.join(', '),
-      report => new Error(report),
-    );
-
-    return pipe(
-      schema.decode({ type, payload }),
-      flow(E.fold(_ => { throw reportError(result) }, identity)),
-    );
-  }
+  const create = (payload?: any): Event =>
+    schema.encode({ type, payload });
 
   return { ...schema, create } as EventBuilderOutput<T, P>;
 };

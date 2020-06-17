@@ -1,7 +1,7 @@
 import * as t from 'io-ts';
 import { event } from '@marblejs/core';
 
-export const enum OfferEventType {
+export enum OfferEventType {
   OFFER_DOCUMENT_SAVED = 'OFFER_DOCUMENT_SAVED',
   OFFER_DOCUMENT_CREATED = 'OFFER_DOCUMENT_CREATED',
 }
