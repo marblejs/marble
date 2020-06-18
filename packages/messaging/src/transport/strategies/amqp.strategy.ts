@@ -1,5 +1,5 @@
 import { Subject, fromEvent, merge, from } from 'rxjs';
-import { map, filter, take, mapTo, first, mergeMap, share } from 'rxjs/operators';
+import { map, filter, take, mapTo, first, mergeMap, share, tap } from 'rxjs/operators';
 import { Channel, ConsumeMessage, Replies } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
@@ -9,6 +9,7 @@ import { AmqpStrategyOptions, AmqpConnectionStatus, AmqpCannotSetExpectAckForNon
 class AmqpStrategyConnection implements TransportLayerConnection {
   private msgSubject$ = new Subject<ConsumeMessage>();
   private statusSubject$ = new Subject<AmqpConnectionStatus>();
+  private errorSubject$ = new Subject<Error>();
   private closeSubject$ = new Subject();
 
   constructor(
@@ -28,7 +29,10 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   }
 
   get error$() {
-    return fromEvent<Error>(this.channelWrapper, 'error');
+    return merge(
+      fromEvent<Error>(this.channelWrapper, 'error'),
+      this.errorSubject$.asObservable(),
+    );
   }
 
   get status$() {
@@ -38,13 +42,22 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     const connectChannel$ = fromEvent(this.channelWrapper, 'connect')
       .pipe(mapTo(AmqpConnectionStatus.CHANNEL_CONNECTED));
 
-    const diconnect$ = fromEvent(this.connectionManager, 'disconnect')
-      .pipe(mapTo(AmqpConnectionStatus.CONNECTION_LOST));
+    const diconnect$ = fromEvent<{ err?: Error }>(this.connectionManager, 'disconnect')
+      .pipe(
+        tap(({ err }) => err && this.errorSubject$.next(err)),
+        mapTo(AmqpConnectionStatus.CONNECTION_LOST),
+      );
 
     const diconnectChannel$ = fromEvent(this.channelWrapper, 'close')
       .pipe(mapTo(AmqpConnectionStatus.CHANNEL_CONNECTION_LOST));
 
-    return merge(connect$, connectChannel$, diconnect$, diconnectChannel$, this.statusSubject$.asObservable());
+    return merge(
+      connect$,
+      connectChannel$,
+      diconnect$,
+      diconnectChannel$,
+      this.statusSubject$.asObservable(),
+    );
   }
 
   get message$() {
