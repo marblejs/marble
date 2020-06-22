@@ -1,6 +1,6 @@
 export type EventType = string;
 
-export interface EventMetadata {
+export interface EventMetadata extends Record<string, unknown> {
   correlationId?: string;
   replyTo?: string;
   raw?: any;
