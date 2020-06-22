@@ -8,11 +8,13 @@ export { AmqpStrategyOptions, AmqpConnectionStatus } from './transport/strategie
 export { RedisStrategyOptions, RedisConnectionStatus } from './transport/strategies/redis.strategy.interface';
 export { LocalStrategyOptions, EVENT_BUS_CHANNEL } from './transport/strategies/local.strategy.interface';
 
-// effects
+// effects, middlewares
 export * from './effects/messaging.effects.interface';
+export * from './middlewares/messaging.ack.middleware';
 
 // handy functions
 export { reply } from './reply/reply';
+export { ackEvent, nackEvent, nackAndResendEvent } from './ack/ack';
 
 // server
 export * from './server/messaging.server';
@@ -23,3 +25,4 @@ export { messagingListener } from './server/messaging.server.listener';
 
 // readers
 export * from './eventbus/messaging.eventBus.reader';
+export * from './eventStore/eventTimerStore';

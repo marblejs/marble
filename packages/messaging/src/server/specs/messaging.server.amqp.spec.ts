@@ -5,9 +5,11 @@ import { forkJoin, TimeoutError } from 'rxjs';
 import { map, tap, delay, mapTo } from 'rxjs/operators';
 import { TransportLayerConnection } from '../../transport/transport.interface';
 import { MsgEffect } from '../../effects/messaging.effects.interface';
+import { rejectUnhandled$ } from '../../middlewares/messaging.ack.middleware';
 import { MessagingClient } from '../../client/messaging.client.interface';
 import { reply } from '../../reply/reply';
 import * as Util from '../../util/messaging.test.util';
+import { ackEvent } from '../../ack/ack';
 
 describe('messagingServer::AMQP', () => {
   let client: MessagingClient;
@@ -121,11 +123,11 @@ describe('messagingServer::AMQP', () => {
     const optionsMicroservice = Util.createAmqpOptions({ expectAck: true });
     const optionsClient = Util.createAmqpOptions({ queue: optionsMicroservice.queue });
 
-    const ack$: MsgEffect = (event$, { client }) =>
+    const ack$: MsgEffect = (event$, ctx) =>
       event$.pipe(
         matchEvent('ACK'),
         delay(50),
-        tap(event => client.ackMessage(event.metadata?.raw)),
+        tap(event => ackEvent(ctx)(event)()),
         map(event => ({ type: 'ACK_RESPONSE', payload: event.payload })),
       );
 
@@ -136,11 +138,37 @@ describe('messagingServer::AMQP', () => {
     )(done);
 
     // when
-    microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ effects: [ack$], output$ });
+    microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ middlewares: [rejectUnhandled$], effects: [ack$], output$ });
     client = await Util.createAmqpClient(optionsClient);
 
     await client.emit({ type: 'ACK', payload: 1 });
     await client.emit({ type: 'ACK', payload: 2 });
+  });
+
+  test('rejects unhandled event events and doesn\'t block the consumer', async done => {
+    // given
+    const optionsMicroservice = Util.createAmqpOptions({ expectAck: true, timeout: 100 });
+    const optionsClient = Util.createAmqpOptions({ queue: optionsMicroservice.queue });
+
+    const ack$: MsgEffect = (event$, ctx) =>
+      event$.pipe(
+        matchEvent('ACK'),
+        delay(50),
+        tap(event => ackEvent(ctx)(event)()),
+        map(event => ({ type: 'ACK_RESPONSE', payload: event.payload })),
+      );
+
+    // then
+    const output$ = Util.assertOutputEvent(
+      { type: 'ACK_RESPONSE' },
+    )(done);
+
+    // when
+    microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ middlewares: [rejectUnhandled$], effects: [ack$], output$ });
+    client = await Util.createAmqpClient(optionsClient);
+
+    await client.emit({ type: 'TEST' });
+    await client.emit({ type: 'ACK', payload: 1 });
   });
 
   test('chains events by sending back to origin channel when no reply is defined', async done => {
