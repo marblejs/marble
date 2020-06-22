@@ -4,6 +4,7 @@ import { bindTo, createEffectContext, combineEffects, ServerIO, lookup, logConte
 import { provideTransportLayer } from '../transport/transport.provider';
 import { statusLogger$ } from '../middlewares/messaging.statusLogger.middleware';
 import { TransportLayerConnection } from '../transport/transport.interface';
+import { EventTimerStoreToken, EventTimerStore } from '../eventStore/eventTimerStore';
 import { CreateMicroserviceConfig } from './messaging.server.interface';
 import { TransportLayerToken, ServerEventsToken } from './messaging.server.tokens';
 import { AllServerEvents, isCloseEvent, ServerEvent } from './messaging.server.events';
@@ -19,10 +20,12 @@ export const createMicroservice = async (config: CreateMicroserviceConfig) => {
 
   const serverEventsSubject = new Subject<AllServerEvents>();
   const transportLayer = provideTransportLayer(transport, options);
+  const boundEventTimerStore = bindTo(EventTimerStoreToken)(EventTimerStore);
   const boundTransportLayer = bindTo(TransportLayerToken)(() => transportLayer);
   const boundServerEvents = bindTo(ServerEventsToken)(() => serverEventsSubject);
 
   const context = await contextFactory(
+    boundEventTimerStore,
     boundTransportLayer,
     boundServerEvents,
     ...dependencies,
