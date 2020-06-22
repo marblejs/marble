@@ -1,7 +1,5 @@
 import * as IO from 'fp-ts/lib/IO';
-import * as M from 'fp-ts/lib/Map';
 import * as O from 'fp-ts/lib/Option';
-import { ordString } from 'fp-ts/lib/Ord';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { createReader, createContextToken, Event } from '@marblejs/core';
 
@@ -11,7 +9,7 @@ const getTimer = (store: Map<string, NodeJS.Timeout>) => (event: Event): readonl
   pipe(
     O.fromNullable(event.metadata?.correlationId),
     O.chain(eventId => pipe(
-      M.lookup(ordString)(eventId, store),
+      O.fromNullable(store.get(eventId)),
       O.map(timer => ([eventId, timer] as const)),
     )),
     O.toUndefined,
@@ -20,10 +18,12 @@ const getTimer = (store: Map<string, NodeJS.Timeout>) => (event: Event): readonl
 const register = (store: Map<string, NodeJS.Timeout>) => (timeout: number) => (handler: (() => any)) => (event: Event): IO.IO<void> =>
   pipe(
     IO.of(event.metadata?.correlationId),
-    IO.chain(id => () => id && pipe(
-      setTimeout(handler, timeout),
-      timer => M.insertAt(ordString)(id, timer)(store),
-    )),
+    IO.chain(id => () => {
+      id && pipe(
+        setTimeout(handler, timeout),
+        timer => store.set(id, timer),
+      );
+    }),
   );
 
 const unregister = (store: Map<string, NodeJS.Timeout>) => (event: Event): IO.IO<void> =>

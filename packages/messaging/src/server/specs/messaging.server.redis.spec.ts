@@ -8,6 +8,7 @@ import { MsgEffect } from '../../effects/messaging.effects.interface';
 import { MessagingClient } from '../../client/messaging.client.interface';
 import { reply } from '../../reply/reply';
 import * as Util from '../../util/messaging.test.util';
+import { ackEvent } from '../../ack/ack';
 
 describe('messagingServer::Redis', () => {
   let client: MessagingClient;
@@ -126,7 +127,7 @@ describe('messagingServer::Redis', () => {
     const test$: MsgEffect = (event$, ctx) =>
       event$.pipe(
         matchEvent('TEST'),
-        tap(event => ctx.client.ackMessage(event.metadata?.raw)),
+        tap(event => ackEvent(ctx)(event)()),
       );
 
     const error$ = Util.assertError({
