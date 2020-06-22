@@ -10,7 +10,9 @@ export { LocalStrategyOptions, EVENT_BUS_CHANNEL } from './transport/strategies/
 
 // effects
 export * from './effects/messaging.effects.interface';
-export { reply } from './effects/messaging.effects.helper';
+
+// handy functions
+export { reply } from './reply/reply';
 
 // server
 export * from './server/messaging.server';
