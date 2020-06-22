@@ -43,6 +43,8 @@ export interface TransportLayerConnection {
   nackMessage: (message: TransportMessage | undefined, resend?: boolean) => void;
   close: () => Promise<any>;
   getChannel(): string;
+  type: Transport;
+  config: { timeout: number };
   message$: Observable<TransportMessage<Buffer>>;
   status$: Observable<string>;
   error$: Observable<Error>;

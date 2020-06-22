@@ -19,6 +19,7 @@ class RedisStrategyConnection implements TransportLayerConnection {
   private closeSubject$ = new Subject();
 
   constructor(
+    public type: Transport,
     private opts: { channel: string; isConsumer: boolean; timeout: number },
     private publisher: RedisClient,
     private subscriber: RedisClient,
@@ -31,6 +32,10 @@ class RedisStrategyConnection implements TransportLayerConnection {
     }
 
     process.nextTick(() => this.statusSubject$.next(RedisConnectionStatus.CONNECT));
+  }
+
+  get config() {
+    return { timeout: this.opts.timeout };
   }
 
   get status$() {
@@ -140,12 +145,19 @@ class RedisStrategy implements TransportLayer {
     const publisher = await RedisHelper.connectClient(this.clientOpts);
     const subscriber = await RedisHelper.connectClient(this.clientOpts);
     const rpcSubscriber = await RedisHelper.connectClient(this.clientOpts);
+    const opts = { isConsumer, channel, timeout: timeout ?? DEFAULT_TIMEOUT };
 
     if (isConsumer) {
       await RedisHelper.subscribeChannel(subscriber)(channel);
     }
 
-    return new RedisStrategyConnection({ isConsumer, channel, timeout: timeout ?? DEFAULT_TIMEOUT }, publisher, subscriber, rpcSubscriber);
+    return new RedisStrategyConnection(
+      Transport.REDIS,
+      opts,
+      publisher,
+      subscriber,
+      rpcSubscriber,
+    );
   }
 }
 
