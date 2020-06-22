@@ -11,7 +11,14 @@ class LocalStrategyConnection implements TransportLayerConnection {
   private msgSubject$ = new Subject<TransportMessage<Buffer>>();
   private closeSubject$ = new Subject();
 
-  constructor(private opts: TransportLayerConfig) { }
+  constructor(
+    public type: Transport,
+    private opts: TransportLayerConfig,
+  ) { }
+
+  get config() {
+    return { timeout: this.opts.timeout };
+  }
 
   get status$() {
     return EMPTY;
@@ -88,7 +95,10 @@ class LocalStrategy implements TransportLayer {
   }
 
   async connect() {
-    return new LocalStrategyConnection(this.config);
+    return new LocalStrategyConnection(
+      Transport.LOCAL,
+      this.config,
+    );
   }
 }
 

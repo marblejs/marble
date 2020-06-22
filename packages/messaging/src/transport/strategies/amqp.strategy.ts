@@ -13,15 +13,20 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   private closeSubject$ = new Subject();
 
   constructor(
-    isConsumer: boolean,
+    public type: Transport,
+    private isConsumer: boolean,
     private connectionManager: AmqpConnectionManager,
     private channelWrapper: ChannelWrapper,
     private options: AmqpStrategyOptions,
   ) {
     process.nextTick(async () => {
-      if (isConsumer) await this.consumeMessages();
+      if (this.isConsumer) await this.consumeMessages();
       this.statusSubject$.next(AmqpConnectionStatus.CONNECTED);
     });
+  }
+
+  get config() {
+    return { timeout: this.options.timeout ?? DEFAULT_TIMEOUT };
   }
 
   get close$() {
@@ -149,14 +154,16 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   };
 
   ackMessage = (msg: TransportMessage | undefined) => {
-    if (msg) {
+    if (this.options.expectAck && msg && !msg.raw.isAcked) {
       this.channelWrapper.ack(msg.raw);
+      msg.raw.isAcked = true;
     }
   }
 
   nackMessage = (msg: TransportMessage | undefined, resend = true) => {
-    if (msg) {
+    if (this.options.expectAck && msg && !msg.raw.isNacked) {
       this.channelWrapper.nack(msg.raw, false , resend);
+      msg.raw.isNacked = true;
     }
   }
 
@@ -207,6 +214,7 @@ class AmqpStrategy implements TransportLayer {
     await (channelWrapper as any).waitForConnect(); // not available in @types/amqp-connection-manager
 
     return new AmqpStrategyConnection(
+      Transport.AMQP,
       isConsumer,
       connectionManager,
       channelWrapper,
