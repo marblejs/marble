@@ -17,6 +17,7 @@ import { jsonTransformer, decodeMessage } from '../transport/transport.transform
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { inputLogger$, outputLogger$, errorLogger$ } from '../middlewares/messaging.eventLogger.middleware';
 import { outputRouter$, outputErrorEncoder$ } from '../middlewares/messaging.eventOutput.middleware';
+import { idApplier$ } from '../middlewares/messaging.eventInput.middleware';
 
 export interface MessagingListenerConfig {
   effects?: MsgEffect[];
@@ -52,7 +53,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
 
   const logger = useContext(LoggerToken)(ask);
   const combinedEffects = combineEffects(...effects);
-  const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
+  const combinedMiddlewares = combineMiddlewares(idApplier$, inputLogger$, ...middlewares);
 
   return connection => {
     const errorSubject = new Subject<Error>();
