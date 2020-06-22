@@ -3,13 +3,13 @@ import { Observable } from 'rxjs';
 import { TransportMessageTransformer, TransportStrategy } from '../transport/transport.interface';
 
 export interface MessagingClient {
-  send: <T = Event, U = Event>(data: U) => Observable<T>;
-  emit: <T = Event>(data: T) => Promise<void>;
+  send: <T extends Event = Event, U extends Event = Event>(data: U) => Observable<T>;
+  emit: <T extends Event = Event>(data: T) => Promise<void>;
   close: () => Promise<void>;
 }
 
 type ConfigurationBase =  {
-  msgTransformer?: TransportMessageTransformer<any>;
+  msgTransformer?: TransportMessageTransformer;
 }
 
 export type MessagingClientConfig =

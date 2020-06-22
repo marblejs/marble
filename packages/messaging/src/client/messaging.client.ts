@@ -34,16 +34,16 @@ export const messagingClient = (config: MessagingClientConfig) => {
     const transportLayer = provideTransportLayer(transport, options);
     const connection = await transportLayer.connect({ isConsumer: false });
 
-    const emit: MessagingClient['emit'] = async msg => {
+    const emit = async <I extends Event>(event: I): Promise<void> => {
       await connection.emitMessage(
         connection.getChannel(),
-        { data: msgTransformer.encode(msg as any) },
+        { data: msgTransformer.encode(event) },
       );
     }
 
-    const send: MessagingClient['send'] = msg => {
+    const send = <O extends Event, I extends Event>(event: I): Observable<O> => {
       const channel = connection.getChannel();
-      const message: TransportMessage<Buffer> = { data: msgTransformer.encode(msg as any) };
+      const message: TransportMessage<Buffer> = { data: msgTransformer.encode(event) };
 
       const catchErrorEvent = <V extends Event>(e: V) => {
         if (!e.error) {
@@ -72,13 +72,13 @@ export const messagingClient = (config: MessagingClientConfig) => {
 
       return defer(() => from(connection.sendMessage(channel, message)).pipe(
         timeout(config.options.timeout || DEFAULT_TIMEOUT),
-        map(m => msgTransformer.decode(m.data)),
+        map(m => msgTransformer.decode<O>(m.data)),
         mergeMap(catchErrorEvent),
         take(1),
       ));
     }
 
-    const close: MessagingClient['close'] = async () => {
+    const close = async (): Promise<void> => {
       await connection.close();
     }
 

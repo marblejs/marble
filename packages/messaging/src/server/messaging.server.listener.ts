@@ -12,29 +12,34 @@ import {
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Observable, Subject, defer } from 'rxjs';
 import { map, catchError, takeUntil, filter } from 'rxjs/operators';
-import { TransportMessage, TransportMessageTransformer, TransportLayerConnection } from '../transport/transport.interface';
-import { jsonTransformer } from '../transport/transport.transformer';
+import { TransportMessageTransformer, TransportLayerConnection } from '../transport/transport.interface';
+import { jsonTransformer, decodeMessage } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { inputLogger$, outputLogger$, errorLogger$ } from '../middlewares/messaging.eventLogger.middleware';
 import { outputRouter$, outputErrorEncoder$ } from '../middlewares/messaging.eventOutput.middleware';
 
 export interface MessagingListenerConfig {
-  effects?: MsgEffect<any, any>[];
-  middlewares?: MsgMiddlewareEffect<any, any>[];
+  effects?: MsgEffect[];
+  middlewares?: MsgMiddlewareEffect[];
   error$?: MsgErrorEffect;
   output$?: MsgOutputEffect;
-  msgTransformer?: TransportMessageTransformer<any>;
+  msgTransformer?: TransportMessageTransformer;
 }
 
 export interface MessagingListener {
   (connection: TransportLayerConnection): void;
 }
 
-const defaultOutput$: MsgOutputEffect = msg$ =>
-  msg$;
+const defaultOutput$: MsgOutputEffect = event$ =>
+  event$;
 
-const defaultError$: MsgErrorEffect = msg$ =>
-  msg$.pipe(map(error => ({ type: 'UNHANDLED_ERROR', error: { name: error.name, message: error.message } } as Event)));
+const defaultError$: MsgErrorEffect = event$ =>
+  event$.pipe(
+    map(error => ({
+      type: 'UNHANDLED_ERROR',
+      error: { name: error.name, message: error.message }
+    })),
+  );
 
 export const messagingListener = createListener<MessagingListenerConfig, MessagingListener>(config => ask => {
   const {
@@ -49,35 +54,28 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
   const combinedEffects = combineEffects(...effects);
   const combinedMiddlewares = combineMiddlewares(inputLogger$, ...middlewares);
 
-  const decode = (msg: TransportMessage<Buffer>): Event => ({
-    ...msgTransformer.decode(msg.data),
-    metadata: {
-      replyTo: msg.replyTo,
-      correlationId: msg.correlationId,
-      raw: msg,
-    }
-  });
-
-  const send = (connection: TransportLayerConnection) => (event: Event): void => {
-    const { metadata, type, payload, error } = event;
-    const { replyTo, correlationId, raw } = metadata ?? {};
-
-    connection.emitMessage(replyTo ?? '', {
-      data: msgTransformer.encode({ type, payload, error }),
-      correlationId,
-      replyTo,
-      raw,
-    });
-  };
-
   return connection => {
     const errorSubject = new Subject<Error>();
     const eventSubject = new Subject<Event>();
+    const decode = decodeMessage({ msgTransformer, errorSubject });
     const ctx = createEffectContext({ ask, client: connection });
+
+    const send = (connection: TransportLayerConnection) => (event: Event): void => {
+      const { metadata, type, payload, error } = event;
+      const { replyTo, correlationId, raw } = metadata ?? {};
+
+      connection.emitMessage(replyTo ?? '', {
+        data: msgTransformer.encode({ type, payload, error }),
+        correlationId,
+        replyTo,
+        raw,
+      });
+    };
 
     const incomingEvent$ = pipe(
       connection.message$,
-      e$ => e$.pipe(map(decode), filter(event => !event.error)),
+      map(decode),
+      filter(event => !event.error),
       e$ => combinedMiddlewares(e$, ctx),
       e$ => defer(() => processError(e$)),
     );
