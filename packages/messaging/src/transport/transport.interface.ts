@@ -49,9 +49,9 @@ export interface TransportLayerConnection {
   close$: Observable<any>;
 }
 
-export interface TransportMessageTransformer<T> {
-  decode: (incomingEvent: Buffer) => T;
-  encode: (outgoingEvent: T) => Buffer;
+export interface TransportMessageTransformer {
+  decode: <T extends Event = Event>(incomingEvent: Buffer) => T;
+  encode: (outgoingEvent: Event) => Buffer;
 }
 
 export interface TransportMessage<T = Event> {
