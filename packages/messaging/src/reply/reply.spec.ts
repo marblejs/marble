@@ -1,5 +1,5 @@
 import { Event, EventMetadata } from '@marblejs/core';
-import { reply, MissingEventTypeError, UNKNOWN_TAG } from '../messaging.effects.helper';
+import { reply, MissingEventTypeError, UNKNOWN_TAG } from './reply';
 
 describe('#reply', () => {
   test('creates success response based on originated event', () => {

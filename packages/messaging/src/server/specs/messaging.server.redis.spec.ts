@@ -6,7 +6,7 @@ import { map, tap, delay, mapTo } from 'rxjs/operators';
 import { TransportLayerConnection } from '../../transport/transport.interface';
 import { MsgEffect } from '../../effects/messaging.effects.interface';
 import { MessagingClient } from '../../client/messaging.client.interface';
-import { reply } from '../../effects/messaging.effects.helper';
+import { reply } from '../../reply/reply';
 import * as Util from '../../util/messaging.test.util';
 
 describe('messagingServer::Redis', () => {

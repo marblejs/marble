@@ -5,7 +5,7 @@ import { throwError, of } from 'rxjs';
 import { delay, map, tap, ignoreElements } from 'rxjs/operators';
 import { MsgEffect } from '../effects/messaging.effects.interface';
 import { runEventBus, runEventBusClient } from '../util/messaging.test.util';
-import { reply } from '../effects/messaging.effects.helper';
+import { reply } from '../reply/reply';
 
 describe('#eventBus', () => {
   test('handles RPC event', async () => {
