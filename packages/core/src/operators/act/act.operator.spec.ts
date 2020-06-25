@@ -182,4 +182,34 @@ describe('#act operator', () => {
       ['-a-(bb)-c-d---', { a: event1, b: eventErrored, c: event3, d: event4 }],
     ]);
   });
+
+  test('catches errored event when thrown outside stream => maps to observable of new events => continues stream', () => {
+    // given
+    const event1: Event = { type: 'TEST_EVENT_1', payload: 1 };
+    const event2: Event = { type: 'TEST_EVENT_2', payload: 2 };
+    const event3: Event = { type: 'TEST_EVENT_3', payload: 3 };
+    const event4: Event = { type: 'TEST_EVENT_4', payload: 4 };
+    const eventErrored: Event = { type: 'TEST_ERROR' };
+
+    // when
+    const effect$ = (event$: Observable<Event>) =>
+      event$.pipe(
+        act(
+          (event: Event) => {
+            if (event.payload === 2) throw new Error('something went wrong');
+            else return of(event);
+          },
+          () => concat(
+            of(eventErrored),
+            of(eventErrored),
+          ),
+        ),
+      );
+
+    // then
+    Marbles.assertEffect(effect$, [
+      ['-a-b----c-d---', { a: event1, b: event2,       c: event3, d: event4 }],
+      ['-a-(bb)-c-d---', { a: event1, b: eventErrored, c: event3, d: event4 }],
+    ]);
+  });
 });
