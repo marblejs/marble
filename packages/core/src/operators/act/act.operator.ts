@@ -35,17 +35,23 @@ export function act<
     metadata: event.metadata,
   } as ErrorEvent);
 
+  const handleError = (event: InputEvent) => (error: unknown) => pipe(
+    O.fromNullable(errorFn),
+    O.map(fn => fn(error, event)),
+    O.map(res => !isObservable(res) ? of(res) : res),
+    O.getOrElse(() => getDefaultErrorEvent(error)(event)),
+  );
+
   return (source: Observable<InputEvent>): Observable<CallEvent | ErrorEvent> =>
     source.pipe(
-      mergeMap(event => defer(() =>
-        callFn(event).pipe(
-          catchError(error => pipe(
-            O.fromNullable(errorFn),
-            O.map(fn => fn(error, event)),
-            O.map(res => !isObservable(res) ? of(res) : res),
-            O.getOrElse(() => getDefaultErrorEvent(error)(event)),
-          )),
-        ),
-      )),
+      mergeMap(event => defer(() => {
+        try {
+          return pipe(
+            callFn(event),
+            catchError(handleError(event)));
+        } catch (error) {
+          return handleError(event)(error);
+        }
+      })),
     );
 }
