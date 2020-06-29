@@ -5,10 +5,9 @@ import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { MsgEffect } from '../effects/messaging.effects.interface';
 import { EventTimerStoreToken } from '../eventStore/eventTimerStore';
-import { Transport } from '../transport/transport.interface';
+import { Transport, TransportLayerConnection } from '../transport/transport.interface';
 import { nackEvent } from '../ack/ack';
-
-const ACK_TRANSPORTS = [Transport.AMQP];
+import { AmqpStrategyOptions } from '../transport/strategies/amqp.strategy.interface';
 
 /**
  * Automatically tries to reject all unhandled events when `timeout` defined by the transport layer options occurs.
@@ -21,8 +20,14 @@ export const rejectUnhandled$: MsgEffect = (event$, ctx) => {
   const logger = useContext(LoggerToken)(ctx.ask);
   const timeout = ctx.client.config.timeout;
 
-  const isAckTransport = (type: Transport) =>
-    ACK_TRANSPORTS.includes(type);
+  const isAckModeSupportedAndEnabled = (conn: TransportLayerConnection): boolean => {
+    switch (conn.type) {
+      case Transport.AMQP:
+        return !!(conn.config.raw as AmqpStrategyOptions).expectAck;
+      default:
+        return false;
+    }
+  }
 
   const logRejection = pipe(
     logger({
@@ -40,7 +45,7 @@ export const rejectUnhandled$: MsgEffect = (event$, ctx) => {
 
   return event$.pipe(
     tap(event => {
-      if (isAckTransport(ctx.client.type)) {
+      if (isAckModeSupportedAndEnabled(ctx.client)) {
         const handler = handleEventRejection(event);
         eventTimerStore.register(timeout)(handler)(event)();
       }
