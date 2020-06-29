@@ -104,6 +104,26 @@ describe('#event', () => {
     })
   });
 
+  test('creates event schema with intersection and partial payload', () => {
+    const Foo = event('FOO')(t.intersection([
+      t.partial({
+        test_partial: t.string
+      }),
+      t.type({
+        test_required: t.string,
+      }),
+    ]));
+
+    const foo = Foo.create({
+      test_required: 'test'
+    });
+
+    expect(foo).toEqual({
+      type: 'FOO',
+      payload: { test_required: 'test' },
+    })
+  });
+
   test('successfuly decodes event schema with object payload and metadata', () => {
     const Foo = event('FOO')(t.type({
       bar: t.string,
