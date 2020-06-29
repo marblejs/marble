@@ -5,7 +5,6 @@ import { forkJoin, TimeoutError } from 'rxjs';
 import { map, tap, delay, mapTo } from 'rxjs/operators';
 import { TransportLayerConnection } from '../../transport/transport.interface';
 import { MsgEffect } from '../../effects/messaging.effects.interface';
-import { rejectUnhandled$ } from '../../middlewares/messaging.ack.middleware';
 import { MessagingClient } from '../../client/messaging.client.interface';
 import { reply } from '../../reply/reply';
 import * as Util from '../../util/messaging.test.util';
@@ -138,7 +137,7 @@ describe('messagingServer::AMQP', () => {
     )(done);
 
     // when
-    microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ middlewares: [rejectUnhandled$], effects: [ack$], output$ });
+    microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ effects: [ack$], output$ });
     client = await Util.createAmqpClient(optionsClient);
 
     await client.emit({ type: 'ACK', payload: 1 });
@@ -164,7 +163,7 @@ describe('messagingServer::AMQP', () => {
     )(done);
 
     // when
-    microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ middlewares: [rejectUnhandled$], effects: [ack$], output$ });
+    microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ effects: [ack$], output$ });
     client = await Util.createAmqpClient(optionsClient);
 
     await client.emit({ type: 'TEST' });

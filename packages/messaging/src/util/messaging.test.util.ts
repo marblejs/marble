@@ -1,30 +1,30 @@
 import { v4 as uuid } from 'uuid';
-import { bindTo, createContext, Event, register, LoggerToken, mockLogger } from '@marblejs/core';
+import { bindTo, Event, LoggerToken, mockLogger, contextFactory, Context } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { flow } from 'fp-ts/lib/function';
 import { merge } from 'rxjs';
 import { tap, catchError, take, toArray, filter, ignoreElements, map } from 'rxjs/operators';
 import { createMicroservice } from '../server/messaging.server';
-import { TransportMessage, Transport } from '../transport/transport.interface';
+import { TransportMessage, Transport, TransportLayerConnection } from '../transport/transport.interface';
 import { MsgOutputEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
 import { messagingListener, MessagingListenerConfig } from '../server/messaging.server.listener';
 import { eventBus, eventBusClient } from '../eventbus/messaging.eventBus.reader';
 import { messagingClient } from '../client/messaging.client';
 import { AmqpStrategyOptions } from '../transport/strategies/amqp.strategy.interface';
 import { RedisStrategyOptions } from '../transport/strategies/redis.strategy.interface';
+import { MessagingClient } from '../client/messaging.client.interface';
 
 // event bus
-export const runEventBus = (config: MessagingListenerConfig) =>
+export const runEventBus = (config: MessagingListenerConfig): Promise<TransportLayerConnection> =>
   pipe(
     createTestContext(),
-    eventBus({ listener: messagingListener(config) }),
+    async ctx => eventBus({ listener: messagingListener(config) })(await ctx),
   );
 
-export const runEventBusClient = () =>
+export const runEventBusClient = (): Promise<MessagingClient> =>
   pipe(
     createTestContext(),
-    eventBusClient,
+    async ctx => eventBusClient(await ctx),
   );
 
 // microservice
@@ -33,10 +33,10 @@ export const createTestMicroservice = (transport: any, options: any) => async (c
   return (await createMicroservice({ options, transport, listener }))();
 };
 
-export const createTestClient = (transport: any, options: any) =>
+export const createTestClient = (transport: any, options: any): Promise<MessagingClient>  =>
   pipe(
     createTestContext(),
-    messagingClient({ transport, options: { ...options, expectAck: false } }),
+    async ctx => messagingClient({ transport, options: { ...options, expectAck: false } })(await ctx),
   );
 
 export const createAmqpClient = (options: AmqpStrategyOptions) =>
@@ -71,10 +71,9 @@ export const createMessage = (data: any, correlationId?: string): TransportMessa
   correlationId: correlationId ?? uuid(),
 });
 
-export const createTestContext = () => {
-  const boundLogger = bindTo(LoggerToken)(mockLogger);
-  return flow(register(boundLogger))(createContext());
-};
+export const createTestContext = (): Promise<Context> => contextFactory(
+  bindTo(LoggerToken)(mockLogger),
+);
 
 export const assertOutputEvent = (...outEvent: Event[]) => (done: jest.DoneCallback): MsgOutputEffect => event$ => {
   const isAssertionEvent = (event: Event) =>

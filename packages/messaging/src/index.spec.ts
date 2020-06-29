@@ -9,5 +9,11 @@ describe('@marblejs/messaging', () => {
     expect(API.messagingClient).toBeDefined();
     expect(API.messagingListener).toBeDefined();
     expect(API.reply).toBeDefined();
+    expect(API.ackEvent).toBeDefined();
+    expect(API.nackEvent).toBeDefined();
+    expect(API.nackAndResendEvent).toBeDefined();
+    expect(API.EVENT_BUS_CHANNEL).toBeDefined();
+    expect(API.AmqpConnectionStatus).toBeDefined();
+    expect(API.RedisConnectionStatus).toBeDefined();
   });
 });
