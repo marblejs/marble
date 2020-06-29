@@ -24,9 +24,9 @@ export type TransportStrategy =
   | LocalStrategy
   ;
 
-export interface TransportLayer {
-  connect: (opts?: { isConsumer: boolean }) => Promise<TransportLayerConnection>;
-  type: Transport;
+export interface TransportLayer<T extends Transport = Transport> {
+  connect: (opts?: { isConsumer: boolean }) => Promise<TransportLayerConnection<T>>;
+  type: T;
   config: TransportLayerConfig;
 }
 
@@ -36,15 +36,15 @@ export interface TransportLayerConfig {
   timeout: number;
 }
 
-export interface TransportLayerConnection {
+export interface TransportLayerConnection<T extends Transport = Transport> {
   sendMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<TransportMessage<Buffer>>;
   emitMessage: (channel: string, message: TransportMessage<Buffer>) => Promise<boolean>;
   ackMessage: (message: TransportMessage | undefined) => void;
   nackMessage: (message: TransportMessage | undefined, resend?: boolean) => void;
   close: () => Promise<any>;
   getChannel(): string;
-  type: Transport;
-  config: { timeout: number };
+  type: T;
+  config: { timeout: number, channel: string; raw: any; };
   message$: Observable<TransportMessage<Buffer>>;
   status$: Observable<string>;
   error$: Observable<Error>;

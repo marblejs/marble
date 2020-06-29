@@ -12,20 +12,20 @@ type RedisIncomingMsg = {
   channel: string;
 };
 
-class RedisStrategyConnection implements TransportLayerConnection {
+class RedisStrategyConnection implements TransportLayerConnection<Transport.REDIS> {
   private statusSubject$ = new Subject<RedisConnectionStatus>();
   private producerSubject = new Subject<RedisIncomingMsg>();
   private consumerSubject = new Subject<RedisIncomingMsg>();
   private closeSubject$ = new Subject();
 
   constructor(
-    public type: Transport,
-    private opts: { channel: string; isConsumer: boolean; timeout: number },
+    isConsumer: boolean,
+    private opts: RedisStrategyOptions,
     private publisher: RedisClient,
     private subscriber: RedisClient,
     private rpcSubscriber: RedisClient,
   ) {
-    if (opts.isConsumer) {
+    if (isConsumer) {
       subscriber.on('message', (channel, content) => this.consumerSubject.next({ content, channel }));
     } else {
       rpcSubscriber.on('message', (channel, content) => this.producerSubject.next({ content, channel }));
@@ -34,8 +34,16 @@ class RedisStrategyConnection implements TransportLayerConnection {
     process.nextTick(() => this.statusSubject$.next(RedisConnectionStatus.CONNECT));
   }
 
+  get type() {
+    return Transport.REDIS as const;
+  }
+
   get config() {
-    return { timeout: this.opts.timeout };
+    return {
+      timeout: this.opts.timeout ?? DEFAULT_TIMEOUT,
+      channel: this.opts.channel,
+      raw: this.opts,
+    };
   }
 
   get status$() {
@@ -118,11 +126,11 @@ class RedisStrategyConnection implements TransportLayerConnection {
   getChannel = () => this.opts.channel;
 }
 
-class RedisStrategy implements TransportLayer {
+class RedisStrategy implements TransportLayer<Transport.REDIS> {
   constructor(private options: RedisStrategyOptions) {}
 
   get type() {
-    return Transport.REDIS;
+    return Transport.REDIS as const;
   }
 
   get config() {
@@ -139,21 +147,20 @@ class RedisStrategy implements TransportLayer {
   }
 
   async connect(data?: { isConsumer: boolean }) {
-    const { channel, timeout } = this.options;
+    const { channel } = this.options;
 
     const isConsumer = !!data?.isConsumer;
     const publisher = await RedisHelper.connectClient(this.clientOpts);
     const subscriber = await RedisHelper.connectClient(this.clientOpts);
     const rpcSubscriber = await RedisHelper.connectClient(this.clientOpts);
-    const opts = { isConsumer, channel, timeout: timeout ?? DEFAULT_TIMEOUT };
 
     if (isConsumer) {
       await RedisHelper.subscribeChannel(subscriber)(channel);
     }
 
     return new RedisStrategyConnection(
-      Transport.REDIS,
-      opts,
+      isConsumer,
+      this.options,
       publisher,
       subscriber,
       rpcSubscriber,
@@ -161,5 +168,5 @@ class RedisStrategy implements TransportLayer {
   }
 }
 
-export const createRedisStrategy = (options: RedisStrategyOptions): TransportLayer =>
+export const createRedisStrategy = (options: RedisStrategyOptions): TransportLayer<Transport.REDIS> =>
   new RedisStrategy(options);

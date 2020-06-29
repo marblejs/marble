@@ -249,4 +249,15 @@ describe('messagingServer::AMQP', () => {
 
     microservice = await Util.createAmqpMicroservice(options)({ effects: [test$], output$ });
   });
+
+  test('microservice connection exposes raw configuration object', async () => {
+    // given
+    const options = Util.createAmqpOptions();
+
+    // when
+    microservice = await Util.createAmqpMicroservice(options)();
+
+    // then
+    expect(microservice.config.raw).toEqual(options);
+  });
 });

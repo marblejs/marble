@@ -6,27 +6,34 @@ import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { TransportLayer, TransportMessage, TransportLayerConnection, Transport, DEFAULT_TIMEOUT } from '../transport.interface';
 import { AmqpStrategyOptions, AmqpConnectionStatus, AmqpCannotSetExpectAckForNonConsumerConnection } from './amqp.strategy.interface';
 
-class AmqpStrategyConnection implements TransportLayerConnection {
+class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP> {
   private msgSubject$ = new Subject<ConsumeMessage>();
   private statusSubject$ = new Subject<AmqpConnectionStatus>();
   private errorSubject$ = new Subject<Error>();
   private closeSubject$ = new Subject();
 
   constructor(
-    public type: Transport,
-    private isConsumer: boolean,
+    isConsumer: boolean,
+    private opts: AmqpStrategyOptions,
     private connectionManager: AmqpConnectionManager,
     private channelWrapper: ChannelWrapper,
-    private options: AmqpStrategyOptions,
   ) {
     process.nextTick(async () => {
-      if (this.isConsumer) await this.consumeMessages();
+      if (isConsumer) await this.consumeMessages();
       this.statusSubject$.next(AmqpConnectionStatus.CONNECTED);
     });
   }
 
+  get type() {
+    return Transport.AMQP as const;
+  }
+
   get config() {
-    return { timeout: this.options.timeout ?? DEFAULT_TIMEOUT };
+    return {
+      timeout: this.opts.timeout ?? DEFAULT_TIMEOUT,
+      channel: this.opts.queue,
+      raw: this.opts,
+    };
   }
 
   get close$() {
@@ -80,16 +87,16 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   private consumeMessages = async () =>
     this.channelWrapper.addSetup(async (channel: Channel) => {
       await channel.consume(
-        this.options.queue,
+        this.opts.queue,
         msg => msg && this.msgSubject$.next(msg),
-        { noAck: !this.options.expectAck },
+        { noAck: !this.opts.expectAck },
       );
     });
 
   sendMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
     const { data } = msg;
     const correlationId = createUuid();
-    const timeout = this.options.timeout ?? DEFAULT_TIMEOUT;
+    const timeout = this.opts.timeout ?? DEFAULT_TIMEOUT;
     const replyToSubject = new Subject<string>();
     const resSubject$ = new Subject<{ msg: ConsumeMessage; tag: string }>();
 
@@ -142,7 +149,7 @@ class AmqpStrategyConnection implements TransportLayerConnection {
     const { correlationId, data, replyTo } = msg;
 
     // don't try to emit the message to the same channel if "ack" mode is enabled
-    if (this.options.expectAck && queue === this.getChannel())
+    if (this.opts.expectAck && queue === this.getChannel())
       return false;
 
     await this.channelWrapper.sendToQueue(queue, data, {
@@ -154,20 +161,20 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   };
 
   ackMessage = (msg: TransportMessage | undefined) => {
-    if (this.options.expectAck && msg && !msg.raw.isAcked) {
+    if (this.opts.expectAck && msg && !msg.raw.isAcked) {
       this.channelWrapper.ack(msg.raw);
       msg.raw.isAcked = true;
     }
   }
 
   nackMessage = (msg: TransportMessage | undefined, resend = true) => {
-    if (this.options.expectAck && msg && !msg.raw.isNacked) {
+    if (this.opts.expectAck && msg && !msg.raw.isNacked) {
       this.channelWrapper.nack(msg.raw, false , resend);
       msg.raw.isNacked = true;
     }
   }
 
-  getChannel = () => this.options.queue;
+  getChannel = () => this.opts.queue;
 
   close = async () => {
     await this.channelWrapper.close();
@@ -176,11 +183,11 @@ class AmqpStrategyConnection implements TransportLayerConnection {
   }
 }
 
-class AmqpStrategy implements TransportLayer {
+class AmqpStrategy implements TransportLayer<Transport.AMQP> {
   constructor(private options: AmqpStrategyOptions) {}
 
   get type() {
-    return Transport.AMQP;
+    return Transport.AMQP as const;
   }
 
   get config() {
@@ -214,14 +221,13 @@ class AmqpStrategy implements TransportLayer {
     await (channelWrapper as any).waitForConnect(); // not available in @types/amqp-connection-manager
 
     return new AmqpStrategyConnection(
-      Transport.AMQP,
       isConsumer,
+      this.options,
       connectionManager,
       channelWrapper,
-      this.options,
     );
   }
 }
 
-export const createAmqpStrategy = (options: AmqpStrategyOptions): TransportLayer =>
+export const createAmqpStrategy = (options: AmqpStrategyOptions): TransportLayer<Transport.AMQP> =>
   new AmqpStrategy(options);

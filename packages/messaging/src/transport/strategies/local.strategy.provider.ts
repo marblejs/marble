@@ -1,12 +1,12 @@
 import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { TransportLayer, TransportLayerConnection } from '../transport.interface';
+import { TransportLayer, TransportLayerConnection, Transport } from '../transport.interface';
 import { createLocalStrategy } from './local.strategy';
 
-class LocalStrategyProvider implements TransportLayer {
+export class LocalStrategyProvider implements TransportLayer<Transport.LOCAL> {
   private static instance: LocalStrategyProvider;
-  private readonly strategy: TransportLayer;
-  private readonly strategyConnection: Promise<TransportLayerConnection>;
+  private readonly strategy: TransportLayer<Transport.LOCAL>;
+  private readonly strategyConnection: Promise<TransportLayerConnection<Transport.LOCAL>>;
 
   private constructor() {
     this.strategy = createLocalStrategy({});
