@@ -196,4 +196,15 @@ describe('messagingServer::Redis', () => {
 
     await client.emit({ type: 'TEST' });
   });
+
+  test('microservice connection exposes raw configuration object', async () => {
+    // given
+    const options = Util.createRedisOptions();
+
+    // when
+    microservice = await Util.createRedisMicroservice(options)();
+
+    // then
+    expect(microservice.config.raw).toEqual(options);
+  });
 });

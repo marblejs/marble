@@ -5,19 +5,24 @@ import { TransportLayer, TransportLayerConnection, TransportMessage, Transport, 
 import { throwUnsupportedError } from '../transport.error';
 import { LocalStrategyOptions, EVENT_BUS_CHANNEL } from './local.strategy.interface';
 
-class LocalStrategyConnection implements TransportLayerConnection {
+class LocalStrategyConnection implements TransportLayerConnection<Transport.LOCAL> {
   private errorSubject$ = new Subject<Error>();
   private rpcSubject$ = new Subject<TransportMessage<Buffer>>();
   private msgSubject$ = new Subject<TransportMessage<Buffer>>();
   private closeSubject$ = new Subject();
 
-  constructor(
-    public type: Transport,
-    private opts: TransportLayerConfig,
-  ) { }
+  constructor(private opts: TransportLayerConfig) { }
+
+  get type() {
+    return Transport.LOCAL as const;
+  }
 
   get config() {
-    return { timeout: this.opts.timeout };
+    return {
+      timeout: this.opts.timeout,
+      channel: this.opts.channel,
+      raw: this.opts,
+    };
   }
 
   get status$() {
@@ -79,11 +84,11 @@ class LocalStrategyConnection implements TransportLayerConnection {
   getChannel = () => this.opts.channel;
 }
 
-class LocalStrategy implements TransportLayer {
+class LocalStrategy implements TransportLayer<Transport.LOCAL> {
   constructor(private options: LocalStrategyOptions) {}
 
   get type() {
-    return Transport.LOCAL;
+    return Transport.LOCAL as Transport.LOCAL;
   }
 
   get config() {
@@ -95,12 +100,9 @@ class LocalStrategy implements TransportLayer {
   }
 
   async connect() {
-    return new LocalStrategyConnection(
-      Transport.LOCAL,
-      this.config,
-    );
+    return new LocalStrategyConnection(this.config);
   }
 }
 
-export const createLocalStrategy = (options: LocalStrategyOptions): TransportLayer =>
+export const createLocalStrategy = (options: LocalStrategyOptions): TransportLayer<Transport.LOCAL> =>
   new LocalStrategy(options);
