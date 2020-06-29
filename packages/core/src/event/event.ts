@@ -4,12 +4,28 @@ import { Event, EventWithPayload, EventWithoutPayload } from './event.interface'
 type Payload =
   | t.TypeC<any>
   | t.TupleC<any>
+  | t.TaggedUnionC<any, any>
+  | t.ReadonlyC<any>
   | t.ReadonlyArrayC<any>
+  | t.AnyC
   | t.ArrayC<any>
   | t.StringC
+  | t.BigIntC
   | t.BooleanC
+  | t.BrandC<any, any>
   | t.NumberC
+  | t.NullC
+  | t.UnionC<any>
   | t.UndefinedC
+  | t.PartialC<any>
+  | t.RefinementC<any>
+  | t.RecordC<any, any>
+  | t.IntersectionC<any>
+  | t.ExactC<any>
+  | t.ObjectC
+  | t.StringC
+  | t.LiteralC<any>
+  | t.KeyofC<any>
   ;
 
 export type EventSchema<T extends string> =
