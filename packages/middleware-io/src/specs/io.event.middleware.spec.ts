@@ -1,10 +1,10 @@
 import * as t from 'io-ts';
 import { of } from 'rxjs';
+import { event } from '@marblejs/core';
 import { eventValidator$ } from '../io.event.middleware';
-import { IOError } from '../io.error';
 
 describe('#eventValidator$', () => {
-  test('passes incoming event if input is successfuly validated', done => {
+  test('validates payload schema and passes incoming event if input is successfuly validated', async () => {
     // given
     const input = {
       type: 'TEST_EVENT',
@@ -13,29 +13,60 @@ describe('#eventValidator$', () => {
         age: 100,
       }
     };
+
     const schema = t.type({
       name: t.string,
       age: t.number,
     });
 
     // when
-    const stream$ = eventValidator$(schema)(of(input));
+    const result = await eventValidator$(schema)(of(input)).toPromise();
 
     // then
-    stream$.subscribe(
-      outgoingData => {
-        expect(outgoingData.type).toEqual(input.type);
-        expect(outgoingData.payload).toEqual(input.payload);
-        done();
-      },
-      (error: IOError) => {
-        fail(error.data);
-        done();
-      },
-    );
+    expect(result.type).toEqual(input.type);
+    expect(result.payload).toEqual(input.payload);
   });
 
-  test('throws WebSocket error if incoming data are not valid', done => {
+  test('validates event schema and passes incoming event if input is successfuly validated', async () => {
+    // given
+    const input = {
+      type: 'TEST_EVENT',
+      payload: {
+        name: 'test',
+        age: 100,
+      }
+    };
+
+    const schema = event('TEST_EVENT')(t.type({
+      name: t.string,
+      age: t.number,
+    }));
+
+    // when
+    const result = await eventValidator$(schema)(of(input)).toPromise();
+
+    // then
+    expect(result.type).toEqual(input.type);
+    expect(result.payload).toEqual(input.payload);
+  });
+
+  test('validates event schema with undefined payload and passes incoming event if input is successfuly validated', async () => {
+    // given
+    const input = {
+      type: 'TEST_EVENT',
+    };
+
+    const schema = event('TEST_EVENT')();
+
+    // when
+    const result = await eventValidator$(schema)(of(input)).toPromise();
+
+    // then
+    expect(result.type).toEqual(input.type);
+    expect(result.payload).toBeUndefined();
+  });
+
+  test('throws validation error if incoming data are not valid', async () => {
     // given
     const input = {
       type: 'TEST_EVENT',
@@ -44,30 +75,23 @@ describe('#eventValidator$', () => {
         age: '100',
       }
     };
+
     const schema = t.type({
       name: t.string,
       age: t.number,
     });
-    const expectedError = [{
-      path: 'age',
-      expected: 'number',
-      got: '"100"',
-    }];
 
     // when
-    const stream$ = eventValidator$(schema)(of(input));
+    const result = eventValidator$(schema)(of(input)).toPromise();
 
     // then
-    stream$.subscribe(
-      () => {
-        fail('Datas should\'t be returned');
-        done();
-      },
-      (error: IOError) => {
-        expect(error.message).toEqual('Validation error');
-        expect(error.data).toEqual(expectedError);
-        done();
-      },
-    );
+    await expect(result).rejects.toEqual(expect.objectContaining({
+      message: 'Validation error',
+      data: [{
+        path: 'age',
+        expected: 'number',
+        got: '"100"',
+      }],
+    }));
   });
 });

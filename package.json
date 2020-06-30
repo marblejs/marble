@@ -81,6 +81,7 @@
     "packages/*"
   ],
   "resolutions": {
-    "fp-ts": "^2.4.3"
+    "fp-ts": "^2.4.3",
+    "io-ts": "^2.2.4"
   }
 }
