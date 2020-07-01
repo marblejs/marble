@@ -1,10 +1,11 @@
 import { of } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
-import { matchEvent, use, act } from '@marblejs/core';
-import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
-import { eventValidator$, t } from '@marblejs/middleware-io';
-import { createMicroservice, messagingListener, Transport, MsgEffect, reply } from '@marblejs/messaging';
 import { IO } from 'fp-ts/lib/IO';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { matchEvent, act } from '@marblejs/core';
+import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
+import { validateEvent, t } from '@marblejs/middleware-io';
+import { createMicroservice, messagingListener, Transport, MsgEffect, reply } from '@marblejs/messaging';
 
 const fib = (n: number): number =>
   (n === 0 || n === 1) ? n : fib(n - 1) + fib(n - 2);
@@ -12,8 +13,8 @@ const fib = (n: number): number =>
 const fibonacci$: MsgEffect = event$ =>
   event$.pipe(
     matchEvent('FIB'),
-    act(event => of(event).pipe(
-      use(eventValidator$(t.number)),
+    act(event => pipe(
+      validateEvent(t.number)(event),
       tap(event => { if (event.payload >= 45) throw new Error('Too high number!') }),
       map(event => fib(event.payload)),
       map(payload => reply(event)({ type: 'FIB_RESULT', payload })),

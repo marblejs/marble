@@ -1,11 +1,11 @@
-import { r, HttpError, HttpStatus, combineRoutes, use } from '@marblejs/core';
-import { requestValidator$, t } from '@marblejs/middleware-io';
+import { r, HttpError, HttpStatus, combineRoutes } from '@marblejs/core';
+import { validateRequest, t } from '@marblejs/middleware-io';
 import { throwError } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { user$ } from './user.effects';
 import { static$ } from './static.effects';
 
-const rootValiadtor$ = requestValidator$({
+const validate = validateRequest({
   params: t.type({
     version: t.union([
       t.literal('v1'),
@@ -18,7 +18,7 @@ const root$ = r.pipe(
   r.matchPath('/'),
   r.matchType('GET'),
   r.useEffect(req$ => req$.pipe(
-    use(rootValiadtor$),
+    validate,
     map(req => req.params.version),
     map(version => `API version: ${version}`),
     map(message => ({ body: message })),

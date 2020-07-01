@@ -1,16 +1,16 @@
-import { combineRoutes, HttpError, HttpStatus, use, r } from '@marblejs/core';
-import { requestValidator$, t } from '@marblejs/middleware-io';
+import { combineRoutes, HttpError, HttpStatus, r } from '@marblejs/core';
+import { validateRequest, t } from '@marblejs/middleware-io';
 import { throwError, from, of } from 'rxjs';
 import { map, switchMap, catchError, mergeMap, bufferCount } from 'rxjs/operators';
 import { Dao } from '../fakes/dao.fake';
 import { simulateRandomFailure, simulateRandomDelay } from '../fakes/random';
 import { authorize$ } from '../middlewares/auth.middleware';
 
-const getUserValidator$ = requestValidator$({
+const validateGetUser = validateRequest({
   params: t.type({ id: t.string }),
 });
 
-const postUserValidator$ = requestValidator$({
+const validatePostUser = validateRequest({
   body: t.type({
     user: t.type({ id: t.string })
   }),
@@ -33,7 +33,7 @@ const getUser$ = r.pipe(
   r.useEffect(req$ => {
 
     return req$.pipe(
-      use(getUserValidator$),
+      validateGetUser,
       map(req => req.params.id),
       mergeMap(id => Dao
         .getUserById(id)
@@ -57,7 +57,7 @@ const getUserBuffered$ = r.pipe(
       bufferCount(2),
       mergeMap(out => from(out).pipe(
         mergeMap(request => of(request).pipe(
-          use(getUserValidator$),
+          validateGetUser,
           map(req => req.params.id),
           switchMap(Dao.getUserById),
           map(user => ({ body: user, request })),
@@ -75,7 +75,7 @@ const postUser$ = r.pipe(
   r.useEffect(req$ => {
 
     return req$.pipe(
-      use(postUserValidator$),
+      validatePostUser,
       map(req => req.body),
       mergeMap(Dao.postUser),
       map(body => ({ body })),

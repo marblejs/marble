@@ -29,7 +29,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
     // given
     const user = { id: 'id', age: '100', };
     const event = { type: 'POST_USER', payload: user };
-    const expectedError = {
+    const expectedEvent = {
       type: 'POST_USER',
       error: {
         name: 'EventError',
@@ -47,7 +47,7 @@ describe('@marblejs/middleware-io - WebSocket integration', () => {
 
     // then
     webSocketClient.once('message', message => {
-      expect(JSON.parse(message)).toEqual(expectedError);
+      expect(JSON.parse(message)).toEqual(expectedEvent);
       webSocketClient.close();
       webSocketServer.close();
       httpServer.close();

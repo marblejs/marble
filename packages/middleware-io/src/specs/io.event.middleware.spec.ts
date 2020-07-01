@@ -1,9 +1,9 @@
 import * as t from 'io-ts';
 import { of } from 'rxjs';
 import { event } from '@marblejs/core';
-import { eventValidator$ } from '../io.event.middleware';
+import { validateEvent } from '../io.event.middleware';
 
-describe('#eventValidator$', () => {
+describe('#validateEvent', () => {
   test('validates payload schema and passes incoming event if input is successfuly validated', async () => {
     // given
     const input = {
@@ -20,7 +20,7 @@ describe('#eventValidator$', () => {
     });
 
     // when
-    const result = await eventValidator$(schema)(of(input)).toPromise();
+    const result = await validateEvent(schema)(of(input)).toPromise();
 
     // then
     expect(result.type).toEqual(input.type);
@@ -43,7 +43,7 @@ describe('#eventValidator$', () => {
     }));
 
     // when
-    const result = await eventValidator$(schema)(of(input)).toPromise();
+    const result = await validateEvent(schema)(input).toPromise();
 
     // then
     expect(result.type).toEqual(input.type);
@@ -59,14 +59,14 @@ describe('#eventValidator$', () => {
     const schema = event('TEST_EVENT')();
 
     // when
-    const result = await eventValidator$(schema)(of(input)).toPromise();
+    const result = await validateEvent(schema)(of(input)).toPromise();
 
     // then
     expect(result.type).toEqual(input.type);
     expect(result.payload).toBeUndefined();
   });
 
-  test('throws validation error if incoming data are not valid', async () => {
+  test('throws an error if incoming event is not valid', async () => {
     // given
     const input = {
       type: 'TEST_EVENT',
@@ -82,10 +82,12 @@ describe('#eventValidator$', () => {
     });
 
     // when
-    const result = eventValidator$(schema)(of(input)).toPromise();
+    const result = validateEvent(schema)(of(input)).toPromise();
 
     // then
     await expect(result).rejects.toEqual(expect.objectContaining({
+      event: expect.objectContaining(input),
+      name: 'EventError',
       message: 'Validation error',
       data: [{
         path: 'age',

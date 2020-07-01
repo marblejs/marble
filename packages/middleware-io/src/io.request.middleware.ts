@@ -21,7 +21,7 @@ enum Context {
   HEADERS = 'headers',
 }
 
-export const requestValidator$ = <
+export const validateRequest = <
   TBody extends Schema = t.UnknownC,
   TParams extends Schema = t.UnknownC,
   TQuery extends Schema = t.UnknownC,
@@ -74,3 +74,9 @@ export const requestValidator$ = <
     ),
   );
 };
+
+/**
+ * @deprecated [#1] since version 3.3.0,
+ * [#2] use `validateRequest` instead,
+ */
+export const requestValidator$ = validateRequest;
