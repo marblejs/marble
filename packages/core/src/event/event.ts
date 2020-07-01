@@ -28,6 +28,11 @@ type Payload =
   | t.KeyofC<any>
   ;
 
+export type EventCodec =
+  | EventSchemaWithPayload<any, any>
+  | EventSchema<any>
+  ;
+
 export type EventSchema<T extends string> =
   t.TypeC<{ type: t.LiteralC<T>; payload: t.UndefinedC }>
 
@@ -44,6 +49,11 @@ type EventBuilderOutput<T extends string, P extends Payload | undefined> =
   undefined extends P
     ? EventSchema<T> & { create: EventCreator<T> }
     : EventSchemaWithPayload<T, NonNullable<P>> & { create: EventCreatorWithPayload<T, NonNullable<P>> }
+
+export const EVENT_CODEC_NAME = 'EventSchema';
+
+export const isEventCodec = (codec: any): codec is EventCodec =>
+  codec.name === EVENT_CODEC_NAME;
 
 /**
  * Creates an Event codec for decoding and creating I/O events.
@@ -64,7 +74,7 @@ export const event = <T extends string>(type: T) => <P extends Payload | undefin
   const schema = t.type({
     type: t.literal(type),
     payload: payload ?? t.undefined,
-  }, 'EventSchema');
+  }, EVENT_CODEC_NAME);
 
   const create = (payload?: any): Event =>
     schema.encode({ type, payload });

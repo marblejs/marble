@@ -2,10 +2,9 @@ import * as t from 'io-ts';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isString } from '../../+internal/utils';
+import { EventCodec, isEventCodec } from '../../event/event';
 import { Event, EventMetadata } from '../../event/event.interface';
 import { EventCreator } from '../../event/event.factory';
-
-type EventSchema = t.Type<any, any, any>;
 
 type EventLike =
   | { type: string }
@@ -14,15 +13,15 @@ type EventLike =
 
 type MachingEvent =
   | EventLike
-  | EventSchema
+  | EventCodec
   | EventCreator<string, any>
   ;
 
 // 3 arguments
 export function matchEvent<
-  E1 extends EventSchema,
-  E2 extends EventSchema,
-  E3 extends EventSchema,
+  E1 extends EventCodec,
+  E2 extends EventCodec,
+  E3 extends EventCodec,
 >(e1: E1, e2: E2, e3: E3): (o: Observable<Event>) => Observable<
   | t.TypeOf<E1> & { metadata: EventMetadata }
   | t.TypeOf<E2> & { metadata: EventMetadata }
@@ -49,8 +48,8 @@ export function matchEvent<
 
 // 2 arguments
 export function matchEvent<
-  E1 extends EventSchema,
-  E2 extends EventSchema,
+  E1 extends EventCodec,
+  E2 extends EventCodec,
 >(e1: E1, e2: E2): (o: Observable<Event>) => Observable<
   | t.TypeOf<E1> & { metadata: EventMetadata }
   | t.TypeOf<E2> & { metadata: EventMetadata }
@@ -73,7 +72,7 @@ export function matchEvent<
 
 // 1 argument
 export function matchEvent<
-  E1 extends EventSchema,
+  E1 extends EventCodec,
 >(e1: E1): (o: Observable<Event>) => Observable<
   | t.TypeOf<E1> & { metadata: EventMetadata }
 >;
@@ -92,12 +91,9 @@ export function matchEvent<
 
 // any arguments
 export function matchEvent(...events: MachingEvent[]) {
-  const isEventSchema = (event: any): event is EventSchema =>
-    event.name === 'EventSchema';
-
   const match = (incomingEvent: Event) => (matchingEvent: MachingEvent): boolean =>
-    isEventSchema(matchingEvent)
-      ? matchingEvent.is(incomingEvent)
+    isEventCodec(matchingEvent)
+      ? matchingEvent.props.type.value === incomingEvent.type
       : isString(matchingEvent)
         ? matchingEvent === incomingEvent.type
         : matchingEvent.type ===  incomingEvent.type;
