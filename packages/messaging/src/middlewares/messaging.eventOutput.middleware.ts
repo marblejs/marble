@@ -1,14 +1,8 @@
 import { Event, useContext } from '@marblejs/core';
-import { createUuid, isNonNullable } from '@marblejs/core/dist/+internal/utils';
+import { createUuid, isNonNullable, encodeError } from '@marblejs/core/dist/+internal/utils';
 import { map } from 'rxjs/operators';
 import { MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { TransportLayerToken } from '../server/messaging.server.tokens';
-
-export const encodeError = (error: any) =>
-  ['name', ...Object.getOwnPropertyNames(error)].reduce((acc, key) => {
-    acc[key] = error[key];
-    return acc;
-  }, Object.create(null))
 
 export const outputRouter$: MsgOutputEffect = (event$, ctx) => {
   const transportLayer = useContext(TransportLayerToken)(ctx.ask);

@@ -2,6 +2,7 @@ import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Observable, of, defer, isObservable } from 'rxjs';
 import { mergeMap, catchError } from 'rxjs/operators';
+import { encodeError } from '../../+internal/utils/error.util';
 import { Event } from '../../event/event.interface';
 
 export function act<
@@ -31,7 +32,7 @@ export function act<
 
   const getDefaultErrorEvent = (error: any) => (event: Event) => of({
     type: event.type,
-    error: { name: error.name, message: error.message, data: error.data },
+    error: encodeError(error),
     metadata: event.metadata,
   } as ErrorEvent);
 
