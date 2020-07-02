@@ -1,8 +1,9 @@
-import { Event, matchEvent, use, combineEffects, act, EventError } from '@marblejs/core';
+import { Event, matchEvent, combineEffects, act, EventError } from '@marblejs/core';
 import { wait, NamedError } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { throwError, of } from 'rxjs';
+import { throwError } from 'rxjs';
 import { delay, map, tap, ignoreElements } from 'rxjs/operators';
+import { flow } from 'fp-ts/lib/function';
 import { MsgEffect } from '../effects/messaging.effects.interface';
 import { runEventBus, runEventBusClient } from '../util/messaging.test.util';
 import { reply } from '../reply/reply';
@@ -12,9 +13,11 @@ describe('#eventBus', () => {
     const rpc$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('RPC_TEST'),
-        use(eventValidator$(t.number)),
-        delay(10),
-        map(event => reply(event)({ type: 'RPC_TEST_RESULT', payload: event.payload + 1 })),
+        act(flow(
+          eventValidator$(t.number),
+          delay(10),
+          map(event => reply(event)({ type: 'RPC_TEST_RESULT', payload: event.payload + 1 })),
+        ))
       );
 
     const eventBus = await runEventBus({ effects: [rpc$] });
@@ -33,17 +36,21 @@ describe('#eventBus', () => {
     const rpc1$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('RPC_1_TEST'),
-        use(eventValidator$(t.number)),
-        delay(10),
-        map(event => reply(event)({ type: 'RPC_1_TEST_RESULT', payload: event.payload + 1 })),
+        act(flow(
+          eventValidator$(t.number),
+          delay(10),
+          map(event => reply(event)({ type: 'RPC_1_TEST_RESULT', payload: event.payload + 1 })),
+        ))
       );
 
     const rpc2$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('RPC_2_TEST'),
-        use(eventValidator$(t.number)),
-        delay(10),
-        map(event => reply(event)({ type: 'RPC_2_TEST_RESULT', payload: event.payload + 1 })),
+        act(flow(
+          eventValidator$(t.number),
+          delay(10),
+          map(event => reply(event)({ type: 'RPC_2_TEST_RESULT', payload: event.payload + 1 })),
+        ))
       );
 
     const eventBus = await runEventBus({ effects: [combineEffects(rpc1$, rpc2$)] });
@@ -76,8 +83,8 @@ describe('#eventBus', () => {
     const rpc1$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('RPC_TEST'),
-        act(event => of(event).pipe(
-          use(eventValidator$(t.number)),
+        act(flow(
+          eventValidator$(t.number),
           delay(10),
         )),
       );
