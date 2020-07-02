@@ -1,5 +1,5 @@
 import { Event, EventError, ValidatedEvent, isEventCodec } from '@marblejs/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, throwError, isObservable } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { mergeMap, catchError, map } from 'rxjs/operators';
 import { Schema, ValidatorOptions, validator$ } from './io.middleware';
@@ -36,6 +36,8 @@ export const eventValidator$ = <U extends Schema>(schema: U, options?: Validator
       )),
     ) as Observable<ValidationResult<U>>;
 
-  return (event$: Observable<Event>) =>
-    event$.pipe(mergeMap(validate));
+  return (input: Observable<Event> | Event) =>
+    isObservable(input)
+      ? input.pipe(mergeMap(validate))
+      : validate(input);
 };

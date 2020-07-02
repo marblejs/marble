@@ -1,8 +1,9 @@
-import { matchEvent, use } from '@marblejs/core';
+import { matchEvent, act } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { forkJoin, TimeoutError } from 'rxjs';
 import { map, tap, delay, mapTo } from 'rxjs/operators';
+import { flow } from 'fp-ts/lib/function';
 import { TransportLayerConnection } from '../../transport/transport.interface';
 import { MsgEffect } from '../../effects/messaging.effects.interface';
 import { MessagingClient } from '../../client/messaging.client.interface';
@@ -40,9 +41,11 @@ describe('messagingServer::Redis', () => {
     const increment$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('INCREMENT'),
-        use(eventValidator$(t.number)),
-        delay(50),
-        map(event => ({ ...event, type: 'INCREMENT_RESULT', payload: event.payload + 1 })),
+        act(flow(
+          eventValidator$(t.number),
+          delay(50),
+          map(event => ({ ...event, type: 'INCREMENT_RESULT', payload: event.payload + 1 })),
+        )),
       );
 
     // when
@@ -101,9 +104,11 @@ describe('messagingServer::Redis', () => {
     const increment$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('INCREMENT'),
-        use(eventValidator$(t.number)),
-        delay(50),
-        map(event => ({ ...event, type: 'INCREMENT_RESULT', payload: event.payload + 1 })),
+        act(flow(
+          eventValidator$(t.number),
+          delay(50),
+          map(event => ({ ...event, type: 'INCREMENT_RESULT', payload: event.payload + 1 })),
+        )),
       );
 
     // then

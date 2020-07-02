@@ -94,4 +94,27 @@ describe('#eventValidator$', () => {
       }],
     }));
   });
+
+  test('allows to pass single event outside Observable stream', async () => {
+    // given
+    const input = {
+      type: 'TEST_EVENT',
+      payload: {
+        name: 'test',
+        age: 100,
+      }
+    };
+
+    const schema = t.type({
+      name: t.string,
+      age: t.number,
+    });
+
+    // when
+    const result = await eventValidator$(schema)(input).toPromise();
+
+    // then
+    expect(result.type).toEqual(input.type);
+    expect(result.payload).toEqual(input.payload);
+  });
 });
