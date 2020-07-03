@@ -18,7 +18,7 @@ export function act<
   ErrorEvent extends Event,
 >(
   callFn: (event: InputEvent) => Observable<CallEvent>,
-  errorFn: (error: any, event: InputEvent) => ErrorEvent | Observable<ErrorEvent>,
+  errorFn: (error: any, event: Event) => ErrorEvent | Observable<ErrorEvent>,
 ): (source: Observable<InputEvent>) => Observable<CallEvent>;
 
 export function act<
@@ -27,7 +27,7 @@ export function act<
   ErrorEvent extends Event,
 >(
   callFn: (event: InputEvent) => Observable<CallEvent>,
-  errorFn?: (error: any, event: InputEvent) => ErrorEvent | Observable<ErrorEvent>,
+  errorFn?: (error: any, event: Event) => ErrorEvent | Observable<ErrorEvent>,
 ) {
 
   const DEFAULT_ERROR_SUFFIX = '_UNHANDLED_ERROR';
