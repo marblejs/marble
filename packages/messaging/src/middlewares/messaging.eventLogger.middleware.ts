@@ -1,5 +1,6 @@
 import { tap } from 'rxjs/operators';
 import { useContext, LoggerToken, LoggerLevel } from '@marblejs/core';
+import { isNamedError } from '@marblejs/core/dist/+internal/utils';
 import { MsgMiddlewareEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
 import { TransportLayerToken } from '../server/messaging.server.tokens';
 
@@ -32,7 +33,7 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
       const { error, metadata, type } = event;
       const tag = transportLayer.config.channel;
       const message = error
-        ? `"${error.name}", "${error.message}" for event ${type}`
+        ? `${isNamedError(error) ? `"${error.name}", "${error.message}"` : 'error'} for event ${type}`
         : metadata?.replyTo
           ? `${event.type}, id: ${metadata?.correlationId || '-'} and sent to "${metadata.replyTo || '-'}"`
           : metadata?.correlationId

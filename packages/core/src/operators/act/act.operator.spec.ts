@@ -79,7 +79,7 @@ describe('#act operator', () => {
     const event2: Event = { type: 'TEST_EVENT_2', payload: 2, metadata: { replyTo: 'channel_2' } };
     const event3: Event = { type: 'TEST_EVENT_3', payload: 3, metadata: { replyTo: 'channel_3' } };
     const event4: Event = { type: 'TEST_EVENT_4', payload: 4, metadata: { replyTo: 'channel_4' } };
-    const event_error: Event = { type: 'TEST_EVENT_2', error, metadata: { replyTo: 'channel_2' } };
+    const event_error: Event = { type: 'TEST_EVENT_2_UNHANDLED_ERROR', error, metadata: { replyTo: 'channel_2' } };
 
     // when
     const effect$ = (event$: Observable<Event>) =>
@@ -219,20 +219,20 @@ describe('#act operator', () => {
     const event2: Event = { type: 'TEST_EVENT_2', error: 'some_error' };
     const event3: Event = { type: 'TEST_EVENT_3', payload: 3 };
     const event4: Event = { type: 'TEST_EVENT_4', payload: 4 };
-    const eventP: Event = { type: 'TEST_EVENT_PROCESSED', payload: 0 };
 
-    const eventE: Event = { type: 'TEST_EVENT_2', error: 'some_error' };
+    const event_ok: Event = { type: 'TEST_EVENT_PROCESSED', payload: 0 };
+    const event_err: Event = { type: 'TEST_EVENT_2_UNHANDLED_ERROR', error: 'some_error' };
 
     // when
     const effect$ = (event$: Observable<Event>) =>
       event$.pipe(
-        act(_ => of(eventP)),
+        act(_ => of(event_ok)),
       );
 
     // then
     Marbles.assertEffect(effect$, [
-      ['-a-b-c-d---', { a: event1, b: event2, c: event3, d: event4 }],
-      ['-a-b-c-d---', { a: eventP, b: eventE, c: eventP, d: eventP }],
+      ['-a-b-c-d---', { a: event1,   b: event2,    c: event3,   d: event4 }],
+      ['-a-b-c-d---', { a: event_ok, b: event_err, c: event_ok, d: event_ok }],
     ]);
   });
 
@@ -279,7 +279,7 @@ describe('#act operator', () => {
         act(e => e.payload === 2 ? throwError('test_error') : of(e as Event<number>)),
         act(_ => of(event_ok), (error, event) => {
           expect(error).toEqual('test_error');
-          expect(event).toEqual({ type: 'TEST_EVENT_2', error: 'test_error' });
+          expect(event).toEqual({ type: 'TEST_EVENT_2_UNHANDLED_ERROR', error: 'test_error' });
           return event_err;
         }),
       );
