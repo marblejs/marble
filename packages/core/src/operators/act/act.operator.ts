@@ -1,7 +1,8 @@
 import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Observable, of, defer, isObservable } from 'rxjs';
-import { mergeMap, catchError } from 'rxjs/operators';
+import { mergeMap, catchError, map } from 'rxjs/operators';
+import { encodeError } from '../../+internal/utils';
 import { Event } from '../../event/event.interface';
 
 export function act<
@@ -18,7 +19,7 @@ export function act<
 >(
   callFn: (event: InputEvent) => Observable<CallEvent>,
   errorFn: (error: any, event: InputEvent) => ErrorEvent | Observable<ErrorEvent>,
-): (source: Observable<InputEvent>) => Observable<CallEvent | ErrorEvent>;
+): (source: Observable<InputEvent>) => Observable<CallEvent>;
 
 export function act<
   InputEvent extends Event,
@@ -31,24 +32,27 @@ export function act<
 
   const getDefaultErrorEvent = (error: any) => (event: Event) => of({
     type: event.type,
-    error: { name: error.name, message: error.message, data: error.data },
+    error: encodeError(error) ?? true,
     metadata: event.metadata,
   } as ErrorEvent);
 
-  const handleError = (event: InputEvent) => (error: unknown) => pipe(
+  const handleError = (event: InputEvent) => (error: unknown): Observable<any> => pipe(
     O.fromNullable(errorFn),
     O.map(fn => fn(error, event)),
     O.map(res => !isObservable(res) ? of(res) : res),
+    O.map(res => res.pipe(map(r => ({ ...r, error: r.error ?? true })))),
     O.getOrElse(() => getDefaultErrorEvent(error)(event)),
   );
 
-  return (source: Observable<InputEvent>): Observable<CallEvent | ErrorEvent> =>
+  return (source: Observable<InputEvent>): Observable<CallEvent> =>
     source.pipe(
       mergeMap(event => defer(() => {
         try {
-          return pipe(
-            callFn(event),
-            catchError(handleError(event)));
+          return event.error
+            ? handleError(event)(event.error)
+            : pipe(
+              callFn(event),
+              catchError(handleError(event)));
         } catch (error) {
           return handleError(event)(error);
         }
