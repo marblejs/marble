@@ -30,8 +30,12 @@ export function act<
   errorFn?: (error: any, event: InputEvent) => ErrorEvent | Observable<ErrorEvent>,
 ) {
 
+  const DEFAULT_ERROR_SUFFIX = '_UNHANDLED_ERROR';
+
   const getDefaultErrorEvent = (error: any) => (event: Event) => of({
-    type: event.type,
+    type: !event.type.includes(DEFAULT_ERROR_SUFFIX)
+      ? event.type + DEFAULT_ERROR_SUFFIX
+      : event.type,
     error: encodeError(error) ?? true,
     metadata: event.metadata,
   } as ErrorEvent);
