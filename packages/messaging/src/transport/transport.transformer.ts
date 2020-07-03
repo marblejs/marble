@@ -8,12 +8,19 @@ import { TransportMessageTransformer, TransportMessage } from './transport.inter
 export type DecodeMessageConfig = { msgTransformer: TransportMessageTransformer; errorSubject: Subject<Error> };
 export type DecodeMessage = (config: DecodeMessageConfig) => (msg: TransportMessage<Buffer>) => Event;
 
-const UNKNOWN_EVENT = { type: 'UNKNOWN' };
-
 export const jsonTransformer: TransportMessageTransformer = {
   decode: event => JSON.parse(event.toString()),
   encode: event => flow(JSON.stringify, Buffer.from)(event),
 };
+
+const applyMetadata = (raw: TransportMessage<Buffer>) => (event: Event) => ({
+  ...event,
+  metadata: {
+    replyTo: raw.replyTo,
+    correlationId: raw.correlationId,
+    raw,
+  },
+});
 
 export const decodeMessage: DecodeMessage = ({ msgTransformer, errorSubject }) => msg =>
   pipe(
@@ -21,15 +28,8 @@ export const decodeMessage: DecodeMessage = ({ msgTransformer, errorSubject }) =
       () => msgTransformer.decode(msg.data),
       error => {
         errorSubject.next(error as Error);
-        return UNKNOWN_EVENT;
+        return applyMetadata(msg)({ type: 'UNKNOWN' });
       }),
-    E.map(event => ({
-      ...event,
-      metadata: {
-        replyTo: msg.replyTo,
-        correlationId: msg.correlationId,
-        raw: msg,
-      },
-    })),
+    E.map(applyMetadata(msg)),
     E.fold(identity, identity),
   );

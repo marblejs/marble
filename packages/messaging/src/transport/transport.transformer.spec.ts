@@ -1,5 +1,6 @@
 import { ReplaySubject } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { Event } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { TransportMessage } from './transport.interface';
 import { jsonTransformer, decodeMessage } from './transport.transformer';
@@ -54,13 +55,23 @@ describe('#decodeMessage', () => {
       // given
       const message: TransportMessage<Buffer> = {
         data: Buffer.from('{ type }'),
+        correlationId: createUuid(),
+        replyTo: createUuid(),
+        raw: {},
       };
 
       // when
       const decodedEvent = decodeMessage({ errorSubject, msgTransformer })(message);
 
       // then
-      expect(decodedEvent).toEqual({ type: 'UNKNOWN' });
+      expect(decodedEvent).toEqual({
+        type: 'UNKNOWN',
+        metadata: expect.objectContaining({
+          correlationId: message.correlationId,
+          replyTo: message.replyTo,
+          raw: expect.anything(),
+        })
+      } as Event);
 
       errorSubject
         .pipe(take(1))
