@@ -1,7 +1,6 @@
-import { useContext, LoggerToken, LoggerTag } from '@marblejs/core';
+import { useContext, LoggerToken, LoggerTag, Event } from '@marblejs/core';
 import { tap } from 'rxjs/operators';
 import * as T from 'fp-ts/lib/Task';
-import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { MsgEffect } from '../effects/messaging.effects.interface';
 import { EventTimerStoreToken } from '../eventStore/eventTimerStore';
@@ -29,19 +28,21 @@ export const rejectUnhandled$: MsgEffect = (event$, ctx) => {
     }
   }
 
-  const logRejection = pipe(
-    logger({
-      tag: LoggerTag.MESSAGING,
-      type: 'rejectUnhandled$',
-      message: 'Rejecting not acknowledged event due to timeout. Check if incoming event type has a corresponding event handler defined'
-    }),
-    T.fromIO,
-  );
+  const logRejection = (event: Event) =>
+    pipe(
+      logger({
+        tag: LoggerTag.MESSAGING,
+        type: 'rejectUnhandled$',
+        message: `Rejecting not acknowledged event "${event.type}" due to timeout. Check if incoming event type has a corresponding event handler defined`
+      }),
+      T.fromIO,
+    );
 
-  const handleEventRejection = flow(
-    nackEvent(ctx),
-    T.chain(() => logRejection),
-  );
+  const handleEventRejection = (event: Event) =>
+    pipe(
+      nackEvent(ctx)(event),
+      T.chain(() => logRejection(event)),
+    );
 
   return event$.pipe(
     tap(event => {
