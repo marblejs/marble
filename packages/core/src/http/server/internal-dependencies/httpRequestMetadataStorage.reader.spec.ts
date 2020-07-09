@@ -1,10 +1,10 @@
 import { createContext } from '../../../context/context.factory';
 import { createUuid } from '../../../+internal/utils';
 import { HttpRequestMetadata } from '../../http.interface';
-import { httpRequestMetadataStorage } from '../http.server.metadata.storage';
+import { HttpRequestMetadataStorage } from './httpRequestMetadataStorage.reader';
 
-describe('#httpRequestMetadataStorage', () => {
-  const storage = httpRequestMetadataStorage(createContext());
+describe('#HttpRequestMetadataStorage', () => {
+  const storage = HttpRequestMetadataStorage(createContext());
 
   test('sets => gets => removes value from storage', () => {
     const id = createUuid();

@@ -13,6 +13,9 @@ export * from './http/server/http.server';
 export * from './http/server/http.server.listener';
 export * from './http/http.interface';
 
+// http - server - internal dependencies
+export * from './http/server/internal-dependencies/httpRequestMetadataStorage.reader';
+
 // core - error
 export { coreErrorFactory, CoreErrorOptions } from './error/error.factory';
 export { CoreError, EventError, isCoreError, isEventError } from './error/error.model';
