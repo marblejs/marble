@@ -62,7 +62,7 @@
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
-    "@types/jest": "^25.2.2",
+    "@types/jest": "^26.0.4",
     "@types/node": "^12.7.12",
     "@types/rimraf": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^3.1.0",
@@ -70,11 +70,11 @@
     "eslint": "^7.0.0",
     "eslint-plugin-import": "^2.20.2",
     "husky": "^4.2.5",
-    "jest": "^26.0.1",
-    "lerna": "^3.21.0",
+    "jest": "^26.1.0",
+    "lerna": "^3.22.1",
     "mock-req": "^0.2.0",
     "rimraf": "^3.0.1",
-    "ts-jest": "^26.1.0",
+    "ts-jest": "^26.1.1",
     "typescript": "~3.9.5"
   },
   "workspaces": [
