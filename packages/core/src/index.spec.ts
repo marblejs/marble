@@ -28,5 +28,9 @@ describe('@marblejs/core public API', () => {
     expect(API.act).toBeDefined();
     expect(API.switchToProtocol).toBeDefined();
     expect(API.matchEvent).toBeDefined();
+
+    // internal dependencies
+    expect(API.HttpServerEventStreamToken).toBeDefined();
+    expect(API.HttpRequestMetadataStorageToken).toBeDefined();
   });
 });
