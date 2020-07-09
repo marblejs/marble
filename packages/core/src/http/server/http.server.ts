@@ -13,8 +13,8 @@ import { ServerIO } from '../../listener/listener.interface';
 import { listening$, close$, error$ } from '../effects/http.effects';
 import { LoggerTag } from '../../logger';
 import { subscribeServerEvents } from './http.server.event.subscriber';
-import { HttpServerClientToken, HttpServerEventStreamToken, HttpRequestMetadataStorageToken, HttpRequestBusToken } from './http.server.tokens';
-import { httpRequestMetadataStorage } from './http.server.metadata.storage';
+import { HttpServerClientToken, HttpServerEventStreamToken, HttpRequestBusToken } from './http.server.tokens';
+import { HttpRequestMetadataStorage, HttpRequestMetadataStorageToken } from './internal-dependencies/httpRequestMetadataStorage.reader';
 import { CreateServerConfig } from './http.server.interface';
 import { isCloseEvent } from './http.server.event';
 
@@ -26,7 +26,7 @@ export const createServer = async (config: CreateServerConfig) => {
 
   const boundHttpServerEvent = bindTo(HttpServerEventStreamToken)(() => serverEvent$);
   const boundHttpServerClient = bindTo(HttpServerClientToken)(() => server);
-  const boundHttpRequestMetadataStorage = bindTo(HttpRequestMetadataStorageToken)(httpRequestMetadataStorage);
+  const boundHttpRequestMetadataStorage = bindTo(HttpRequestMetadataStorageToken)(HttpRequestMetadataStorage);
   const boundHttpRequestBus = bindTo(HttpRequestBusToken)(() => new Subject<HttpRequest>());
 
   const context = await contextFactory(

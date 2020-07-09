@@ -7,7 +7,7 @@ import { HttpEffectResponse } from '../effects/http.effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { isStream } from '../../+internal/utils';
 import { ContextProvider } from '../../context/context.factory';
-import { HttpRequestMetadataStorageToken } from '../server/http.server.tokens';
+import { HttpRequestMetadataStorageToken } from '../server/internal-dependencies/httpRequestMetadataStorage.reader';
 import { getTestingRequestIdHeader, isTestingMetadataOn } from '../../+internal/testing';
 import { headersFactory } from './http.responseHeaders.factory';
 import { bodyFactory } from './http.responseBody.factory';
