@@ -4,8 +4,11 @@ import * as https from 'https';
 import { EventEmitter } from 'events';
 import { forkJoin } from 'rxjs';
 import { tap, filter, take } from 'rxjs/operators';
-import { httpListener } from '../http.server.listener';
-import { createServer } from '../http.server';
+import { HttpServer } from '../http.interface';
+import { lookup } from '../../context/context.factory';
+import { useContext } from '../../context/context.hook';
+import { httpListener } from './http.server.listener';
+import { createServer } from './http.server';
 import {
   ServerEventType,
   isListeningEvent,
@@ -17,11 +20,8 @@ import {
   isCheckExpectationEvent,
   isClientErrorEvent,
   isCloseEvent,
-} from '../http.server.event';
-import { lookup } from '../../../context/context.factory';
-import { useContext } from '../../../context/context.hook';
-import { HttpServer } from '../../http.interface';
-import { HttpServerClientToken } from '../http.server.tokens';
+} from './http.server.event';
+import { HttpServerClientToken } from './http.server.tokens';
 
 describe('#createServer', () => {
   let server: HttpServer;
@@ -69,8 +69,8 @@ describe('#createServer', () => {
   test('creates https server', async () => {
     // given
     const httpsOptions: https.ServerOptions = {
-      key: fs.readFileSync(path.resolve(__dirname, '../../../../../../assets/key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, '../../../../../../assets/cert.pem')),
+      key: fs.readFileSync(path.resolve(__dirname, '../../../../../assets/key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, '../../../../../assets/cert.pem')),
     };
     const app = await createServer({
       listener: httpListener(),
