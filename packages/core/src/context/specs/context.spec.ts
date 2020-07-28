@@ -16,8 +16,10 @@ import {
   ContextReader,
   ContextReaderTag,
   resolve,
+  DerivedContextToken,
 } from '../context';
 import { createContextToken } from '../context.token.factory';
+import { contextFactory } from '../context.helper';
 
 describe('#bindTo', () => {
   test('binds lazy reader to token', () => {
@@ -230,5 +232,36 @@ describe('#reader', () => {
     expect(lookup(context)(token)).toEqual(O.some('test'));
     expect(lookup(context)(token)).toEqual(O.some('test'));
     expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  test('asks context for a derived context dependency', async () => {
+    // given
+    const unknownToken = createContextToken<unknown>();
+
+    // given - derived context
+    const derivedDependency_1 = () => 'test_1';
+    const derivedDependency_2 = () => 'test_2';
+    const derivedDependencyToken_1 = createContextToken();
+    const derivedDependencyToken_2 = createContextToken();
+
+    const derivedContext = await contextFactory(
+      bindTo(derivedDependencyToken_1)(derivedDependency_1),
+      bindTo(derivedDependencyToken_2)(derivedDependency_2),
+    );
+
+    // given - new context
+    const dependency_3 = () => 'test_3';
+    const dependencyToken_3 = createContextToken();
+
+    const context = await contextFactory(
+      bindEagerlyTo(DerivedContextToken)(() => derivedContext),
+      bindTo(dependencyToken_3)(dependency_3),
+    );
+
+    // when, then
+    expect(lookup(context)(derivedDependencyToken_1)).toEqual(O.some('test_1'));
+    expect(lookup(context)(derivedDependencyToken_2)).toEqual(O.some('test_2'));
+    expect(lookup(context)(dependencyToken_3)).toEqual(O.some('test_3'));
+    expect(lookup(context)(unknownToken)).toEqual(O.none);
   });
 });
