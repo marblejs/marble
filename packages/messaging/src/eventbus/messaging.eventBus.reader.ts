@@ -1,7 +1,6 @@
 import { pipe } from 'fp-ts/lib/pipeable';
-import { deleteAt } from 'fp-ts/lib/Map';
 import * as R from 'fp-ts/lib/Reader';
-import { Context, bindTo, setoidContextToken, createContextToken, constructContext } from '@marblejs/core';
+import { Context, bindTo, createContextToken, contextFactory, bindEagerlyTo, DerivedContextToken, logContext, LoggerTag } from '@marblejs/core';
 import { TransportLayerToken } from '../server/messaging.server.tokens';
 import { Transport, TransportLayerConnection } from '../transport/transport.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
@@ -19,16 +18,18 @@ export const EventBusClientToken = createContextToken<MessagingClient>('EventBus
 
 export const eventBus = (config: EventBusConfig) => pipe(
   R.ask<Context>(),
-  R.map(async rootContext => {
+  R.map(async derivedContext => {
     const { listener } = config;
-    const derivedContext = deleteAt(setoidContextToken)(EventBusToken)(rootContext);
     const transportLayer = provideTransportLayer(Transport.LOCAL);
     const transportLayerConnection = await transportLayer.connect();
 
-    const context = await constructContext(derivedContext)(
+    const context = await contextFactory(
+      bindEagerlyTo(DerivedContextToken)(() => derivedContext),
       bindTo(TransportLayerToken)(() => transportLayer),
       bindTo(EventTimerStoreToken)(EventTimerStore),
     );
+
+    logContext(LoggerTag.EVENT_BUS)(context);
 
     listener(context)(transportLayerConnection);
 
