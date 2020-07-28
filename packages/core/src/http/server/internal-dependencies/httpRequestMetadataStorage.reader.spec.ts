@@ -1,4 +1,4 @@
-import { createContext } from '../../../context/context.factory';
+import { createContext } from '../../../context/context';
 import { createUuid } from '../../../+internal/utils';
 import { HttpRequestMetadata } from '../../http.interface';
 import { HttpRequestMetadataStorage } from './httpRequestMetadataStorage.reader';

@@ -1,5 +1,5 @@
 import { Observable, SchedulerLike } from 'rxjs';
-import { ContextProvider } from '../context/context.factory';
+import { ContextProvider } from '../context/context';
 
 export interface EffectLike {
   (input$: Observable<any>, ...args: any[]): Observable<any>;

@@ -2,7 +2,7 @@ import * as http from 'http';
 import { EventEmitter } from 'events';
 import { forkJoin } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
-import { createContext } from '../../../context/context.factory';
+import { createContext } from '../../../context/context';
 import {
   isErrorEvent,
   isClientErrorEvent,

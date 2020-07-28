@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { deleteAt } from 'fp-ts/lib/Map';
 import * as R from 'fp-ts/lib/Reader';
-import { Context, resolve, bindTo, setoidContextToken, createContextToken, registerAll } from '@marblejs/core';
+import { Context, bindTo, setoidContextToken, createContextToken, constructContext } from '@marblejs/core';
 import { TransportLayerToken } from '../server/messaging.server.tokens';
 import { Transport, TransportLayerConnection } from '../transport/transport.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
@@ -21,14 +21,14 @@ export const eventBus = (config: EventBusConfig) => pipe(
   R.ask<Context>(),
   R.map(async rootContext => {
     const { listener } = config;
-    const ctx = deleteAt(setoidContextToken)(EventBusToken)(rootContext);
+    const derivedContext = deleteAt(setoidContextToken)(EventBusToken)(rootContext);
     const transportLayer = provideTransportLayer(Transport.LOCAL);
     const transportLayerConnection = await transportLayer.connect();
-    const registerDependencies = registerAll([
+
+    const context = await constructContext(derivedContext)(
       bindTo(TransportLayerToken)(() => transportLayer),
       bindTo(EventTimerStoreToken)(EventTimerStore),
-    ]);
-    const context = await pipe(ctx, registerDependencies, resolve);
+    );
 
     listener(context)(transportLayerConnection);
 
