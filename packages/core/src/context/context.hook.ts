@@ -4,7 +4,7 @@ import * as O from 'fp-ts/lib/Option';
 import { ContextError } from '../error/error.model';
 import { coreErrorFactory, CoreErrorOptions } from '../error/error.factory';
 import { ContextToken } from './context.token.factory';
-import { ContextProvider } from './context.factory';
+import { ContextProvider } from './context';
 
 const coreErrorOptions: CoreErrorOptions =  { contextMethod: 'useContext', offset: 2 };
 

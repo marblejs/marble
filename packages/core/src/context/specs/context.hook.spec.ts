@@ -1,4 +1,4 @@
-import { createContext, registerAll, bindTo, lookup } from '../context.factory';
+import { createContext, registerAll, bindTo, lookup } from '../context';
 import { createContextToken } from '../context.token.factory';
 import { useContext } from '../context.hook';
 

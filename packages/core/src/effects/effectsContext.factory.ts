@@ -1,6 +1,6 @@
 import { SchedulerLike } from 'rxjs';
 import { AsyncScheduler } from 'rxjs/internal/scheduler/AsyncScheduler';
-import { ContextProvider } from '../context/context.factory';
+import { ContextProvider } from '../context/context';
 import { EffectContext } from './effects.interface';
 
 export const createEffectContext = <Client, Scheduler extends SchedulerLike>(

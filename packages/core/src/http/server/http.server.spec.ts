@@ -5,7 +5,7 @@ import { EventEmitter } from 'events';
 import { forkJoin } from 'rxjs';
 import { tap, filter, take } from 'rxjs/operators';
 import { HttpServer } from '../http.interface';
-import { lookup } from '../../context/context.factory';
+import { lookup } from '../../context/context';
 import { useContext } from '../../context/context.hook';
 import { httpListener } from './http.server.listener';
 import { createServer } from './http.server';

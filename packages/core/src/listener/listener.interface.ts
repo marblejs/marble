@@ -1,7 +1,7 @@
 import { IO } from 'fp-ts/lib/IO';
 import { Reader } from 'fp-ts/lib/Reader';
 import { Effect } from '../effects/effects.interface';
-import { Context, BoundDependency } from '../context/context.factory';
+import { Context, BoundDependency } from '../context/context';
 
 export interface ListenerConfig<T = any> {
   effects?: any[];

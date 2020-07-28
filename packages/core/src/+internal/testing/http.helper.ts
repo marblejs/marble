@@ -11,7 +11,7 @@ import {
   QueryParameters,
   HttpServer,
 } from '../../http/http.interface';
-import { createContext, lookup, registerAll, bindTo } from '../../context/context.factory';
+import { createContext, lookup, registerAll, bindTo } from '../../context/context';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { HttpRequestBusToken, HttpServerClientToken } from '../../http/server/http.server.tokens';
 import { ServerIO } from '../../listener/listener.interface';

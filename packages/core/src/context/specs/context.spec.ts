@@ -16,7 +16,7 @@ import {
   ContextReader,
   ContextReaderTag,
   resolve,
-} from '../context.factory';
+} from '../context';
 import { createContextToken } from '../context.token.factory';
 
 describe('#bindTo', () => {

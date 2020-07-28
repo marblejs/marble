@@ -3,7 +3,7 @@ import * as A from 'fp-ts/lib/Array';
 import { io } from 'fp-ts/lib/IO';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { LoggerToken } from '../logger';
-import { Context, lookup, ordContextToken } from './context.factory';
+import { Context, lookup, ordContextToken } from './context';
 import { useContext } from './context.hook';
 import { ContextToken } from './context.token.factory';
 
