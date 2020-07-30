@@ -32,5 +32,6 @@ describe('@marblejs/core public API', () => {
     // internal dependencies
     expect(API.HttpServerEventStreamToken).toBeDefined();
     expect(API.HttpRequestMetadataStorageToken).toBeDefined();
+    expect(API.HttpRequestBusToken).toBeDefined();
   });
 });

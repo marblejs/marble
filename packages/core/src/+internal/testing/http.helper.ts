@@ -1,6 +1,5 @@
 import * as http from 'http';
 import { EventEmitter } from 'events';
-import { Subject } from 'rxjs';
 import { delay, tap, mapTo } from 'rxjs/operators';
 import {
   HttpRequest,
@@ -13,12 +12,13 @@ import {
 } from '../../http/http.interface';
 import { createContext, lookup, registerAll, bindTo } from '../../context/context';
 import { createEffectContext } from '../../effects/effectsContext.factory';
-import { HttpRequestBusToken, HttpServerClientToken } from '../../http/server/http.server.tokens';
 import { ServerIO } from '../../listener/listener.interface';
 import { LoggerToken, mockLogger } from '../../logger';
 import { factorizeRegExpWithParams } from '../../http/router/http.router.params.factory';
 import { HttpEffect } from '../../http/effects/http.effects.interface';
 import { RoutingItem } from '../../http/router/http.router.interface';
+import { HttpRequestBusToken, HttpRequestBus } from '../../http/server/internal-dependencies/httpRequestBus.reader';
+import { HttpServerClientToken } from '../../http/server/http.server.tokens';
 
 interface HttpRequestMockParams {
   url?: string;
@@ -71,7 +71,7 @@ export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
 export const createMockEffectContext = () => {
   const dependencies = [
     bindTo(LoggerToken)(mockLogger),
-    bindTo(HttpRequestBusToken)(() => new Subject<HttpRequest>()),
+    bindTo(HttpRequestBusToken)(HttpRequestBus),
     bindTo(HttpServerClientToken)(() => http.createServer()),
   ];
   const context = registerAll(dependencies)(createContext());

@@ -13,8 +13,8 @@ import {
   isHttpRequestError,
 } from '../error/http.error.model';
 import { useContext } from '../../context/context.hook';
-import { HttpRequestBusToken } from '../server/http.server.tokens';
 import { LoggerToken, LoggerTag, LoggerLevel } from '../../logger';
+import { HttpRequestBusToken } from '../server/internal-dependencies/httpRequestBus.reader';
 import { Routing, BootstrappedRoutingItem } from './http.router.interface';
 import { queryParamsFactory } from './http.router.query.factory';
 import { matchRoute } from './http.router.matcher';
@@ -29,7 +29,7 @@ export const resolveRouting = (
   output$?: HttpOutputEffect,
   error$?: HttpErrorEffect,
 ) => {
-  const requestBusSubject = useContext(HttpRequestBusToken)(ctx.ask);
+  const requestBus = useContext(HttpRequestBusToken)(ctx.ask);
   const logger = useContext(LoggerToken)(ctx.ask);
 
   const close$ = fromEvent(ctx.client, 'close').pipe(take(1), share());
@@ -146,7 +146,7 @@ export const resolveRouting = (
     req.meta.path = resolvedRoute.path;
 
     resolvedRoute.subject.next(req);
-    requestBusSubject.next(req);
+    requestBus.next(req);
   };
 
   return {
