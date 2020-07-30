@@ -16,6 +16,7 @@ export * from './http/http.interface';
 // http - server - internal dependencies
 export * from './http/server/internal-dependencies/httpRequestMetadataStorage.reader';
 export * from './http/server/internal-dependencies/httpServerEventStream.reader';
+export * from './http/server/internal-dependencies/httpRequestBus.reader';
 
 // core - error
 export { coreErrorFactory, CoreErrorOptions } from './error/error.factory';

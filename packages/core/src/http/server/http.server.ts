@@ -1,26 +1,27 @@
 import * as http from 'http';
 import * as https from 'https';
-import { Subject, merge, EMPTY } from 'rxjs';
+import { merge, EMPTY } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { lookup, bindTo, bindEagerlyTo } from '../../context/context';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { isTestingMetadataOn } from '../../+internal/testing';
 import { insertIf } from '../../+internal/utils';
-import { HttpRequest, HttpServer } from '../http.interface';
+import { HttpServer } from '../http.interface';
 import { logContext } from '../../context/context.logger';
 import { contextFactory } from '../../context/context.helper';
 import { ServerIO } from '../../listener/listener.interface';
 import { listening$, close$, error$ } from '../effects/http.effects';
 import { LoggerTag } from '../../logger';
 import { useContext } from '../../context/context.hook';
-import { HttpServerClientToken, HttpRequestBusToken } from './http.server.tokens';
+import { HttpServerClientToken } from './http.server.tokens';
 import { CreateServerConfig } from './http.server.interface';
 import { isCloseEvent } from './http.server.event';
 
 // internal dependencies
 import { HttpRequestMetadataStorage, HttpRequestMetadataStorageToken } from './internal-dependencies/httpRequestMetadataStorage.reader';
 import { HttpServerEventStreamToken, HttpServerEventStream } from './internal-dependencies/httpServerEventStream.reader';
+import { HttpRequestBusToken, HttpRequestBus } from './internal-dependencies/httpRequestBus.reader';
 
 export const createServer = async (config: CreateServerConfig) => {
   const { listener, event$, port, hostname, dependencies = [], options = {} } = config;
@@ -29,10 +30,10 @@ export const createServer = async (config: CreateServerConfig) => {
     ? https.createServer(options.httpsOptions)
     : http.createServer();
 
+  const boundHttpServerClient = bindEagerlyTo(HttpServerClientToken)(() => server);
   const boundHttpServerEvent = bindEagerlyTo(HttpServerEventStreamToken)(HttpServerEventStream({ server, hostname }));
-  const boundHttpServerClient = bindTo(HttpServerClientToken)(() => server);
+  const boundHttpRequestBus = bindEagerlyTo(HttpRequestBusToken)(HttpRequestBus);
   const boundHttpRequestMetadataStorage = bindTo(HttpRequestMetadataStorageToken)(HttpRequestMetadataStorage);
-  const boundHttpRequestBus = bindTo(HttpRequestBusToken)(() => new Subject<HttpRequest>());
 
   const context = await contextFactory(
     boundHttpServerClient,
