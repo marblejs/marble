@@ -20,19 +20,24 @@ export const outputRouter$: MsgOutputEffect = (event$, ctx) => {
   );
 };
 
-export const outputErrorEncoder$: MsgOutputEffect<Event<any>> = event$ =>
-  event$.pipe(
+export const outputErrorEncoder$: MsgOutputEffect<Event<any>> = event$ => {
+  const hasError = (event: Event<{ error?: any }>): boolean =>
+    [event.payload?.error, event.error].some(Boolean);
+
+  return event$.pipe(
     map(event => {
-      const { payload: { error: payloadError } = { error: undefined }, error } = event;
+      if (!hasError(event)) return event;
 
-      if (isNonNullable(error)) {
-        event.error = encodeError(error);
-      }
+      const eventError = event.error;
+      const payloadError = event.payload?.error;
 
-      if (isNonNullable(payloadError)) {
+      if (isNonNullable(eventError))
+        event.error = encodeError(eventError);
+
+      if (isNonNullable(payloadError))
         event.payload.error = encodeError(payloadError);
-      }
 
       return event;
     }),
   );
+}
