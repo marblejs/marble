@@ -3,7 +3,7 @@ import { size } from 'fp-ts/lib/Map';
 import { createContextToken } from '../context.token.factory';
 import { createReader } from '../context.reader.factory';
 import { contextFactory, constructContext } from '../context.helper';
-import { bindTo, lookup } from '../context';
+import { bindTo, lookup, DerivedContextToken, bindEagerlyTo } from '../context';
 import { LoggerToken } from '../../logger';
 
 describe('#contextFactory', () => {
@@ -50,5 +50,29 @@ describe('#constructContext', () => {
     expect(lookup(context)(LoggerToken)).toEqual(O.some(expect.anything()));
     expect(lookup(context)(token1)).toEqual(O.some('test_1'));
     expect(lookup(context)(token2)).toEqual(O.some('test_2'));
+  });
+
+  test('doesn\'t register redundant LoggerToken if derived context has it already bound ', async () => {
+    // given
+    const customLogger = jest.fn(() => 'custom_logger');
+    const derivedContext = await contextFactory(
+      bindEagerlyTo(LoggerToken)(() => customLogger()),
+    );
+
+    // when
+    const context = await constructContext(derivedContext)(
+      bindEagerlyTo(DerivedContextToken)(() => derivedContext),
+    );
+
+    // then
+    expect(
+      lookup(derivedContext)(LoggerToken)
+    ).toEqual(
+      lookup(context)(LoggerToken)
+    );
+
+    expect(size(context)).toEqual(1);        // Context[DerivedContextToken]
+    expect(size(derivedContext)).toEqual(1); // Context[Loggertoken]
+    expect(customLogger).toHaveBeenCalledTimes(1);
   });
 });
