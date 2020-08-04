@@ -63,6 +63,13 @@ export const registerAll = (boundDependencies: BoundDependency<any, any>[]) => (
   );
 
 /**
+ * Unregisters given token from the context
+ * @since v3.4.0
+ */
+export const unregister = (token: ContextToken) => (context: Context): Context =>
+  M.deleteAt(setoidContextToken)(token)(context);
+
+/**
  * Resolves eager dependencies within the context
  * @since v2.0.0
  */

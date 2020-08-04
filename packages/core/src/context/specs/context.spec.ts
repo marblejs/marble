@@ -17,6 +17,7 @@ import {
   ContextReaderTag,
   resolve,
   DerivedContextToken,
+  unregister,
 } from '../context';
 import { createContextToken } from '../context.token.factory';
 import { contextFactory } from '../context.helper';
@@ -94,6 +95,28 @@ describe('#registerAll', () => {
     // then
     expect(size(context)).toEqual(3);
     expect(lookup(context)(token2)).toEqual(O.some('test_2'));
+  });
+});
+
+describe('#unregister', () => {
+  test('unregisters specified token', () => {
+    // given
+    const token = createContextToken<string>();
+    const token_to_delete = createContextToken<string>();
+    const dependency = pipe(R.ask<Context>(), R.map(_ => 'test'));
+    const dependency_to_delete = pipe(R.ask<Context>(), R.map(_ => 'test_to_delete'));
+
+    const contextBefore = registerAll([
+      bindTo(token)(dependency),
+      bindTo(token_to_delete)(dependency_to_delete),
+    ])(createContext());
+
+    // when
+    const contextAfter = unregister(token_to_delete)(contextBefore);
+
+    // then
+    expect(size(contextAfter)).toEqual(1);
+    expect(lookup(contextAfter)(token_to_delete)).toEqual(O.none);
   });
 });
 
