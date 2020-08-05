@@ -7,6 +7,7 @@ import { tap, filter, take } from 'rxjs/operators';
 import { HttpServer } from '../http.interface';
 import { lookup } from '../../context/context';
 import { useContext } from '../../context/context.hook';
+import { HttpServerClientToken } from './internal-dependencies/httpServerClient.reader';
 import { httpListener } from './http.server.listener';
 import { createServer } from './http.server';
 import {
@@ -21,7 +22,6 @@ import {
   isClientErrorEvent,
   isCloseEvent,
 } from './http.server.event';
-import { HttpServerClientToken } from './http.server.tokens';
 
 describe('#createServer', () => {
   let server: HttpServer;

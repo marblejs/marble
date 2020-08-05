@@ -18,7 +18,7 @@ import { factorizeRegExpWithParams } from '../../http/router/http.router.params.
 import { HttpEffect } from '../../http/effects/http.effects.interface';
 import { RoutingItem } from '../../http/router/http.router.interface';
 import { HttpRequestBusToken, HttpRequestBus } from '../../http/server/internal-dependencies/httpRequestBus.reader';
-import { HttpServerClientToken } from '../../http/server/http.server.tokens';
+import { HttpServerClientToken, HttpServerClient } from '../../http/server/internal-dependencies/httpServerClient.reader';
 
 interface HttpRequestMockParams {
   url?: string;
@@ -72,7 +72,7 @@ export const createMockEffectContext = () => {
   const dependencies = [
     bindTo(LoggerToken)(mockLogger),
     bindTo(HttpRequestBusToken)(HttpRequestBus),
-    bindTo(HttpServerClientToken)(() => http.createServer()),
+    bindTo(HttpServerClientToken)(HttpServerClient(http.createServer())),
   ];
   const context = registerAll(dependencies)(createContext());
   const client = http.createServer();

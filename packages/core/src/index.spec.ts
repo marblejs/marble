@@ -30,6 +30,7 @@ describe('@marblejs/core public API', () => {
     expect(API.matchEvent).toBeDefined();
 
     // internal dependencies
+    expect(API.HttpServerClientToken).toBeDefined();
     expect(API.HttpServerEventStreamToken).toBeDefined();
     expect(API.HttpRequestMetadataStorageToken).toBeDefined();
     expect(API.HttpRequestBusToken).toBeDefined();
