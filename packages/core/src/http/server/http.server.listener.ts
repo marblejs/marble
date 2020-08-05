@@ -8,7 +8,7 @@ import { factorizeRoutingWithDefaults } from '../router/http.router.factory';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { useContext } from '../../context/context.hook';
 import { createListener } from '../../listener/listener.factory';
-import { HttpServerClientToken } from './http.server.tokens';
+import { HttpServerClientToken } from './internal-dependencies/httpServerClient.reader';
 
 export interface HttpListenerConfig {
   effects?: (RouteEffect | RouteEffectGroup)[];

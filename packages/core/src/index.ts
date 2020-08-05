@@ -2,19 +2,19 @@
 export { EffectFactory } from './http/effects/http.effects.factory';
 export { defaultError$ } from './http/error/http.error.effect';
 export { HttpError, HttpRequestError, isHttpError, isHttpRequestError } from './http/error/http.error.model';
+export { createServer } from './http/server/http.server';
 export { combineRoutes } from './http/router/http.router.combiner';
 export { r } from './http/router/http.router.ixbuilder';
 export * from './http/router/http.router.interface';
 export * from './http/effects/http.effects.interface';
 export * from './http/server/http.server.event';
 export * from './http/server/http.server.interface';
-export * from './http/server/http.server.tokens';
-export * from './http/server/http.server';
 export * from './http/server/http.server.listener';
 export * from './http/http.interface';
 
 // http - server - internal dependencies
 export * from './http/server/internal-dependencies/httpRequestMetadataStorage.reader';
+export * from './http/server/internal-dependencies/httpServerClient.reader';
 export * from './http/server/internal-dependencies/httpServerEventStream.reader';
 export * from './http/server/internal-dependencies/httpRequestBus.reader';
 

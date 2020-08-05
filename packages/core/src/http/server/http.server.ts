@@ -14,7 +14,6 @@ import { ServerIO } from '../../listener/listener.interface';
 import { listening$, close$, error$ } from '../effects/http.effects';
 import { LoggerTag } from '../../logger';
 import { useContext } from '../../context/context.hook';
-import { HttpServerClientToken } from './http.server.tokens';
 import { CreateServerConfig } from './http.server.interface';
 import { isCloseEvent } from './http.server.event';
 
@@ -22,6 +21,7 @@ import { isCloseEvent } from './http.server.event';
 import { HttpRequestMetadataStorage, HttpRequestMetadataStorageToken } from './internal-dependencies/httpRequestMetadataStorage.reader';
 import { HttpServerEventStreamToken, HttpServerEventStream } from './internal-dependencies/httpServerEventStream.reader';
 import { HttpRequestBusToken, HttpRequestBus } from './internal-dependencies/httpRequestBus.reader';
+import { HttpServerClient, HttpServerClientToken } from './internal-dependencies/httpServerClient.reader';
 
 export const createServer = async (config: CreateServerConfig) => {
   const { listener, event$, port, hostname, dependencies = [], options = {} } = config;
@@ -30,7 +30,7 @@ export const createServer = async (config: CreateServerConfig) => {
     ? https.createServer(options.httpsOptions)
     : http.createServer();
 
-  const boundHttpServerClient = bindEagerlyTo(HttpServerClientToken)(() => server);
+  const boundHttpServerClient = bindEagerlyTo(HttpServerClientToken)(HttpServerClient(server));
   const boundHttpServerEvent = bindEagerlyTo(HttpServerEventStreamToken)(HttpServerEventStream({ server, hostname }));
   const boundHttpRequestBus = bindEagerlyTo(HttpRequestBusToken)(HttpRequestBus);
   const boundHttpRequestMetadataStorage = bindTo(HttpRequestMetadataStorageToken)(HttpRequestMetadataStorage);
