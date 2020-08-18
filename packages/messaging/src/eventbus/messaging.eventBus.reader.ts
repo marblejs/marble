@@ -11,6 +11,7 @@ import { EventTimerStoreToken, EventTimerStore } from '../eventStore/eventTimerS
 
 export interface EventBusConfig {
   listener: ReturnType<typeof messagingListener>;
+  timeout?: number;
 }
 
 export const EventBusToken = createContextToken<TransportLayerConnection>('EventBusToken');
@@ -20,7 +21,7 @@ export const eventBus = (config: EventBusConfig) => pipe(
   R.ask<Context>(),
   R.map(async derivedContext => {
     const { listener } = config;
-    const transportLayer = provideTransportLayer(Transport.LOCAL);
+    const transportLayer = provideTransportLayer(Transport.LOCAL, { timeout: config.timeout });
     const transportLayerConnection = await transportLayer.connect();
 
     const context = await contextFactory(

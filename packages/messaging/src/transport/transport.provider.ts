@@ -10,7 +10,7 @@ export const provideTransportLayer = <T extends Transport>(transport: T, transpo
     case Transport.REDIS:
       return createRedisStrategy(transportOptions);
     case Transport.LOCAL:
-      return provideLocalStrategy();
+      return provideLocalStrategy(transportOptions);
     default:
       throw new Error(`Unsupported transport type: ${transport}`);
   }
