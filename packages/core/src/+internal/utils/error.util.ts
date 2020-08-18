@@ -17,3 +17,5 @@ export const encodeError = (error: any) =>
       acc[key] = error[key];
       return acc;
     }, Object.create(null));
+
+export const throwException = (error: any) => { throw error };

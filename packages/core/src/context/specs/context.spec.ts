@@ -21,6 +21,7 @@ import {
 } from '../context';
 import { createContextToken } from '../context.token.factory';
 import { contextFactory } from '../context.helper';
+import { wait } from '../../+internal/utils';
 
 describe('#bindTo', () => {
   test('binds lazy reader to token', () => {
@@ -286,5 +287,54 @@ describe('#reader', () => {
     expect(lookup(context)(derivedDependencyToken_2)).toEqual(O.some('test_2'));
     expect(lookup(context)(dependencyToken_3)).toEqual(O.some('test_3'));
     expect(lookup(context)(unknownToken)).toEqual(O.none);
+  });
+
+  test('asks context for dependant asynchronous dependencies', async () => {
+    // given
+    const executionOrder: number[] = [];
+    const spy1 = jest.fn(() => executionOrder.push(1));
+    const spy2 = jest.fn(() => executionOrder.push(2));
+    const spy3 = jest.fn(() => executionOrder.push(3));
+    const token1 = createContextToken<string>();
+    const token2 = createContextToken<string>();
+    const token3 = createContextToken<string>();
+
+    const dependency1 = pipe(reader, R.map(async () => {
+      spy1();
+      wait(0.5);
+      return 'test';
+    }));
+
+    const dependency2 = pipe(reader, R.map(ask => {
+      spy2();
+      return pipe(ask(token1), O.map(async v => {
+        await wait(0.5);
+        return v + '_1';
+      }), O.getOrElse(() => Promise.resolve('')));
+    }));
+
+    const dependency3 = pipe(reader, R.map(ask => {
+      spy3();
+      return pipe(ask(token2), O.map(async v => {
+        await wait(0.5);
+        return v + '_2';
+      }), O.getOrElse(() => Promise.resolve('')));
+    }));
+
+    // when
+    const context = await flow(
+      registerAll([
+        bindEagerlyTo(token1)(dependency1),
+        bindEagerlyTo(token2)(dependency2),
+        bindEagerlyTo(token3)(dependency3),
+      ]),
+      resolve,
+    )(createContext());
+
+    // then
+    expect(lookup(context)(token1)).toEqual(O.some('test'));
+    expect(lookup(context)(token2)).toEqual(O.some('test_1'));
+    expect(lookup(context)(token3)).toEqual(O.some('test_1_2'));
+    expect(executionOrder).toEqual([1, 2, 3]);
   });
 });

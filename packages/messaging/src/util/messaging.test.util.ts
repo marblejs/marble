@@ -1,30 +1,29 @@
 import { v4 as uuid } from 'uuid';
-import { bindTo, Event, LoggerToken, mockLogger, contextFactory, Context } from '@marblejs/core';
+import { bindTo, Event, LoggerToken, mockLogger, contextFactory, Context, bindEagerlyTo, lookup, useContext } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { merge } from 'rxjs';
 import { tap, catchError, take, toArray, filter, ignoreElements, map } from 'rxjs/operators';
 import { createMicroservice } from '../server/messaging.server';
-import { TransportMessage, Transport, TransportLayerConnection } from '../transport/transport.interface';
+import { TransportMessage, Transport } from '../transport/transport.interface';
 import { MsgOutputEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
 import { messagingListener, MessagingListenerConfig } from '../server/messaging.server.listener';
-import { eventBus, eventBusClient } from '../eventbus/messaging.eventBus.reader';
+import { EventBusToken, eventBus } from '../eventbus/messaging.eventBus.reader';
+import { EventBusClientToken, eventBusClient } from '../eventbus/messaging.eventBusClient.reader';
 import { messagingClient } from '../client/messaging.client';
 import { AmqpStrategyOptions } from '../transport/strategies/amqp.strategy.interface';
 import { RedisStrategyOptions } from '../transport/strategies/redis.strategy.interface';
 import { MessagingClient } from '../client/messaging.client.interface';
 
 // event bus
-export const runEventBus = (config: MessagingListenerConfig): Promise<TransportLayerConnection> =>
+export const createEventBusTestBed = async (config: MessagingListenerConfig) =>
   pipe(
-    createTestContext(),
-    async ctx => eventBus({ listener: messagingListener(config) })(await ctx),
-  );
-
-export const runEventBusClient = (): Promise<MessagingClient> =>
-  pipe(
-    createTestContext(),
-    async ctx => eventBusClient(await ctx),
+    await contextFactory(
+      bindEagerlyTo(EventBusToken)(eventBus({ listener: messagingListener(config) })),
+      bindEagerlyTo(EventBusClientToken)(eventBusClient),
+    ),
+    lookup,
+    ask => ([useContext(EventBusToken)(ask), useContext(EventBusClientToken)(ask)] as const),
   );
 
 // microservice

@@ -1,6 +1,10 @@
+import * as E from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
 import { Subject } from 'rxjs';
 import { takeWhile, takeUntil, take } from 'rxjs/operators';
 import { bindTo, createEffectContext, combineEffects, ServerIO, lookup, logContext, LoggerTag, contextFactory } from '@marblejs/core';
+import { throwException } from '@marblejs/core/dist/+internal/utils';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { statusLogger$ } from '../middlewares/messaging.statusLogger.middleware';
 import { TransportLayerConnection } from '../transport/transport.interface';
@@ -18,8 +22,11 @@ export const createMicroservice = async (config: CreateMicroserviceConfig) => {
     listener,
   } = config;
 
+  const transportLayer = pipe(
+    provideTransportLayer(transport, options)(),
+    E.fold(throwException, identity));
+
   const serverEventsSubject = new Subject<AllServerEvents>();
-  const transportLayer = provideTransportLayer(transport, options);
   const boundEventTimerStore = bindTo(EventTimerStoreToken)(EventTimerStore);
   const boundTransportLayer = bindTo(TransportLayerToken)(() => transportLayer);
   const boundServerEvents = bindTo(ServerEventsToken)(() => serverEventsSubject);

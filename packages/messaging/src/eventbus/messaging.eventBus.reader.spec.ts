@@ -1,12 +1,16 @@
-import { Event, matchEvent, combineEffects, act, EventError } from '@marblejs/core';
+import { Event, matchEvent, combineEffects, act, EventError, contextFactory, bindEagerlyTo, lookup, useContext } from '@marblejs/core';
 import { wait, NamedError } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { throwError } from 'rxjs';
+import { throwError, of, TimeoutError } from 'rxjs';
 import { delay, map, tap, ignoreElements } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { MsgEffect } from '../effects/messaging.effects.interface';
-import { runEventBus, runEventBusClient } from '../util/messaging.test.util';
 import { reply } from '../reply/reply';
+import { messagingListener } from '../server/messaging.server.listener';
+import { createEventBusTestBed } from '../util/messaging.test.util';
+import { EventBusToken, eventBus } from './messaging.eventBus.reader';
+import { EventBusClientToken, eventBusClient } from './messaging.eventBusClient.reader';
 
 describe('#eventBus', () => {
   test('handles RPC event', async () => {
@@ -20,8 +24,8 @@ describe('#eventBus', () => {
         ))
       );
 
-    const eventBus = await runEventBus({ effects: [rpc$] });
-    const eventBusClient = await runEventBusClient();
+    const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [rpc$] });
+
     const event: Event = { type: 'RPC_TEST', payload: 1 };
 
     const result = await eventBusClient.send(event).toPromise();
@@ -53,8 +57,7 @@ describe('#eventBus', () => {
         ))
       );
 
-    const eventBus = await runEventBus({ effects: [combineEffects(rpc1$, rpc2$)] });
-    const eventBusClient = await runEventBusClient();
+    const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [combineEffects(rpc1$, rpc2$)] });
 
     const event1: Event = { type: 'RPC_1_TEST', payload: 1 };
     const event2: Event = { type: 'RPC_2_TEST', payload: 2 };
@@ -89,8 +92,7 @@ describe('#eventBus', () => {
         )),
       );
 
-    const eventBus = await runEventBus({ effects: [rpc1$] });
-    const eventBusClient = await runEventBusClient();
+    const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [rpc1$] });
 
     const event1: Event = { type: 'RPC_TEST', payload: 1 };
     const event2: Event = { type: 'RPC_TEST', payload: '2' };
@@ -129,8 +131,7 @@ describe('#eventBus', () => {
         ignoreElements(),
       );
 
-    const eventBus = await runEventBus({ effects: [foo$] });
-    const eventBusClient = await runEventBusClient();
+    const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [foo$] });
     const event: Event = { type: 'TEST', payload: 1 };
 
     await eventBusClient.emit(event);
@@ -151,8 +152,7 @@ describe('#eventBus', () => {
         ),
       );
 
-    const eventBus = await runEventBus({ effects: [rpc$] });
-    const eventBusClient = await runEventBusClient();
+    const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [rpc$] });
     const event: Event = { type: 'RPC_TEST' };
 
     const result = eventBusClient.send(event).toPromise();
@@ -177,8 +177,7 @@ describe('#eventBus', () => {
         ),
       );
 
-    const eventBus = await runEventBus({ effects: [rpc$] });
-    const eventBusClient = await runEventBusClient();
+    const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [rpc$] });
     const event: Event = { type: 'RPC_TEST' };
 
     const result = eventBusClient.send(event).toPromise();
@@ -197,8 +196,7 @@ describe('#eventBus', () => {
         act(() => throwError(error)),
       );
 
-    const eventBus = await runEventBus({ effects: [rpc$] });
-    const eventBusClient = await runEventBusClient();
+    const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [rpc$] });
     const event: Event = { type: 'RPC_TEST' };
 
     const result = eventBusClient.send(event).toPromise();
@@ -206,5 +204,50 @@ describe('#eventBus', () => {
 
     await eventBus.close();
     await eventBusClient.close();
+  });
+
+  test('allows to set custom timeout', async () => {
+    const timeout = 1;
+
+    const rpc$: MsgEffect = event$ =>
+      event$.pipe(
+        matchEvent('RPC_TEST'),
+        act(event => pipe(
+          of(reply(event)({ type: 'RPC_TEST_RESULT' })),
+          delay(100),
+        )),
+      );
+
+    const event: Event = { type: 'RPC_TEST' };
+    const listener = messagingListener({ effects: [rpc$] });
+
+    const ask = pipe(
+      await contextFactory(
+        bindEagerlyTo(EventBusToken)(eventBus({ listener, timeout })),
+        bindEagerlyTo(EventBusClientToken)(eventBusClient),
+      ),
+      lookup,
+    );
+
+    const eventBusInstance = useContext(EventBusToken)(ask);
+    const eventBusClientInstance = useContext(EventBusClientToken)(ask);
+
+    expect(eventBusInstance.config.timeout).toEqual(timeout);
+
+    const result = eventBusClientInstance.send(event).toPromise();
+
+    await expect(result).rejects.toEqual(new TimeoutError());
+
+    await eventBusInstance.close();
+    await eventBusClientInstance.close();
+  });
+
+  test('fails if event bus client is registered before main EventBus reader', async () => {
+    const context = contextFactory(
+      bindEagerlyTo(EventBusClientToken)(eventBusClient),
+      bindEagerlyTo(EventBusToken)(eventBus({ listener: messagingListener() })),
+    );
+
+    await expect(context).rejects.toEqual(new Error('Cannot provide non-evaluated EventBus transport layer'));
   });
 });
