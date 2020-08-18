@@ -24,4 +24,5 @@ export { messagingListener } from './server/messaging.server.listener';
 
 // readers
 export * from './eventbus/messaging.eventBus.reader';
+export * from './eventbus/messaging.eventBusClient.reader';
 export * from './eventStore/eventTimerStore';

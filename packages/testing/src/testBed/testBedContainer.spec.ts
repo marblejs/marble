@@ -12,8 +12,8 @@ describe('#createTestBedSetup cleanup container', () => {
   });
 
   const dependencies = [
-    bindEagerlyTo(EventBusClientToken)(eventBusClient),
     bindEagerlyTo(EventBusToken)(eventBus({ listener: messagingListener() })),
+    bindEagerlyTo(EventBusClientToken)(eventBusClient),
   ];
 
   const customDependencyToken = createContextToken<CustomDependency>();

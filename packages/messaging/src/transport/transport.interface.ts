@@ -62,3 +62,8 @@ export interface TransportMessage<T = Event> {
   replyTo?: string;
   correlationId?: string;
 }
+
+export const isTransportLayerConnection = <T extends Transport>(data: any): data is TransportLayerConnection<T> => {
+  const conn = data as TransportLayerConnection;
+  return Boolean(conn.status$ && conn.emitMessage && conn.sendMessage);
+}

@@ -3,25 +3,22 @@ import * as R from 'fp-ts/lib/Reader';
 import { Context, bindTo, createContextToken, contextFactory, bindEagerlyTo, DerivedContextToken, logContext, LoggerTag } from '@marblejs/core';
 import { TransportLayerToken } from '../server/messaging.server.tokens';
 import { Transport, TransportLayerConnection } from '../transport/transport.interface';
-import { provideTransportLayer } from '../transport/transport.provider';
 import { messagingListener } from '../server/messaging.server.listener';
-import { MessagingClient } from '../client/messaging.client.interface';
-import { messagingClient } from '../client/messaging.client';
 import { EventTimerStoreToken, EventTimerStore } from '../eventStore/eventTimerStore';
+import { createLocalStrategy } from '../transport/strategies/local.strategy';
 
 export interface EventBusConfig {
   listener: ReturnType<typeof messagingListener>;
   timeout?: number;
 }
 
-export const EventBusToken = createContextToken<TransportLayerConnection>('EventBusToken');
-export const EventBusClientToken = createContextToken<MessagingClient>('EventBusClientToken');
+export const EventBusToken = createContextToken<TransportLayerConnection<Transport.LOCAL>>('EventBus');
 
 export const eventBus = (config: EventBusConfig) => pipe(
   R.ask<Context>(),
   R.map(async derivedContext => {
     const { listener } = config;
-    const transportLayer = provideTransportLayer(Transport.LOCAL, { timeout: config.timeout });
+    const transportLayer = createLocalStrategy(config);
     const transportLayerConnection = await transportLayer.connect();
 
     const context = await contextFactory(
@@ -36,12 +33,4 @@ export const eventBus = (config: EventBusConfig) => pipe(
 
     return transportLayerConnection;
   }),
-);
-
-export const eventBusClient = pipe(
-  R.ask<Context>(),
-  R.map(messagingClient({
-    transport: Transport.LOCAL,
-    options: {},
-  })),
 );
