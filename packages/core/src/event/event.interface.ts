@@ -13,7 +13,6 @@ export interface Event<P = unknown, E = any, T extends EventType = EventType> {
   metadata?: EventMetadata;
 }
 
-
 export interface EventWithoutPayload<T extends EventType = EventType> {
   type: T;
   metadata?: EventMetadata;

@@ -10,12 +10,13 @@ import {
   LoggerLevel,
 } from '@marblejs/core';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
 import { Observable, Subject, defer } from 'rxjs';
 import { map, catchError, takeUntil } from 'rxjs/operators';
 import { TransportMessageTransformer, TransportLayerConnection } from '../transport/transport.interface';
 import { jsonTransformer, decodeMessage } from '../transport/transport.transformer';
 import { MsgEffect, MsgMiddlewareEffect, MsgErrorEffect, MsgOutputEffect } from '../effects/messaging.effects.interface';
-import { inputLogger$, outputLogger$, errorLogger$ } from '../middlewares/messaging.eventLogger.middleware';
+import { inputLogger$, outputLogger$, exceptionLogger$ } from '../middlewares/messaging.eventLogger.middleware';
 import { outputRouter$, outputErrorEncoder$ } from '../middlewares/messaging.eventOutput.middleware';
 import { idApplier$ } from '../middlewares/messaging.eventInput.middleware';
 import { rejectUnhandled$ } from '../middlewares/messaging.ack.middleware';
@@ -32,9 +33,6 @@ export interface MessagingListener {
   (connection: TransportLayerConnection): void;
 }
 
-const defaultOutput$: MsgOutputEffect = event$ =>
-  event$;
-
 const defaultError$: MsgErrorEffect = event$ =>
   event$.pipe(
     map(error => ({
@@ -47,7 +45,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
   const {
     middlewares = [],
     effects = [],
-    output$ = defaultOutput$,
+    output$ = identity,
     error$ = defaultError$,
     msgTransformer = jsonTransformer,
   } = config ?? {};
@@ -94,7 +92,7 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
     const errorEvent$ = pipe(
       errorSubject.asObservable(),
       e$ => error$(e$, ctx),
-      e$ => defer(() => errorLogger$(e$, ctx)),
+      e$ => exceptionLogger$(e$, ctx),
     );
 
     const processError = <T>(origin$: Observable<T>): Observable<T> =>

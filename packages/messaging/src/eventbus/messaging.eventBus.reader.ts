@@ -12,11 +12,15 @@ export interface EventBusConfig {
   timeout?: number;
 }
 
-export const EventBusToken = createContextToken<TransportLayerConnection<Transport.LOCAL>>('EventBus');
+export interface EventBus extends TransportLayerConnection<Transport.LOCAL> {
+  context: Context;
+}
+
+export const EventBusToken = createContextToken<EventBus>('EventBus');
 
 export const eventBus = (config: EventBusConfig) => pipe(
   R.ask<Context>(),
-  R.map(async derivedContext => {
+  R.map<Context, Promise<EventBus>>(async derivedContext => {
     const { listener } = config;
     const transportLayer = createLocalStrategy(config);
     const transportLayerConnection = await transportLayer.connect();
@@ -31,6 +35,10 @@ export const eventBus = (config: EventBusConfig) => pipe(
 
     listener(context)(transportLayerConnection);
 
-    return transportLayerConnection;
+    const eventBus = transportLayerConnection as EventBus;
+
+    eventBus.context = context;
+
+    return eventBus;
   }),
 );
