@@ -14,7 +14,7 @@ import { ContextToken } from './context.token.factory';
 const unregisterRedundantToken = (token: ContextToken) => (context: Context): Context =>
   pipe(
     lookup(context)(DerivedContextToken),
-    O.chain(() => lookup(context)(token)),
+    O.chain(derivedContext => lookup(derivedContext)(token)),
     O.fold(
       constant(context),
       () => unregister(token)(context)),
