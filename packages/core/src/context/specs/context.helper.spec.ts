@@ -3,7 +3,7 @@ import { size } from 'fp-ts/lib/Map';
 import { createContextToken } from '../context.token.factory';
 import { createReader } from '../context.reader.factory';
 import { contextFactory, constructContext } from '../context.helper';
-import { bindTo, lookup, DerivedContextToken, bindEagerlyTo } from '../context';
+import { bindTo, lookup, DerivedContextToken, bindEagerlyTo, createContext } from '../context';
 import { LoggerToken } from '../../logger';
 
 describe('#contextFactory', () => {
@@ -72,7 +72,24 @@ describe('#constructContext', () => {
     );
 
     expect(size(context)).toEqual(1);        // Context[DerivedContextToken]
-    expect(size(derivedContext)).toEqual(1); // Context[Loggertoken]
+    expect(size(derivedContext)).toEqual(1); // DerivedContext[Loggertoken]
     expect(customLogger).toHaveBeenCalledTimes(1);
+  });
+
+  test('registers default LoggerToken if derived context doesn\'t have it already bound', async () => {
+    // given
+    const derivedContext = createContext();
+
+    // when
+    const context = await constructContext()(
+      bindEagerlyTo(DerivedContextToken)(() => derivedContext),
+    );
+
+    // then
+    expect(lookup(derivedContext)(LoggerToken)).toEqual(O.none);
+    expect(lookup(context)(LoggerToken)).toEqual(O.some(expect.anything()));
+
+    expect(size(context)).toEqual(2);        // Context[DerivedContextToken, Loggertoken]
+    expect(size(derivedContext)).toEqual(0); // DerivedContext[]
   });
 });
