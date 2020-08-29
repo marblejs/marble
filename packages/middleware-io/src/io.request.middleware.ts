@@ -1,6 +1,7 @@
 import * as t from 'io-ts';
 import { HttpError, HttpRequest, HttpStatus } from '@marblejs/core';
 import { isTestingMetadataOn } from '@marblejs/core/dist/+internal/testing';
+import { pipe } from 'fp-ts/lib/function';
 import { forkJoin, Observable, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { ioTypeToJsonSchema, mergeJsonObjects } from './io.json-schema';
@@ -21,15 +22,17 @@ enum Context {
   HEADERS = 'headers',
 }
 
+const unknown$ = (i$: Observable<unknown>) => i$;
+
 export const requestValidator$ = <
   TBody extends Schema = t.UnknownC,
   TParams extends Schema = t.UnknownC,
   TQuery extends Schema = t.UnknownC,
 >(schema: RequestSchema<TBody, TParams, TQuery>, options: ValidatorOptions = {}) => {
-  const bodyValidator$ = validator$(schema.body, { ...options, context: Context.BODY });
-  const paramsValidator$ = validator$(schema.params, { ...options, context: Context.PARAMS });
-  const queryValidator$ = validator$(schema.query, { ...options, context: Context.QUERY });
-  const headersValidator$ = validator$(schema.headers, { ...options, context: Context.HEADERS });
+  const bodyValidator$ = schema.body ? validator$(schema.body, { ...options, context: Context.BODY }) : unknown$;
+  const paramsValidator$ = schema.params ? validator$(schema.params, { ...options, context: Context.PARAMS }) : unknown$;
+  const queryValidator$ = schema.query ? validator$(schema.query, { ...options, context: Context.QUERY }) : unknown$;
+  const headersValidator$ = schema.headers ? validator$(schema.headers, { ...options, context: Context.HEADERS }) : unknown$;
 
   const addMetadata = (req: HttpRequest, name: keyof typeof schema) => {
     req.meta = {
@@ -50,27 +53,26 @@ export const requestValidator$ = <
         addMetadata(req, 'headers');
       }
     }),
-    mergeMap(req =>
-      forkJoin(
-        bodyValidator$(of(req.body as any)),
-        paramsValidator$(of(req.params as any)),
-        queryValidator$(of(req.query as any)),
-        headersValidator$(of(req.headers as any)),
-      ).pipe(
-        map(([body, params, query]) => {
-          req.body = body;
-          req.params = params;
-          req.query = query;
-          return req as HttpRequest<
-            (typeof schema.body extends t.UnknownC | undefined | null ? unknown : typeof body) & T['body'],
-            (typeof schema.params extends t.UnknownC | undefined | null ? unknown : typeof params) & T['params'],
-            (typeof schema.query extends t.UnknownC | undefined | null ? unknown : typeof query) & T['query']
-          >;
-        }),
-        catchError((error: IOError) => throwError(
-          new HttpError(error.message, HttpStatus.BAD_REQUEST, error.data, req, error.context),
-        )),
-      )
-    ),
+    mergeMap(req => pipe(
+      forkJoin([
+        bodyValidator$(of(req.body)),
+        paramsValidator$(of(req.params)),
+        queryValidator$(of(req.query)),
+        headersValidator$(of(req.headers)),
+      ]),
+      map(([body, params, query]) => {
+        req.body = body;
+        req.params = params;
+        req.query = query;
+        return req as HttpRequest<
+          (typeof schema.body extends t.UnknownC | undefined | null ? unknown : t.TypeOf<TBody>) & T['body'],
+          (typeof schema.params extends t.UnknownC | undefined | null ? unknown : t.TypeOf<TParams>) & T['params'],
+          (typeof schema.query extends t.UnknownC | undefined | null ? unknown : t.TypeOf<TQuery>) & T['query']
+        >;
+      }),
+      catchError((error: IOError) => throwError(
+        new HttpError(error.message, HttpStatus.BAD_REQUEST, error.data, req, error.context),
+      )),
+    )),
   );
 };

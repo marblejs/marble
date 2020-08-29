@@ -23,10 +23,7 @@ describe('#validator$', () => {
         expect((outgoingData as any).additional).toEqual(input.additional);
         done();
       },
-      (error: IOError) => {
-        fail(error.data);
-        done();
-      },
+      fail,
     );
   });
 
@@ -44,10 +41,7 @@ describe('#validator$', () => {
         expect(outgoingData).toEqual(input);
         done();
       },
-      (error: IOError) => {
-        fail(error.data);
-        done();
-      },
+      fail,
     );
   });
 
@@ -69,10 +63,7 @@ describe('#validator$', () => {
 
     // then
     stream$.subscribe(
-      () => {
-        fail('Datas should\t be returned');
-        done();
-      },
+      fail,
       (error: IOError) => {
         expect(error.message).toEqual('Validation error');
         expect(error.data).toEqual(expectedError);
