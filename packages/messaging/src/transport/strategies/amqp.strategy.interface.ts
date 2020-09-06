@@ -1,4 +1,3 @@
-import { Options } from 'amqplib';
 import { NamedError } from '@marblejs/core/dist/+internal/utils';
 import { Transport } from '../transport.interface';
 
@@ -10,7 +9,18 @@ export interface AmqpStrategy {
 export interface AmqpStrategyOptions {
   host: string;
   queue: string;
-  queueOptions?: Options.AssertQueue;
+  queueOptions?: {
+    exclusive?: boolean;
+    durable?: boolean;
+    autoDelete?: boolean;
+    arguments?: any;
+    messageTtl?: number;
+    expires?: number;
+    deadLetterExchange?: string;
+    deadLetterRoutingKey?: string;
+    maxLength?: number;
+    maxPriority?: number;
+  };
   prefetchCount?: number;
   expectAck?: boolean;
   timeout?: number;
