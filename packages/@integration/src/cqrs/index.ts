@@ -29,8 +29,8 @@ export const server = () => createServer({
   port: getPortEnv(),
   listener,
   dependencies: [
-    bindEagerlyTo(EventBusClientToken)(eventBusClient),
     bindEagerlyTo(EventBusToken)(eventBus({ listener: eventBusListener })),
+    bindEagerlyTo(EventBusClientToken)(eventBusClient),
   ],
 });
 

@@ -1,8 +1,7 @@
 import * as E from 'fp-ts/lib/Either';
 import * as O from 'fp-ts/lib/Option';
-import * as M from 'fp-ts/lib/Map';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Context, ordContextToken } from '@marblejs/core';
+import { Context, lookup } from '@marblejs/core';
 import { EventBusToken } from '../eventbus/messaging.eventBus.reader';
 import { Transport, TransportLayer, isTransportLayerConnection } from './transport.interface';
 import { createAmqpStrategy } from './strategies/amqp.strategy';
@@ -11,7 +10,7 @@ import { createRedisStrategy } from './strategies/redis.strategy';
 export const provideLocalTransportLayer = (context?: Context): E.Either<Error, TransportLayer<Transport>> =>
   pipe(
     O.fromNullable(context),
-    O.chain(ctx => M.lookup(ordContextToken)(EventBusToken, ctx)),
+    O.chain(ctx => lookup(ctx)(EventBusToken)),
     E.fromOption(() => new Error('Cannot provide EventBus transport layer if it is not registered')),
     E.chain(dependency => !isTransportLayerConnection(dependency)
       ? E.left(new Error('Cannot provide non-evaluated EventBus transport layer'))
