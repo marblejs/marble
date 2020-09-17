@@ -8,10 +8,12 @@ export const EventBusClientToken = createContextToken<EventBusClient>('EventBusC
 export const eventBusClient = createReader(ask => {
   const logger = useContext(LoggerToken)(ask);
 
-  logger({
+  const logWarning = logger({
     tag: LoggerTag.EVENT_BUS,
     level: LoggerLevel.WARN,
     type: 'eventBusClient',
     message: '"EventBusClient" requires to be registered eagerly before main "EventBus" reader.',
-  })();
+  });
+
+  logWarning();
 });
