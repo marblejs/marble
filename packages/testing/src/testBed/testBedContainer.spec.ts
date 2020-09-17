@@ -41,7 +41,7 @@ describe('#createTestBedSetup cleanup container', () => {
 
     await cleanup();
 
-    expect(eventBusSpy).toHaveBeenCalledTimes(2);
+    expect(eventBusSpy).toHaveBeenCalledTimes(1);
     expect(eventBusClientSpy).toHaveBeenCalledTimes(1);
   });
 

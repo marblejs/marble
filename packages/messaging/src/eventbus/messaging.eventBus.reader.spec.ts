@@ -242,12 +242,12 @@ describe('#eventBus', () => {
     await eventBusClientInstance.close();
   });
 
-  test('fails if event bus client is registered before main EventBus reader', async () => {
+  test('doesn\'t fail if event bus client is registered before main EventBus reader', async () => {
     const context = contextFactory(
       bindEagerlyTo(EventBusClientToken)(eventBusClient),
       bindEagerlyTo(EventBusToken)(eventBus({ listener: messagingListener() })),
     );
 
-    await expect(context).rejects.toEqual(new Error('Cannot provide non-evaluated EventBus transport layer'));
+    await expect(context).resolves.toBeDefined();
   });
 });

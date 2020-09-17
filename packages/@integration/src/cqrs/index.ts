@@ -1,12 +1,13 @@
 import * as T from 'fp-ts/lib/Task';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isTestEnv, getPortEnv } from '@marblejs/core/dist/+internal/utils';
-import { httpListener, createServer, bindEagerlyTo } from '@marblejs/core';
+import { httpListener, createServer, bindEagerlyTo, bindTo } from '@marblejs/core';
 import { messagingListener, EventBusClientToken, eventBusClient, EventBusToken, eventBus } from '@marblejs/messaging';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { logger$ } from '@marblejs/middleware-logger';
 import { postDocumentsGenerate$ } from './effects/http.effects';
 import { generateOfferDocument$, offerDocumentCreated$ } from './effects/eventbus.effects';
+import { SomeDependencyToken, SomeDependency } from './__mock__/__mock__dependencies';
 
 const eventBusListener = messagingListener({
   effects: [
@@ -31,6 +32,7 @@ export const server = () => createServer({
   dependencies: [
     bindEagerlyTo(EventBusToken)(eventBus({ listener: eventBusListener })),
     bindEagerlyTo(EventBusClientToken)(eventBusClient),
+    bindTo(SomeDependencyToken)(SomeDependency),
   ],
 });
 

@@ -1,16 +1,17 @@
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as R from 'fp-ts/lib/Reader';
-import { Context, createContextToken } from '@marblejs/core';
-import { Transport } from '../transport/transport.interface';
+import { createContextToken, createReader, useContext, LoggerToken, LoggerTag, LoggerLevel } from '@marblejs/core';
 import { MessagingClient } from '../client/messaging.client.interface';
-import { messagingClient } from '../client/messaging.client';
 
-export const EventBusClientToken = createContextToken<MessagingClient>('EventBusClient');
+export interface EventBusClient extends MessagingClient {}
 
-export const eventBusClient = pipe(
-  R.ask<Context>(),
-  R.map(messagingClient({
-    transport: Transport.LOCAL,
-    options: {},
-  })),
-);
+export const EventBusClientToken = createContextToken<EventBusClient>('EventBusClient');
+
+export const eventBusClient = createReader(ask => {
+  const logger = useContext(LoggerToken)(ask);
+
+  logger({
+    tag: LoggerTag.EVENT_BUS,
+    level: LoggerLevel.WARN,
+    type: 'eventBusClient',
+    message: '"EventBusClient" requires to be registered eagerly before main "EventBus" reader.',
+  })();
+});
