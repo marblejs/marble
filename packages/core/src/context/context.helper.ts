@@ -1,24 +1,29 @@
 import * as T from 'fp-ts/lib/Task';
 import * as O from 'fp-ts/lib/Option';
+import * as IO from 'fp-ts/lib/IO';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { constant } from 'fp-ts/lib/function';
 import { logger, LoggerToken, mockLogger } from '../logger';
 import { isTestEnv } from '../+internal/utils';
-import { registerAll, BoundDependency, createContext, bindTo, resolve, Context, lookup, DerivedContextToken, unregister } from './context';
+import { registerAll, BoundDependency, createContext, bindTo, resolve, Context, lookup, DerivedContextToken } from './context';
 import { ContextToken } from './context.token.factory';
 
 /**
  * `INTERNAL` - unregisters redundant token if available in DerivedContext
  * @since v3.4.0
  */
-const unregisterRedundantToken = (token: ContextToken) => (context: Context): Context =>
-  pipe(
+const unregisterRedundantToken = (token: ContextToken) => (context: Context): IO.IO<Context> => {
+  const deleteToken = pipe(
+    () => context.delete(token),
+    IO.map(constant(context)),
+  );
+
+  return pipe(
     lookup(context)(DerivedContextToken),
     O.chain(derivedContext => lookup(derivedContext)(token)),
-    O.fold(
-      constant(context),
-      () => unregister(token)(context)),
+    O.fold(() => IO.of(context), () => deleteToken),
   );
+}
 
 /**
  * Constructs and resolves a new or derived context based on provided dependencies
@@ -32,7 +37,7 @@ export const constructContext = (context?: Context) => (...dependencies: BoundDe
       ...dependencies,
     ]),
     context => () => resolve(context),
-    T.map(unregisterRedundantToken(LoggerToken)),
+    T.chain(context => T.fromIO(unregisterRedundantToken(LoggerToken)(context))),
   )();
 
 /**

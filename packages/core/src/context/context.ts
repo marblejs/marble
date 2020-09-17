@@ -41,11 +41,11 @@ export interface BoundDependency<T, U extends ContextDependency = ContextDepende
 export const DerivedContextToken = createContextToken<Context>('DerivedContext');
 
 const isEagerDependency = (x: any): x is ContextEagerReader => {
-  return x.eval && x.tag === ContextReaderTag.EAGER_READER;
+  return Boolean(x.eval && x.tag === ContextReaderTag.EAGER_READER);
 };
 
 const isLazyDependency = (x: any): x is ContextLazyReader => {
-  return x.eval && x.tag === ContextReaderTag.LAZY_READER;
+  return Boolean(x.eval && x.tag === ContextReaderTag.LAZY_READER);
 };
 
 export const createContext = () => M.empty;
