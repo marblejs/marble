@@ -19,6 +19,7 @@
     "purge": "yarn clean && rimraf node_modules",
     "prepublishOnly": "yarn clean && yarn build && yarn test",
     "publish": "lerna publish --no-push --force-publish=*",
+    "publish:canary:patch": "lerna publish --no-push --dist-tag dev --canary patch --preid dev --force-publish=* --ignore-scripts",
     "publish:canary:minor": "lerna publish --no-push --dist-tag dev --canary minor --preid dev --force-publish=* --ignore-scripts",
     "publish:canary:major": "lerna publish --no-push --dist-tag next --canary major --preid next --force-publish=* --ignore-scripts",
     "publish:canary:major:github": "lerna publish --dist-tag next --canary major --preid next --yes --force-publish=* --no-verify-access --no-git-reset --ignore-scripts",
