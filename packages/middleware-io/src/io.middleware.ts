@@ -22,7 +22,7 @@ const validateError = (reporter: Reporter<any> = defaultReporter, context?: stri
   )(result)
 
 export function validator$<U extends Schema, T>(schema: U, options?: ValidatorOptions): (i$: Observable<T>) => Observable<t.TypeOf<U>>;
-export function validator$<U extends Schema, T>(schema: undefined, options?: ValidatorOptions): (i$: Observable<T>) => Observable<T>;
+export function validator$<T>(schema: undefined, options?: ValidatorOptions): (i$: Observable<T>) => Observable<T>;
 export function validator$<U extends Schema, T>(schema: U | undefined, options: ValidatorOptions = {}) {
   return (i$: Observable<T>) =>
     !schema ? i$ : i$.pipe(

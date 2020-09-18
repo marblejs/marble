@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as Joi from 'joi';
 import { Schema } from './validator.schema';
 

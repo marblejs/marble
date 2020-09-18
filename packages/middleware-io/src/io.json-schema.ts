@@ -143,7 +143,7 @@ export const getTag = (ioType: t.Any): IoTag => {
 
 export const getIoConverter = (tag: IoTag) => IoTypes[tag];
 
-const convert = <K extends IoTag>(ioType: t.Any, supertypes: any[] = []): JSONSchema7 =>
+const convert = (ioType: t.Any, supertypes: any[] = []): JSONSchema7 =>
   getIoConverter(getTag(ioType))(ioType, supertypes);
 
 const filterTree = <T extends Record<string, any> | any[]>(element: T, matcher: (value: any) => boolean): T | undefined => {
