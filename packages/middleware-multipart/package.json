@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-multipart",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "description": "A multipart/form-data middleware for Marble.js",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
@@ -46,8 +46,8 @@
     "rxjs": "^6.5.3"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.4.1",
-    "@marblejs/testing": "^3.4.1",
+    "@marblejs/core": "^3.4.2",
+    "@marblejs/testing": "^3.4.2",
     "@types/form-data": "^2.5.0",
     "form-data": "^3.0.0"
   },
