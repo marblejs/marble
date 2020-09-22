@@ -1,4 +1,4 @@
-import { isString, trim, stringify, createUuid, trunc } from '../string.util';
+import { isString, trim, stringify, createUuid, trunc, maskUriComponent } from '../string.util';
 
 describe('#isString', () => {
   const cases: [any, boolean][] = [
@@ -52,3 +52,15 @@ test('#stringify stringifies given value', () => {
 test('#createUuid creates unique identifier', () => {
   expect(createUuid()).toBeDefined();
 });
+
+describe('#maskUriComponent', () => {
+  test('masks "authorization" URI component', () => {
+    const mask = maskUriComponent('authorization');
+
+    expect(mask('amqp://some_user:some_pass@host:10000/vhost'))
+      .toEqual('amqp://[user]:[pass]@host:10000/vhost');
+
+    expect(mask('amqp://host:10000/vhost'))
+      .toEqual('amqp://host:10000/vhost');
+  })
+})

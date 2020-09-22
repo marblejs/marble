@@ -4,7 +4,7 @@ import { identity } from 'fp-ts/lib/function';
 import { Subject } from 'rxjs';
 import { takeWhile, takeUntil, take } from 'rxjs/operators';
 import { bindTo, createEffectContext, combineEffects, ServerIO, lookup, logContext, LoggerTag, contextFactory } from '@marblejs/core';
-import { throwException } from '@marblejs/core/dist/+internal/utils';
+import { throwException, maskUriComponent } from '@marblejs/core/dist/+internal/utils';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { statusLogger$ } from '../middlewares/messaging.statusLogger.middleware';
 import { TransportLayerConnection } from '../transport/transport.interface';
@@ -55,15 +55,25 @@ export const createMicroservice = async (config: CreateMicroserviceConfig) => {
 
     connection.status$
       .pipe(takeUntil(connection.close$))
-      .subscribe(type => serverEventsSubject.next(ServerEvent.status(host, channel, type)));
+      .subscribe(type => pipe(
+        maskUriComponent('authorization')(host),
+        host => ServerEvent.status(host, channel, type),
+        event => serverEventsSubject.next(event),
+      ));
 
     connection.close$
       .pipe(take(1))
-      .subscribe(() => serverEventsSubject.next(ServerEvent.close()));
+      .subscribe(() => pipe(
+        ServerEvent.close(),
+        event => serverEventsSubject.next(event),
+      ));
 
     connection.error$
       .pipe(takeUntil(connection.close$))
-      .subscribe(error => serverEventsSubject.next(ServerEvent.error(error)));
+      .subscribe(error => pipe(
+        ServerEvent.error(error),
+        event => serverEventsSubject.next(event),
+      ));
 
     return connection;
   };

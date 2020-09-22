@@ -25,3 +25,12 @@ export const stringify = (value: any): string =>
     : JSON.stringify(value);
 
 export const createUuid = () => uuid();
+
+export const maskUriComponent = (type: 'authorization') => (uri: string): string => {
+  switch (type) {
+    case 'authorization':
+      return uri.replace(/\/\/(.*)\@/, '//[user]:[pass]@');
+    default:
+      return uri;
+  }
+}
