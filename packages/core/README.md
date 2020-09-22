@@ -32,6 +32,7 @@ Functional reactive <a href="http://nodejs.org" target="blank">Node.js</a> frame
 | [@marblejs/core](https://www.npmjs.com/package/@marblejs/core)                           | Framework core module           |
 | [@marblejs/websockets](https://www.npmjs.com/package/@marblejs/websockets)               | WebSockets module               |
 | [@marblejs/messaging](https://www.npmjs.com/package/@marblejs/messaging)                 | Messaging module                |
+| [@marblejs/testing](https://www.npmjs.com/package/@marblejs/testing)                     | Testing module                  |
 | [@marblejs/middleware-logger](https://www.npmjs.com/package/@marblejs/middleware-logger) | Logger middleware               |
 | [@marblejs/middleware-body](https://www.npmjs.com/package/@marblejs/middleware-body)     | Body parser middleware          |
 | [@marblejs/middleware-io](https://www.npmjs.com/package/@marblejs/middleware-io)         | I/O validation middleware       |
