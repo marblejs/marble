@@ -49,60 +49,6 @@ For the latest updates, documentation, change log, and release information visit
 
 To view the example project, visit the [example](https://github.com/marblejs/example) repository.
 
-## Authors
-
-<table border="0">
-  <tr>
-    <td>
-      <a href="https://github.com/JozefFlakus" style="color: white">
-        <img src="https://github.com/JozefFlakus.png?s=150" width="150"/>
-      </a>
-    </td>
-    <td>
-      <p><strong>Józef Flakus</strong></p>
-      <p><strong>contact: </strong><a href="mailto:hello@jflakus.com">hello@jflakus.com</a></p>
-      <p><strong>twitter: </strong><a href="https://twitter.com/jozflakus">@jozflakus</a></p>
-    </td>
-  </tr>
-</table>
-
-## Contributors
-
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/sebastianmusial" style="color: white">
-        <img src="https://github.com/sebastianmusial.png?s=150" width="100"/>
-        <p style="text-align: center"><small>Sebastian Musial</small></p>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/pdomaleczny" style="color: white">
-        <img src="https://github.com/pdomaleczny.png?s=150" width="100"/>
-        <p style="text-align: center"><small>Patryk Domałeczny</small></p>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/luciorubeens" style="color: white">
-        <img src="https://github.com/luciorubeens.png?s=150" width="100"/>
-        <p style="text-align: center"><small>Lúcio Rubens</small></p>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/krzysztof-miemiec" style="color: white">
-        <img src="https://github.com/krzysztof-miemiec.png?s=150" width="100"/>
-        <p style="text-align: center"><small>Krzysztof Miemiec</small></p>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/edbzn" style="color: white">
-        <img src="https://github.com/edbzn.png?s=150" width="100"/>
-        <p style="text-align: center"><small>Edouard Bozon</small></p>
-      </a>
-    </td>
-  </tr>
-</table>
-
 ## License
 
 marble.js is MIT licensed
