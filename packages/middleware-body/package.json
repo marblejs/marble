@@ -37,7 +37,9 @@
   "dependencies": {
     "@types/qs": "^6.5.1",
     "@types/type-is": "~1.6.2",
+    "@types/content-type": "1.1.2",
     "qs": "^6.6.0",
+    "content-type": "~1.0.4",
     "type-is": "~1.6.16"
   },
   "devDependencies": {
