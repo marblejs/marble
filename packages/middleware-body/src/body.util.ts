@@ -1,10 +1,12 @@
 import * as typeIs from 'type-is';
+import { pipe } from 'fp-ts/lib/function';
+import { Observable } from 'rxjs';
+import { map, toArray } from 'rxjs/operators';
 import { HttpRequest } from '@marblejs/core';
 import { getContentType } from '@marblejs/core/dist/+internal/http';
 import { fromReadableStream } from '@marblejs/core/dist/+internal/observable';
-import { map, toArray } from 'rxjs/operators';
 
-export const matchType = (type: string[]) => (req: HttpRequest) =>
+export const matchType = (type: string[]) => (req: HttpRequest): boolean =>
   !!typeIs.is(getContentType(req.headers), type);
 
 export const isMultipart = (req: HttpRequest): boolean =>
@@ -13,8 +15,9 @@ export const isMultipart = (req: HttpRequest): boolean =>
 export const hasBody = (req: HttpRequest): boolean =>
   req.body !== undefined && req.body !== null;
 
-export const getBody = (req: HttpRequest) =>
-  fromReadableStream(req).pipe(
+export const getBody = (req: HttpRequest): Observable<Buffer> =>
+  pipe(
+    fromReadableStream(req),
     toArray(),
     map(chunks => Buffer.concat(chunks)),
   );
