@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/core",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "description": "Reactive Node APIs made easy",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
