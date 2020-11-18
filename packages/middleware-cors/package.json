@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-cors",
-  "version": "3.4.4",
+  "version": "3.4.5",
   "description": "A CORS middleware for Marble.js",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
@@ -42,7 +42,7 @@
     "rxjs": "^6.5.3"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.4.4"
+    "@marblejs/core": "^3.4.5"
   },
   "publishConfig": {
     "access": "public"
