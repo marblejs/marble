@@ -9,6 +9,7 @@ export type LoggerOptions = {
   type: string;
   message: string;
   level?: LoggerLevel;
+  data?: Record<string, unknown>;
 };
 
 export const enum LoggerTag {

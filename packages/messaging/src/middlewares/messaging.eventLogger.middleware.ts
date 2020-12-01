@@ -20,7 +20,12 @@ export const inputLogger$: MsgMiddlewareEffect = (event$, ctx) => {
   return event$.pipe(
     tap(event => pipe(
       getIncomingMessageForEvent(event),
-      message => logger({ tag, message, level: LoggerLevel.INFO, type: 'EVENT_IN' }),
+      message => logger({
+        tag, message,
+        level: LoggerLevel.INFO,
+        type: 'EVENT_IN',
+        data: { payload: event.payload },
+      }),
     )()),
   );
 };
@@ -42,7 +47,12 @@ export const outputLogger$: MsgOutputEffect = (event$, ctx) => {
       event.error
         ? getErrorMessageForEvent(event)
         : getOutgoingMessageForEvent(event),
-      message => logger({ tag, message, level: event.error ? LoggerLevel.ERROR : LoggerLevel.INFO, type: 'EVENT_OUT' })
+      message => logger({
+        tag, message,
+        level: event.error ? LoggerLevel.ERROR : LoggerLevel.INFO,
+        type: 'EVENT_OUT',
+        data: { payload: event.payload },
+      }),
     )()),
   );
 };
