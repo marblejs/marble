@@ -62,6 +62,7 @@ describe('inputLogger$', () => {
       message: events[0].type,
       type: 'EVENT_IN',
       tag: 'event_bus',
+      data: { payload: events[0].payload },
     });
 
     expect(loggerMock).toHaveBeenCalledWith({
@@ -69,6 +70,7 @@ describe('inputLogger$', () => {
       message: events[1].type,
       type: 'EVENT_IN',
       tag: 'event_bus',
+      data: { payload: events[1].payload },
     });
 
     expect(loggerMock).toHaveBeenCalledWith({
@@ -76,6 +78,7 @@ describe('inputLogger$', () => {
       message: events[2].type,
       type: 'EVENT_IN',
       tag: 'event_bus',
+      data: { payload: events[2].payload },
     });
   });
 
@@ -122,6 +125,7 @@ describe('inputLogger$', () => {
       message: events[0].type,
       type: 'EVENT_OUT',
       tag: 'event_bus',
+      data: { payload: events[0].payload },
     });
 
     expect(loggerMock).toHaveBeenCalledWith({
@@ -129,6 +133,7 @@ describe('inputLogger$', () => {
       message: `${events[1].type}, id: ${events[1].metadata?.correlationId} and sent to \"${events[1].metadata?.replyTo}\"`,
       type: 'EVENT_OUT',
       tag: 'event_bus',
+      data: { payload: events[1].payload },
     });
 
     expect(loggerMock).toHaveBeenCalledWith({
@@ -136,6 +141,7 @@ describe('inputLogger$', () => {
       message: `Unknown error "{"test":true}" for event "${events[2].type}"`,
       type: 'EVENT_OUT',
       tag: 'event_bus',
+      data: { payload: events[2].payload },
     });
 
     expect(loggerMock).toHaveBeenCalledWith({
@@ -143,6 +149,7 @@ describe('inputLogger$', () => {
       message: `"Error: some_error_message" for event "${events[3].type}"`,
       type: 'EVENT_OUT',
       tag: 'event_bus',
+      data: { payload: events[3].payload },
     });
 
     expect(loggerMock).toHaveBeenCalledWith({
@@ -150,6 +157,7 @@ describe('inputLogger$', () => {
       message: `Received invalid event "${events[4].type}" (UNKNOWN_CORRELATION_ID) with error: {"test":true}`,
       type: 'EVENT_OUT',
       tag: 'event_bus',
+      data: { payload: events[4].payload },
     });
 
     expect(loggerMock).toHaveBeenCalledWith({
@@ -157,6 +165,7 @@ describe('inputLogger$', () => {
       message: `Received invalid event "${events[5].type}" (some_id) with error: {"test":true}`,
       type: 'EVENT_OUT',
       tag: 'event_bus',
+      data: { payload: events[5].payload },
     });
   });
 
