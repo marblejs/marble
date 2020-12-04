@@ -20,6 +20,7 @@ enum IoTag {
   DICTIONARY = 'DictionaryType',
   REFINEMENT = 'RefinementType',
   CUSTOM_JSON_SCHEMA = 'CustomJsonSchemaType',
+  UNKNOWN = 'UnknownType',
 }
 
 type IoConverter = (type: any, supertypes: any[]) => any;
@@ -131,13 +132,13 @@ const IoTypes: Record<IoTag, IoConverter> = {
 
   [IoTag.CUSTOM_JSON_SCHEMA]: (type: CustomJsonSchemaType<any, any>) =>
     type.jsonSchema,
+
+  [IoTag.UNKNOWN]: () => ({ type: 'object' }),
 };
 
 export const getTag = (ioType: t.Any): IoTag => {
   const tag = (ioType as any)._tag;
-  if (!IoTypes[tag]) {
-    throw new Error(`Unsupported type with tag: ${tag}\n${JSON.stringify(ioType, null, 2)}`);
-  }
+  if (!IoTypes[tag]) return IoTag.UNKNOWN;
   return tag;
 };
 

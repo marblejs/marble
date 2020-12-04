@@ -187,10 +187,12 @@ describe('#ioTypeToJsonSchema', () => {
     expect(ioTypeToJsonSchema(undefined)).toBe(undefined);
   });
 
-  test('throws an error on unknown io-ts type', () => {
-    expect(() => ioTypeToJsonSchema({
-      _tag: 'this is not a valid type'
-    } as any)).toThrow('Unsupported type');
+  test('fallbacks to "object" if codec is not supported', () => {
+    expect(ioTypeToJsonSchema({
+      _tag: 'some custom type',
+    } as any)).toEqual({
+      type: 'object',
+    });
   });
 });
 
