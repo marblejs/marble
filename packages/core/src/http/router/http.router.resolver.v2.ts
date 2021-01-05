@@ -2,7 +2,7 @@ import { Subject, of, fromEvent, Observable } from 'rxjs';
 import { takeUntil, share, take, mergeMap, map, catchError } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { EffectContext } from '../../effects/effects.interface';
-import { HttpServer, HttpRequest } from '../http.interface';
+import { HttpServer, HttpRequest, HttpStatus } from '../http.interface';
 import { defaultError$ } from '../error/http.error.effect';
 import { HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http.effects.interface';
 import {
@@ -11,6 +11,7 @@ import {
   errorNotBoundToRequestErrorFactory,
   responseNotBoundToRequestErrorFactory,
   isHttpRequestError,
+  HttpError
 } from '../error/http.error.model';
 import { useContext } from '../../context/context.hook';
 import { LoggerToken, LoggerTag, LoggerLevel } from '../../logger';
@@ -134,19 +135,28 @@ export const resolveRouting = (
 
   const resolve = (req: HttpRequest) => {
     const [urlPath, urlQuery] = req.url.split('?');
-    const resolvedRoute = find(urlPath, req.method);
 
-    if (!resolvedRoute) {
-      return errorSubject.next({ req, error: ROUTE_NOT_FOUND_ERROR });
+    try {
+      const resolvedRoute = find(urlPath, req.method);
+
+      if (!resolvedRoute) {
+        return errorSubject.next({ req, error: ROUTE_NOT_FOUND_ERROR });
+      }
+
+      req.query = queryParamsFactory(urlQuery);
+      req.params = resolvedRoute.params;
+      req.meta = {};
+      req.meta.path = resolvedRoute.path;
+
+      resolvedRoute.subject.next(req);
+      requestBus.next(req);
+    } catch (error) {
+      if (error.name === 'URIError') {
+        return errorSubject.next({ req, error: new HttpError(error.message, HttpStatus.BAD_REQUEST) });
+      }
+
+      return errorSubject.next({ req, error: new HttpError(`Internal server error: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR) });
     }
-
-    req.query = queryParamsFactory(urlQuery);
-    req.params = resolvedRoute.params;
-    req.meta = {};
-    req.meta.path = resolvedRoute.path;
-
-    resolvedRoute.subject.next(req);
-    requestBus.next(req);
   };
 
   return {
