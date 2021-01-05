@@ -1,10 +1,12 @@
 import { of, merge } from 'rxjs';
-import { mapTo, take, toArray, delay, mergeMap, map } from 'rxjs/operators';
+import { mapTo, take, toArray, delay, mergeMap, map, first } from 'rxjs/operators';
 import { createMockEffectContext, createHttpRequest, createHttpResponse, createTestRoute } from '../../../+internal/testing';
 import { HttpEffect } from '../../effects/http.effects.interface';
 import { Routing } from '../http.router.interface';
 import { resolveRouting } from '../http.router.resolver.v2';
 import { factorizeRegExpWithParams } from '../http.router.params.factory';
+import { HttpError } from '../../error/http.error.model';
+import { HttpStatus } from '../../http.interface';
 
 describe('#resolveRouting', () => {
   test('resolves routes inside collection', async (done) => {
@@ -67,7 +69,7 @@ describe('#resolveRouting', () => {
     resolve(req5);
   });
 
-  test('returns undefined if route cannot be resolved', () => {
+  test(`returns ${HttpStatus.NOT_FOUND} (Not Found) response if route cannot be resolved`, async () => {
     // given
     const ctx = createMockEffectContext();
     const response = createHttpResponse();
@@ -83,10 +85,44 @@ describe('#resolveRouting', () => {
     }];
 
     // when
-    const subject = resolveRouting(routing, ctx)().resolve(req);
+    const { resolve, errorSubject } = resolveRouting(routing, ctx)();
+    const errorPromise = errorSubject.pipe(first()).toPromise();
+
+    resolve(req);
 
     // then
-    expect(subject).toBeUndefined();
+    await expect(errorPromise).resolves.toEqual({
+      req,
+      error: new HttpError('Route not found', HttpStatus.NOT_FOUND),
+    });
+  });
+
+  test(`returns ${HttpStatus.BAD_REQUEST} (Bad Request) response in case of malformed URL`, async () => {
+    // given
+    const ctx = createMockEffectContext();
+    const response = createHttpResponse();
+    const req = createHttpRequest(({ url: '/group/%test', method: 'GET', response }));
+    const path = factorizeRegExpWithParams('/group/:id');
+
+    const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
+
+    const routing: Routing = [{
+      regExp: path.regExp,
+      path: path.path,
+      methods: { GET: { effect: effect$, middlewares: [], parameters: path.parameters } },
+    }];
+
+    // when
+    const { resolve, errorSubject } = resolveRouting(routing, ctx)();
+    const errorPromise = errorSubject.pipe(first()).toPromise();
+
+    resolve(req);
+
+    // then
+    await expect(errorPromise).resolves.toEqual({
+      req,
+      error: new HttpError('URI malformed', HttpStatus.BAD_REQUEST),
+    });
   });
 
   test('handles concurrent requests for the same path', done => {
@@ -179,7 +215,7 @@ describe('#resolveRouting', () => {
       createTestRoute({ delay: 20, throwError: true }), // [1] GET /delay_20
       createTestRoute({ delay: 30 }),                   // [2] GET /delay_30
       createTestRoute({ delay: 40 }),                   // [3] GET /delay_40
-    ]
+    ];
 
     const routing: Routing = testData.map(route => route.item);
 
