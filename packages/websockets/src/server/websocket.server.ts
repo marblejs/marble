@@ -6,9 +6,9 @@ import { map, takeWhile } from 'rxjs/operators';
 import { Context, contextFactory, createEffectContext, ServerIO, LoggerTag, lookup, logContext, combineEffects } from '@marblejs/core';
 import { createUuid, isNullable } from '@marblejs/core/dist/+internal/utils';
 import { createServer, handleServerBrokenConnections, handleClientBrokenConnection } from '../server/websocket.server.helper';
-import { handleBroadcastResponse, handleResponse } from '../response/websocket.response.handler';
 import { WebSocketConnectionError } from '../error/websocket.error.model';
 import { statusLogger$ } from '../middlewares/websockets.statusLogger.middleware';
+import { broadcastEvent, emitEvent } from './websocket.server.response';
 import { WebSocketServerConfig, WebSocketClientConnection, WebSocketServerConnection } from './websocket.server.interface';
 import { subscribeWebSocketEvents } from './websocket.server.event.subscriber';
 import { isCloseEvent, ServerEventType, ServerEvent } from './websocket.server.event';
@@ -50,7 +50,7 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
     verifyClient: verifyClient(context),
     noServer,
     ...options
-  }, webSocketListener.eventTransformer);
+  }, webSocketListener.eventTransformer, context);
 
   const { serverEvent$, serverEventSubject }  = subscribeWebSocketEvents(server);
 
@@ -63,8 +63,8 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
 
     server.on(ServerEventType.CONNECTION, (client: WebSocketClientConnection, req: http.IncomingMessage) => {
       client.once('close', () => serverEventSubject.next(ServerEvent.closeClient(client)));
-      client.sendResponse = handleResponse(client, webSocketListener.eventTransformer);
-      client.sendBroadcastResponse = handleBroadcastResponse(server, webSocketListener.eventTransformer);
+      client.sendResponse = emitEvent({ client, eventTransformer: webSocketListener.eventTransformer, ask: ctx.ask });
+      client.sendBroadcastResponse = broadcastEvent({ server, eventTransformer: webSocketListener.eventTransformer, ask: ctx.ask });
       client.isAlive = true;
       client.id = createUuid();
       client.address = req.connection.remoteAddress ?? '-';

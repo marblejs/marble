@@ -1,3 +1,5 @@
+import * as WebSocket from 'ws';
+
 export enum WebSocketStatus {
   NORMAL_CLOSURE = 1000,
   GOING_AWAY = 1001,
@@ -22,3 +24,10 @@ export enum WebSocketConnectionLiveness {
 }
 
 export type WebSocketData = string | Buffer | ArrayBuffer | Buffer[];
+
+export const WebsocketReadyStateMap = {
+  [WebSocket.OPEN]: 'open',
+  [WebSocket.CLOSED]: 'closed',
+  [WebSocket.CLOSING]: 'closing',
+  [WebSocket.CONNECTING]: 'connecting',
+};

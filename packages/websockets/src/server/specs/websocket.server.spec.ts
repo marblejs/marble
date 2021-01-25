@@ -1,4 +1,5 @@
 import { Event } from '@marblejs/core';
+import { wait } from '@marblejs/core/dist/+internal/utils';
 import { throwError, fromEvent, forkJoin } from 'rxjs';
 import { tap, map, mergeMap, first, toArray, take, mapTo } from 'rxjs/operators';
 import { webSocketListener } from '../websocket.server.listener';
@@ -51,7 +52,7 @@ describe('WebSocket server', () => {
       const client1$ = fromEvent(webSocketclient1, 'message').pipe(first());
       const client2$ = fromEvent(webSocketclient2, 'message').pipe(first());
 
-      forkJoin(client1$, client2$).subscribe(([ message1, message2 ]: [any, any]) => {
+      forkJoin([client1$, client2$]).subscribe(([ message1, message2 ]: [any, any]) => {
         expect(JSON.parse(message1.data)).toEqual(event);
         expect(JSON.parse(message2.data)).toEqual(event);
         webSocketclient1.close();
@@ -180,6 +181,29 @@ describe('WebSocket server', () => {
           httpSever.close();
           done();
         });
+    });
+
+    test('server doesn\'t try to push an event to the client that is already closing', async () => {
+      try {
+        // given - effects
+        const effect$: WsEffect = (event$, ctx) => event$.pipe(tap(_ => ctx.client.close()));
+
+        // given - server + clients
+        const listener = webSocketListener({ effects: [effect$] });
+        const httpServer = await bootstrapHttpServer();
+        const webSocketServer = await bootstrapWebSocketServer({ server: httpServer }, listener);
+        const webSocketClient = await bootstrapWebSocketClient(httpServer);
+
+        // when
+        webSocketClient.send(JSON.stringify({ type: 'SOME_EVENT' }));
+        await wait(1);
+
+        // then
+        webSocketServer.close();
+        httpServer.close();
+      } catch (error) {
+        fail(`Server should not throw a fatal exception: "${error}"`);
+      }
     });
   });
 
