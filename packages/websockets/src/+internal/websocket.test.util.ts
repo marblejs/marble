@@ -24,7 +24,8 @@ export const bootstrapWebSocketServer = async (
   options:  WebSocketServerConfig['options'],
   listener: ServerConfig<any, any>['listener'],
   event$?: WsServerEffect,
-) => (await createWebSocketServer({ options, listener, event$ }))();
+  dependencies?: WebSocketServerConfig['dependencies'],
+) => (await createWebSocketServer({ options, listener, event$, dependencies }))();
 
 export const createWebSocketClientMock = (): WebSocketClientConnection => {
   class WebSocketClientMock extends WebSocket.EventEmitter {

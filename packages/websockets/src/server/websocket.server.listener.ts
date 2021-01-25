@@ -115,7 +115,7 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
       input$
         .pipe(takeUntil(close$))
         .subscribe(
-          (event: Event) => client.sendResponse(event),
+          (event: Event) => client.sendResponse(event).toPromise(),
           (error: EventError) => {
             const type = 'ServerListener';
             const message = `Unexpected error for OutgoingEvent stream: "${error.name}", "${error.message}"`;
