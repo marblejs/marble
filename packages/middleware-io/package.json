@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-io",
-  "version": "3.4.8",
+  "version": "3.4.9",
   "description": "IO middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -39,7 +39,7 @@
     "io-ts": "^2.2.10"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.4.8"
+    "@marblejs/core": "^3.4.9"
   },
   "publishConfig": {
     "access": "public"
