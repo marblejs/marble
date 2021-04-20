@@ -3,8 +3,9 @@ import * as net from 'net';
 import * as WebSocket from 'ws';
 import { Observable, of } from 'rxjs';
 import { map, takeWhile } from 'rxjs/operators';
+import { filter } from 'fp-ts/lib/Array';
 import { Context, contextFactory, createEffectContext, ServerIO, LoggerTag, lookup, logContext, combineEffects } from '@marblejs/core';
-import { createUuid, isNullable } from '@marblejs/core/dist/+internal/utils';
+import { createUuid, isNonNullable, isNullable } from '@marblejs/core/dist/+internal/utils';
 import { createServer, handleServerBrokenConnections, handleClientBrokenConnection } from '../server/websocket.server.helper';
 import { WebSocketConnectionError } from '../error/websocket.error.model';
 import { statusLogger$ } from '../middlewares/websockets.statusLogger.middleware';
@@ -34,7 +35,7 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
       );
   };
 
-  const context = await contextFactory(...dependencies);
+  const context = await contextFactory(...filter(isNonNullable)(dependencies));
 
   logContext(LoggerTag.WEBSOCKETS)(context);
 

@@ -2,11 +2,12 @@ import * as http from 'http';
 import * as https from 'https';
 import { merge, EMPTY } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
+import { filter } from 'fp-ts/lib/Array';
 import { lookup, bindTo, bindEagerlyTo } from '../../context/context';
 import { createEffectContext } from '../../effects/effectsContext.factory';
 import { isTestingMetadataOn } from '../../+internal/testing';
-import { insertIf } from '../../+internal/utils';
+import { insertIf, isNonNullable } from '../../+internal/utils';
 import { HttpServer } from '../http.interface';
 import { logContext } from '../../context/context.logger';
 import { contextFactory } from '../../context/context.helper';
@@ -40,7 +41,7 @@ export const createServer = async (config: CreateServerConfig) => {
     boundHttpServerEvent,
     boundHttpRequestBus,
     ...insertIf(isTestingMetadataOn())(boundHttpRequestMetadataStorage),
-    ...dependencies,
+    ...filter(isNonNullable)(dependencies),
   );
 
   logContext(LoggerTag.HTTP)(context);
