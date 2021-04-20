@@ -4,9 +4,11 @@ import * as https from 'https';
 import { EventEmitter } from 'events';
 import { forkJoin } from 'rxjs';
 import { tap, filter, take } from 'rxjs/operators';
+import { pipe, constant } from 'fp-ts/lib/function';
 import { HttpServer } from '../http.interface';
-import { lookup } from '../../context/context';
+import { lookup, bindTo } from '../../context/context';
 import { useContext } from '../../context/context.hook';
+import { createContextToken } from '../../context/context.token.factory';
 import { HttpServerClientToken } from './internal-dependencies/httpServerClient.reader';
 import { httpListener } from './http.server.listener';
 import { createServer } from './http.server';
@@ -99,20 +101,45 @@ describe('#createServer', () => {
     expect(boundServer).toBeDefined();
   });
 
+  test('can register `nullable` context dependency', async () => {
+    // given - context dependency
+    const someToken = createContextToken();
+    const someDependency = 'test';
+
+    // given - server
+    const app = await createServer({
+      listener: httpListener(),
+      dependencies: [
+        bindTo(someToken)(constant(someDependency)),
+        undefined,
+      ],
+    });
+
+    // when
+    server = await app();
+
+    // then
+    const ask = lookup(app.context);
+    const boundDependency = useContext(someToken)(ask);
+
+    expect(boundDependency).toEqual(someDependency);
+  });
+
   test(`emits server events`, async done => {
     const app = await createServer({
       listener: httpListener(),
-      event$: event$ => forkJoin(
-        event$.pipe(filter(isErrorEvent), take(1)),
-        event$.pipe(filter(isClientErrorEvent), take(1)),
-        event$.pipe(filter(isCloseEvent), take(1)),
-        event$.pipe(filter(isConnectEvent), take(1)),
-        event$.pipe(filter(isConnectionEvent), take(1)),
-        event$.pipe(filter(isListeningEvent), take(1)),
-        event$.pipe(filter(isUpgradeEvent), take(1)),
-        event$.pipe(filter(isCheckContinueEvent), take(1)),
-        event$.pipe(filter(isCheckExpectationEvent), take(1)),
-      ).pipe(
+      event$: event$ => pipe(
+        forkJoin([
+          event$.pipe(filter(isErrorEvent), take(1)),
+          event$.pipe(filter(isClientErrorEvent), take(1)),
+          event$.pipe(filter(isCloseEvent), take(1)),
+          event$.pipe(filter(isConnectEvent), take(1)),
+          event$.pipe(filter(isConnectionEvent), take(1)),
+          event$.pipe(filter(isListeningEvent), take(1)),
+          event$.pipe(filter(isUpgradeEvent), take(1)),
+          event$.pipe(filter(isCheckContinueEvent), take(1)),
+          event$.pipe(filter(isCheckExpectationEvent), take(1)),
+        ]),
         tap(() => done()),
       ),
     });

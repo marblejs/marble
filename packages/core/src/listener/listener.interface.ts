@@ -29,5 +29,5 @@ export interface ServerConfig<
 > {
   event$?: T;
   listener: U;
-  dependencies?: BoundDependency<any>[];
+  dependencies?: (BoundDependency<any> | undefined | null)[];
 }

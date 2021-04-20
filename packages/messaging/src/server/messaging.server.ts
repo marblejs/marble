@@ -1,10 +1,10 @@
 import * as E from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
+import { identity, pipe } from 'fp-ts/lib/function';
+import { filter } from 'fp-ts/lib/Array';
 import { Subject } from 'rxjs';
 import { takeWhile, takeUntil, take } from 'rxjs/operators';
 import { bindTo, createEffectContext, combineEffects, ServerIO, lookup, logContext, LoggerTag, contextFactory } from '@marblejs/core';
-import { throwException, maskUriComponent } from '@marblejs/core/dist/+internal/utils';
+import { throwException, maskUriComponent, isNonNullable } from '@marblejs/core/dist/+internal/utils';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { statusLogger$ } from '../middlewares/messaging.statusLogger.middleware';
 import { TransportLayerConnection } from '../transport/transport.interface';
@@ -35,7 +35,7 @@ export const createMicroservice = async (config: CreateMicroserviceConfig) => {
     boundEventTimerStore,
     boundTransportLayer,
     boundServerEvents,
-    ...dependencies,
+    ...filter(isNonNullable)(dependencies),
   );
 
   logContext(LoggerTag.MESSAGING)(context);
