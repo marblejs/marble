@@ -45,7 +45,7 @@
     "@types/redis": "^2.8.14",
     "amqp-connection-manager": "^3.2.0",
     "amqplib": "^0.5.3",
-    "redis": "^2.8.0"
+    "redis": "^3.1.1"
   },
   "publishConfig": {
     "access": "public"
