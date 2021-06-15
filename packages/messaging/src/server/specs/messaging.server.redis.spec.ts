@@ -1,7 +1,7 @@
 import { matchEvent, act } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { forkJoin, firstValueFrom, TimeoutError } from 'rxjs';
+import { forkJoin, firstValueFrom } from 'rxjs';
 import { map, tap, delay, mapTo } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
 import { TransportLayerConnection } from '../../transport/transport.interface';
@@ -94,7 +94,9 @@ describe('messagingServer::Redis', () => {
     const result = firstValueFrom(client.send({ type: 'TEST' }));
 
     // then
-    await expect(result).rejects.toEqual(new TimeoutError());
+    await expect(result).rejects.toEqual(expect.objectContaining({
+      name: 'TimeoutError',
+    }));
   });
 
   test('handles non-blocking communication and routes the event back to origin channel', async done => {
