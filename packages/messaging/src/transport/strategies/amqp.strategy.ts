@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/lib/function';
-import { Subject, fromEvent, merge, from, firstValueFrom } from 'rxjs';
+import { Subject, fromEvent, merge, from, firstValueFrom, Observable } from 'rxjs';
 import { map, filter, take, mapTo, first, mergeMap, share, tap } from 'rxjs/operators';
 import { Channel, ConsumeMessage, Replies } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
@@ -43,26 +43,28 @@ class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP>
 
   get error$() {
     return merge(
-      fromEvent<Error>(this.channelWrapper, 'error'),
+      fromEvent(this.channelWrapper, 'error') as Observable<Error>,
       this.errorSubject$.asObservable(),
     );
   }
 
   get status$() {
-    const connect$ = fromEvent(this.connectionManager, 'connect')
-      .pipe(mapTo(AmqpConnectionStatus.CONNECTED));
+    const connect$ = pipe(
+      fromEvent(this.connectionManager, 'connect'),
+      mapTo(AmqpConnectionStatus.CONNECTED));
 
-    const connectChannel$ = fromEvent(this.channelWrapper, 'connect')
-      .pipe(mapTo(AmqpConnectionStatus.CHANNEL_CONNECTED));
+    const connectChannel$ = pipe(
+      fromEvent(this.channelWrapper, 'connect'),
+      mapTo(AmqpConnectionStatus.CHANNEL_CONNECTED));
 
-    const diconnect$ = fromEvent<{ err?: Error }>(this.connectionManager, 'disconnect')
-      .pipe(
-        tap(({ err }) => err && this.errorSubject$.next(err)),
-        mapTo(AmqpConnectionStatus.CONNECTION_LOST),
-      );
+    const diconnect$ = pipe(
+      fromEvent(this.connectionManager, 'disconnect') as Observable<{ err?: Error }>,
+      tap(({ err }) => err && this.errorSubject$.next(err)),
+      mapTo(AmqpConnectionStatus.CONNECTION_LOST));
 
-    const diconnectChannel$ = fromEvent(this.channelWrapper, 'close')
-      .pipe(mapTo(AmqpConnectionStatus.CHANNEL_CONNECTION_LOST));
+    const diconnectChannel$ = pipe(
+      fromEvent(this.channelWrapper, 'close'),
+      mapTo(AmqpConnectionStatus.CHANNEL_CONNECTION_LOST));
 
     return merge(
       connect$,
@@ -74,7 +76,8 @@ class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP>
   }
 
   get message$() {
-    return this.msgSubject$.asObservable().pipe(
+    return pipe(
+      this.msgSubject$.asObservable(),
       share(),
       map(raw => ({
         data: raw.content,
@@ -101,14 +104,15 @@ class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP>
     const replyToSubject = new Subject<string>();
     const resSubject$ = new Subject<{ msg: ConsumeMessage; tag: string }>();
 
-    replyToSubject
-      .pipe(first())
-      .subscribe(async replyTo => {
-        await this.channelWrapper.sendToQueue(queue, data, {
-          correlationId,
-          replyTo,
-        });
+    pipe(
+      replyToSubject,
+      first()
+    ).subscribe(async replyTo => {
+      await this.channelWrapper.sendToQueue(queue, data, {
+        correlationId,
+        replyTo,
       });
+    });
 
     const modifyChannelSetup = async (channel: Channel): Promise<void> => {
       const replyQueue = await channel.assertQueue('', {
@@ -135,7 +139,8 @@ class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP>
 
     await this.channelWrapper.addSetup(modifyChannelSetup);
 
-    return firstValueFrom(resSubject$.asObservable().pipe(
+    return firstValueFrom(pipe(
+      resSubject$.asObservable(),
       filter(raw => raw.msg.properties.correlationId === correlationId),
       take(1),
       mergeMap(raw =>
