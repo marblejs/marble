@@ -12,17 +12,17 @@ export const connectClient = async (options?: ClientOpts | undefined): Promise<R
 
 export const quitClient = (client: RedisClient): Promise<undefined> =>
   new Promise((resolve, reject) => {
-    client.quit(error => error ? reject() : resolve());
+    client.quit(error => error ? reject() : resolve(undefined));
   });
 
 export const subscribeChannel = (client: RedisClient) => (channel: string): Promise<undefined> =>
   new Promise((resolve, reject) => {
-    client.subscribe(channel, error => error ? reject() : resolve());
+    client.subscribe(channel, error => error ? reject() : resolve(undefined));
   });
 
 export const unsubscribeChannel = (client: RedisClient) => (channel: string): Promise<undefined> =>
   new Promise((resolve, reject) => {
-    client.unsubscribe(channel, error => error ? reject() : resolve());
+    client.unsubscribe(channel, error => error ? reject() : resolve(undefined));
   });
 
 export const publishMessage = (client: RedisClient) => (channel: string) => (message: string): Promise<boolean>  =>

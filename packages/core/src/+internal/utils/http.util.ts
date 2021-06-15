@@ -14,7 +14,7 @@ export const getHeaderValueHead = <T extends string = string>(key: string) => (r
 
 export const closeServer = (server: HttpServer): Task<void> =>
   () => new Promise((res, rej) =>
-    server.close(err => err ? rej(err) : res()));
+    server.close(err => err ? rej(err) : res(undefined)));
 
 export const getServerAddress = (server: HttpServer): { host: string; port: number } => {
   const serverAddressInfo = server.address() as AddressInfo;

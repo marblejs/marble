@@ -20,9 +20,9 @@ export const getPortEnv = () => pipe(
   O.toUndefined,
 );
 
-export const wait = (seconds = 1) =>
+export const wait = (seconds = 1): Promise<unknown> =>
   new Promise(res => {
-    setTimeout(() => res(), seconds * 1000);
+    setTimeout(() => res(undefined), seconds * 1000);
   });
 
 export const bufferFrom = (data: any): Buffer =>
