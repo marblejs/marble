@@ -1,4 +1,4 @@
-import { Observable, fromEvent, Subject, defer } from 'rxjs';
+import { Observable, fromEvent, Subject, defer, firstValueFrom } from 'rxjs';
 import { map, takeUntil, catchError } from 'rxjs/operators';
 import {
   combineEffects,
@@ -12,7 +12,7 @@ import {
   LoggerToken,
   LoggerLevel,
 } from '@marblejs/core';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { WsEffect, WsErrorEffect, WsMiddlewareEffect, WsOutputEffect } from '../effects/websocket.effects.interface';
 import { jsonTransformer } from '../transformer/websocket.json.transformer';
 import { EventTransformer } from '../transformer/websocket.transformer.interface';
@@ -115,7 +115,7 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
       input$
         .pipe(takeUntil(close$))
         .subscribe(
-          (event: Event) => client.sendResponse(event).toPromise(),
+          (event: Event) => firstValueFrom(client.sendResponse(event)),
           (error: EventError) => {
             const type = 'ServerListener';
             const message = `Unexpected error for OutgoingEvent stream: "${error.name}", "${error.message}"`;

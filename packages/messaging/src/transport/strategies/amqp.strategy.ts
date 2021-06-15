@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/lib/function';
-import { Subject, fromEvent, merge, from } from 'rxjs';
+import { Subject, fromEvent, merge, from, firstValueFrom } from 'rxjs';
 import { map, filter, take, mapTo, first, mergeMap, share, tap } from 'rxjs/operators';
 import { Channel, ConsumeMessage, Replies } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
@@ -135,7 +135,7 @@ class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP>
 
     await this.channelWrapper.addSetup(modifyChannelSetup);
 
-    return resSubject$.asObservable().pipe(
+    return firstValueFrom(resSubject$.asObservable().pipe(
       filter(raw => raw.msg.properties.correlationId === correlationId),
       take(1),
       mergeMap(raw =>
@@ -148,7 +148,7 @@ class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP>
             raw,
           } as TransportMessage<Buffer>)),
         )),
-    ).toPromise();
+    ));
   };
 
   emitMessage = async (queue: string, msg: TransportMessage<Buffer>) => {
@@ -185,7 +185,7 @@ class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP>
   close = async () => {
     await this.channelWrapper.close();
     await this.connectionManager.close();
-    this.closeSubject$.next();
+    this.closeSubject$.next(null);
   }
 }
 

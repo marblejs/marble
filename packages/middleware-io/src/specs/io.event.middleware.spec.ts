@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import { of } from 'rxjs';
+import { of, firstValueFrom } from 'rxjs';
 import { event } from '@marblejs/core';
 import { eventValidator$ } from '../io.event.middleware';
 
@@ -20,7 +20,7 @@ describe('#eventValidator$', () => {
     });
 
     // when
-    const result = await eventValidator$(schema)(of(input)).toPromise();
+    const result = await firstValueFrom(eventValidator$(schema)(of(input)));
 
     // then
     expect(result.type).toEqual(input.type);
@@ -43,7 +43,7 @@ describe('#eventValidator$', () => {
     }));
 
     // when
-    const result = await eventValidator$(schema)(of(input)).toPromise();
+    const result = await firstValueFrom(eventValidator$(schema)(of(input)));
 
     // then
     expect(result.type).toEqual(input.type);
@@ -59,7 +59,7 @@ describe('#eventValidator$', () => {
     const schema = event('TEST_EVENT')();
 
     // when
-    const result = await eventValidator$(schema)(of(input)).toPromise();
+    const result = await firstValueFrom(eventValidator$(schema)(of(input)));
 
     // then
     expect(result.type).toEqual(input.type);
@@ -82,7 +82,7 @@ describe('#eventValidator$', () => {
     });
 
     // when
-    const result = eventValidator$(schema)(of(input)).toPromise();
+    const result = firstValueFrom(eventValidator$(schema)(of(input)));
 
     // then
     await expect(result).rejects.toEqual(expect.objectContaining({
@@ -111,7 +111,7 @@ describe('#eventValidator$', () => {
     });
 
     // when
-    const result = await eventValidator$(schema)(input).toPromise();
+    const result = await firstValueFrom(eventValidator$(schema)(input));
 
     // then
     expect(result.type).toEqual(input.type);

@@ -1,4 +1,4 @@
-import { of, merge } from 'rxjs';
+import { of, merge, firstValueFrom } from 'rxjs';
 import { mapTo, take, toArray, delay, mergeMap, map, first } from 'rxjs/operators';
 import { createMockEffectContext, createHttpRequest, createHttpResponse, createTestRoute } from '../../../+internal/testing';
 import { HttpEffect } from '../../effects/http.effects.interface';
@@ -86,7 +86,7 @@ describe('#resolveRouting', () => {
 
     // when
     const { resolve, errorSubject } = resolveRouting(routing, ctx)();
-    const errorPromise = errorSubject.pipe(first()).toPromise();
+    const errorPromise = firstValueFrom(errorSubject.pipe(first()));
 
     resolve(req);
 
@@ -114,7 +114,7 @@ describe('#resolveRouting', () => {
 
     // when
     const { resolve, errorSubject } = resolveRouting(routing, ctx)();
-    const errorPromise = errorSubject.pipe(first()).toPromise();
+    const errorPromise = firstValueFrom(errorSubject.pipe(first()));
 
     resolve(req);
 

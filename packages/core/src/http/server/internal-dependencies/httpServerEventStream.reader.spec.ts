@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { EventEmitter } from 'events';
-import { forkJoin } from 'rxjs';
+import { forkJoin, firstValueFrom } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { createContext } from '../../../context/context';
 import {
@@ -35,7 +35,7 @@ describe('#HttpServerEventStream', () => {
     const event$ = HttpServerEventStream({ hostname, server })(createContext());
 
     // when
-    const result = forkJoin(
+    const result = firstValueFrom(forkJoin([
       event$.pipe(filter(isErrorEvent), take(1)),
       event$.pipe(filter(isClientErrorEvent), take(1)),
       event$.pipe(filter(isCloseEvent), take(1)),
@@ -45,7 +45,7 @@ describe('#HttpServerEventStream', () => {
       event$.pipe(filter(isUpgradeEvent), take(1)),
       event$.pipe(filter(isCheckContinueEvent), take(1)),
       event$.pipe(filter(isCheckExpectationEvent), take(1)),
-    ).toPromise();
+    ]));
 
     server.emit(ServerEventType.ERROR, new Error('test_error'));
     server.emit(ServerEventType.CLIENT_ERROR);
