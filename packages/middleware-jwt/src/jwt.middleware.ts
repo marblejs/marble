@@ -19,8 +19,6 @@ export const authorize$ = (
       mergeMap(verifyPayload$),
       tap(assignPayloadToRequest(req)),
       mapTo(req),
-      catchError(() =>
-        throwError(new HttpError('Unauthorized', HttpStatus.UNAUTHORIZED, undefined, req))
-      )
+      catchError(() => throwError(() => new HttpError('Unauthorized', HttpStatus.UNAUTHORIZED, undefined, req)))
     )),
   );

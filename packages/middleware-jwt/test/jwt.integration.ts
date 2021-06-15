@@ -13,7 +13,7 @@ const verifyPayload$ = (payload: Payload) =>
   of(payload).pipe(
     flatMap(payload => iif(
       () => payload.id !== 'test_id' || payload.email !== 'admin@admin.com',
-      throwError(new Error()),
+      throwError(() => new Error()),
       of(payload)
     )),
   );

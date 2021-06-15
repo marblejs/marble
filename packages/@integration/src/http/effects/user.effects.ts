@@ -38,7 +38,7 @@ const getUser$ = r.pipe(
       mergeMap(id => Dao
         .getUserById(id)
         .pipe(catchError(() => throwError(
-          new HttpError('User does not exist', HttpStatus.NOT_FOUND)
+          () => new HttpError('User does not exist', HttpStatus.NOT_FOUND)
         )),
       )),
       simulateRandomDelay,
@@ -62,7 +62,7 @@ const getUserBuffered$ = r.pipe(
           switchMap(Dao.getUserById),
           map(user => ({ body: user, request })),
           catchError(() => throwError(
-            new HttpError('User does not exist', HttpStatus.NOT_FOUND)
+            () => new HttpError('User does not exist', HttpStatus.NOT_FOUND)
           )),
         )),
       )),
