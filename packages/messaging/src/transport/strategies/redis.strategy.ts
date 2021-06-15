@@ -1,6 +1,7 @@
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
-import { Subject, fromEvent, merge, firstValueFrom } from 'rxjs';
+import { Subject, fromEvent, merge, firstValueFrom, Observable } from 'rxjs';
 import { map, mapTo, take, tap, share, filter } from 'rxjs/operators';
+import { pipe } from 'fp-ts/lib/function';
 import { RedisClient, ClientOpts } from 'redis';
 import { TransportLayer, TransportLayerConnection, TransportMessage, Transport, DEFAULT_TIMEOUT } from '../transport.interface';
 import { throwUnsupportedError } from '../transport.error';
@@ -47,19 +48,24 @@ class RedisStrategyConnection implements TransportLayerConnection<Transport.REDI
   }
 
   get status$() {
-    const ready$ = merge(fromEvent(this.subscriber, 'ready'))
-      .pipe(mapTo(RedisConnectionStatus.READY));
+    const ready$ = pipe(
+      merge(fromEvent(this.subscriber, 'ready')),
+      mapTo(RedisConnectionStatus.READY));
 
-    const connect$ = merge(fromEvent(this.subscriber, 'connect'))
-      .pipe(mapTo(RedisConnectionStatus.CONNECT));
+    const connect$ = pipe(
+      merge(fromEvent(this.subscriber, 'connect')),
+      mapTo(RedisConnectionStatus.CONNECT));
 
-    const reconnecting$ = merge(fromEvent(this.subscriber, 'reconnecting'))
-      .pipe(mapTo(RedisConnectionStatus.RECONNECTING));
+    const reconnecting$ = pipe(
+      merge(fromEvent(this.subscriber, 'reconnecting')),
+      mapTo(RedisConnectionStatus.RECONNECTING));
 
-    const end$ = merge(fromEvent(this.subscriber, 'end'))
-      .pipe(mapTo(RedisConnectionStatus.END));
+    const end$ = pipe(
+      merge(fromEvent(this.subscriber, 'end')),
+      mapTo(RedisConnectionStatus.END));
 
-    return merge(ready$, connect$, reconnecting$, end$, this.statusSubject$.asObservable()).pipe(
+    return pipe(
+      merge(ready$, connect$, reconnecting$, end$, this.statusSubject$.asObservable()),
       share(),
     );
   }
@@ -69,17 +75,19 @@ class RedisStrategyConnection implements TransportLayerConnection<Transport.REDI
   }
 
   get error$() {
-    return merge(
-      fromEvent<Error>(this.publisher, 'error'),
-      fromEvent<Error>(this.subscriber, 'error'),
-      fromEvent<Error>(this.rpcSubscriber, 'error'),
-    ).pipe(
+    return pipe(
+      merge(
+        fromEvent(this.publisher, 'error') as Observable<Error>,
+        fromEvent(this.subscriber, 'error') as Observable<Error>,
+        fromEvent(this.rpcSubscriber, 'error') as Observable<Error>,
+      ),
       share(),
     );
   }
 
   get message$() {
-    return this.consumerSubject.asObservable().pipe(
+    return pipe(
+      this.consumerSubject.asObservable(),
       map(msg => RedisHelper.decodeMessage(msg.content)),
     );
   }
@@ -99,7 +107,8 @@ class RedisStrategyConnection implements TransportLayerConnection<Transport.REDI
     await RedisHelper.subscribeChannel(this.rpcSubscriber)(replyChannel);
     await this.emitMessage(channel, message);
 
-    return firstValueFrom(this.producerSubject.asObservable().pipe(
+    return firstValueFrom(pipe(
+      this.producerSubject.asObservable(),
       filter(msg => msg.channel === replyChannel),
       take(1),
       tap(() => RedisHelper.unsubscribeChannel(this.rpcSubscriber)(replyChannel)),

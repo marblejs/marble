@@ -24,8 +24,8 @@ import { generateToken } from '@marblejs/middleware-jwt';
 import { SECRET_KEY } from './config';
 
 const login$ = r.pipe(
-  r.matchPath('/login')
-  r.matchType('POST')
+  r.matchPath('/login'),
+  r.matchType('POST'),
   r.useEffect(req$ => req$.pipe(
     //
     map(payload => generateToken({ secret: SECRET_KEY })(payload)), 👈
