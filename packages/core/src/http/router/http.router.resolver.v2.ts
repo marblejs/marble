@@ -59,16 +59,16 @@ export const resolveRouting = (
   );
 
   const subscribeOutput = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
-    stream$.subscribe(
-      ([res, req]) => req.response.send(res),
-      error => { throw unexpectedErrorWhileSendingOutputFactory(error) },
-    );
+    stream$.subscribe({
+      next: ([res, req]) => req.response.send(res),
+      error: err => { throw unexpectedErrorWhileSendingOutputFactory(err) },
+    });
 
   const subscribeError = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
-    stream$.subscribe(
-      ([res, req]) => req.response.send(res),
-      error => { throw unexpectedErrorWhileSendingErrorFactory(error) },
-    );
+    stream$.subscribe({
+      next: ([res, req]) => req.response.send(res),
+      error: err => { throw unexpectedErrorWhileSendingErrorFactory(err) },
+    });
 
   subscribeOutput(outputFlow$);
   subscribeError(errorFlow$);
@@ -105,22 +105,22 @@ export const resolveRouting = (
       };
 
       const subscribe = (stream$: Observable<HttpEffectResponse>) =>
-        stream$.subscribe(
-          res => {
+        stream$.subscribe({
+          next: res => {
             if (!res.request) throw responseNotBoundToRequestErrorFactory(res);
             outputSubject.next({ res, req: res.request });
           },
-          error => {
+          error: err => {
             const type = 'RouterResolver';
-            const message = `Unexpected error for Output stream: "${error.name}", "${error.message}"`;
+            const message = `Unexpected error for Output stream: "${err.name}", "${err.message}"`;
             logger({ tag: LoggerTag.HTTP, type, message, level: LoggerLevel.ERROR })();
           },
-          () => {
+          complete: () => {
             const type = 'RouterResolver';
             const message = `Effect stream completes`;
             logger({ tag: LoggerTag.HTTP, type, message, level: LoggerLevel.DEBUG })();
-          }
-        );
+          },
+        });
 
       subscribe(output$);
 

@@ -104,37 +104,37 @@ export const messagingListener = createListener<MessagingListenerConfig, Messagi
     const subscribeIncomingEvent = (event$: Observable<Event>) =>
       event$
         .pipe(takeUntil(connection.close$))
-        .subscribe(
-          event => eventSubject.next(event),
-          (error: Error) => {
+        .subscribe({
+          next: event => eventSubject.next(event),
+          error: (err: Error) => {
             const type = 'ServerListener';
-            const message = `Unexpected error for IncomingEvent stream: "${error.name}", "${error.message}"`;
+            const message = `Unexpected error for IncomingEvent stream: "${err.name}", "${err.message}"`;
             logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.ERROR })();
             subscribeIncomingEvent(event$);
           },
-          () => {
+          complete: () => {
             const type = 'ServerListener';
             const message = `IncomingEvent stream completes`;
             logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.DEBUG })();
           },
-        );
+        });
 
     const subscribeOutgoingEvent = (event$: Observable<Event<unknown, any, string>>) =>
       event$
         .pipe(takeUntil(connection.close$))
-        .subscribe(
-          event => send(connection)(event),
-          (error: Error) => {
+        .subscribe({
+          next: event => send(connection)(event),
+          error: (err: Error) => {
             const type = 'ServerListener';
-            const message = `Unexpected error for OutgoingEvent stream: "${error.name}", "${error.message}"`;
+            const message = `Unexpected error for OutgoingEvent stream: "${err.name}", "${err.message}"`;
             logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.ERROR })();
           },
-          () => {
+          complete: () => {
             const type = 'ServerListener';
             const message = `OutgoingEvent stream completes`;
             logger({ tag: LoggerTag.MESSAGING, type, message, level: LoggerLevel.DEBUG })();
           },
-        );
+        });
 
     subscribeIncomingEvent(incomingEvent$);
     subscribeOutgoingEvent(outgoingEvent$);

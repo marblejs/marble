@@ -34,17 +34,14 @@ describe('Joi middleware - Body', () => {
     const http$ = bodyParser$()(req$, ctx);
     const valid$ = validator$(schema)(http$);
 
-    valid$.subscribe(
-      () => {
-        fail('Exceptions should be thrown');
-        done();
-      },
-      error => {
-        expect(error).toBeDefined();
-        expect(error.message).toBe('"token" is required');
+    valid$.subscribe({
+      next: () => fail('Exceptions should be thrown'),
+      error: err => {
+        expect(err).toBeDefined();
+        expect(err.message).toBe('"token" is required');
         done();
       }
-    );
+    });
 
     request.write({});
     request.end();
@@ -70,17 +67,17 @@ describe('Joi middleware - Body', () => {
     const http$ = bodyParser$()(req$, ctx);
     const valid$ = validator$(schema)(http$);
 
-    valid$.subscribe(
-      () => {
+    valid$.subscribe({
+      next: () => {
         fail('Exceptions should be thrown');
         done();
       },
-      error => {
-        expect(error).toBeDefined();
-        expect(error.message).toBe('"id" is not allowed');
+      error: err => {
+        expect(err).toBeDefined();
+        expect(err.message).toBe('"id" is not allowed');
         done();
       }
-    );
+    });
 
     request.write({ token: '181782881DB38D84', id: 5 });
     request.end();

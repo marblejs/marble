@@ -29,10 +29,10 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
   const verifyClient = (context: Context): WebSocket.VerifyClientCallbackAsync => (info, callback) => {
     connection$(of(info.req), createEffectContext({ ask: lookup(context), client: undefined }))
       .pipe(map(Boolean))
-      .subscribe(
-        isVerified => callback(isVerified),
-        (error: WebSocketConnectionError) => callback(false, error.status, error.message),
-      );
+      .subscribe({
+        next: isVerified => callback(isVerified),
+        error: (err: WebSocketConnectionError) => callback(false, err.status, err.message),
+      });
   };
 
   const context = await contextFactory(...filter(isNonNullable)(dependencies));

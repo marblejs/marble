@@ -46,17 +46,15 @@ describe('JWT middleware', () => {
     const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 
     // then
-    middleware$.subscribe(
-      req => {
+    middleware$.subscribe({
+      next: req => {
         expect(req).toEqual(expectedRequest);
         expect(utilModule.parseAuthorizationHeader).toHaveBeenCalledTimes(1);
         expect(factoryModule.verifyToken$).toHaveBeenCalledTimes(1);
         done();
       },
-      () => {
-        fail(`Stream shouldn\'t throw an error`);
-      }
-    );
+      error: () => fail(`Stream shouldn\'t throw an error`)
+    });
   });
 
   test('authorize$ throws error if incoming request is not authorized', done => {
@@ -74,18 +72,15 @@ describe('JWT middleware', () => {
     const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 
     // then
-    middleware$.subscribe(
-      () => {
-        fail(`Stream should throw an error`);
-        done();
-      },
-      err => {
+    middleware$.subscribe({
+      next: () => fail(`Stream should throw an error`),
+      error: err => {
         expect(err).toEqual(expectedError);
         expect(utilModule.parseAuthorizationHeader).toHaveBeenCalledTimes(1);
         expect(factoryModule.verifyToken$).toHaveBeenCalledTimes(1);
         done();
       }
-    );
+    });
   });
 
   test('authorize$ throws error if verifyPayload$ handler doesn\'t pass', done => {
@@ -104,14 +99,12 @@ describe('JWT middleware', () => {
     const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 
     // then
-    middleware$.subscribe(
-      () => {
-        fail(`Stream should throw an error`);
-      },
-      err => {
+    middleware$.subscribe({
+      next: () => fail(`Stream should throw an error`),
+      error: err => {
         expect(err).toEqual(expectedError);
         done();
       }
-    );
+    });
   });
 });
