@@ -1,10 +1,9 @@
 import { Event, matchEvent, combineEffects, act, EventError, contextFactory, bindEagerlyTo, lookup, useContext } from '@marblejs/core';
 import { wait, NamedError } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { throwError, of, TimeoutError, firstValueFrom } from 'rxjs';
+import { throwError, of, firstValueFrom } from 'rxjs';
 import { delay, map, tap, ignoreElements } from 'rxjs/operators';
-import { flow } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { flow, pipe } from 'fp-ts/lib/function';
 import { MsgEffect } from '../effects/messaging.effects.interface';
 import { reply } from '../reply/reply';
 import { messagingListener } from '../server/messaging.server.listener';
@@ -236,7 +235,9 @@ describe('#eventBus', () => {
 
     const result = firstValueFrom(eventBusClientInstance.send(event));
 
-    await expect(result).rejects.toEqual(new TimeoutError());
+    await expect(result).rejects.toEqual(expect.objectContaining({
+      name: 'TimeoutError',
+    }));
 
     await eventBusInstance.close();
     await eventBusClientInstance.close();
