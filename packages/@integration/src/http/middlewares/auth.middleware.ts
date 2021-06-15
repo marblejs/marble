@@ -7,7 +7,7 @@ export const authorize$: HttpMiddlewareEffect = req$ =>
   req$.pipe(
     switchMap(req => iif(
       () => !isAuthorized(req),
-      throwError(new HttpError('Unauthorized', HttpStatus.UNAUTHORIZED)),
+      throwError(() => new HttpError('Unauthorized', HttpStatus.UNAUTHORIZED)),
       of(req),
     )),
   );

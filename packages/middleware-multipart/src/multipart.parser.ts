@@ -33,7 +33,7 @@ export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observab
 
   const filesLimit$ = fromEvent(busboy, 'filesLimit').pipe(
     takeUntil(finish$),
-    mergeMap(() => throwError(
+    mergeMap(() => throwError(() =>
       new HttpError(`Reached max files count limit [${opts.maxFileCount}]`, HttpStatus.PRECONDITION_FAILED, undefined, req),
     )),
     defaultIfEmpty(true),
@@ -41,7 +41,7 @@ export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observab
 
   const fieldsLimit$ = fromEvent(busboy, 'fieldsLimit').pipe(
     takeUntil(finish$),
-    mergeMap(() => throwError(
+    mergeMap(() => throwError(() =>
       new HttpError(`Reached max fields count limit [${opts.maxFieldCount}]`, HttpStatus.PRECONDITION_FAILED, undefined, req),
     )),
     defaultIfEmpty(true),
@@ -57,8 +57,8 @@ export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observab
   ]).pipe(
     mapTo(req),
     catchError((error: Error) => isHttpError(error)
-      ? throwError(error)
-      : throwError(new HttpError(error.message, HttpStatus.INTERNAL_SERVER_ERROR, undefined, req))
+      ? throwError(() => error)
+      : throwError(() => new HttpError(error.message, HttpStatus.INTERNAL_SERVER_ERROR, undefined, req))
     ),
   );
 }

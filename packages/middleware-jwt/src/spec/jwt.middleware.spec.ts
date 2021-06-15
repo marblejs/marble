@@ -8,7 +8,7 @@ const verifyPayload$ = (payload: { id: string }) =>
   of(payload).pipe(
     flatMap(payload => iif(
       () => payload.id !== 'test_id',
-      throwError(new Error()),
+      throwError(() => new Error()),
       of(payload)
     )),
   );
@@ -69,7 +69,7 @@ describe('JWT middleware', () => {
 
     // when
     utilModule.parseAuthorizationHeader = jest.fn(() => mockedToken);
-    factoryModule.verifyToken$ = jest.fn(() => () => throwError(expectedError));
+    factoryModule.verifyToken$ = jest.fn(() => () => throwError(() => expectedError));
 
     const middleware$ = authorize$({ secret: mockedSecret }, verifyPayload$)(req$, ctx);
 

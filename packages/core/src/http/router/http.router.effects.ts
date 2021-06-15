@@ -9,5 +9,5 @@ export const ROUTE_NOT_FOUND_ERROR = new HttpError('Route not found', HttpStatus
 export const notFound$ = r.pipe(
   r.matchPath('*'),
   r.matchType('*'),
-  r.useEffect(req$ => req$.pipe(mergeMapTo(throwError(ROUTE_NOT_FOUND_ERROR)))),
+  r.useEffect(req$ => req$.pipe(mergeMapTo(throwError(() => ROUTE_NOT_FOUND_ERROR)))),
   r.applyMeta({ overridable: true }));

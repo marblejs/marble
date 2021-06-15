@@ -12,7 +12,7 @@ export type FileEvent = [string, NodeJS.ReadableStream, string, string, string];
 const fileSizeLimit = (maxBytes: number | undefined) => (data: FileIncomingData) => (finish$: Observable<any>) =>
   fromEvent(data.file, 'limit').pipe(
     takeUntil(finish$),
-    mergeMapTo(throwError(
+    mergeMapTo(throwError(() =>
       new HttpError(`Reached file size limit for "${data.fieldname}" [${maxBytes} bytes]`, HttpStatus.PRECONDITION_FAILED),
     )),
     ignoreElements(),
@@ -24,7 +24,7 @@ export const parseFile = (req: HttpRequest) => (opts: ParserOpts) => (event$: Ob
     map(([ fieldname, file, filename, encoding, mimetype ]) => ({ fieldname, file, filename, encoding, mimetype })),
     mergeMap(data => iif(
       () => !shouldParseFieldname(opts.files)(data.fieldname),
-      throwError(new HttpError(`File "${data.fieldname}" is not acceptable`, HttpStatus.PRECONDITION_FAILED)),
+      throwError(() => new HttpError(`File "${data.fieldname}" is not acceptable`, HttpStatus.PRECONDITION_FAILED)),
       of(data),
     )),
     mergeMap(data => merge(fileSizeLimit(opts.maxFileSize)(data)(finish$), of(data))),

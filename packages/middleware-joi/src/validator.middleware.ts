@@ -15,7 +15,7 @@ const validateSource = (rules: Map<string, any>, options: Joi.ValidationOptions)
         from(Joi.validate(item || {}, rules.get(rule), options)).pipe(
           catchError((err: Joi.ValidationError) => {
             const message = err.details[0].message;
-            return throwError(new HttpError(message, HttpStatus.BAD_REQUEST));
+            return throwError(() => new HttpError(message, HttpStatus.BAD_REQUEST));
           })
         )
       ),
@@ -41,7 +41,7 @@ export const validator$ = <TBody = any, TParams = any, TQuery = any>
     );
 
     if (result && result.error) {
-      return throwError(result.error);
+      return throwError(() => result.error);
     }
 
     return req$.pipe(
