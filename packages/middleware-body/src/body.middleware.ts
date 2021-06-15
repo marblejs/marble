@@ -28,7 +28,7 @@ export const bodyParser$ = ({
         map(parser(req)),
         tap(body => req.body = body),
         mapTo(req),
-        catchError(error => throwError(
+        catchError(error => throwError(() =>
           new HttpError(`Request body parse error: "${error.toString()}"`, HttpStatus.BAD_REQUEST, undefined, req),
         )))
       : of(req),
