@@ -28,17 +28,14 @@ describe('Joi middleware - Header', () => {
     };
     const http$ = validator$(schema)(req$);
 
-    http$.subscribe(
-      () => {
-        fail('Exceptions should be thrown');
-        done();
-      },
-      error => {
+    http$.subscribe({
+      next: () => fail('Exceptions should be thrown'),
+      error: error => {
         expect(error).toBeDefined();
         expect(error.message).toBe('"token" is required');
         done();
       }
-    );
+    });
   });
 
   test('should throws an error if pass a unknown field', done => {
@@ -57,17 +54,14 @@ describe('Joi middleware - Header', () => {
     };
     const http$ = validator$(schema)(req$);
 
-    http$.subscribe(
-      () => {
-        fail('Exceptions should be thrown');
-        done();
-      },
-      error => {
-        expect(error).toBeDefined();
-        expect(error.message).toBe('"end" is not allowed');
+    http$.subscribe({
+      next: () => fail('Exceptions should be thrown'),
+      error: err => {
+        expect(err).toBeDefined();
+        expect(err.message).toBe('"end" is not allowed');
         done();
       }
-    );
+    });
   });
 
   test('should validates header with unknown field', done => {
