@@ -1,5 +1,5 @@
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
+import { UnaryFunction } from 'rxjs';
+import { pipe, identity } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
 import * as E from 'fp-ts/lib/Either';
 import * as qs from 'qs';
@@ -41,3 +41,15 @@ export const parseJson = (data: any) =>
       () => data),
     E.fold(identity, identity),
   );
+
+export const pipeFromArray = <T, R>(fns: Array<UnaryFunction<T, R>>): UnaryFunction<T, R> => {
+  if (fns.length === 0)
+    return identity as UnaryFunction<any, any>;
+
+  if (fns.length === 1)
+    return fns[0];
+
+  return function piped(input: T): R {
+    return fns.reduce((prev: any, fn: UnaryFunction<T, R>) => fn(prev), input as any);
+  };
+}

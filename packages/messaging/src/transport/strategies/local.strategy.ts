@@ -1,4 +1,4 @@
-import { Subject, EMPTY } from 'rxjs';
+import { Subject, EMPTY, firstValueFrom } from 'rxjs';
 import { share, take, filter } from 'rxjs/operators';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { TransportLayer, TransportLayerConnection, TransportMessage, Transport, DEFAULT_TIMEOUT, TransportLayerConfig } from '../transport.interface';
@@ -66,15 +66,14 @@ class LocalStrategyConnection implements TransportLayerConnection<Transport.LOCA
 
     setImmediate(() => this.msgSubject$.next(message));
 
-    return this.rpcSubject$
+    return firstValueFrom(this.rpcSubject$
       .asObservable()
       .pipe(filter(msg => msg.replyTo === replyChannel && msg.correlationId === correlationId))
-      .pipe(take(1))
-      .toPromise();
+      .pipe(take(1)));
   }
 
   close = async () => {
-    this.closeSubject$.next();
+    this.closeSubject$.next(null);
   }
 
   ackMessage = () => throwUnsupportedError('LOCAL')('ackMessage');
