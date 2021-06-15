@@ -1,5 +1,4 @@
-import { SchedulerLike } from 'rxjs';
-import { AsyncScheduler } from 'rxjs/internal/scheduler/AsyncScheduler';
+import { SchedulerLike, asyncScheduler } from 'rxjs';
 import { ContextProvider } from '../context/context';
 import { EffectContext } from './effects.interface';
 
@@ -12,5 +11,5 @@ export const createEffectContext = <Client, Scheduler extends SchedulerLike>(
 ): EffectContext<Client> => ({
   ask: data.ask,
   client: data.client,
-  scheduler: data.scheduler || AsyncScheduler as any,
+  scheduler: data.scheduler || typeof asyncScheduler as any,
 });

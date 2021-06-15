@@ -45,13 +45,13 @@ const fib$ = (clientToken: ContextToken<MessagingClient>) => r.pipe(
     return req$.pipe(
       use(rootValiadtor$),
       map(req => Number(req.params.number)),
-      mergeMap(number => forkJoin(
+      mergeMap(number => forkJoin([
         client.send({ type: 'FIB', payload: number + 0 }),
         client.send({ type: 'FIB', payload: number + 1 }),
         client.send({ type: 'FIB', payload: number + 2 }),
         client.send({ type: 'FIB', payload: number + 3 }),
         client.send({ type: 'FIB', payload: number + 4 }),
-      )),
+      ])),
       map(body => ({ body })),
     );
   }),

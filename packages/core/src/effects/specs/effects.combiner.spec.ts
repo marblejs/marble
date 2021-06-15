@@ -1,4 +1,4 @@
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { tap, mapTo, filter } from 'rxjs/operators';
 import { HttpMiddlewareEffect, HttpEffect } from '../../http/effects/http.effects.interface';
 import { combineMiddlewares, combineEffects } from '../effects.combiner';
@@ -16,7 +16,7 @@ describe('#combineMiddlewares', () => {
 
     // when
     const middlewares$ = combineMiddlewares(a$, b$, c$);
-    const response = await middlewares$(of(incomingRequest), ctx).toPromise();
+    const response = await firstValueFrom(middlewares$(of(incomingRequest), ctx));
 
     // then
     expect(response).toEqual(outgoingRequest);
@@ -32,7 +32,7 @@ describe('#combineMiddlewares', () => {
     const middlewares$ = combineMiddlewares();
 
     // then
-    const response = await middlewares$(of(incomingRequest), ctx).toPromise();
+    const response = await firstValueFrom(middlewares$(of(incomingRequest), ctx));
     expect(response).toEqual(outgoingRequest);
   });
 });

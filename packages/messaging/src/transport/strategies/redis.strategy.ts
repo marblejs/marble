@@ -1,5 +1,5 @@
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
-import { Subject, fromEvent, merge } from 'rxjs';
+import { Subject, fromEvent, merge, firstValueFrom } from 'rxjs';
 import { map, mapTo, take, tap, share, filter } from 'rxjs/operators';
 import { RedisClient, ClientOpts } from 'redis';
 import { TransportLayer, TransportLayerConnection, TransportMessage, Transport, DEFAULT_TIMEOUT } from '../transport.interface';
@@ -99,12 +99,12 @@ class RedisStrategyConnection implements TransportLayerConnection<Transport.REDI
     await RedisHelper.subscribeChannel(this.rpcSubscriber)(replyChannel);
     await this.emitMessage(channel, message);
 
-    return this.producerSubject.asObservable().pipe(
+    return firstValueFrom(this.producerSubject.asObservable().pipe(
       filter(msg => msg.channel === replyChannel),
       take(1),
       tap(() => RedisHelper.unsubscribeChannel(this.rpcSubscriber)(replyChannel)),
       map(msg => RedisHelper.decodeMessage(msg.content)),
-    ).toPromise();
+    ));
   }
 
   close = async () => {
@@ -116,7 +116,7 @@ class RedisStrategyConnection implements TransportLayerConnection<Transport.REDI
       RedisHelper.quitClient(this.rpcSubscriber),
     ]);
 
-    this.closeSubject$.next();
+    this.closeSubject$.next(null);
   }
 
   ackMessage = () => throwUnsupportedError('Redis')('ackMessage');

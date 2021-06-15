@@ -1,7 +1,7 @@
 import { matchEvent, act } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { forkJoin, TimeoutError } from 'rxjs';
+import { firstValueFrom, forkJoin, TimeoutError } from 'rxjs';
 import { map, tap, delay, mapTo } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
 import { TransportLayerConnection } from '../../transport/transport.interface';
@@ -48,10 +48,10 @@ describe('messagingServer::AMQP', () => {
     microservice = await Util.createAmqpMicroservice(options)({ effects: [increment$] });
     client = await Util.createAmqpClient(options);
 
-    const result = await forkJoin([
+    const result = await firstValueFrom(forkJoin([
       client.send({ type: 'INCREMENT', payload: 1 }),
       client.send({ type: 'INCREMENT', payload: 10 }),
-    ]).toPromise();
+    ]));
 
     // then
     expect(result[0]).toEqual({ type: 'INCREMENT_RESULT', payload: 2 });
@@ -73,7 +73,7 @@ describe('messagingServer::AMQP', () => {
     microservice = await Util.createAmqpMicroservice(options)({ effects: [test$] });
     client = await Util.createAmqpClient(options);
 
-    const result = client.send({ type: 'TEST' }).toPromise();
+    const result = firstValueFrom(client.send({ type: 'TEST' }));
 
     // then
     await expect(result).rejects.toEqual(error);
@@ -87,7 +87,7 @@ describe('messagingServer::AMQP', () => {
     microservice = await Util.createAmqpMicroservice(options)();
     client = await Util.createAmqpClient(options);
 
-    const result = client.send({ type: 'TEST' }).toPromise();
+    const result = firstValueFrom(client.send({ type: 'TEST' }));
 
     // then
     await expect(result).rejects.toEqual(new TimeoutError());

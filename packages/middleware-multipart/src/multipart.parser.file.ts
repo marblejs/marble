@@ -7,7 +7,7 @@ import { mapTo, map, mergeMap, takeUntil, toArray, tap, mergeMapTo, ignoreElemen
 import { FileIncomingData, ParserOpts } from './multipart.interface';
 import { setRequestData, shouldParseFieldname } from './multipart.util';
 
-type FileEvent = [string, NodeJS.ReadableStream, string, string, string];
+export type FileEvent = [string, NodeJS.ReadableStream, string, string, string];
 
 const fileSizeLimit = (maxBytes: number | undefined) => (data: FileIncomingData) => (finish$: Observable<any>) =>
   fromEvent(data.file, 'limit').pipe(

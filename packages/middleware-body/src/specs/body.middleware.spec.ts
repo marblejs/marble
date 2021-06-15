@@ -1,6 +1,6 @@
 import * as qs from 'qs';
 import * as MockReq from 'mock-req';
-import { of } from 'rxjs';
+import { of, firstValueFrom } from 'rxjs';
 import { HttpRequest } from '@marblejs/core';
 import { ContentType } from '@marblejs/core/dist/+internal/http';
 import { createMockEffectContext } from '@marblejs/core/dist/+internal/testing';
@@ -20,7 +20,7 @@ describe('bodyParser$ middleware', () => {
     });
 
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     const res = await http;
     expect(res.body).toBeUndefined();
@@ -32,7 +32,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_JSON },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request.write({ test: 'test' });
     request.end();
@@ -47,7 +47,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': `${ContentType.APPLICATION_JSON};charset=utf-8` },
     });
     const req$ = of(request);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request.write({ test: 'test' });
     request.end();
@@ -62,7 +62,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
     const body = {
       test: 'test',
       'test-2': 'test-2',
@@ -82,7 +82,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
     const body = {
       test1: 'field=with=equals&and&ampersands',
       test2: 'field=with=equals&and&ampersands',
@@ -101,7 +101,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_X_WWW_FORM_URLENCODED },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
     const body = {
       children: [
         { bar: 'foo', foo: 'bar' },
@@ -124,7 +124,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_OCTET_STREAM },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request.write(message);
     request.end();
@@ -139,7 +139,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.TEXT_PLAIN },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request.write('test');
     request.end();
@@ -154,7 +154,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': `${ContentType.TEXT_PLAIN};charset=utf-8` },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request.write('Józef');
     request.end();
@@ -169,7 +169,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': `${ContentType.TEXT_PLAIN};charset=ascii` },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request.write('Józef');
     request.end();
@@ -184,7 +184,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.TEXT_HTML },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request.write('<h1>test</h1>');
     request.end();
@@ -199,7 +199,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.APPLICATION_JSON },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request.write('test');
     request.end();
@@ -216,7 +216,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.TEXT_PLAIN },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request._fail(new Error());
     request.write('test');
@@ -231,7 +231,7 @@ describe('bodyParser$ middleware', () => {
       headers: { 'Content-Type': ContentType.AUDIO_MPEG },
     });
     const req$ = of(request as HttpRequest);
-    const http = bodyParser$()(req$, ctx).toPromise();
+    const http = firstValueFrom(bodyParser$()(req$, ctx));
 
     request.write('test');
     request.end();
