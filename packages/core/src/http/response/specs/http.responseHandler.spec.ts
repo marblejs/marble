@@ -75,14 +75,15 @@ describe('Response handler', () => {
 
     // then
     expect(response.end).not.toHaveBeenCalled();
-    result.subscribe(
-      () => fail('Stream should be empty'),
-      () => fail('Stream should be empty'),
-      () => {
+
+    result.subscribe({
+      next: () => fail('Stream should be empty'),
+      error: () => fail('Stream should be empty'),
+      complete: () => {
         expect(true).toBe(true);
         done();
       },
-    );
+    });
   });
 
 });

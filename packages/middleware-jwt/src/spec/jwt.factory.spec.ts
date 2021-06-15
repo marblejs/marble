@@ -58,17 +58,14 @@ describe('JWT factory', () => {
     const verify$ = verifyToken$<Payload>({ secret })(token);
 
     // then
-    verify$.subscribe(
-      payload => {
+    verify$.subscribe({
+      next: payload => {
         expect(payload.id).toBeDefined();
         expect(payload.iat).toBeDefined();
         done();
       },
-      () => {
-        fail('Stream should\'t return an error');
-        done();
-      }
-    );
+      error: () => fail('Stream should\'t return an error'),
+    });
   });
 
   test('#verifyToken$ verifies wrong JWT token as stream and throws error', done => {
@@ -82,17 +79,14 @@ describe('JWT factory', () => {
     const verify$ = verifyToken$<Payload>({ secret })('test_token');
 
     // then
-    verify$.subscribe(
-      () => {
-        fail('Stream should\'t return next data');
-        done();
-      },
-      error => {
-        expect(error.name).toEqual('JsonWebTokenError');
-        expect(error.message).toEqual('jwt malformed');
+    verify$.subscribe({
+      next: () => fail('Stream should\'t return next data'),
+      error: err => {
+        expect(err.name).toEqual('JsonWebTokenError');
+        expect(err.message).toEqual('jwt malformed');
         done();
       }
-    );
+    });
   });
 
   test('#verifyToken$ verifies JWT token with wrong secret as stream and throws error', done => {
@@ -107,17 +101,14 @@ describe('JWT factory', () => {
     const verify$ = verifyToken$<Payload>({ secret: 'wrong_secret' })(token);
 
     // then
-    verify$.subscribe(
-      () => {
-        fail('Stream should\'t return next data');
-        done();
-      },
-      error => {
-        expect(error.name).toEqual('JsonWebTokenError');
-        expect(error.message).toEqual('invalid signature');
+    verify$.subscribe({
+      next: () => fail('Stream should\'t return next data'),
+      error: err => {
+        expect(err.name).toEqual('JsonWebTokenError');
+        expect(err.message).toEqual('invalid signature');
         done();
       }
-    );
+    });
   });
 
   test('#generateExpirationInHours creates timestamp for JWT expiration date', () => {

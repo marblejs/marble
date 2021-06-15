@@ -13,18 +13,11 @@ describe('#fromReadableStream', () => {
     const stream = new DuplexStream();
     const data = '111';
 
-    fromReadableStream(stream).subscribe(
-      (buffer: Buffer) => {
-        expect(buffer.toString()).toEqual(data);
-      },
-      (error: Error) => {
-        fail(`Error shouldn't be thrown: ${error}`);
-        done();
-      },
-      () => {
-        done();
-      },
-    );
+    fromReadableStream(stream).subscribe({
+      next: (buffer: Buffer) => expect(buffer.toString()).toEqual(data),
+      error: (err: Error) => fail(`Error shouldn't be thrown: ${err}`),
+      complete: done,
+    });
 
     stream.write(data);
     stream.end();
@@ -34,16 +27,13 @@ describe('#fromReadableStream', () => {
     const stream = new DuplexStream();
     const errorToThrow = new Error('test-error');
 
-    fromReadableStream(stream).subscribe(
-      (_: Buffer) => {
-        fail(`Error should be thrown`);
-        done();
-      },
-      (error: Error) => {
+    fromReadableStream(stream).subscribe({
+      next: () => fail(`Error should be thrown`),
+      error: (error: Error) => {
         expect(error.message).toBe(errorToThrow.message);
         done();
-      }
-    );
+      },
+    });
 
     stream.emit('error', errorToThrow);
     stream.end();

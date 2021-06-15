@@ -26,19 +26,16 @@ describe('#requestValidator$', () => {
     })(of(input));
 
     // then
-    stream$.subscribe(
-      outgoingData => {
+    stream$.subscribe({
+      next: outgoingData => {
         expect(outgoingData.body).toEqual(input.body);
         expect(outgoingData.params).toEqual(input.params);
         expect(outgoingData.query).toEqual(input.query);
         expect(outgoingData.headers).toEqual(input.headers);
         done();
       },
-      (error: HttpError) => {
-        fail(error.data);
-        done();
-      },
-    );
+      error: (err: HttpError) => fail(err.data),
+    });
   });
 
   test('applies JSON schema when testing is enabled', done => {
@@ -63,43 +60,39 @@ describe('#requestValidator$', () => {
     })(of(input));
 
     // then
-    stream$.subscribe(
-      outgoingData => {
+    stream$.subscribe({
+      next: outgoingData => {
         delete process.env.MARBLE_TESTING_METADATA_ON;
         expect(outgoingData.meta).toEqual({
-            body: {
-              properties: { test: { type: 'string' } },
-              required: ['test'],
-              type: 'object',
-              additionalProperties: true,
-            },
-            headers: {
-              properties: { 'content-type': { enum: ['application/json'] } },
-              required: ['content-type'],
-              type: 'object',
-              additionalProperties: true
-            },
-            params: {
-              properties: { test: { type: 'string' } },
-              required: ['test'],
-              type: 'object',
-              additionalProperties: true,
-            },
-            query: {
-              properties: { test: { type: 'string' } },
-              required: ['test'],
-              type: 'object',
-              additionalProperties: true,
-            },
-          }
-        );
+          body: {
+            properties: { test: { type: 'string' } },
+            required: ['test'],
+            type: 'object',
+            additionalProperties: true,
+          },
+          headers: {
+            properties: { 'content-type': { enum: ['application/json'] } },
+            required: ['content-type'],
+            type: 'object',
+            additionalProperties: true
+          },
+          params: {
+            properties: { test: { type: 'string' } },
+            required: ['test'],
+            type: 'object',
+            additionalProperties: true,
+          },
+          query: {
+            properties: { test: { type: 'string' } },
+            required: ['test'],
+            type: 'object',
+            additionalProperties: true,
+          },
+        });
         done();
       },
-      (error: HttpError) => {
-        fail(error.data);
-        done();
-      },
-    );
+      error: (err: HttpError) => fail(err.data),
+    });
   });
 
   test('updates values when valid', done => {
@@ -128,16 +121,13 @@ describe('#requestValidator$', () => {
     const stream$ = requestValidator$({ query: schema })(of(input));
 
     // then
-    stream$.subscribe(
-      outgoingData => {
+    stream$.subscribe({
+      next: outgoingData => {
         expect(outgoingData.query.test).toBe(1);
         done();
       },
-      (error: HttpError) => {
-        fail(error.data);
-        done();
-      },
-    );
+      error: (err: HttpError) => fail(err.data),
+    });
   });
 
   test('throws HttpError error if incoming data are not valid', done => {
@@ -161,12 +151,9 @@ describe('#requestValidator$', () => {
     })(of(input));
 
     // then
-    stream$.subscribe(
-      () => {
-        fail('Datas should\'t be returned');
-        done();
-      },
-      (error: HttpError) => {
+    stream$.subscribe({
+      next: () => fail('Datas should\'t be returned'),
+      error: (error: HttpError) => {
         expect(error.message).toEqual('Validation error');
         expect(error.status).toEqual(HttpStatus.BAD_REQUEST);
         expect(error.context).toEqual('headers');
@@ -179,6 +166,6 @@ describe('#requestValidator$', () => {
         ]);
         done();
       },
-    );
+    });
   });
 });
