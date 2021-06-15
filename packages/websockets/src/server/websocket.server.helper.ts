@@ -19,7 +19,7 @@ export const createServer = (options: WebSocket.ServerOptions, eventTransformer:
 }
 
 export const sendMessage = (client: WebSocket) => (outgoingEvent: any): Promise<unknown> =>
-  new Promise((res, rej) => client.send(outgoingEvent, err => err ? rej() : res()));
+  new Promise((res, rej) => client.send(outgoingEvent, err => err ? rej() : res(undefined)));
 
 export const handleServerBrokenConnections = (server: WebSocketServerConnection, scheduler?: SchedulerLike) =>
   interval(HEART_BEAT_INTERVAL, scheduler).pipe(
