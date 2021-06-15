@@ -1,4 +1,4 @@
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
 import { createEffectContext, lookup, register, LoggerToken, bindTo, createContext, HttpServer, Logger, EffectContext } from '@marblejs/core';
 import { logger$ } from '../logger.middleware';
@@ -24,7 +24,7 @@ describe('logger$', () => {
     req.response.statusCode = 200;
 
     // when
-    await logger$()(req$, ctx).toPromise();
+    await firstValueFrom(logger$()(req$, ctx));
     req.response.emit('finish');
 
     // then
@@ -38,7 +38,7 @@ describe('logger$', () => {
     req.response.statusCode = 403;
 
     // when
-    await logger$()(req$, ctx).toPromise();
+    await firstValueFrom(logger$()(req$, ctx));
     req.response.emit('finish');
 
     // then

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
-import { from } from 'rxjs';
+import { firstValueFrom, from } from 'rxjs';
 import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
 import { shouldParseFieldname, shouldParseMultipart, setRequestData, streamFileTo } from '../multipart.util';
 import { FileIncomingData } from '../multipart.interface';
@@ -83,13 +83,13 @@ describe('#streamFileTo', () => {
 
     if (fs.existsSync(TMP_PATH)) { rimraf.sync(TMP_PATH); }
 
-    const response = await from(streamFileTo(TMP_PATH)({
+    const response = await firstValueFrom(from(streamFileTo(TMP_PATH)({
       file,
       fieldname: 'data_field',
       filename: 'README.md',
       mimetype: 'text/markdown',
       encoding: '7bit',
-    })).toPromise();
+    })));
 
     expect(response.destination).toEqual(savedFilePath);
     expect(fs.readFileSync(savedFilePath)).toBeDefined();
@@ -101,13 +101,13 @@ describe('#streamFileTo', () => {
   test('streams file to given path ', async () => {
     const file = fs.createReadStream(uploadFilePath);
 
-    const response = await from(streamFileTo(TMP_PATH)({
+    const response = await firstValueFrom(from(streamFileTo(TMP_PATH)({
       file,
       fieldname: 'data_field',
       filename: 'README.md',
       mimetype: 'text/markdown',
       encoding: '7bit',
-    })).toPromise();
+    })));
 
     expect(response.destination).toEqual(savedFilePath);
     expect(fs.readFileSync(savedFilePath)).toBeDefined();

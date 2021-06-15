@@ -3,8 +3,8 @@ import { HttpRequest, HttpError, HttpStatus, isHttpError } from '@marblejs/core'
 import { fromEvent, Observable, throwError, forkJoin } from 'rxjs';
 import { mapTo, mergeMap, takeUntil, catchError, share, defaultIfEmpty } from 'rxjs/operators';
 import { ParserOpts } from './multipart.interface';
-import { parseField } from './multipart.parser.field';
-import { parseFile } from './multipart.parser.file';
+import { parseField, FieldEvent } from './multipart.parser.field';
+import { parseFile, FileEvent } from './multipart.parser.file';
 
 export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observable<HttpRequest> => {
   const busboy = new Busboy({
@@ -22,12 +22,12 @@ export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observab
   );
 
   const parseFile$ = parseFile(req)(opts)(
-    fromEvent(busboy, 'file'),
+    fromEvent(busboy, 'file') as Observable<FileEvent>,
     finish$,
   );
 
   const parseField$ = parseField(req)(
-    fromEvent(busboy, 'field'),
+    fromEvent(busboy, 'field') as Observable<FieldEvent>,
     finish$,
   );
 
@@ -49,12 +49,12 @@ export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observab
 
   req.pipe(busboy);
 
-  return forkJoin(
+  return forkJoin([
     filesLimit$,
     fieldsLimit$,
     parseFile$,
     parseField$,
-  ).pipe(
+  ]).pipe(
     mapTo(req),
     catchError((error: Error) => isHttpError(error)
       ? throwError(error)

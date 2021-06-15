@@ -1,7 +1,7 @@
 import { Event, matchEvent, combineEffects, act, EventError, contextFactory, bindEagerlyTo, lookup, useContext } from '@marblejs/core';
 import { wait, NamedError } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { throwError, of, TimeoutError } from 'rxjs';
+import { throwError, of, TimeoutError, firstValueFrom } from 'rxjs';
 import { delay, map, tap, ignoreElements } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -28,7 +28,7 @@ describe('#eventBus', () => {
 
     const event: Event = { type: 'RPC_TEST', payload: 1 };
 
-    const result = await eventBusClient.send(event).toPromise();
+    const result = await firstValueFrom(eventBusClient.send(event));
 
     expect(result).toEqual({ type: 'RPC_TEST_RESULT', payload: 2 });
 
@@ -65,10 +65,10 @@ describe('#eventBus', () => {
     const event4: Event = { type: 'RPC_2_TEST', payload: 4 };
 
     const result = await Promise.all([
-      eventBusClient.send(event1).toPromise(),
-      eventBusClient.send(event2).toPromise(),
-      eventBusClient.send(event3).toPromise(),
-      eventBusClient.send(event4).toPromise(),
+      firstValueFrom(eventBusClient.send(event1)),
+      firstValueFrom(eventBusClient.send(event2)),
+      firstValueFrom(eventBusClient.send(event3)),
+      firstValueFrom(eventBusClient.send(event4)),
     ]);
 
     expect(result).toEqual([
@@ -99,10 +99,10 @@ describe('#eventBus', () => {
     const event3: Event = { type: 'RPC_TEST', payload: 3 };
     const event4: Event = { type: 'RPC_TEST', payload: 4 };
 
-    const res1 = eventBusClient.send(event1).toPromise();
-    const res2 = eventBusClient.send(event2).toPromise();
-    const res3 = eventBusClient.send(event3).toPromise();
-    const res4 = eventBusClient.send(event4).toPromise();
+    const res1 = firstValueFrom(eventBusClient.send(event1));
+    const res2 = firstValueFrom(eventBusClient.send(event2));
+    const res3 = firstValueFrom(eventBusClient.send(event3));
+    const res4 = firstValueFrom(eventBusClient.send(event4));
 
     await Promise.all([
       expect(res1).resolves.toEqual(event1),
@@ -155,7 +155,7 @@ describe('#eventBus', () => {
     const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [rpc$] });
     const event: Event = { type: 'RPC_TEST' };
 
-    const result = eventBusClient.send(event).toPromise();
+    const result = firstValueFrom(eventBusClient.send(event));
     await expect(result).rejects.toEqual(error);
 
     await eventBus.close();
@@ -180,7 +180,7 @@ describe('#eventBus', () => {
     const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [rpc$] });
     const event: Event = { type: 'RPC_TEST' };
 
-    const result = eventBusClient.send(event).toPromise();
+    const result = firstValueFrom(eventBusClient.send(event));
     await expect(result).rejects.toEqual(new Error(`{"test":"${error.name}"}`));
 
     await eventBus.close();
@@ -199,7 +199,7 @@ describe('#eventBus', () => {
     const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [rpc$] });
     const event: Event = { type: 'RPC_TEST' };
 
-    const result = eventBusClient.send(event).toPromise();
+    const result = firstValueFrom(eventBusClient.send(event));
     await expect(result).rejects.toEqual(error);
 
     await eventBus.close();
@@ -234,7 +234,7 @@ describe('#eventBus', () => {
 
     expect(eventBusInstance.config.timeout).toEqual(timeout);
 
-    const result = eventBusClientInstance.send(event).toPromise();
+    const result = firstValueFrom(eventBusClientInstance.send(event));
 
     await expect(result).rejects.toEqual(new TimeoutError());
 

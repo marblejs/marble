@@ -44,7 +44,7 @@
   "keywords": [
     "API",
     "JavaScript",
-    "RxJs",
+    "RxJS",
     "TypeScript",
     "Reactive"
   ],
@@ -57,7 +57,7 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "rxjs": "^6.6.2",
+    "rxjs": "^7.1.0",
     "fp-ts": "^2.8.2"
   },
   "devDependencies": {
