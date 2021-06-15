@@ -16,15 +16,15 @@ describe('#validator$', () => {
     const stream$ = validator$(schema)(of(input));
 
     // then
-    stream$.subscribe(
-      outgoingData => {
+    stream$.subscribe({
+      next: outgoingData => {
         expect(outgoingData.age as number).toEqual(input.age);
         expect(outgoingData.name as string).toEqual(input.name);
         expect((outgoingData as any).additional).toEqual(input.additional);
         done();
       },
-      fail,
-    );
+      error: fail,
+    });
   });
 
   test('passes incoming data if schema is not defined', done => {
@@ -36,13 +36,13 @@ describe('#validator$', () => {
     const stream$ = validator$(schema)(of(input));
 
     // then
-    stream$.subscribe(
-      outgoingData => {
+    stream$.subscribe({
+      next: outgoingData => {
         expect(outgoingData).toEqual(input);
         done();
       },
-      fail,
-    );
+      error: fail,
+    });
   });
 
   test('throws error if incoming data are not valid', done => {
@@ -62,13 +62,13 @@ describe('#validator$', () => {
     const stream$ = validator$(schema)(of(input));
 
     // then
-    stream$.subscribe(
-      fail,
-      (error: IOError) => {
-        expect(error.message).toEqual('Validation error');
-        expect(error.data).toEqual(expectedError);
+    stream$.subscribe({
+      next: fail,
+      error: (err: IOError) => {
+        expect(err.message).toEqual('Validation error');
+        expect(err.data).toEqual(expectedError);
         done();
       },
-    );
+    });
   });
 });

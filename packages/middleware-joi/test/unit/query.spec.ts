@@ -27,17 +27,14 @@ describe('Joi middleware - Query', () => {
     };
     const http$ = validator$(schema)(req$);
 
-    http$.subscribe(
-      () => {
-        fail('Exceptions should be thrown');
-        done();
-      },
-      error => {
+    http$.subscribe({
+      next: () => fail('Exceptions should be thrown'),
+      error: error => {
         expect(error).toBeDefined();
         expect(error.message).toBe('"id" is required');
         done();
       }
-    );
+    });
   });
 
   test('should throws an error if pass a invalid field', done => {
@@ -51,19 +48,14 @@ describe('Joi middleware - Query', () => {
     };
     const http$ = validator$(schema)(req$);
 
-    http$.subscribe(
-      () => {
-        fail('Exceptions should be thrown');
-        done();
-      },
-      error => {
+    http$.subscribe({
+      next: () => fail('Exceptions should be thrown'),
+      error: error => {
         expect(error).toBeDefined();
-        expect(error.message).toBe(
-          '"id" must only contain alpha-numeric and underscore characters'
-        );
+        expect(error.message).toBe('"id" must only contain alpha-numeric and underscore characters');
         done();
       }
-    );
+    });
   });
 
   test('should validates query with a valid value', done => {

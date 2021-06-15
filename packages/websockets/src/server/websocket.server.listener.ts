@@ -96,38 +96,38 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
     const subscribeIncomingEvent = (input$: Observable<Event>) =>
       input$
         .pipe(takeUntil(close$))
-        .subscribe(
-          (event: Event) => eventSubject.next(event),
-          (error: EventError) => {
+        .subscribe({
+          next: (event: Event) => eventSubject.next(event),
+          error: (err: EventError) => {
             const type = 'ServerListener';
-            const message = `Unexpected error for IncomingEvent stream: "${error.name}", "${error.message}"`;
+            const message = `Unexpected error for IncomingEvent stream: "${err.name}", "${err.message}"`;
             logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.ERROR })();
             subscribeIncomingEvent(input$);
           },
-          () => {
+          complete: () => {
             const type = 'ServerListener';
             const message = `OutgoingEvent stream completes`;
             logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.DEBUG })();
           },
-        );
+        });
 
     const subscribeOutgoingEvent = (input$: Observable<Event>) =>
       input$
         .pipe(takeUntil(close$))
-        .subscribe(
-          (event: Event) => firstValueFrom(client.sendResponse(event)),
-          (error: EventError) => {
+        .subscribe({
+          next: (event: Event) => firstValueFrom(client.sendResponse(event)),
+          error: (err: EventError) => {
             const type = 'ServerListener';
-            const message = `Unexpected error for OutgoingEvent stream: "${error.name}", "${error.message}"`;
+            const message = `Unexpected error for OutgoingEvent stream: "${err.name}", "${err.message}"`;
             logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.ERROR })();
             subscribeOutgoingEvent(input$);
           },
-          () => {
+          complete: () => {
             const type = 'ServerListener';
             const message = `OutgoingEvent stream completes`;
             logger({ tag: LoggerTag.WEBSOCKETS, type, message, level: LoggerLevel.DEBUG })();
           },
-        );
+        });
 
       subscribeIncomingEvent(incomingEvent$);
       subscribeOutgoingEvent(outgoingEvent$);

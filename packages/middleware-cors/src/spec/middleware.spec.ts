@@ -28,14 +28,13 @@ describe('CORS middleware', () => {
 
     const middleware$ = cors$();
 
-    middleware$(request$, ctx).subscribe(
-      () => fail('Should not return any further value.'),
-      undefined,
-      () => {
+    middleware$(request$, ctx).subscribe({
+      next: () => fail('Should not return any further value.'),
+      complete: () => {
         expect(request.response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
         done();
       },
-    );
+    });
   });
 
   test('handle CORS request', done => {

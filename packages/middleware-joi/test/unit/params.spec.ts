@@ -32,16 +32,14 @@ describe('Joi middleware - Params', () => {
     };
     const http$ = validator$(schema)(req$);
 
-    http$.subscribe(
-      () => {
-        fail('Exceptions should be thrown');
-      },
-      error => {
-        expect(error).toBeDefined();
-        expect(error.message).toBe('"id" is required');
+    http$.subscribe({
+      next: () => fail('Exceptions should be thrown'),
+      error: err => {
+        expect(err).toBeDefined();
+        expect(err.message).toBe('"id" is required');
         done();
       }
-    );
+    });
   });
 
   it('should throws an error if pass a invalid field', done => {
@@ -55,18 +53,14 @@ describe('Joi middleware - Params', () => {
     };
     const http$ = validator$(schema)(req$);
 
-    http$.subscribe(
-      () => {
-        fail('Exceptions should be thrown');
-      },
-      error => {
-        expect(error).toBeDefined();
-        expect(error.message).toBe(
-          '"id" must only contain alpha-numeric and underscore characters'
-        );
+    http$.subscribe({
+      next: () => fail('Exceptions should be thrown'),
+      error: err => {
+        expect(err).toBeDefined();
+        expect(err.message).toBe('"id" must only contain alpha-numeric and underscore characters');
         done();
       }
-    );
+    });
   });
 
   it('should validates params with a default value', done => {
