@@ -19,27 +19,28 @@ Requires `@marblejs/core` to be installed.
 
 **Generate token:**
 ```typescript
-import { EffectFactory } from '@marblejs/core';
+import { r } from '@marblejs/core';
 import { generateToken } from '@marblejs/middleware-jwt';
 import { SECRET_KEY } from './config';
 
-const login$ = EffectFactory
-  .matchPath('/login')
-  .matchType('POST')
-  .use(req$ => req$.pipe(
+const login$ = r.pipe(
+  r.matchPath('/login')
+  r.matchType('POST')
+  r.useEffect(req$ => req$.pipe(
     //
     map(payload => generateToken({ secret: SECRET_KEY })(payload)), 👈
     // ...
-  ));
+  )));
 ```
 
 **Validate payload:**
 ```typescript
+import { pipe } from 'fp-ts/lib/function';
+
 const verifyPayload$ = (payload: { id: string }) =>
-  of(payload).pipe(
-    map(payload => payload.id),
-    flatMap(UserRepository.findById),  // the repository can throw an error if not found or...
-    catchError(/* ... */)              // the `verifyPayload$` can throw it explicitly
+  pipe(
+    UserRepository.findById(payload.id),  // the repository can throw an error if not found or...
+    catchError(/* ... */)                 // the `verifyPayload$` can throw it explicitly
   );
 ```
 

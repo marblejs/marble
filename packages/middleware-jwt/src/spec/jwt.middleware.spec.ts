@@ -2,11 +2,11 @@ import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
 import { createMockEffectContext } from '@marblejs/core/dist/+internal/testing';
 import { authorize$ } from '@marblejs/middleware-jwt/src/jwt.middleware';
 import { of, throwError, iif } from 'rxjs';
-import { flatMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 
 const verifyPayload$ = (payload: { id: string }) =>
   of(payload).pipe(
-    flatMap(payload => iif(
+    mergeMap(payload => iif(
       () => payload.id !== 'test_id',
       throwError(() => new Error()),
       of(payload)
