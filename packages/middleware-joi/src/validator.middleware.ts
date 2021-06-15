@@ -4,14 +4,14 @@ import * as Joi from 'joi';
 import './validator.interface';
 import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
 import { from, of, throwError, Observable } from 'rxjs';
-import { mergeMap, flatMap, catchError, mapTo, switchMap, toArray, map } from 'rxjs/operators';
+import { mergeMap, catchError, mapTo, switchMap, toArray, map } from 'rxjs/operators';
 import { Schema, SchemaValidator } from './validator.schema';
 import { ExtractedBody, ExtractedParams, ExtractedQuery } from './validator.interface';
 
 const validateSource = (rules: Map<string, any>, options: Joi.ValidationOptions) => (req: HttpRequest) =>
   from(rules.keys()).pipe(
     mergeMap(rule => of(req[rule]).pipe(
-      flatMap(item =>
+      mergeMap(item =>
         from(Joi.validate(item || {}, rules.get(rule), options)).pipe(
           catchError((err: Joi.ValidationError) => {
             const message = err.details[0].message;
