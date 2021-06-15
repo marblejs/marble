@@ -1,4 +1,3 @@
-import { TimeoutError } from 'rxjs';
 import { Marbles } from '@marblejs/core/dist/+internal/testing';
 import { WebSocketStatus, WebSocketConnectionLiveness } from '../../websocket.interface';
 import { WebSocketConnectionError } from '../../error/websocket.error.model';
@@ -86,7 +85,6 @@ describe('#handleClientBrokenConnection', () => {
     // given
     const scheduler = Marbles.createTestScheduler();
     const client = createWebSocketClientMock();
-    const timeoutError = new TimeoutError();
     const isAlive = true;
 
     // when
@@ -98,7 +96,7 @@ describe('#handleClientBrokenConnection', () => {
       expectObservable(brokenConnection$).toBe(
         `100ms a ${HEART_BEAT_TERMINATE_INTERVAL - 1}ms #`,
         { a: isAlive },
-        timeoutError,
+        expect.objectContaining({ name: 'TimeoutError' }),
       );
       flush();
       expect(client.terminate).toHaveBeenCalled();
