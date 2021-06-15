@@ -135,9 +135,6 @@ describe('#matchEvent operator', () => {
     const barEvent = BarEvent.create();
     const bazEvent = BazEvent.create({ test1: 100, test2: '100' });
 
-    const EventUnion = t.union([FooEvent, BarEvent, BazEvent]);
-    type EventUnion = t.TypeOf<typeof EventUnion>
-
     // when
     const listen$ = (event$: Observable<Event>) =>
       event$.pipe(
