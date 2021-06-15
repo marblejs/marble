@@ -52,8 +52,8 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
     const errorSubject = new Subject<Error>();
     const eventSubject = new Subject<Event>();
     const ctx = createEffectContext({ ask, client });
-    const close$ = fromEvent(client, 'close');
-    const message$ = fromEvent<{ data: any }>(client, 'message');
+    const close$ = fromEvent(client, 'close') as Observable<unknown>;
+    const message$ = fromEvent(client, 'message') as Observable<{ data: any }>;
 
     const applyMetadata = (event: Event): Event => ({
       ...event,
