@@ -143,7 +143,7 @@ describe('#eventBus', () => {
       event$.pipe(
         matchEvent('RPC_TEST'),
         act(
-          () => throwError(error),
+          () => throwError(() => error),
           (error, event) => reply(event)({
             type: 'RPC_TEST_ERROR',
             error: { name: error.name, message: error.message },
@@ -168,7 +168,7 @@ describe('#eventBus', () => {
       event$.pipe(
         matchEvent('RPC_TEST'),
         act(
-          () => throwError(error),
+          () => throwError(() => error),
           (error, event) => reply(event)({
             type: 'RPC_TEST_ERROR',
             error: { test: error.name },
@@ -192,7 +192,7 @@ describe('#eventBus', () => {
     const rpc$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('RPC_TEST'),
-        act(() => throwError(error)),
+        act(() => throwError(() => error)),
       );
 
     const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [rpc$] });

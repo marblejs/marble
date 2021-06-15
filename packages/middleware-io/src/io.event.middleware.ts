@@ -31,7 +31,7 @@ export const eventValidator$ = <U extends Schema>(schema: U, options?: Validator
       isEventCodec(schema)
         ? validateByEventSchema(event)
         : validateByPayloadSchema(event),
-      catchError((error: IOError) => throwError(
+      catchError((error: IOError) => throwError(() =>
         new EventError(event, error.message, error.data),
       )),
     ) as Observable<ValidationResult<U>>;

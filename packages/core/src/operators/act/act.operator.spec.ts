@@ -276,7 +276,7 @@ describe('#act operator', () => {
     // when
     const effect$ = (event$: Observable<Event>) =>
       event$.pipe(
-        act(e => e.payload === 2 ? throwError('test_error') : of(e as Event<number>)),
+        act(e => e.payload === 2 ? throwError(() => 'test_error') : of(e as Event<number>)),
         act(_ => of(event_ok), (error, event) => {
           expect(error).toEqual('test_error');
           expect(event).toEqual({ type: 'TEST_EVENT_2_UNHANDLED_ERROR', error: 'test_error' });

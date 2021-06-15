@@ -70,7 +70,7 @@ export const requestValidator$ = <
           (typeof schema.query extends t.UnknownC | undefined | null ? unknown : t.TypeOf<TQuery>) & T['query']
         >;
       }),
-      catchError((error: IOError) => throwError(
+      catchError((error: IOError) => throwError(() =>
         new HttpError(error.message, HttpStatus.BAD_REQUEST, error.data, req, error.context),
       )),
     )),

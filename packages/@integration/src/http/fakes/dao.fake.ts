@@ -10,7 +10,7 @@ export const Dao = {
   getUserById: (id: number | string) =>
     String(id) !== String(0)
       ? of({ id, firstName: 'Bob', lastName: 'Collins' })
-      : throwError(new Error()),
+      : throwError(() => new Error()),
 
   postUser: <T>(data: T) => of({
     data,

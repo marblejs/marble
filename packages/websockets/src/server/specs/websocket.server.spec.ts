@@ -158,7 +158,7 @@ describe('WebSocket server', () => {
       const outgoingEvent = { type: 'UNHANDLED_ERROR', error: { name: 'Error', message: 'test_message' } };
 
       const effect$: WsEffect = event$ =>
-        event$.pipe(mergeMap(() => throwError(new Error('test_message'))));
+        event$.pipe(mergeMap(() => throwError(() => new Error('test_message'))));
 
       const listener = webSocketListener({ effects: [effect$] });
 

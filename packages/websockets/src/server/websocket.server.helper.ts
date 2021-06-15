@@ -54,7 +54,7 @@ export const handleClientBrokenConnection = (client: WebSocketClientConnection, 
     map(client => client.isAlive),
     catchError(error => {
       client.terminate();
-      return throwError(error);
+      return throwError(() => error);
     }),
   );
 

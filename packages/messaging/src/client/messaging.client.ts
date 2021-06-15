@@ -1,7 +1,7 @@
 import * as E from 'fp-ts/lib/Either';
 import * as O from 'fp-ts/lib/Option';
 import * as R from 'fp-ts/lib/Reader';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe, identity } from 'fp-ts/lib/function';
 import {
   Event,
   HttpServerEventStreamToken,
@@ -20,7 +20,6 @@ import {
 import { isNamedError, NamedError, throwException } from '@marblejs/core/dist/+internal/utils';
 import { from, Observable, EMPTY, throwError, of, defer } from 'rxjs';
 import { mergeMap, take, map, timeout } from 'rxjs/operators';
-import { identity } from 'fp-ts/lib/function';
 import { TransportMessage, DEFAULT_TIMEOUT } from '../transport/transport.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { jsonTransformer } from '../transport/transport.transformer';
@@ -56,17 +55,14 @@ export const messagingClient = (config: MessagingClientConfig) => {
         const message: TransportMessage<Buffer> = { data: msgTransformer.encode(event) };
 
         const catchErrorEvent = <V extends Event>(e: V) => {
-          if (!e.error) {
+          if (!e.error)
             return of(e);
-          }
 
-          if (isEventError(e.error)) {
-            return throwError(new EventError(e, e.error.message, e.error.data));
-          }
+          if (isEventError(e.error))
+            return throwError(() => new EventError(e, e.error.message, e.error.data));
 
-          if (isNamedError(e.error)) {
-            return throwError(new NamedError(e.error.name, e.error.message));
-          }
+          if (isNamedError(e.error))
+            return throwError(() => new NamedError(e.error.name, e.error.message));
 
           const parsedError = JSON.stringify(e.error);
 
@@ -77,7 +73,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
             level: LoggerLevel.WARN,
           })();
 
-          return throwError(new Error(parsedError));
+          return throwError(() => new Error(parsedError));
         }
 
         return defer(() => from(connection.sendMessage(channel, message)).pipe(

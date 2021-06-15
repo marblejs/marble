@@ -29,7 +29,7 @@ const notImplemented$ = r.pipe(
   r.matchType('GET'),
   r.useEffect(req$ => req$.pipe(
     mergeMap(() => throwError(
-      new HttpError('Route not implemented', HttpStatus.NOT_IMPLEMENTED, { reason: 'Not implemented' })
+      () => new HttpError('Route not implemented', HttpStatus.NOT_IMPLEMENTED, { reason: 'Not implemented' })
     )),
   )));
 
@@ -38,7 +38,7 @@ const notFound$ = r.pipe(
   r.matchType('*'),
   r.useEffect(req$ => req$.pipe(
     mergeMap(() => throwError(
-      new HttpError('Route not found', HttpStatus.NOT_FOUND)
+      () => new HttpError('Route not found', HttpStatus.NOT_FOUND)
     )),
   )));
 
