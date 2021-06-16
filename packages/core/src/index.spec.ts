@@ -4,6 +4,7 @@ describe('@marblejs/core public API', () => {
   test('apis are defined', () => {
     expect(API.httpListener).toBeDefined();
     expect(API.defaultError$).toBeDefined();
+    // eslint-disable-next-line deprecation/deprecation
     expect(API.EffectFactory).toBeDefined();
     expect(API.combineRoutes).toBeDefined();
     expect(API.combineEffects).toBeDefined();

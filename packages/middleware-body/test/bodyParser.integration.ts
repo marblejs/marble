@@ -1,12 +1,12 @@
-import { EffectFactory, httpListener, combineRoutes } from '@marblejs/core';
+import { r, httpListener, combineRoutes } from '@marblejs/core';
 import { ContentType, getContentType } from '@marblejs/core/dist/+internal/http';
 import { map } from 'rxjs/operators';
 import { bodyParser$, urlEncodedParser, jsonParser, textParser, rawParser } from '../src';
 
-const effect$ = EffectFactory
-  .matchPath('/')
-  .matchType('POST')
-  .use(req$ => req$.pipe(
+const effect$ = r.pipe(
+  r.matchPath('/'),
+  r.matchType('POST'),
+  r.useEffect(req$ => req$.pipe(
     map(req => {
       const incomingContentType = getContentType(req.headers) as ContentType;
       const outgoingContentType = [ContentType.APPLICATION_OCTET_STREAM, ContentType.TEXT_PLAIN].includes(incomingContentType)
@@ -17,7 +17,7 @@ const effect$ = EffectFactory
         headers: { 'Content-Type': outgoingContentType },
       };
     }),
-  ));
+  )));
 
 const defaultParser$ = combineRoutes('/default-parser', {
   middlewares: [bodyParser$()],
