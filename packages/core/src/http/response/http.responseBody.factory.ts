@@ -1,4 +1,3 @@
-import { isBuffer } from 'util';
 import { Stream } from 'stream';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { HttpHeaders } from '../http.interface';
@@ -20,7 +19,7 @@ export const bodyFactory: ResponseBodyFactory = headers => body => {
     case ContentType.APPLICATION_X_WWW_FORM_URLENCODED:
       return transformUrlEncoded(body);
     case ContentType.APPLICATION_OCTET_STREAM:
-      return !isBuffer(body)
+      return !Buffer.isBuffer(body)
         ? pipe(body, stringifyJson, bufferFrom)
         : body;
     case ContentType.TEXT_PLAIN:

@@ -1,3 +1,4 @@
+/* eslint-disable deprecation/deprecation */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { of } from 'rxjs';

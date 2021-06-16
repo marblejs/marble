@@ -8,11 +8,9 @@ import {
   HttpMethod,
   RouteParameters,
   QueryParameters,
-  HttpServer,
 } from '../../http/http.interface';
 import { createContext, lookup, registerAll, bindTo } from '../../context/context';
 import { createEffectContext } from '../../effects/effectsContext.factory';
-import { ServerIO } from '../../listener/listener.interface';
 import { LoggerToken, mockLogger } from '../../logger';
 import { factorizeRegExpWithParams } from '../../http/router/http.router.params.factory';
 import { HttpEffect } from '../../http/effects/http.effects.interface';
@@ -101,27 +99,3 @@ export const createTestRoute = (opts?: { throwError?: boolean; delay?: number; m
 
   return { req, path, effect, item };
 };
-
-/**
- * @deprecated
- */
-export const createHttpServerTestBed = (server: Promise<ServerIO<HttpServer>>) => {
-  let httpServer: HttpServer;
-
-  const getInstance = () => httpServer;
-
-  beforeAll(async () => {
-    const app = await server;
-    httpServer = await app();
-  });
-
-  afterAll(done => {
-    httpServer.close(done);
-  });
-
-  return {
-    getInstance,
-  };
-};
-
-export type HttpServerTestBed = ReturnType<typeof createHttpServerTestBed>;

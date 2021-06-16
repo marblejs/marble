@@ -1,3 +1,4 @@
+/* eslint-disable deprecation/deprecation */
 import * as Joi from 'joi';
 
 // package public API

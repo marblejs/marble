@@ -1,14 +1,24 @@
+import { Observable } from 'rxjs';
 import { mapTo } from 'rxjs/operators';
 import { combineRoutes } from '../http.router.combiner';
-import { EffectFactory } from '../../effects/http.effects.factory';
-import { HttpMiddlewareEffect, HttpEffect } from '../../effects/http.effects.interface';
+import { r } from '../http.router.ixbuilder';
+import { HttpMiddlewareEffect } from '../../effects/http.effects.interface';
+import { HttpRequest } from '../../http.interface';
 
 describe('#combineRoutes', () => {
   test('factorizes combined routes for effects only', () => {
     // given
-    const effect$ = req$ => req$.pipe(mapTo({}));
-    const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
-    const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
+    const effect$ = (req$: Observable<HttpRequest>) => req$.pipe(mapTo({}));
+
+    const a$ = r.pipe(
+      r.matchPath('/a'),
+      r.matchType('GET'),
+      r.useEffect(effect$));
+
+    const b$ = r.pipe(
+      r.matchPath('/b'),
+      r.matchType('GET'),
+      r.useEffect(effect$));
 
     // when
     const combiner = combineRoutes('/test', [a$, b$]);
@@ -23,9 +33,17 @@ describe('#combineRoutes', () => {
 
   test('factorizes combined routes for effects with middlewares', () => {
     // given
-    const effect$: HttpEffect = req$ => req$.pipe(mapTo({}));
-    const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
-    const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
+    const effect$ = (req$: Observable<HttpRequest>) => req$.pipe(mapTo({}));
+
+    const a$ = r.pipe(
+      r.matchPath('/a'),
+      r.matchType('GET'),
+      r.useEffect(effect$));
+
+    const b$ = r.pipe(
+      r.matchPath('/b'),
+      r.matchType('GET'),
+      r.useEffect(effect$));
 
     const m1$: HttpMiddlewareEffect = req$ => req$;
     const m2$: HttpMiddlewareEffect = req$ => req$;
@@ -46,9 +64,17 @@ describe('#combineRoutes', () => {
 
   test('factorizes combined routes for effects with empty middlewares', () => {
     // given
-    const effect$ = req$ => req$.pipe(mapTo({}));
-    const a$ = EffectFactory.matchPath('/a').matchType('GET').use(effect$);
-    const b$ = EffectFactory.matchPath('/b').matchType('GET').use(effect$);
+    const effect$ = (req$: Observable<HttpRequest>) => req$.pipe(mapTo({}));
+
+    const a$ = r.pipe(
+      r.matchPath('/a'),
+      r.matchType('GET'),
+      r.useEffect(effect$));
+
+    const b$ = r.pipe(
+      r.matchPath('/b'),
+      r.matchType('GET'),
+      r.useEffect(effect$));
 
     // when
     const combiner = combineRoutes('/test', {

@@ -1,3 +1,5 @@
+/* eslint-disable deprecation/deprecation */
+
 import { mapTo } from 'rxjs/operators';
 import { HttpEffect } from '../http.effects.interface';
 import { EffectFactory } from '../http.effects.factory';

@@ -2,6 +2,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: [
     '@typescript-eslint',
+    'deprecation',
   ],
   extends: [
     'plugin:@typescript-eslint/recommended',
@@ -10,8 +11,9 @@ module.exports = {
     'plugin:import/typescript',
   ],
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 2020,
     sourceType: 'module',
+    project: './tsconfig.json',
   },
   rules: {
     '@typescript-eslint/indent': 0,
@@ -26,6 +28,7 @@ module.exports = {
     '@typescript-eslint/explicit-member-accessibility': 0,
     '@typescript-eslint/explicit-module-boundary-types': 0,
     '@typescript-eslint/no-var-requires': 0,
+    'deprecation/deprecation': 'warn',
     'quotes': ['error', 'single', { allowTemplateLiterals: true }],
     'import/order': ['error', {
       'groups': [
