@@ -1,13 +1,10 @@
 import * as http from 'http';
 import * as net from 'net';
-import * as WebSocket from 'ws';
-import { Observable, of } from 'rxjs';
-import { map, takeWhile } from 'rxjs/operators';
+import { takeWhile } from 'rxjs/operators';
 import { filter } from 'fp-ts/lib/Array';
-import { Context, contextFactory, createEffectContext, ServerIO, LoggerTag, lookup, logContext, combineEffects } from '@marblejs/core';
+import { contextFactory, createEffectContext, ServerIO, LoggerTag, lookup, logContext, combineEffects } from '@marblejs/core';
 import { createUuid, isNonNullable, isNullable } from '@marblejs/core/dist/+internal/utils';
 import { createServer, handleServerBrokenConnections, handleClientBrokenConnection } from '../server/websocket.server.helper';
-import { WebSocketConnectionError } from '../error/websocket.error.model';
 import { statusLogger$ } from '../middlewares/websockets.statusLogger.middleware';
 import { broadcastEvent, emitEvent } from './websocket.server.response';
 import { WebSocketServerConfig, WebSocketClientConnection, WebSocketServerConnection } from './websocket.server.interface';
@@ -20,20 +17,7 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
     options,
     dependencies = [],
     listener,
-    connection$ = (req$: Observable<http.IncomingMessage>) => req$,
   } = config;
-
-  /**
-   * @deprecated legacy API - will be removed in version v4
-   */
-  const verifyClient = (context: Context): WebSocket.VerifyClientCallbackAsync => (info, callback) => {
-    connection$(of(info.req), createEffectContext({ ask: lookup(context), client: undefined }))
-      .pipe(map(Boolean))
-      .subscribe({
-        next: isVerified => callback(isVerified),
-        error: (err: WebSocketConnectionError) => callback(false, err.status, err.message),
-      });
-  };
 
   const context = await contextFactory(...filter(isNonNullable)(dependencies));
 
@@ -48,7 +32,6 @@ export const createWebSocketServer = async (config: WebSocketServerConfig) => {
     && isNullable(options?.noServer);
 
   const server = createServer({
-    verifyClient: verifyClient(context),
     noServer,
     ...options
   }, webSocketListener.eventTransformer, context);
