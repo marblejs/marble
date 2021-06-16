@@ -1,4 +1,5 @@
 // http
+// eslint-disable-next-line deprecation/deprecation
 export { EffectFactory } from './http/effects/http.effects.factory';
 export { defaultError$ } from './http/error/http.error.effect';
 export { HttpError, HttpRequestError, isHttpError, isHttpRequestError } from './http/error/http.error.model';

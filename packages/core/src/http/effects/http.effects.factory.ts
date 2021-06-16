@@ -1,3 +1,5 @@
+/* eslint-disable deprecation/deprecation */
+
 import { getArrayFromEnum } from '../../+internal/utils';
 import { coreErrorFactory, CoreErrorOptions } from '../../error/error.factory';
 import { HttpEffect } from '../effects/http.effects.interface';

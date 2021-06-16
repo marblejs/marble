@@ -1,3 +1,5 @@
+/* eslint-disable deprecation/deprecation */
+
 import { HttpRequest } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { createMockEffectContext } from '@marblejs/core/dist/+internal/testing';
