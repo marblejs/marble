@@ -33,8 +33,6 @@
     { "path": "../middleware-body" },
     { "path": "../middleware-cors" },
     { "path": "../middleware-io" },
-    { "path": "../middleware-jwt" },
-    { "path": "../middleware-joi" },
     { "path": "../middleware-logger" },
     { "path": "../middleware-multipart" },
   ]
