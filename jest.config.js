@@ -1,3 +1,5 @@
+const path = require('path');
+
 const SCOPE = process.env.SCOPE;
 
 const config = {
@@ -23,7 +25,7 @@ const config = {
   ],
   globals: {
     'ts-jest': {
-      tsConfig: './tsconfig.test.json',
+      tsconfig: path.join(path.dirname(__filename), './tsconfig.test.json'),
       diagnostics: {
         ignoreCodes: [2300],
       },

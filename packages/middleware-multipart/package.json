@@ -8,7 +8,7 @@
     "start": "yarn watch",
     "watch": "tsc -w",
     "build": "tsc",
-    "test": "jest --config ../../jest.config.js",
+    "test": "jest --config ./jest.config.js",
     "clean": "rimraf dist"
   },
   "files": [
