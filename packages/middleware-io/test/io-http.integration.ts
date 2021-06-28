@@ -1,4 +1,4 @@
-import { r, httpListener } from '@marblejs/core';
+import { r, httpListener } from '@marblejs/http';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { map } from 'rxjs/operators';
 import { requestValidator$, t } from '../src';

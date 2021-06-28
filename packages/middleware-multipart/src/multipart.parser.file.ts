@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
+import { HttpRequest, HttpError, HttpStatus } from '@marblejs/http';
 import { isNonNullable } from '@marblejs/core/dist/+internal/utils';
 import { fromReadableStream } from '@marblejs/core/dist/+internal/observable';
 import { fromEvent, Observable, of, throwError, merge, iif } from 'rxjs';

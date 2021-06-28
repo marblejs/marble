@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import { HttpError, HttpRequest, HttpStatus } from '@marblejs/core';
+import { HttpError, HttpRequest, HttpStatus } from '@marblejs/http';
 import { isTestingMetadataOn } from '@marblejs/core/dist/+internal/testing';
 import { pipe } from 'fp-ts/lib/function';
 import { forkJoin, Observable, of, throwError } from 'rxjs';

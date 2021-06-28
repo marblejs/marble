@@ -1,7 +1,7 @@
 import { WsEffect, webSocketListener, createWebSocketServer } from '@marblejs/websockets';
-import { buffer, map } from 'rxjs/operators';
 import { matchEvent, act } from '@marblejs/core';
 import { eventValidator$, t } from '@marblejs/middleware-io';
+import { buffer, map } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
 
 const sum$: WsEffect = event$ =>

@@ -1,7 +1,8 @@
 import * as T from 'fp-ts/lib/Task';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { isTestEnv, getPortEnv } from '@marblejs/core/dist/+internal/utils';
-import { httpListener, createServer, bindEagerlyTo, bindTo } from '@marblejs/core';
+import { bindEagerlyTo, bindTo } from '@marblejs/core';
+import { httpListener, createServer } from '@marblejs/http';
 import { messagingListener, EventBusClientToken, eventBusClient, EventBusToken, eventBus } from '@marblejs/messaging';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { logger$ } from '@marblejs/middleware-logger';

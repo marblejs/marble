@@ -26,6 +26,7 @@
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
     "@marblejs/core": "^3.5.1",
+    "@marblejs/http": "^3.5.1",
     "@marblejs/middleware-body": "^3.5.1",
     "@marblejs/middleware-cors": "^3.5.1",
     "@marblejs/middleware-io": "^3.5.1",

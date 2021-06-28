@@ -2,8 +2,8 @@ import * as typeIs from 'type-is';
 import { pipe } from 'fp-ts/lib/function';
 import { Observable } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
-import { HttpRequest } from '@marblejs/core';
-import { getContentType } from '@marblejs/core/dist/+internal/http';
+import { HttpRequest } from '@marblejs/http';
+import { getContentType } from '@marblejs/http/dist/+internal/contentType.util';
 import { fromReadableStream } from '@marblejs/core/dist/+internal/observable';
 
 export const matchType = (type: string[]) => (req: HttpRequest): boolean =>

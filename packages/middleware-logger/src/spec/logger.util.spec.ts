@@ -1,5 +1,5 @@
-import { HttpRequest } from '@marblejs/core';
-import { createHttpRequest, createHttpResponse } from '@marblejs/core/dist/+internal/testing';
+import { HttpRequest } from '@marblejs/http';
+import { createHttpRequest, createHttpResponse } from '@marblejs/http/dist/+internal/testing.util';
 import { formatTime, getTimeDifferenceInMs, filterResponse, isNotSilent } from '../logger.util';
 
 describe('Logger util', () => {

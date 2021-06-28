@@ -4,7 +4,7 @@ import * as t from 'io-ts';
 import { Marbles } from '../../+internal/testing';
 import { event } from '../../event/event';
 import { Event } from '../../event/event.interface';
-import { ServerEventType, ServerEvent, AllServerEvents, } from '../../http/server/http.server.event';
+import { createEvent } from '../../event/event.factory';
 import { matchEvent } from './matchEvent.operator';
 
 describe('#matchEvent operator', () => {
@@ -54,41 +54,53 @@ describe('#matchEvent operator', () => {
 
   test('matches EventCreator', () => {
     // given
-    const listenEvent: Event = { type: ServerEventType.LISTENING, payload: { port: 80, host: 'localhost' } };
-    const closeEvent: Event = { type: ServerEventType.CLOSE, payload: {} };
-    const errorEvent: Event = { type: ServerEventType.ERROR, payload: {} };
+    const ExampleEvent = {
+      foo_1: createEvent('FOO_1', (bar: number) => ({ bar })),
+      foo_2: createEvent('FOO_2', (bar: number) => ({ bar })),
+      foo_3: createEvent('FOO_3', (bar: number) => ({ bar })),
+    };
+
+    const foo1Event = ExampleEvent.foo_1(1);
+    const foo2Event = ExampleEvent.foo_2(2);
+    const foo3Event = ExampleEvent.foo_3(3);
 
     // when
-    const listen$ = (event$: Observable<AllServerEvents>) =>
+    const foo$ = (event$: Observable<Event>) =>
       event$.pipe(
-        matchEvent(ServerEvent.listening),
+        matchEvent(ExampleEvent.foo_2),
         map(event => event.payload),
       );
 
     // then
-    Marbles.assertEffect(listen$, [
-      ['-a-b-c---', { a: closeEvent, b: listenEvent, c: errorEvent }],
-      ['---b-----', { b: listenEvent.payload }],
+    Marbles.assertEffect(foo$, [
+      ['-a-b-c---', { a: foo1Event, b: foo2Event, c: foo3Event }],
+      ['---b-----', { b: foo2Event.payload }],
     ]);
   });
 
   test('matches EventCreator collection', () => {
     // given
-    const listenEvent: Event = { type: ServerEventType.LISTENING, payload: { port: 80, host: 'localhost' } };
-    const closeEvent: Event = { type: ServerEventType.CLOSE, payload: {} };
-    const errorEvent: Event = { type: ServerEventType.ERROR, payload: {} };
+    const ExampleEvent = {
+      foo_1: createEvent('FOO_1', (bar: number) => ({ bar })),
+      foo_2: createEvent('FOO_2', (bar: number) => ({ bar })),
+      foo_3: createEvent('FOO_3', (bar: number) => ({ bar })),
+    };
+
+    const foo1Event = ExampleEvent.foo_1(1);
+    const foo2Event = ExampleEvent.foo_2(2);
+    const foo3Event = ExampleEvent.foo_3(3);
 
     // when
-    const listen$ = (event$: Observable<AllServerEvents>) =>
+    const foo$ = (event$: Observable<Event>) =>
       event$.pipe(
-        matchEvent(ServerEvent.listening, ServerEvent.error),
+        matchEvent(ExampleEvent.foo_2, ExampleEvent.foo_3),
         map(event => event.payload),
       );
 
     // then
-    Marbles.assertEffect(listen$, [
-      ['-a-b-c---', { a: closeEvent, b: listenEvent, c: errorEvent }],
-      ['---b-c---', { b: listenEvent.payload, c: errorEvent.payload }],
+    Marbles.assertEffect(foo$, [
+      ['-a-b-c---', { a: foo1Event, b: foo2Event, c: foo3Event }],
+      ['---b-c---', { b: foo2Event.payload, c: foo3Event.payload }],
     ]);
   });
 

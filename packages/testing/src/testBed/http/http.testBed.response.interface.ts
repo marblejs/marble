@@ -1,4 +1,4 @@
-import { HttpHeaders, HttpStatus } from '@marblejs/core';
+import { HttpHeaders, HttpStatus } from '@marblejs/http';
 import { TestingMetadata } from '@marblejs/core/dist/+internal/testing';
 import { HttpTestBedRequest } from './http.testBed.request.interface';
 
