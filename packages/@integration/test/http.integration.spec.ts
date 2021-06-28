@@ -1,6 +1,6 @@
-import { pipe } from 'fp-ts/lib/pipeable';
-import { HttpStatus } from '@marblejs/core';
-import { ContentType } from '@marblejs/core/dist/+internal/http';
+import { pipe } from 'fp-ts/lib/function';
+import { HttpStatus } from '@marblejs/http';
+import { ContentType } from '@marblejs/http/dist/+internal/contentType.util';
 import { createHttpTestBed, createTestBedSetup } from '@marblejs/testing';
 import { listener } from '../src/http';
 

@@ -1,5 +1,5 @@
 import * as Busboy from 'busboy';
-import { HttpRequest, HttpError, HttpStatus, isHttpError } from '@marblejs/core';
+import { HttpRequest, HttpError, HttpStatus, isHttpError } from '@marblejs/http';
 import { fromEvent, Observable, throwError, forkJoin } from 'rxjs';
 import { mapTo, mergeMap, takeUntil, catchError, share, defaultIfEmpty } from 'rxjs/operators';
 import { ParserOpts } from './multipart.interface';

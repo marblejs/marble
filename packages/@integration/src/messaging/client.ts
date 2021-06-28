@@ -1,10 +1,11 @@
 import { logger$ } from '@marblejs/middleware-logger';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
-import { r, createServer, createContextToken, httpListener, use, useContext, bindEagerlyTo, combineRoutes, ContextToken } from '@marblejs/core';
+import { createContextToken, useContext, bindEagerlyTo, ContextToken } from '@marblejs/core';
+import { r, createServer, combineRoutes, httpListener } from '@marblejs/http';
 import { isTestEnv, getPortEnv } from '@marblejs/core/dist/+internal/utils';
 import * as T from 'fp-ts/lib/Task';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { forkJoin } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 
@@ -43,7 +44,7 @@ const fib$ = (clientToken: ContextToken<MessagingClient>) => r.pipe(
     const client = useContext(clientToken)(ctx.ask);
 
     return req$.pipe(
-      use(rootValiadtor$),
+      rootValiadtor$,
       map(req => Number(req.params.number)),
       mergeMap(number => forkJoin([
         client.send({ type: 'FIB', payload: number + 0 }),

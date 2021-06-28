@@ -1,4 +1,4 @@
-import { createHttpRequest } from '@marblejs/core/dist/+internal/testing/http.helper';
+import { createHttpRequest } from '@marblejs/http/dist/+internal/testing.util';
 import { hasBody } from '../body.util';
 
 test('#hasBody checks if request has body', () => {

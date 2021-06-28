@@ -1,4 +1,4 @@
-import { HttpRequest } from '@marblejs/core';
+import { HttpRequest } from '@marblejs/http';
 import { checkStringOrigin } from './checkStringOrigin';
 import { checkArrayOrigin } from './checkArrayOrigin';
 import { checkRegexpOrigin } from './checkRegexpOrigin';

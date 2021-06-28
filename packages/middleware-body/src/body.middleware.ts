@@ -1,4 +1,4 @@
-import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/core';
+import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/http';
 import { of, throwError } from 'rxjs';
 import { catchError, map, tap, mapTo, mergeMap } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/function';

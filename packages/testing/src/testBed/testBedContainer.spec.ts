@@ -1,4 +1,5 @@
-import { httpListener, bindEagerlyTo, useContext, bindTo, createContextToken } from '@marblejs/core';
+import { bindEagerlyTo, useContext, bindTo, createContextToken } from '@marblejs/core';
+import { httpListener } from '@marblejs/http';
 import { EventBusClientToken, eventBusClient, EventBusToken, eventBus, messagingListener } from '@marblejs/messaging';
 import { createHttpTestBed } from './http/http.testBed';
 import { createTestBedSetup } from './testBedSetup';

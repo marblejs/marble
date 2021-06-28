@@ -6,6 +6,9 @@
   },
   "include": ["src/**/*.ts"],
   "references": [
-    { "path": "../core" }
+    { "path": "../core" },
+    { "path": "../http" },
+    { "path": "../messaging" },
+    { "path": "../websockets" }
   ]
 }

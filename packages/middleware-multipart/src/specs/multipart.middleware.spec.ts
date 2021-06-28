@@ -4,7 +4,7 @@ import * as rimraf from 'rimraf';
 import * as FormData from 'form-data';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map } from 'rxjs/operators';
-import { r, use, httpListener } from '@marblejs/core';
+import { r, httpListener } from '@marblejs/http';
 import { createHttpTestBed, createTestBedSetup } from '@marblejs/testing';
 import { multipart$ } from '../multipart.middleware';
 import { streamFileTo } from '../multipart.util';
@@ -15,7 +15,7 @@ const memoryMultipart$ = r.pipe(
   r.matchPath('/memory'),
   r.matchType('POST'),
   r.useEffect(req$ => req$.pipe(
-    use(multipart$()),
+    multipart$(),
     map(req => ({ body: {
       files: req.files,
       fields: req.body,
@@ -26,11 +26,11 @@ const memoryWithOptionsMultipart$ = r.pipe(
   r.matchPath('/memory-with-options'),
   r.matchType('POST'),
   r.useEffect(req$ => req$.pipe(
-    use(multipart$({
+    multipart$({
       maxFileCount: 1,
       maxFieldCount: 2,
       maxFileSize: 20,
-    })),
+    }),
     map(req => ({ body: {
       files: req.files,
       fields: req.body,
@@ -41,9 +41,9 @@ const filesystemMultipart$ = r.pipe(
   r.matchPath('/filesystem'),
   r.matchType('POST'),
   r.useEffect(req$ => req$.pipe(
-    use(multipart$({
+    multipart$({
       stream: streamFileTo(TMP_PATH),
-    })),
+    }),
     map(req => ({ body: {
       files: req.files,
       fields: req.body,

@@ -1,12 +1,22 @@
+import { Socket } from 'net';
+import { IncomingMessage } from 'http';
 import * as O from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { ServerEvent, ServerEventType } from '@marblejs/core';
+import { pipe } from 'fp-ts/lib/function';
+import { EventMetadata } from '@marblejs/core';
 import { pathToRegexp } from 'path-to-regexp';
 import { Observable, from, EMPTY } from 'rxjs';
 import { filter, mergeMap, map, tap, mapTo, toArray, mergeMapTo } from 'rxjs/operators';
 import { WebSocketServerConnection } from '../../server/websocket.server.interface';
 
-export type UpgradeEvent = ReturnType<typeof ServerEvent.upgrade>;
+export type UpgradeEvent = {
+  type: 'upgrade';
+  payload: {
+      request: IncomingMessage;
+      socket: Socket;
+      head: Buffer;
+  };
+  metadata?: EventMetadata;
+}
 
 type WebSocketServerPathMapping = {
   path: string;
@@ -30,7 +40,7 @@ export const mapToServer = (...serverMapping: WebSocketServerPathMapping) => {
         filter(({ pathToMatch }) => pathToMatch.test(request.url || '')),
         tap(({ server }) =>
           pipe(server, O.map(server => server.handleUpgrade(request, socket, head, (ws) =>
-            server.emit(ServerEventType.CONNECTION, ws, request)
+            server.emit('connection', ws, request)
           ))),
         ),
         mapTo(true),
