@@ -1,4 +1,4 @@
-import { HttpResponse } from '@marblejs/core';
+import { HttpResponse } from '@marblejs/http';
 
 export interface ConfiguredHeader {
   key: AccessControlHeader;

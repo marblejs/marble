@@ -36,19 +36,12 @@
   },
   "dependencies": {
     "@types/json-schema": "^7.0.3",
-    "@types/qs": "^6.9.0",
     "@types/uuid": "^7.0.0",
     "chalk": "^3.0.0",
-    "file-type": "^8.0.0",
     "io-ts": "^2.2.4",
-    "mime": "^2.4.4",
-    "path-to-regexp": "^6.1.0",
-    "qs": "^6.9.1",
     "uuid": "^7.0.1"
   },
   "devDependencies": {
-    "@types/file-type": "^5.2.1",
-    "@types/mime": "^2.0.1"
   },
   "publishConfig": {
     "access": "public"

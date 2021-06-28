@@ -1,5 +1,6 @@
-import { createContextToken, httpListener, bindTo, useContext } from '@marblejs/core';
+import { createContextToken, bindTo, useContext } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
+import { httpListener } from '@marblejs/http';
 import { createHttpTestBed } from './http/http.testBed';
 import { createTestBedSetup } from './testBedSetup';
 

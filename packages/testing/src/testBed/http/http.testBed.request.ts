@@ -1,8 +1,8 @@
-import { HttpMethod, HttpHeaders } from '@marblejs/core'
+import { HttpMethod, HttpHeaders } from '@marblejs/http'
 import * as O from 'fp-ts/lib/Option';
 import * as A from 'fp-ts/lib/Array';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { getMimeType } from '@marblejs/core/dist/http/response/http.responseContentType.factory';
+import { pipe } from 'fp-ts/lib/function';
+import { getMimeType } from '@marblejs/http/dist/response/http.responseContentType.factory';
 import { HttpTestBedRequest, WithBodyApplied } from './http.testBed.request.interface';
 import { createTestingRequestHeader } from './http.testBed.util';
 

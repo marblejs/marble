@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
 import { firstValueFrom, from } from 'rxjs';
-import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
+import { createHttpRequest } from '@marblejs/http/dist/+internal/testing.util';
 import { shouldParseFieldname, shouldParseMultipart, setRequestData, streamFileTo } from '../multipart.util';
 import { FileIncomingData } from '../multipart.interface';
 

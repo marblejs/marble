@@ -1,4 +1,4 @@
-import { HttpRequest } from '@marblejs/core';
+import { HttpRequest } from '@marblejs/http';
 import { Observable } from 'rxjs';
 import { takeUntil, tap, defaultIfEmpty, mapTo } from 'rxjs/operators';
 

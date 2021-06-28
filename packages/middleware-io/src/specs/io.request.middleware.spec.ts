@@ -1,8 +1,8 @@
 import * as t from 'io-ts';
 import { of } from 'rxjs';
 import { isLeft, getOrElse } from 'fp-ts/lib/Either';
-import { HttpError, HttpStatus } from '@marblejs/core';
-import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
+import { HttpError, HttpStatus } from '@marblejs/http';
+import { createHttpRequest } from '@marblejs/http/dist/+internal/testing.util';
 import { requestValidator$ } from '../io.request.middleware';
 
 describe('#requestValidator$', () => {

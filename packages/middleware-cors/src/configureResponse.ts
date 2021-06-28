@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse } from '@marblejs/core';
+import { HttpRequest, HttpResponse } from '@marblejs/http';
 
 import { AccessControlHeader, applyHeaders, ConfiguredHeader } from './applyHeaders';
 import { CORSOptions } from './middleware';

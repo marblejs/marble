@@ -38,11 +38,13 @@
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
     "@marblejs/core": "^3.0.0",
+    "@marblejs/http": "^3.0.0",
     "fp-ts": "^2.4.2",
     "rxjs": "^7.1.0"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.5.0"
+    "@marblejs/core": "^3.5.0",
+    "@marblejs/http": "^3.5.0"
   },
   "publishConfig": {
     "access": "public"

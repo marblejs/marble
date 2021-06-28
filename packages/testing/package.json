@@ -31,6 +31,7 @@
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
     "@marblejs/core": "^3.0.0",
+    "@marblejs/http": "^3.0.0",
     "@marblejs/messaging": "^3.0.0",
     "@marblejs/websockets": "^3.0.0",
     "fp-ts": "^2.4.2",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "@marblejs/core": "^3.5.0",
+    "@marblejs/http": "^3.5.0",
     "@marblejs/messaging": "^3.5.0",
     "@marblejs/websockets": "^3.5.0"
   },

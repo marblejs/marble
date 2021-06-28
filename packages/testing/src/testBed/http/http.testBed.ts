@@ -1,10 +1,12 @@
 import { request } from 'http';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { sequenceT } from 'fp-ts/lib/Apply';
 import * as O from 'fp-ts/lib/Option';
-import { lookup, createServer, HttpMethod, HttpRequestMetadataStorageToken, ContextProvider } from '@marblejs/core';
-import { closeServer, getServerAddress, isStream } from '@marblejs/core/dist/+internal/utils';
-import { bodyFactory } from '@marblejs/core/dist/http/response/http.responseBody.factory';
+import { lookup, ContextProvider } from '@marblejs/core';
+import { createServer, HttpMethod, HttpRequestMetadataStorageToken } from '@marblejs/http';
+import { closeServer, getServerAddress } from '@marblejs/http/dist/+internal/server.util';
+import { isStream } from '@marblejs/core/dist/+internal/utils';
+import { bodyFactory } from '@marblejs/http/dist/response/http.responseBody.factory';
 import { TESTING_REQUEST_ID_HEADER, TestingMetadata } from '@marblejs/core/dist/+internal/testing';
 import { TestBedType, TestBedFactory } from '../testBed.interface';
 import { HttpTestBedConfig, HttpTestBed } from './http.testBed.interface';

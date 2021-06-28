@@ -1,4 +1,4 @@
-import { createHttpResponse } from '@marblejs/core/dist/+internal/testing';
+import { createHttpResponse } from '@marblejs/http/dist/+internal/testing.util';
 import { configureResponse } from '../configureResponse';
 import { CORSOptions } from '../middleware';
 import { createMockRequest } from '../util';

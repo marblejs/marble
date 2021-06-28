@@ -1,4 +1,4 @@
-import { HttpMethod, HttpHeaders } from '@marblejs/core';
+import { HttpMethod, HttpHeaders } from '@marblejs/http';
 import { withHeaders, withBody, withPath } from './http.testBed.request';
 import { HttpTestBedResponse } from './http.testBed.response.interface';
 

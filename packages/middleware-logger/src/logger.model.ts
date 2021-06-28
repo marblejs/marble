@@ -1,4 +1,4 @@
-import { HttpRequest } from '@marblejs/core';
+import { HttpRequest } from '@marblejs/http';
 
 export type WritableLike = {
   write: (chunk: any) => void;

@@ -1,6 +1,7 @@
 import * as http from 'http';
-import { HttpMethod, createEffectContext, createContext, lookup } from '@marblejs/core';
-import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
+import { createEffectContext, createContext, lookup } from '@marblejs/core';
+import { HttpMethod } from '@marblejs/http';
+import { createHttpRequest } from '@marblejs/http/dist/+internal/testing.util';
 
 export const capitalize = (str: string): string =>
   str

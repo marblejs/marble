@@ -1,8 +1,8 @@
 import * as O from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { HttpStatus } from '@marblejs/core';
+import { pipe } from 'fp-ts/lib/function';
+import { HttpStatus } from '@marblejs/http';
 import { parseJson } from '@marblejs/core/dist/+internal/utils';
-import { getContentType, ContentType } from '@marblejs/core/dist/+internal/http/contentType.util';
+import { getContentType, ContentType } from '@marblejs/http/dist/+internal/contentType.util';
 import { HttpTestBedResponseProps, HttpTestBedResponse } from './http.testBed.response.interface';
 import { HttpTestBedRequest } from './http.testBed.request.interface';
 

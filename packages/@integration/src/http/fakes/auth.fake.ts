@@ -1,4 +1,4 @@
-import { HttpRequest } from '@marblejs/core';
+import { HttpRequest } from '@marblejs/http';
 
 export const isAuthorized = (request: HttpRequest) =>
   request.headers.authorization || request.url.includes('?token')

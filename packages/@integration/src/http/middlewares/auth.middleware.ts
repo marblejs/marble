@@ -1,4 +1,4 @@
-import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/core';
+import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/http';
 import { iif, of, throwError } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { isAuthorized } from '../fakes/auth.fake';

@@ -1,5 +1,5 @@
 import { Timestamp } from 'rxjs';
-import { HttpRequest } from '@marblejs/core';
+import { HttpRequest } from '@marblejs/http';
 import { factorizeTime } from './logger.util';
 
 export const factorizeLog = (stamp: Timestamp<HttpRequest>) => (req: HttpRequest) => {

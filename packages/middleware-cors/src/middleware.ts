@@ -1,7 +1,7 @@
-import { isString } from '@marblejs/core/dist/+internal/utils';
 import { of, EMPTY } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { HttpMethod, HttpMiddlewareEffect, HttpStatus } from '@marblejs/core';
+import { isString } from '@marblejs/core/dist/+internal/utils';
+import { HttpMethod, HttpMiddlewareEffect, HttpStatus } from '@marblejs/http';
 import { configurePreflightResponse } from './configurePreflightResponse';
 import { configureResponse } from './configureResponse';
 

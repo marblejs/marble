@@ -1,6 +1,6 @@
-import { ContentType } from '@marblejs/core/dist/+internal/http';
+import { ContentType } from '@marblejs/http/dist/+internal/contentType.util';
 import { bufferFrom, stringifyJson } from '@marblejs/core/dist/+internal/utils';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { createHttpTestBed, createTestBedSetup } from '@marblejs/testing';
 import { listener } from './bodyParser.integration';
 

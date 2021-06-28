@@ -1,7 +1,7 @@
 import { Observable, throwError } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
-import { HttpRequest, HttpError, HttpStatus } from '@marblejs/core';
-import { ContentType } from '@marblejs/core/dist/+internal/http';
+import { HttpRequest, HttpError, HttpStatus } from '@marblejs/http';
+import { ContentType } from '@marblejs/http/dist/+internal/contentType.util';
 import { parseMultipart } from './multipart.parser';
 import { shouldParseMultipart } from './multipart.util';
 import { WithFile, ParserOpts } from './multipart.interface';

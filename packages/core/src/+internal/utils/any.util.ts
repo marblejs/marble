@@ -2,7 +2,6 @@ import { UnaryFunction } from 'rxjs';
 import { pipe, identity } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
 import * as E from 'fp-ts/lib/Either';
-import * as qs from 'qs';
 import { isString } from './string.util';
 
 export const isNonNullable = <T>(value: T): value is NonNullable<T> =>
@@ -27,9 +26,6 @@ export const wait = (seconds = 1): Promise<unknown> =>
 
 export const bufferFrom = (data: any): Buffer =>
   Buffer.from(data);
-
-export const transformUrlEncoded = (data: any): string =>
-  !isString(data) ? qs.stringify(data) : data;
 
 export const stringifyJson = (data: any): string =>
   !isString(data) ? JSON.stringify(data) : data;

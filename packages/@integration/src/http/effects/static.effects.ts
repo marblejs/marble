@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { r, combineRoutes, use } from '@marblejs/core';
+import { r, combineRoutes } from '@marblejs/http';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { multipart$ } from '@marblejs/middleware-multipart';
 import { streamFileTo } from '@marblejs/middleware-multipart/dist/multipart.util';
@@ -20,10 +20,10 @@ const postFile$ = r.pipe(
   r.useEffect(req$ => {
 
     return req$.pipe(
-      use(multipart$({
+      multipart$({
         files: ['image_1'],
         stream: streamFileTo(TMP_PATH),
-      })),
+      }),
       map(req => ({
         body: {
           file: req.files,
@@ -39,7 +39,7 @@ const getFileStream$ = r.pipe(
   r.useEffect(req$ => {
 
     return req$.pipe(
-      use(getFileValidator$),
+      getFileValidator$,
       map(req => req.params.dir),
       map(dir => fs.createReadStream(path.resolve(STATIC_PATH, dir))),
       map(body => ({ body })),
@@ -52,7 +52,7 @@ const getFile$ = r.pipe(
   r.useEffect(req$ => {
 
     return req$.pipe(
-      use(getFileValidator$),
+      getFileValidator$,
       map(req => req.params.dir),
       mergeMap(readFile(STATIC_PATH)),
       map(body => ({ body }))

@@ -1,13 +1,12 @@
 import * as E from 'fp-ts/lib/Either';
 import * as O from 'fp-ts/lib/Option';
 import * as R from 'fp-ts/lib/Reader';
-import { pipe, identity } from 'fp-ts/lib/function';
+import * as T from 'fp-ts/lib/Task';
+import * as TE from 'fp-ts/lib/TaskEither';
+import { pipe, identity, constNull, constant, constVoid } from 'fp-ts/lib/function';
 import {
   Event,
-  HttpServerEventStreamToken,
   matchEvent,
-  ServerEvent,
-  AllServerEvents,
   useContext,
   LoggerToken,
   LoggerTag,
@@ -25,6 +24,12 @@ import { provideTransportLayer } from '../transport/transport.provider';
 import { jsonTransformer } from '../transport/transport.transformer';
 import { MessagingClient, MessagingClientConfig } from './messaging.client.interface';
 
+const getHttpModule: T.Task<O.Some<typeof import('@marblejs/http')> | O.None> =
+  pipe(
+    TE.tryCatch(() => import('@marblejs/http'), constNull),
+    TE.map(O.some),
+    TE.getOrElseW(constant(T.of(O.none))));
+
 export const messagingClient = (config: MessagingClientConfig) => {
   const {
     transport,
@@ -35,6 +40,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
   return pipe(
     R.ask<Context>(),
     R.map<Context, Promise<MessagingClient>>(async context => {
+      const httpModule = await getHttpModule();
       const ask = lookup(context);
       const logger = useContext(LoggerToken)(ask);
       const transportLayer = pipe(
@@ -88,18 +94,18 @@ export const messagingClient = (config: MessagingClientConfig) => {
         await connection.close();
       }
 
-      const teardownOnClose = (event$: Observable<AllServerEvents>) =>
-        event$.pipe(
-          matchEvent(ServerEvent.close),
-          take(1),
-          mergeMap(() => connection.close()),
-        );
-
+      // @TODO: refactor -> move to function
       pipe(
-        ask(HttpServerEventStreamToken),
-        O.map(teardownOnClose),
-        O.getOrElse(() => EMPTY as Observable<any>),
-      ).subscribe();
+        httpModule,
+        O.fold(constVoid, http => pipe(
+          ask(http.HttpServerEventStreamToken),
+          O.map(event$ => event$.pipe(
+            matchEvent(http.ServerEvent.close),
+            take(1),
+            mergeMap(() => connection.close()))),
+          O.getOrElseW(constant(EMPTY)),
+        ).subscribe()),
+      );
 
       return {
         emit,

@@ -1,5 +1,5 @@
-import { r, httpListener, combineRoutes } from '@marblejs/core';
-import { ContentType, getContentType } from '@marblejs/core/dist/+internal/http';
+import { r, httpListener, combineRoutes } from '@marblejs/http';
+import { ContentType, getContentType } from '@marblejs/http/dist/+internal/contentType.util';
 import { map } from 'rxjs/operators';
 import { bodyParser$, urlEncodedParser, jsonParser, textParser, rawParser } from '../src';
 

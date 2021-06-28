@@ -28,6 +28,7 @@
   ],
   "references": [
     { "path": "../core" },
+    { "path": "../http" },
     { "path": "../messaging" },
     { "path": "../websockets" },
     { "path": "../middleware-body" },

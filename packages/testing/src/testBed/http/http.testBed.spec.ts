@@ -1,5 +1,5 @@
-import { pipe } from 'fp-ts/lib/pipeable';
-import { httpListener, r, use } from '@marblejs/core';
+import { pipe } from 'fp-ts/lib/function';
+import { httpListener, r } from '@marblejs/http';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { TESTING_REQUEST_ID_HEADER } from '@marblejs/core/dist/+internal/testing';
@@ -82,7 +82,7 @@ describe('TetBed - HTTP', () => {
 
   test('creates request with body and sends it', async () => {
     // given
-    const validator$ = requestValidator$({
+    const validateRequest = requestValidator$({
       body: t.type({ foo: t.string }),
     });
 
@@ -90,7 +90,7 @@ describe('TetBed - HTTP', () => {
       r.matchPath('/test'),
       r.matchType('POST'),
       r.useEffect(req$ => req$.pipe(
-        use(validator$),
+        validateRequest,
         map(req => ({ body: req.body })),
       )));
 

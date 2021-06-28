@@ -1,4 +1,5 @@
-import { HttpMiddlewareEffect, useContext, LoggerToken } from '@marblejs/core';
+import { useContext, LoggerToken } from '@marblejs/core';
+import { HttpMiddlewareEffect } from '@marblejs/http';
 import { timestamp, tap, map } from 'rxjs/operators';
 import { LoggerOptions } from './logger.model';
 import { loggerHandler } from './logger.handler';

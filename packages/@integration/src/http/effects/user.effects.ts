@@ -1,4 +1,4 @@
-import { combineRoutes, HttpError, HttpStatus, use, r } from '@marblejs/core';
+import { combineRoutes, HttpError, HttpStatus, r } from '@marblejs/http';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { throwError, from, of } from 'rxjs';
 import { map, switchMap, catchError, mergeMap, bufferCount } from 'rxjs/operators';
@@ -33,7 +33,7 @@ const getUser$ = r.pipe(
   r.useEffect(req$ => {
 
     return req$.pipe(
-      use(getUserValidator$),
+      getUserValidator$,
       map(req => req.params.id),
       mergeMap(id => Dao
         .getUserById(id)
@@ -57,7 +57,7 @@ const getUserBuffered$ = r.pipe(
       bufferCount(2),
       mergeMap(out => from(out).pipe(
         mergeMap(request => of(request).pipe(
-          use(getUserValidator$),
+          getUserValidator$,
           map(req => req.params.id),
           switchMap(Dao.getUserById),
           map(user => ({ body: user, request })),
@@ -75,7 +75,7 @@ const postUser$ = r.pipe(
   r.useEffect(req$ => {
 
     return req$.pipe(
-      use(postUserValidator$),
+      postUserValidator$,
       map(req => req.body),
       mergeMap(Dao.postUser),
       map(body => ({ body })),
