@@ -1,6 +1,7 @@
 import { firstValueFrom, of } from 'rxjs';
-import { createHttpRequest } from '@marblejs/core/dist/+internal/testing';
-import { createEffectContext, lookup, register, LoggerToken, bindTo, createContext, HttpServer, Logger, EffectContext } from '@marblejs/core';
+import { HttpServer } from '@marblejs/http';
+import { createHttpRequest } from '@marblejs/http/dist/+internal/testing.util';
+import { createEffectContext, lookup, register, LoggerToken, bindTo, createContext, Logger, EffectContext } from '@marblejs/core';
 import { logger$ } from '../logger.middleware';
 
 describe('logger$', () => {

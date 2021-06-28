@@ -1,4 +1,5 @@
-import { HttpRequest, Logger, LoggerTag, LoggerLevel } from '@marblejs/core';
+import { Logger, LoggerTag, LoggerLevel } from '@marblejs/core';
+import { HttpRequest } from '@marblejs/http';
 import { fromEvent, Timestamp, Observable } from 'rxjs';
 import { take, filter, mapTo, map, tap } from 'rxjs/operators';
 import { factorizeLog } from './logger.factory';

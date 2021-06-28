@@ -1,6 +1,8 @@
 import { some } from 'fp-ts/lib/Option';
-import { Marbles, createHttpRequest } from '@marblejs/core/dist/+internal/testing';
-import { HttpServerEffect, ServerEvent, ServerEventType, matchEvent } from '@marblejs/core';
+import { Marbles } from '@marblejs/core/dist/+internal/testing';
+import { createHttpRequest } from '@marblejs/http/dist/+internal/testing.util';
+import { ServerEventType, ServerEvent, HttpServerEffect } from '@marblejs/http';
+import { matchEvent } from '@marblejs/core';
 import { mapToServer, UpgradeEvent } from './websocket.mapToServer.operator';
 
 describe('#mapToServer operator', () => {

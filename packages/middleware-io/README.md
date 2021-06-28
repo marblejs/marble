@@ -22,7 +22,7 @@ For the latest updates, documentation, change log, and release information visit
 ## Usage
 
 ```typescript
-import { use, r } from '@marblejs/core';
+import { r } from '@marblejs/http';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 
 const userSchema = t.type({
@@ -41,7 +41,7 @@ const effect$ = r.pipe(
   r.matchPath('/'),
   r.matchType('POST'),
   r.useEffect(req$ => req$.pipe(
-    use(requestValidator$({ body: userSchema })),
+    requestValidator$({ body: userSchema }),
     // ..
   )));
 ```

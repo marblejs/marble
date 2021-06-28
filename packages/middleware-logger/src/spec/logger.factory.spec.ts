@@ -1,4 +1,4 @@
-import { createHttpResponse, createHttpRequest } from '@marblejs/core/dist/+internal/testing';
+import { createHttpResponse, createHttpRequest } from '@marblejs/http/dist/+internal/testing.util';
 import { factorizeLog } from '../logger.factory';
 
 describe('Logger factory', () => {

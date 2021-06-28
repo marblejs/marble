@@ -13,7 +13,7 @@ A **multipart/form-data** middleware for [Marble.js](https://github.com/marblejs
 ```
 $ npm i @marblejs/middleware-multipart
 ```
-Requires `@marblejs/core` to be installed.
+Requires `@marblejs/core` and `@marblejs/http` to be installed.
 
 ## Documentation
 
@@ -38,7 +38,7 @@ const effect$ = r.pipe(
   r.matchPath('/'),
   r.matchType('POST'),
   r.useEffect(req$ => req$.pipe(
-    use(multipart$()),
+    multipart$(),
     map(req => ({ body: {
       files: req.files['image_1'],  // file information
       body: req.body,             // all incoming body fields
@@ -60,11 +60,11 @@ const effect$ = r.pipe(
   r.matchPath('/'),
   r.matchType('POST'),
   r.useEffect(req$ => req$.pipe(
-    use(multipart$({
+    multipart$({
       stream,
       maxFileCount: 1,
       files: ['image_1'],
-    })),
+    }),
     map(req => ({ body: {
       files: req.files['image_1'],  // file information
       body: req.body,             // all incoming body fields

@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { of } from 'rxjs';
-import { HttpRequest } from '@marblejs/core';
-import { getContentType } from '@marblejs/core/dist/+internal/http';
+import { HttpRequest } from '@marblejs/http';
+import { getContentType } from '@marblejs/http/dist/+internal/contentType.util';
 import { FileIncomingData, StreamHandler } from './multipart.interface';
 
 type ComputedFileData = Partial<{ buffer: Buffer; destination: any; size: number }>;

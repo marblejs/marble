@@ -13,7 +13,7 @@ A logger middleware for [Marble.js](https://github.com/marblejs/marble).
 ```
 $ npm i @marblejs/middleware-logger
 ```
-Requires `@marblejs/core` to be installed.
+Requires `@marblejs/core` and `@marblejs/http` to be installed.
 
 ## Documentation
 

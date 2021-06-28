@@ -40,7 +40,8 @@
     "ws": "~7.4.6"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.5.1"
+    "@marblejs/core": "^3.5.1",
+    "@marblejs/http": "^3.5.1"
   },
   "publishConfig": {
     "access": "public"

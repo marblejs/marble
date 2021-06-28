@@ -1,4 +1,4 @@
-import { createHttpResponse } from '@marblejs/core/dist/+internal/testing';
+import { createHttpResponse } from '@marblejs/http/dist/+internal/testing.util';
 import { AccessControlHeader, applyHeaders, ConfiguredHeader } from '../applyHeaders';
 
 describe('applyHeaders', () => {

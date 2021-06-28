@@ -13,7 +13,7 @@ A request body parser middleware for [Marble.js](https://github.com/marblejs/mar
 ```
 $ npm i @marblejs/middleware-body
 ```
-Requires `@marblejs/core` to be installed.
+Requires `@marblejs/core` and `@marblejs/http`  to be installed.
 
 ## Documentation
 
