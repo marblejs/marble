@@ -1,4 +1,4 @@
-import { isString } from '@marblejs/core/src/+internal/utils';
+import { isString } from '@marblejs/core/dist/+internal/utils';
 import { HttpMethod, HttpRequest, HttpResponse, HttpStatus } from '@marblejs/core';
 import { checkOrigin } from './checkOrigin';
 import { AccessControlHeader, applyHeaders, ConfiguredHeader } from './applyHeaders';
