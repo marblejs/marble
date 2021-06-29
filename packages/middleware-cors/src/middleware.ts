@@ -1,4 +1,4 @@
-import { isString } from '@marblejs/core/src/+internal/utils';
+import { isString } from '@marblejs/core/dist/+internal/utils';
 import { of, EMPTY } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { HttpMethod, HttpMiddlewareEffect, HttpStatus } from '@marblejs/core';
