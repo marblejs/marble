@@ -1,4 +1,4 @@
-import { Observable, fromEvent, Subject, defer, firstValueFrom } from 'rxjs';
+import { Observable, fromEvent, Subject, defer, lastValueFrom } from 'rxjs';
 import { map, takeUntil, catchError } from 'rxjs/operators';
 import {
   combineEffects,
@@ -115,7 +115,7 @@ export const webSocketListener = createListener<WebSocketListenerConfig, WebSock
       input$
         .pipe(takeUntil(close$))
         .subscribe({
-          next: (event: Event) => firstValueFrom(client.sendResponse(event)),
+          next: (event: Event) => lastValueFrom(client.sendResponse(event)),
           error: (err: EventError) => {
             const type = 'ServerListener';
             const message = `Unexpected error for OutgoingEvent stream: "${err.name}", "${err.message}"`;

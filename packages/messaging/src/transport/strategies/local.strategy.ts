@@ -1,4 +1,4 @@
-import { Subject, EMPTY, firstValueFrom } from 'rxjs';
+import { Subject, EMPTY, lastValueFrom } from 'rxjs';
 import { share, take, filter } from 'rxjs/operators';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { TransportLayer, TransportLayerConnection, TransportMessage, Transport, DEFAULT_TIMEOUT, TransportLayerConfig } from '../transport.interface';
@@ -66,7 +66,7 @@ class LocalStrategyConnection implements TransportLayerConnection<Transport.LOCA
 
     setImmediate(() => this.msgSubject$.next(message));
 
-    return firstValueFrom(this.rpcSubject$
+    return lastValueFrom(this.rpcSubject$
       .asObservable()
       .pipe(filter(msg => msg.replyTo === replyChannel && msg.correlationId === correlationId))
       .pipe(take(1)));

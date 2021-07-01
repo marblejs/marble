@@ -1,5 +1,5 @@
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
-import { Subject, fromEvent, merge, firstValueFrom, Observable } from 'rxjs';
+import { Subject, fromEvent, merge, lastValueFrom, Observable } from 'rxjs';
 import { map, mapTo, take, tap, share, filter } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/function';
 import { RedisClient, ClientOpts } from 'redis';
@@ -107,7 +107,7 @@ class RedisStrategyConnection implements TransportLayerConnection<Transport.REDI
     await RedisHelper.subscribeChannel(this.rpcSubscriber)(replyChannel);
     await this.emitMessage(channel, message);
 
-    return firstValueFrom(pipe(
+    return lastValueFrom(pipe(
       this.producerSubject.asObservable(),
       filter(msg => msg.channel === replyChannel),
       take(1),
