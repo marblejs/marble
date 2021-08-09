@@ -36,7 +36,8 @@
   },
   "dependencies": {
     "@types/ws": "~6.0.1",
-    "ws": "~7.4.6"
+    "ws": "~7.4.6",
+    "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
     "@marblejs/core": "^3.5.0"
