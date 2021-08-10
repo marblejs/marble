@@ -21,7 +21,7 @@ const getExpectedType = (context: t.ContextEntry[]) => pipe(
   getLast(context),
   O.map(c => c.type.name),
   O.getOrElse(() => 'any'),
-)
+);
 
 const getErrorMessage = (value: any, context: t.Context): ReporterResult => ({
   path: getPath(context),

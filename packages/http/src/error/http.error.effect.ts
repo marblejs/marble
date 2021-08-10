@@ -26,7 +26,7 @@ const errorFactory = (status: HttpStatus) => (error: Error): HttpErrorResponse =
   error: isHttpError(error)
     ? { status, message: error.message, data: error.data, context: error.context }
     : { status, message: error.message },
-})
+});
 
 export const defaultError$: HttpErrorEffect = req$ =>
   req$.pipe(

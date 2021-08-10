@@ -11,4 +11,4 @@ export const getServerAddress = (server: HttpServer): { host: string; port: numb
   const port = serverAddressInfo.port;
 
   return { host, port };
-}
+};

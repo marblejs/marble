@@ -39,7 +39,7 @@ describe('inputLogger$', () => {
 
   afterEach(() => {
     loggerMock.mockReset();
-  })
+  });
 
   test('logs incoming events', async () => {
     // given - events

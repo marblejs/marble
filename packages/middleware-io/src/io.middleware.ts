@@ -19,7 +19,7 @@ const validateError = (reporter: Reporter<any> = defaultReporter, context?: stri
   E.fold(
     () => throwException(new IOError('Validation error', reporter.report(result), context)),
     identity,
-  )(result)
+  )(result);
 
 export function validator$<U extends Schema, T>(schema: U, options?: ValidatorOptions): (i$: Observable<T>) => Observable<t.TypeOf<U>>;
 export function validator$<T>(schema: undefined, options?: ValidatorOptions): (i$: Observable<T>) => Observable<T>;

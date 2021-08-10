@@ -90,7 +90,7 @@ export const assertOutputEvent = (...outEvent: Event[]) => (done: jest.DoneCallb
     ),
     event$,
   );
-}
+};
 
 export const assertError = (error: any) => (done: jest.DoneCallback): MsgErrorEffect => error$ =>
   error$.pipe(

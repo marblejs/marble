@@ -33,4 +33,4 @@ export const maskUriComponent = (type: 'authorization') => (uri: string): string
     default:
       return uri;
   }
-}
+};

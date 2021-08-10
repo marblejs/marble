@@ -35,7 +35,7 @@ export const setRequestData =
         fieldname: incomingFile.fieldname,
       },
     };
-}
+};
 
 export const streamFileTo = (basePath: string): StreamHandler => {
   if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath); }
@@ -45,4 +45,4 @@ export const streamFileTo = (basePath: string): StreamHandler => {
     file.pipe(fs.createWriteStream(destination));
     return of({ destination });
   };
-}
+};

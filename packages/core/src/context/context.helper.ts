@@ -23,7 +23,7 @@ const unregisterRedundantToken = (token: ContextToken) => (context: Context): IO
     O.chain(derivedContext => lookup(derivedContext)(token)),
     O.fold(() => IO.of(context), () => deleteToken),
   );
-}
+};
 
 /**
  * Constructs and resolves a new or derived context based on provided dependencies

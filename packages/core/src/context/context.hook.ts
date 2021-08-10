@@ -15,7 +15,7 @@ export const useContext = <T>(token: ContextToken<T>) => (ask: ContextProvider) 
       const message = `Cannot resolve "${token.name || token._id}" context token.`;
       const detail = `You've probably forgot to register the bound token in the app context.`;
       const error = new ContextError(`${message} ${detail}`);
-      const coreError = coreErrorFactory(error.message, coreErrorOptions)
+      const coreError = coreErrorFactory(error.message, coreErrorOptions);
 
       console.error(coreError.stack);
 

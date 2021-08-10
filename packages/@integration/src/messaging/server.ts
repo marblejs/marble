@@ -15,7 +15,7 @@ const fibonacci$: MsgEffect = event$ =>
     matchEvent('FIB'),
     act(event => pipe(
       eventValidator$(t.number)(event),
-      tap(event => { if (event.payload >= 45) throw new Error('Too high number!') }),
+      tap(event => { if (event.payload >= 45) throw new Error('Too high number!'); }),
       map(event => fib(event.payload)),
       map(payload => reply(event)({ type: 'FIB_RESULT', payload })),
       catchError(error => of(reply(event)({ type: 'FIB_ERROR', error: { name: error.name, message: error.message } }))),

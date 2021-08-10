@@ -16,7 +16,7 @@ export const throwUnsupportedError = (transportName: string) => (method: string)
   const detail = `Method "${method}" is unsupported for ${transportName} transport layer.`;
   const error = new UnsupportedError(`${message} ${detail}`);
   const coreErrorOptions: CoreErrorOptions =  { contextMethod: method, offset: 1 };
-  const coreError = coreErrorFactory(error.message, coreErrorOptions)
+  const coreError = coreErrorFactory(error.message, coreErrorOptions);
 
   console.error(coreError.stack);
 

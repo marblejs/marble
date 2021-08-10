@@ -36,7 +36,7 @@ export const createWebSocketClientMock = (): WebSocketClientConnection => {
   }
 
   return new WebSocketClientMock() as any;
-}
+};
 
 export const createWebSocketServerMock = (clients: ReturnType<typeof createWebSocketClientMock>[]): WebSocketServerConnection => {
   class WebSocketServerMock extends WebSocket.EventEmitter {
@@ -46,4 +46,4 @@ export const createWebSocketServerMock = (clients: ReturnType<typeof createWebSo
   }
 
   return new WebSocketServerMock(clients) as any;
-}
+};

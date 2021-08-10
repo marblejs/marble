@@ -32,4 +32,4 @@ export const logContext = (tag: string) => (context: Context): Context => {
   logDependencies();
 
   return context;
-}
+};

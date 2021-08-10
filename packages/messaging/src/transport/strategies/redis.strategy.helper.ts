@@ -8,7 +8,7 @@ export const connectClient = async (options?: ClientOpts | undefined): Promise<R
     const client = redis.createClient(options);
     client.once('connect', error => error ? reject() : resolve(client));
   });
-}
+};
 
 export const quitClient = (client: RedisClient): Promise<undefined> =>
   new Promise((resolve, reject) => {

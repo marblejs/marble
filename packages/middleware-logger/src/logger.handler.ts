@@ -27,4 +27,4 @@ export const loggerHandler = (opts: LoggerOptions, logger: Logger) => (stamp: Ti
       return log();
     }),
   );
-}
+};

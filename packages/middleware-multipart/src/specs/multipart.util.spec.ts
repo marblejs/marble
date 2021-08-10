@@ -68,7 +68,7 @@ test('#setRequestData sets file related request data', () => {
       filename: incomingFile.filename,
       fieldname: incomingFile.fieldname,
     },
-  })
+  });
 });
 
 describe('#streamFileTo', () => {

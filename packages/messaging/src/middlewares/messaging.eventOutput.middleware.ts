@@ -40,4 +40,4 @@ export const outputErrorEncoder$: MsgOutputEffect<Event<any>> = event$ => {
       return event;
     }),
   );
-}
+};

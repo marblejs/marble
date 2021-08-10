@@ -10,13 +10,13 @@ export const HttpRequestMetadataStorage = createReader(() => {
 
   const set = (key: string | undefined, metadata: HttpRequestMetadata | undefined) => {
     if (key && metadata) storage.set(key, metadata);
-  }
+  };
 
   const get = (key: string) => {
     const metadata = storage.get(key);
     storage.delete(key);
     return metadata;
-  }
+  };
 
   const size = () =>
     storage.size;
@@ -25,5 +25,5 @@ export const HttpRequestMetadataStorage = createReader(() => {
     set,
     get,
     size,
-  }
+  };
 });

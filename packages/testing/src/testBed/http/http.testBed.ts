@@ -25,7 +25,7 @@ const sendRequest = async <T extends HttpMethod>(testBedRequest: HttpTestBedRequ
       method: testBedRequest.method,
       host: testBedRequest.host,
       path: testBedRequest.path,
-    })
+    });
 
     clientRequest.on('error', reject);
 
@@ -64,7 +64,7 @@ const getRequestMetadata = (request: HttpTestBedRequest<any>) => (ask: ContextPr
     O.chain(([storage, requestId]) => O.fromNullable(storage.get(requestId))),
     O.getOrElse(() => ({})),
   );
-}
+};
 
 export const createHttpTestBed = (config: HttpTestBedConfig): TestBedFactory<HttpTestBed> => async (dependencies = []) => {
   const { listener } = config;

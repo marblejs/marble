@@ -62,5 +62,5 @@ describe('#maskUriComponent', () => {
 
     expect(mask('amqp://host:10000/vhost'))
       .toEqual('amqp://host:10000/vhost');
-  })
-})
+  });
+});

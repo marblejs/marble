@@ -12,4 +12,4 @@ export const logger$ = (opts: LoggerOptions = {}): HttpMiddlewareEffect => (req$
     tap(stamp => loggerHandler(opts, logger)(stamp).subscribe()),
     map(({ value: req }) => req),
   );
-}
+};

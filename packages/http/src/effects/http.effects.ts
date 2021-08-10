@@ -16,7 +16,7 @@ export const listening$: HttpServerEffect = (event$, ctx) => {
       log();
     }),
   );
-}
+};
 
 export const error$: HttpServerEffect = (event$, ctx) => {
   const logger = useContext(LoggerToken)(ctx.ask);
@@ -31,7 +31,7 @@ export const error$: HttpServerEffect = (event$, ctx) => {
       log();
     }),
   );
-}
+};
 
 export const close$: HttpServerEffect = (event$, ctx) => {
   const logger = useContext(LoggerToken)(ctx.ask);
@@ -46,4 +46,4 @@ export const close$: HttpServerEffect = (event$, ctx) => {
       log();
     }),
   );
-}
+};

@@ -26,7 +26,7 @@ export const rejectUnhandled$: MsgEffect = (event$, ctx) => {
       default:
         return false;
     }
-  }
+  };
 
   const logRejection = (event: Event) =>
     pipe(

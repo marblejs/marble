@@ -22,7 +22,7 @@ export const createTestBedContainer = (config?: TestBedContainerConfig): TestBed
   const register = <T extends TestBed>(testBed: T): T.Task<T> => {
     instances.push(testBed);
     return T.of(testBed);
-  }
+  };
 
   const cleanupDependency = (testBed: TestBed) => (dependencyCleanup: DependencyCleanup<any>): T.Task<void> => pipe(
     testBed.ask(dependencyCleanup.token),

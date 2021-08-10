@@ -61,4 +61,4 @@ export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observab
       : throwError(() => new HttpError(error.message, HttpStatus.INTERNAL_SERVER_ERROR, undefined, req))
     ),
   );
-}
+};
