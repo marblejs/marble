@@ -2,13 +2,13 @@ import { Stream } from 'stream';
 import { pipe } from 'fp-ts/lib/function';
 import { bufferFrom, isStream, stringifyJson } from '@marblejs/core/dist/+internal/utils';
 import { HttpHeaders } from '../http.interface';
-import { ContentType, getContentType, isJsonContentType } from '../+internal/contentType.util';
+import { ContentType, getContentTypeUnsafe, isJsonContentType } from '../+internal/contentType.util';
 import { transformUrlEncoded } from '../+internal/urlEncoded.util';
 
 export type ResponseBodyFactory = (headers: HttpHeaders) => (body: any) => string | Stream | Buffer;
 
 export const bodyFactory: ResponseBodyFactory = headers => body => {
-  const contentType = getContentType(headers);
+  const contentType = getContentTypeUnsafe(headers);
 
   if (isStream(body))
     return body;

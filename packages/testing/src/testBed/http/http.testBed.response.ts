@@ -2,7 +2,7 @@ import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/function';
 import { HttpStatus } from '@marblejs/http';
 import { parseJson } from '@marblejs/core/dist/+internal/utils';
-import { getContentType, ContentType } from '@marblejs/http/dist/+internal/contentType.util';
+import { getContentTypeUnsafe, ContentType } from '@marblejs/http/dist/+internal/contentType.util';
 import { HttpTestBedResponseProps, HttpTestBedResponse } from './http.testBed.response.interface';
 import { HttpTestBedRequest } from './http.testBed.request.interface';
 
@@ -10,7 +10,7 @@ const parseResponseBody = (props: HttpTestBedResponseProps): string | Array<any>
   pipe(
     O.fromNullable(props.body),
     O.map(body => {
-      switch (getContentType(props.headers)) {
+      switch (getContentTypeUnsafe(props.headers)) {
         case ContentType.APPLICATION_JSON:
           return pipe(body.toString(), parseJson);
         case ContentType.TEXT_PLAIN:

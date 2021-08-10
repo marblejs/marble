@@ -1,3 +1,6 @@
+import * as O from 'fp-ts/lib/Option';
+import * as A from 'fp-ts/lib/Array';
+import { constant, pipe } from 'fp-ts/lib/function';
 import { HttpHeaders } from '../http.interface';
 
 export enum ContentType {
@@ -36,12 +39,26 @@ export enum ContentType {
   MULTIPART_FORM_DATA = 'multipart/form-data',
 }
 
-export const getContentType = (headers: HttpHeaders): string => {
-  const contentType = headers['content-type'] || headers['Content-Type'];
-  return contentType
-    ? Array.isArray(contentType) ? contentType[0] : String(contentType)
-    : '';
-};
+export const getContentType = (headers: HttpHeaders): O.Option<string> =>
+  pipe(
+    O.fromNullable(headers['content-type'] ?? headers['Content-Type']),
+    O.chain(value => Array.isArray(value)
+      ? A.head(value)
+      : O.some(String(value))),
+  );
 
-export const isJsonContentType = (headerValue: string) =>
+export const getContentTypeUnsafe = (headers: HttpHeaders): string =>
+  pipe(
+    getContentType(headers),
+    O.getOrElse(constant('')),
+  );
+
+export const getContentTypeEncoding = (headers: HttpHeaders): O.Option<string> =>
+  pipe(
+    getContentType(headers),
+    O.chain(cType => O.fromNullable(/charset=([^()<>@,;:\"/[\]?.=\s]*)/i.exec(cType))),
+    O.chain(res => O.fromNullable(res[1] || null)),
+  );
+
+export const isJsonContentType = (headerValue: string): boolean =>
   headerValue.includes('json');
