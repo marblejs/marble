@@ -3,14 +3,14 @@ import { pipe } from 'fp-ts/lib/function';
 import { Observable } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
 import { HttpRequest } from '@marblejs/http';
-import { getContentType } from '@marblejs/http/dist/+internal/contentType.util';
+import { getContentTypeUnsafe } from '@marblejs/http/dist/+internal/contentType.util';
 import { fromReadableStream } from '@marblejs/core/dist/+internal/observable';
 
 export const matchType = (type: string[]) => (req: HttpRequest): boolean =>
-  !!typeIs.is(getContentType(req.headers), type);
+  !!typeIs.is(getContentTypeUnsafe(req.headers), type);
 
 export const isMultipart = (req: HttpRequest): boolean =>
-  getContentType(req.headers).includes('multipart/');
+  getContentTypeUnsafe(req.headers).includes('multipart/');
 
 export const hasBody = (req: HttpRequest): boolean =>
   req.body !== undefined && req.body !== null;

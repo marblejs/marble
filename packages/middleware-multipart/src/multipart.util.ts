@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { of } from 'rxjs';
 import { HttpRequest } from '@marblejs/http';
-import { getContentType } from '@marblejs/http/dist/+internal/contentType.util';
+import { getContentTypeUnsafe } from '@marblejs/http/dist/+internal/contentType.util';
 import { FileIncomingData, StreamHandler } from './multipart.interface';
 
 type ComputedFileData = Partial<{ buffer: Buffer; destination: any; size: number }>;
@@ -11,7 +11,7 @@ const isProperMethod = (req: HttpRequest): boolean =>
   ['POST', 'PUT'].includes(req.method);
 
 const isMultipart = (req: HttpRequest): boolean =>
-  getContentType(req.headers).includes('multipart/');
+  getContentTypeUnsafe(req.headers).includes('multipart/');
 
 export const shouldParseFieldname = (files: string[] | undefined) => (fieldname: string) =>
   !!files ? files.includes(fieldname) : true;

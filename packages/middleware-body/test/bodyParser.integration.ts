@@ -1,5 +1,5 @@
 import { r, httpListener, combineRoutes } from '@marblejs/http';
-import { ContentType, getContentType } from '@marblejs/http/dist/+internal/contentType.util';
+import { ContentType, getContentTypeUnsafe } from '@marblejs/http/dist/+internal/contentType.util';
 import { map } from 'rxjs/operators';
 import { bodyParser$, urlEncodedParser, jsonParser, textParser, rawParser } from '../src';
 
@@ -8,7 +8,7 @@ const effect$ = r.pipe(
   r.matchType('POST'),
   r.useEffect(req$ => req$.pipe(
     map(req => {
-      const incomingContentType = getContentType(req.headers) as ContentType;
+      const incomingContentType = getContentTypeUnsafe(req.headers) as ContentType;
       const outgoingContentType = [ContentType.APPLICATION_OCTET_STREAM, ContentType.TEXT_PLAIN].includes(incomingContentType)
         ? incomingContentType
         : ContentType.APPLICATION_JSON;
