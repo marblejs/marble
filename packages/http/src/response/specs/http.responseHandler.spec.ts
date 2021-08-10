@@ -2,7 +2,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { HttpResponse, HttpStatus } from '../../http.interface';
 import { handleResponse } from '../http.responseHandler';
-import { DEFAULT_HEADERS } from '../http.responseHeaders.factory';
 import { createMockEffectContext, createHttpRequest, createHttpResponse } from '../../+internal/testing.util';
 import { ContentType } from '../../+internal/contentType.util';
 
@@ -21,24 +20,40 @@ describe('Response handler', () => {
 
   test('sets provided status', () => {
     handle({ status: HttpStatus.FORBIDDEN });
-    expect(response.writeHead).toHaveBeenCalledWith(HttpStatus.FORBIDDEN, DEFAULT_HEADERS);
+    expect(response.writeHead).toHaveBeenCalledWith(HttpStatus.FORBIDDEN, {
+      'content-length': 0,
+      'content-type': 'application/json',
+      'x-content-type-options': 'nosniff',
+    });
   });
 
   test('sets status OK if is not explicitly set', () => {
     handle({});
-    expect(response.writeHead).toHaveBeenCalledWith(HttpStatus.OK, DEFAULT_HEADERS);
+    expect(response.writeHead).toHaveBeenCalledWith(HttpStatus.OK, {
+      'content-length': 0,
+      'content-type': 'application/json',
+      'x-content-type-options': 'nosniff',
+    });
   });
 
   test('sets default headers if are not explicitly set', () => {
     handle({});
-    expect(response.writeHead).toHaveBeenCalledWith(HttpStatus.OK, DEFAULT_HEADERS);
+    expect(response.writeHead).toHaveBeenCalledWith(HttpStatus.OK, {
+      'content-length': 0,
+      'content-type': 'application/json',
+      'x-content-type-options': 'nosniff',
+    });
   });
 
   test('sets provided headers', () => {
     const CUSTOM_HEADERS = { 'Content-Encoding': 'gzip' };
-    handle({ headers: CUSTOM_HEADERS, body: {} });
-    expect(response.writeHead).toHaveBeenCalledWith(HttpStatus.OK, { ...DEFAULT_HEADERS, ...CUSTOM_HEADERS });
-    expect(response.setHeader).toHaveBeenCalledWith('Content-Length', 2);
+    handle({ headers: CUSTOM_HEADERS, body: { test: 'test' } });
+    expect(response.writeHead).toHaveBeenCalledWith(HttpStatus.OK, {
+      'content-encoding': 'gzip',
+      'content-length': 15,
+      'content-type': 'application/json',
+      'x-content-type-options': 'nosniff',
+    });
   });
 
   test('sets unefined response if body is not provided', () => {
