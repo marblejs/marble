@@ -49,3 +49,8 @@ export const pipeFromArray = <T, R>(fns: Array<UnaryFunction<T, R>>): UnaryFunct
     return fns.reduce((prev: any, fn: UnaryFunction<T, R>) => fn(prev), input as any);
   };
 };
+
+export const isEmpty = (obj: Record<string, unknown>): boolean =>
+  isNullable(obj)
+    ? true
+    : Object.keys(obj).length === 0;

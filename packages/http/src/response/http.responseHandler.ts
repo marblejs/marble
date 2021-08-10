@@ -9,7 +9,7 @@ import { HttpEffectResponse } from '../effects/http.effects.interface';
 import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { HttpRequestMetadataStorageToken } from '../server/internal-dependencies/httpRequestMetadataStorage.reader';
 import { getTestingRequestIdHeader } from '../+internal/header.util';
-import { headersFactory } from './http.responseHeaders.factory';
+import { factorizeHeaders } from './http.responseHeaders.factory';
 import { bodyFactory } from './http.responseBody.factory';
 
 export const handleResponse = (ask: ContextProvider) => (res: HttpResponse) => (req: HttpRequest) => (effectResponse: HttpEffectResponse) => {
@@ -18,8 +18,8 @@ export const handleResponse = (ask: ContextProvider) => (res: HttpResponse) => (
   const status = effectResponse.status || HttpStatus.OK;
   const path = url.parse(req.url).pathname || '';
 
-  const headersFactoryWithData = headersFactory({ body: effectResponse.body, path, status });
-  const headers = headersFactoryWithData(effectResponse.headers);
+  const headersFactoryWithData = factorizeHeaders({ body: effectResponse.body, path, status });
+  const headers = headersFactoryWithData(effectResponse.headers)(); // @TODO: refactor `#handleResponse` function
 
   const bodyFactoryWithHeaders = bodyFactory(headers);
   const body = bodyFactoryWithHeaders(effectResponse.body);
@@ -37,10 +37,6 @@ export const handleResponse = (ask: ContextProvider) => (res: HttpResponse) => (
     res.writeHead(status, headers);
     body.pipe(res);
   } else {
-    if (body) {
-      res.setHeader('Content-Length', Buffer.byteLength(body));
-    }
-
     res.writeHead(status, headers);
     res.end(body);
   }
