@@ -1,7 +1,9 @@
-import { UnaryFunction } from 'rxjs';
+import { defer, Observable, of, UnaryFunction } from 'rxjs';
 import { pipe, identity } from 'fp-ts/lib/function';
+import { IO } from 'fp-ts/lib/IO';
 import * as O from 'fp-ts/lib/Option';
 import * as E from 'fp-ts/lib/Either';
+import { Task } from 'fp-ts/lib/Task';
 import { isString } from './string.util';
 
 export const isNonNullable = <T>(value: T): value is NonNullable<T> =>
@@ -54,3 +56,14 @@ export const isEmpty = (obj: Record<string, unknown>): boolean =>
   isNullable(obj)
     ? true
     : Object.keys(obj).length === 0;
+
+const fromIO = <T>(fa: IO<T>): Observable<T> =>
+  defer(() => of(fa()));
+
+const fromTask = <T>(fa: Task<T>): Observable<T> =>
+  defer(fa);
+
+export const FpRx = {
+  fromIO,
+  fromTask,
+};

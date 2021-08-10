@@ -1,5 +1,5 @@
 import * as typeis from 'type-is';
-import { getContentType } from '@marblejs/http/dist/+internal/contentType.util';
+import { getContentTypeUnsafe } from '@marblejs/http/dist/+internal/contentType.util';
 import { RequestBodyParser } from '../body.model';
 import { jsonParser } from './json.body.parser';
 import { textParser } from './text.body.parser';
@@ -11,7 +11,7 @@ const SUPPORTED_CONTENT_TYPES = ['json', 'urlencoded', 'application/octet-stream
 export const defaultParser: RequestBodyParser = reqOrContentType => body => {
   const contentType = typeof reqOrContentType === 'string'
     ? reqOrContentType
-    : getContentType(reqOrContentType.headers);
+    : getContentTypeUnsafe(reqOrContentType.headers);
 
   switch (typeis.is(contentType, SUPPORTED_CONTENT_TYPES)) {
     case 'json':
