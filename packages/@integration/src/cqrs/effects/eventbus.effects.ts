@@ -25,7 +25,7 @@ export const generateOfferDocument$: MsgEffect = (event$, ctx) => {
       map(offerId => OfferDocumentCreatedEvent.create({ offerId })),
     )),
   );
-}
+};
 
 export const offerDocumentCreated$: MsgEffect = (event$, ctx) => {
   const logger = useContext(LoggerToken)(ctx.ask);
@@ -39,4 +39,4 @@ export const offerDocumentCreated$: MsgEffect = (event$, ctx) => {
       map(OfferDocumentSavedEvent.create),
     )),
   );
-}
+};

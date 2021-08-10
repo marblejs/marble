@@ -18,4 +18,4 @@ export const encodeError = (error: any) =>
       return acc;
     }, Object.create(null));
 
-export const throwException = (error: any) => { throw error };
+export const throwException = (error: any) => { throw error; };

@@ -39,19 +39,19 @@ export const isHttpRequestError = (error: Error | undefined): error is HttpReque
 export const unexpectedErrorWhileSendingErrorFactory = (error: Error): CoreError => {
   const message = `An unexpected error ${chalk.red(`"${error.message}"`)} occured while sending an error response. Please check your error effect.`;
   return coreErrorFactory(message, { printStacktrace: false });
-}
+};
 
 export const unexpectedErrorWhileSendingOutputFactory = (error: Error): CoreError => {
   const message = `An unexpected error ${chalk.red(`"${error.message}"`)} occured while sending a response. Please check your output effect.`;
   return coreErrorFactory(message, { printStacktrace: false });
-}
+};
 
 export const responseNotBoundToRequestErrorFactory = (response: HttpEffectResponse): CoreError => {
   const message = `An effect returned a response: "${chalk.yellow(JSON.stringify(response))}" without bound request`;
   return coreErrorFactory(message, { printStacktrace: false });
-}
+};
 
 export const errorNotBoundToRequestErrorFactory = (error: Error): CoreError => {
   const message = `An effect or middleware thrown an error ${chalk.red(`"${error.message}"`)} without bound request.`;
   return coreErrorFactory(message, { printStacktrace: false });
-}
+};

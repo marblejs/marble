@@ -83,4 +83,4 @@ export const broadcastEvent: ServerResponseHandler = ({ server, eventTransformer
   ));
 
   return of(true);
-}
+};

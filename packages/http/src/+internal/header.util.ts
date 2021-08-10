@@ -11,7 +11,7 @@ export const getHeaderValueHead = (key: string): GetHeaderValue => req => {
 
   return Array.isArray(header)
     ? pipe(getHead(header), toUndefined)
-    : header
+    : header;
 };
 
 export const getTestingRequestIdHeader: GetHeaderValue =

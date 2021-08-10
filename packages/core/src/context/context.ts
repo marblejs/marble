@@ -84,7 +84,7 @@ export const resolve = async (context: Context): Promise<Context> => {
   }
 
   return context;
-}
+};
 
 /**
  * Lookup the dependency for a token in a `Context`

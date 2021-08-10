@@ -22,7 +22,7 @@ describe('#event', () => {
         bar: 'test',
         baz: false,
       },
-    })
+    });
   });
 
   test('creates event schema with array of objects payload', () => {
@@ -39,7 +39,7 @@ describe('#event', () => {
     expect(foo).toEqual({
       type: 'FOO',
       payload: [{ bar: 'test', baz: false }],
-    })
+    });
   });
 
   test('creates event schema with tuple payload', () => {
@@ -56,7 +56,7 @@ describe('#event', () => {
     expect(foo).toEqual({
       type: 'FOO',
       payload: ['test_1', 'test_2'],
-    })
+    });
   });
 
 
@@ -68,7 +68,7 @@ describe('#event', () => {
     expect(foo).toEqual({
       type: 'FOO',
       payload: 'test',
-    })
+    });
   });
 
   test('creates event schema with boolean payload', () => {
@@ -79,7 +79,7 @@ describe('#event', () => {
     expect(foo).toEqual({
       type: 'FOO',
       payload: true,
-    })
+    });
   });
 
   test('creates event schema without payload', () => {
@@ -89,7 +89,7 @@ describe('#event', () => {
 
     expect(foo).toEqual({
       type: 'FOO',
-    })
+    });
   });
 
   test('creates event schema for enum type', () => {
@@ -101,7 +101,7 @@ describe('#event', () => {
 
     expect(foo).toEqual({
       type: 'FOO',
-    })
+    });
   });
 
   test('creates event schema with intersection and partial payload', () => {
@@ -121,7 +121,7 @@ describe('#event', () => {
     expect(foo).toEqual({
       type: 'FOO',
       payload: { test_required: 'test' },
-    })
+    });
   });
 
   test('successfuly decodes event schema with object payload and metadata', () => {

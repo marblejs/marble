@@ -30,6 +30,7 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 0,
     'deprecation/deprecation': 'warn',
     'quotes': ['error', 'single', { allowTemplateLiterals: true }],
+    'semi': ['error'],
     'import/order': ['error', {
       'groups': [
         'builtin',

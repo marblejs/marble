@@ -85,7 +85,7 @@ const getValidationErrorMessage = (event: Event<unknown, EventError>): string =>
   return correlationId
     ? `Received invalid event "${eventType}" (${correlationId}) with error: ${parsedError}`
     : `Received invalid event "${eventType}" with error: ${parsedError}`;
-}
+};
 
 const getGenericErrorMessage = (event: Event<unknown, NamedError>): string => {
   const error = event.error;
@@ -94,8 +94,8 @@ const getGenericErrorMessage = (event: Event<unknown, NamedError>): string => {
   const eventType = event.type;
   return name
     ? `"${name}: ${message}" for event "${eventType}"`
-    : `Unknown error "${JSON.stringify(error)}" for event "${eventType}"`
-}
+    : `Unknown error "${JSON.stringify(error)}" for event "${eventType}"`;
+};
 
 const getOutgoingMessageForEvent = ({ type, metadata }: Event): string => {
   const replyTo = metadata?.replyTo;
@@ -105,7 +105,7 @@ const getOutgoingMessageForEvent = ({ type, metadata }: Event): string => {
     : correlationId
       ? `${type}, id: ${correlationId}`
       : type;
-}
+};
 
 const getIncomingMessageForEvent = ({ type, metadata }: Event): string => {
   const id = metadata?.correlationId;

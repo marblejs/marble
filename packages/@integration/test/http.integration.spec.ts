@@ -9,7 +9,7 @@ const useTestBedSetup = createTestBedSetup({
 });
 
 describe('API integration', () => {
-  const testBedSetup = useTestBedSetup()
+  const testBedSetup = useTestBedSetup();
 
   afterEach(testBedSetup.cleanup);
 
@@ -249,7 +249,7 @@ describe('API integration', () => {
       expect(response.statusCode).toEqual(200);
       expect(response.headers['content-type']).toEqual(ContentType.IMAGE_PNG);
     });
-  })
+  });
 
   describe('CORS', () => {
     test('OPTIONS "/api/v2" returns 204', async () => {

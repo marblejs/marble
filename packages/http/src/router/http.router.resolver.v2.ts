@@ -59,13 +59,13 @@ export const resolveRouting = (
   const subscribeOutput = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
     stream$.subscribe({
       next: ([res, req]) => req.response.send(res),
-      error: err => { throw unexpectedErrorWhileSendingOutputFactory(err) },
+      error: err => { throw unexpectedErrorWhileSendingOutputFactory(err); },
     });
 
   const subscribeError = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
     stream$.subscribe({
       next: ([res, req]) => req.response.send(res),
-      error: err => { throw unexpectedErrorWhileSendingErrorFactory(err) },
+      error: err => { throw unexpectedErrorWhileSendingErrorFactory(err); },
     });
 
   subscribeOutput(outputFlow$);
@@ -161,5 +161,5 @@ export const resolveRouting = (
     resolve,
     errorSubject,
     outputSubject,
-  }
+  };
 };

@@ -10,7 +10,7 @@ export const matchType = (type: string[]) => (req: HttpRequest): boolean =>
   !!typeIs.is(getContentType(req.headers), type);
 
 export const isMultipart = (req: HttpRequest): boolean =>
-  getContentType(req.headers).includes('multipart/')
+  getContentType(req.headers).includes('multipart/');
 
 export const hasBody = (req: HttpRequest): boolean =>
   req.body !== undefined && req.body !== null;

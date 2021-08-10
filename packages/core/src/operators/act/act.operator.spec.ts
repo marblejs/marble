@@ -85,7 +85,7 @@ describe('#act operator', () => {
     const effect$ = (event$: Observable<Event>) =>
       event$.pipe(
         act((event: any) => of(event).pipe(
-          tap(e => { if (e.payload === 2) throw new NamedError(error.name, error.message) }),
+          tap(e => { if (e.payload === 2) throw new NamedError(error.name, error.message); }),
         )),
       );
 
@@ -109,7 +109,7 @@ describe('#act operator', () => {
       event$.pipe(
         act(
           (event: any) => of(event).pipe(
-            tap(e => { if (e.payload === 2) throw new Error('something went wrong') }),
+            tap(e => { if (e.payload === 2) throw new Error('something went wrong'); }),
           ),
           (error: Error) => ({
             type: 'TEST_ERROR',
@@ -138,7 +138,7 @@ describe('#act operator', () => {
       event$.pipe(
         act(
           (event: any) => of(event).pipe(
-            tap(e => { if (e.payload === 2) throw new Error('something went wrong') }),
+            tap(e => { if (e.payload === 2) throw new Error('something went wrong'); }),
           ),
           (error: Error, event: Event) => ({
             type: event.type,
@@ -167,7 +167,7 @@ describe('#act operator', () => {
       event$.pipe(
         act(
           (event: any) => of(event).pipe(
-            tap(e => { if (e.payload === 2) throw new Error('something went wrong') }),
+            tap(e => { if (e.payload === 2) throw new Error('something went wrong'); }),
           ),
           () => concat(
             of(event_error),

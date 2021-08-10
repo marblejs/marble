@@ -54,7 +54,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
           connection.getChannel(),
           { data: msgTransformer.encode(event) },
         );
-      }
+      };
 
       const send = <O extends Event, I extends Event>(event: I): Observable<O> => {
         const channel = connection.getChannel();
@@ -80,7 +80,7 @@ export const messagingClient = (config: MessagingClientConfig) => {
           })();
 
           return throwError(() => new Error(parsedError));
-        }
+        };
 
         return defer(() => from(connection.sendMessage(channel, message)).pipe(
           timeout(config.options.timeout ?? connection.config.timeout ?? DEFAULT_TIMEOUT),
@@ -88,11 +88,11 @@ export const messagingClient = (config: MessagingClientConfig) => {
           mergeMap(catchErrorEvent),
           take(1),
         ));
-      }
+      };
 
       const close = async (): Promise<void> => {
         await connection.close();
-      }
+      };
 
       // @TODO: refactor -> move to function
       pipe(

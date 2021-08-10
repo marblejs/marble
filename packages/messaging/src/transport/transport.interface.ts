@@ -66,4 +66,4 @@ export interface TransportMessage<T = Event> {
 export const isTransportLayerConnection = <T extends Transport>(data: any): data is TransportLayerConnection<T> => {
   const conn = data as Partial<TransportLayerConnection>;
   return Boolean(conn.status$ && conn.emitMessage && conn.sendMessage);
-}
+};

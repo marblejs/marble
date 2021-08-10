@@ -72,5 +72,5 @@ describe('#queryParamsFactory', () => {
 
     // then
     expect(params).toEqual(expectedParamsObj);
-  })
+  });
 });

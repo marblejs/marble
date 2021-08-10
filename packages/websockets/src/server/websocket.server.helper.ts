@@ -16,7 +16,7 @@ export const createServer = (options: WebSocket.ServerOptions, eventTransformer:
   const server = new WebSocket.Server(options) as WebSocketServerConnection;
   server.sendBroadcastResponse = broadcastEvent({ server, eventTransformer, ask });
   return server;
-}
+};
 
 export const sendMessage = (client: WebSocket) => (outgoingEvent: any): Promise<unknown> =>
   new Promise((res, rej) => client.send(outgoingEvent, err => err ? rej() : res(undefined)));
