@@ -1,18 +1,20 @@
 import { createServer, Server } from 'http';
-import { getHeaderValueHead, normalizeHeaders } from './header.util';
+import * as O from 'fp-ts/lib/Option';
+import { getHeaderValue, normalizeHeaders } from './header.util';
 import { closeServer, getServerAddress } from './server.util';
 import { createHttpRequest } from './testing.util';
 
-test('#getHeaderValueHead', () => {
-  const headers = {
-    'x-test-1': 'a',
-    'x-test-2': ['b', 'c'],
-  };
-  const req = createHttpRequest({ headers });
+test('#getHeaderValue', () => {
+  const req = createHttpRequest({
+    headers: {
+      'x-test-1': 'a',
+      'x-test-2': ['b', 'c'],
+    }
+  });
 
-  expect(getHeaderValueHead('x-test-1')(req)).toEqual('a');
-  expect(getHeaderValueHead('x-test-2')(req)).toEqual('b');
-  expect(getHeaderValueHead('x-test-3')(req)).toBeUndefined();
+  expect(getHeaderValue('x-test-1')(req.headers)).toEqual(O.some('a'));
+  expect(getHeaderValue('x-test-2')(req.headers)).toEqual(O.some('b'));
+  expect(getHeaderValue('x-test-3')(req.headers)).toEqual(O.none);
 });
 
 test('#getServerAddress', async () => {

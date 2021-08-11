@@ -1,10 +1,10 @@
 import * as fileType from 'file-type';
 import * as mime from 'mime';
 import * as O from 'fp-ts/lib/Option';
-import * as A from 'fp-ts/lib/Array';
 import { constant, pipe } from 'fp-ts/lib/function';
 import { isString } from '@marblejs/core/dist/+internal/utils';
 import { HttpHeaders } from '../http.interface';
+import { getHeaderValue } from './header.util';
 
 export enum ContentType {
   APPLICATION = 'application/*',
@@ -41,20 +41,6 @@ export enum ContentType {
   FONT_WOFF2 = 'font/woff2',
   MULTIPART_FORM_DATA = 'multipart/form-data',
 }
-
-/**
- * Get header value for given key from provided headers object
- *
- * @param key header key
- * @since 4.0.0
- */
-export const getHeaderValue = <T extends string = string>(key: string) => (headers: HttpHeaders): O.Option<T> =>
-  pipe(
-    O.fromNullable(headers[key] ?? headers[key.toLowerCase()]),
-    O.chain(value => Array.isArray(value)
-      ? A.head(value) as O.Option<T>
-      : O.some(String(value)) as O.Option<T>),
-  );
 
 /**
  * Get `Content-Type` header value from provided headers object
