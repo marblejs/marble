@@ -1,7 +1,8 @@
 import { HttpMethod, HttpHeaders } from '@marblejs/http';
 import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/function';
-import { ContentType, getHeaderValue, getMimeType } from '@marblejs/http/dist/+internal/contentType.util';
+import { getHeaderValue } from '@marblejs/http/dist/+internal/header.util';
+import { ContentType, getMimeType } from '@marblejs/http/dist/+internal/contentType.util';
 import { HttpTestBedRequest, WithBodyApplied } from './http.testBed.request.interface';
 import { createTestingRequestHeader } from './http.testBed.util';
 

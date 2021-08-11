@@ -1,6 +1,6 @@
 import * as url from 'url';
 import { EMPTY } from 'rxjs';
-import { fold } from 'fp-ts/lib/Option';
+import * as O from 'fp-ts/lib/Option';
 import { constVoid, pipe } from 'fp-ts/lib/function';
 import { ContextProvider } from '@marblejs/core';
 import { isStream } from '@marblejs/core/dist/+internal/utils';
@@ -24,12 +24,12 @@ export const handleResponse = (ask: ContextProvider) => (res: HttpResponse) => (
   const bodyFactoryWithHeaders = factorizeBody(headers);
   const body = bodyFactoryWithHeaders(effectResponse.body);
 
-  const testingHeader = getTestingRequestIdHeader(req);
+  const testingHeaderValue = pipe(getTestingRequestIdHeader(req.headers), O.toNullable);
 
-  if (isTestingMetadataOn()) {
+  if (isTestingMetadataOn() && testingHeaderValue) {
     pipe(
       ask(HttpRequestMetadataStorageToken),
-      fold(constVoid, storage => storage.set(testingHeader, req.meta)),
+      O.fold(constVoid, storage => storage.set(testingHeaderValue, req.meta)),
     );
   }
 
