@@ -6,7 +6,7 @@ import { lookup, ContextProvider } from '@marblejs/core';
 import { createServer, HttpMethod, HttpRequestMetadataStorageToken } from '@marblejs/http';
 import { closeServer, getServerAddress } from '@marblejs/http/dist/+internal/server.util';
 import { isStream } from '@marblejs/core/dist/+internal/utils';
-import { bodyFactory } from '@marblejs/http/dist/response/http.responseBody.factory';
+import { factorizeBody } from '@marblejs/http/dist/response/http.responseBody.factory';
 import { TESTING_REQUEST_ID_HEADER, TestingMetadata } from '@marblejs/core/dist/+internal/testing';
 import { TestBedType, TestBedFactory } from '../testBed.interface';
 import { HttpTestBedConfig, HttpTestBed } from './http.testBed.interface';
@@ -48,7 +48,7 @@ const sendRequest = async <T extends HttpMethod>(testBedRequest: HttpTestBedRequ
     }
 
     if (testBedRequest.body) {
-      const body = bodyFactory(testBedRequest.headers)(testBedRequest.body);
+      const body = factorizeBody(testBedRequest.headers)(testBedRequest.body);
       return clientRequest.end(body);
     }
 

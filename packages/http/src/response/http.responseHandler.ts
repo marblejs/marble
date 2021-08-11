@@ -10,7 +10,7 @@ import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { HttpRequestMetadataStorageToken } from '../server/internal-dependencies/httpRequestMetadataStorage.reader';
 import { getTestingRequestIdHeader } from '../+internal/header.util';
 import { factorizeHeaders } from './http.responseHeaders.factory';
-import { bodyFactory } from './http.responseBody.factory';
+import { factorizeBody } from './http.responseBody.factory';
 
 export const handleResponse = (ask: ContextProvider) => (res: HttpResponse) => (req: HttpRequest) => (effectResponse: HttpEffectResponse) => {
   if (res.finished) { return EMPTY; }
@@ -21,7 +21,7 @@ export const handleResponse = (ask: ContextProvider) => (res: HttpResponse) => (
   const headersFactoryWithData = factorizeHeaders({ body: effectResponse.body, path, status });
   const headers = headersFactoryWithData(effectResponse.headers)(); // @TODO: refactor `#handleResponse` function
 
-  const bodyFactoryWithHeaders = bodyFactory(headers);
+  const bodyFactoryWithHeaders = factorizeBody(headers);
   const body = bodyFactoryWithHeaders(effectResponse.body);
 
   const testingHeader = getTestingRequestIdHeader(req);
