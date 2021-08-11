@@ -7,7 +7,7 @@ import { transformUrlEncoded } from '../+internal/urlEncoded.util';
 
 export type ResponseBodyFactory = (headers: HttpHeaders) => (body: any) => string | Stream | Buffer;
 
-export const bodyFactory: ResponseBodyFactory = headers => body => {
+export const factorizeBody: ResponseBodyFactory = headers => body => {
   const contentType = getContentTypeUnsafe(headers);
 
   if (isStream(body))

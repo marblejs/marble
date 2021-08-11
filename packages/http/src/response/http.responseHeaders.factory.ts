@@ -29,7 +29,7 @@ export const MARBLE_HTTP_HEADERS_NORMALIZATION_ENV_KEY = 'MARBLE_HTTP_HEADERS_NO
 
 const useHttpHeadersNormalization = getEnvConfigOrElseAsBoolean(MARBLE_HTTP_HEADERS_NORMALIZATION_ENV_KEY, true);
 
-const provideContentLengthHeader = (response: HttpResponseLike): HttpHeaders => {
+export const provideContentLengthHeader = (response: HttpResponseLike): HttpHeaders => {
   if (isStream(response.body)) return {};
 
   const contentLength = isNullable(response.body) ? 0 : Buffer.byteLength(
