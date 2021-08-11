@@ -1,8 +1,7 @@
 import { HttpMethod, HttpHeaders } from '@marblejs/http';
 import * as O from 'fp-ts/lib/Option';
-import * as A from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/function';
-import { getMimeType } from '@marblejs/http/dist/response/http.responseContentType.factory';
+import { ContentType, getHeaderValue, getMimeType } from '@marblejs/http/dist/+internal/contentType.util';
 import { HttpTestBedRequest, WithBodyApplied } from './http.testBed.request.interface';
 import { createTestingRequestHeader } from './http.testBed.util';
 
@@ -35,15 +34,10 @@ export const withBody = <T>(body: T) => <U extends 'POST' | 'PUT' | 'PATCH'>(req
     O.map(() => ({ ...req, body })),
     O.getOrElse(() => pipe(
       getMimeType(body, req.path),
-      type => withHeaders({ 'Content-Type': type })(req),
+      type => withHeaders({ 'Content-Type': type ?? ContentType.APPLICATION_JSON })(req),
       req => ({ ...req, body }),
     ))
   );
 
 export const getHeader = <T extends string = string>(key: string) => (req: HttpTestBedRequest<any>): O.Option<T> =>
-  pipe(
-    O.fromNullable(req.headers[key]),
-    O.chain(header => Array.isArray(header)
-      ? A.head(header) as O.Option<T>
-      : O.some(header) as O.Option<T>),
-  );
+  getHeaderValue<T>(key)(req.headers);

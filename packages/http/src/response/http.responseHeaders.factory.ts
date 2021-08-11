@@ -1,10 +1,10 @@
+import * as O from 'fp-ts/lib/Option';
 import * as IO from 'fp-ts/lib/IO';
-import { pipe } from 'fp-ts/lib/function';
+import { constant, pipe } from 'fp-ts/lib/function';
 import { isStream, isEmpty, getEnvConfigOrElseAsBoolean, isString } from '@marblejs/core/dist/+internal/utils';
-import { ContentType } from '../+internal/contentType.util';
+import { ContentType, getContentLength, getContentType, getMimeType } from '../+internal/contentType.util';
 import { normalizeHeaders } from '../+internal/header.util';
 import { HttpHeaders, HttpStatus } from '../http.interface';
-import { contentTypeFactory } from './http.responseContentType.factory';
 
 interface HttpResponseLike {
   body: any;
@@ -29,7 +29,7 @@ export const MARBLE_HTTP_HEADERS_NORMALIZATION_ENV_KEY = 'MARBLE_HTTP_HEADERS_NO
 
 const useHttpHeadersNormalization = getEnvConfigOrElseAsBoolean(MARBLE_HTTP_HEADERS_NORMALIZATION_ENV_KEY, true);
 
-const getContentLengthHeader = (response: HttpResponseLike): HttpHeaders => {
+const provideContentLengthHeader = (response: HttpResponseLike): HttpHeaders => {
   if (isStream(response.body)) return {};
 
   const contentLength = isEmpty(response.body) ? 0 : Buffer.byteLength(
@@ -38,15 +38,45 @@ const getContentLengthHeader = (response: HttpResponseLike): HttpHeaders => {
       : JSON.stringify(response.body)
   );
 
-  return { 'Content-Length': contentLength };
+  return {
+    'Content-Length': contentLength,
+  };
 };
 
-export const factorizeHeaders = (response: HttpResponseLike) => (headers?: HttpHeaders): IO.IO<HttpHeaders> => {
+export const provideContentTypeHeader = (response: HttpResponseLike): HttpHeaders => {
+  const contentType = response.status < 400
+    ? getMimeType(response.body, response.path)
+    : DEFAULT_HEADERS['Content-Type'];
+
+  return {
+    'Content-Type': contentType ?? DEFAULT_HEADERS['Content-Type'],
+  };
+};
+
+export const factorizeHeaders = (response: HttpResponseLike) => (providedHeaders?: HttpHeaders): IO.IO<HttpHeaders> => {
+  const defaultContentTypeHeaders = pipe(
+    O.fromNullable(providedHeaders),
+    O.chain(getContentType),
+    O.fold(
+      () => ({
+        ...provideContentTypeHeader(response),
+        ...provideContentLengthHeader(response),
+      }),
+      () => pipe(
+        O.fromNullable(providedHeaders),
+        O.chain(getContentLength),
+        O.fold(
+          () => ({ ...provideContentLengthHeader(response) }),
+          constant({}),
+        )
+      )),
+    );
+
+
   const mergedHeaders = {
     ...DEFAULT_HEADERS,
-    ...contentTypeFactory(response),
-    ...getContentLengthHeader(response),
-    ...headers,
+    ...defaultContentTypeHeaders,
+    ...providedHeaders,
   };
 
   return pipe(

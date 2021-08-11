@@ -1,6 +1,9 @@
+import * as fileType from 'file-type';
+import * as mime from 'mime';
 import * as O from 'fp-ts/lib/Option';
 import * as A from 'fp-ts/lib/Array';
 import { constant, pipe } from 'fp-ts/lib/function';
+import { isString } from '@marblejs/core/dist/+internal/utils';
 import { HttpHeaders } from '../http.interface';
 
 export enum ContentType {
@@ -39,26 +42,83 @@ export enum ContentType {
   MULTIPART_FORM_DATA = 'multipart/form-data',
 }
 
-export const getContentType = (headers: HttpHeaders): O.Option<string> =>
+/**
+ * Get header value for given key from provided headers object
+ *
+ * @param key header key
+ * @since 4.0.0
+ */
+export const getHeaderValue = <T extends string = string>(key: string) => (headers: HttpHeaders): O.Option<T> =>
   pipe(
-    O.fromNullable(headers['content-type'] ?? headers['Content-Type']),
+    O.fromNullable(headers[key] ?? headers[key.toLowerCase()]),
     O.chain(value => Array.isArray(value)
-      ? A.head(value)
-      : O.some(String(value))),
+      ? A.head(value) as O.Option<T>
+      : O.some(String(value)) as O.Option<T>),
   );
 
+/**
+ * Get `Content-Type` header value from provided headers object
+ *
+ * @see getHeaderValue
+ * @since 4.0.0
+ */
+export const getContentType = getHeaderValue('Content-Type');
+
+/**
+ * Get `Content-Length` header value from provided headers object
+ *
+ * @see getHeaderValue
+ * @since 4.0.0
+ */
+export const getContentLength = getHeaderValue('Content-Length');
+
+/**
+ * Get **UNSAFE** `Content-Type` header value from provided headers object
+ *
+ * @see getHeaderValue
+ * @since 4.0.0
+ */
 export const getContentTypeUnsafe = (headers: HttpHeaders): string =>
   pipe(
     getContentType(headers),
     O.getOrElse(constant('')),
   );
 
-export const getContentTypeEncoding = (headers: HttpHeaders): O.Option<string> =>
+
+/**
+ * Get `Content-Type` charset (encoding) value, either from provided headers object or header value directly
+ *
+ * @since 4.0.0
+ */
+export const getContentTypeEncoding = (headersOrContentType: HttpHeaders | string): O.Option<string> =>
   pipe(
-    getContentType(headers),
+    isString(headersOrContentType) ? O.some(headersOrContentType) : getContentType(headersOrContentType),
     O.chain(cType => O.fromNullable(/charset=([^()<>@,;:\"/[\]?.=\s]*)/i.exec(cType))),
     O.chain(res => O.fromNullable(res[1] || null)),
+    O.map(encoding => encoding.toLowerCase()),
   );
 
+/**
+ * Guess mime type for given combination of request body and path
+ *
+ * @param body request body
+ * @param path request url
+ * @returns `string | null`
+ * @since 1.0.0
+ */
+export const getMimeType = (body: any, path: string): string | null =>
+  pipe(
+    O.fromNullable(Buffer.isBuffer(body) ? fileType(body) : null),
+    O.map(mimeFromBuffer => mimeFromBuffer.mime),
+    O.getOrElse(() => mime.getType(path)),
+  );
+
+/**
+ * Checks whether given Content-Type header value is of `json` type
+ *
+ * @param headerValue
+ * @returns boolean
+ * @since 1.0.0
+ */
 export const isJsonContentType = (headerValue: string): boolean =>
   headerValue.includes('json');
