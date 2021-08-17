@@ -1,17 +1,16 @@
-import { HttpMethod, HttpHeaders } from '@marblejs/http';
 import * as O from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/function';
-import { getHeaderValue } from '@marblejs/http/dist/+internal/header.util';
-import { ContentType, getMimeType } from '@marblejs/http/dist/+internal/contentType.util';
+import { HttpMethod, HttpHeaders } from '@marblejs/http';
+import { createRequestMetadataHeader } from '@marblejs/http/dist/+internal/metadata.util';
+import { ContentType, getMimeType, getContentType } from '@marblejs/http/dist/+internal/contentType.util';
 import { HttpTestBedRequest, WithBodyApplied } from './http.testBed.request.interface';
-import { createTestingRequestHeader } from './http.testBed.util';
 
 export const createRequest = (port: number, host: string, headers?: HttpHeaders) =>
   <T extends HttpMethod>(method: T): HttpTestBedRequest<T> => ({
     protocol: 'http:',
     path: '/',
     headers: {
-      ...createTestingRequestHeader(),
+      ...createRequestMetadataHeader(),
       ...headers,
     },
     method,
@@ -31,7 +30,7 @@ export const withHeaders = (headers: HttpHeaders) => <T extends HttpMethod>(req:
 
 export const withBody = <T>(body: T) => <U extends 'POST' | 'PUT' | 'PATCH'>(req: HttpTestBedRequest<U>): HttpTestBedRequest<U> & WithBodyApplied<T> =>
   pipe(
-    getHeader('Content-Type')(req),
+    getContentType(req.headers),
     O.map(() => ({ ...req, body })),
     O.getOrElse(() => pipe(
       getMimeType(body, req.path),
@@ -39,6 +38,3 @@ export const withBody = <T>(body: T) => <U extends 'POST' | 'PUT' | 'PATCH'>(req
       req => ({ ...req, body }),
     ))
   );
-
-export const getHeader = <T extends string = string>(key: string) => (req: HttpTestBedRequest<any>): O.Option<T> =>
-  getHeaderValue<T>(key)(req.headers);

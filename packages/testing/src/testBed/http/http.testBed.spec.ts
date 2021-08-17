@@ -2,7 +2,6 @@ import { pipe } from 'fp-ts/lib/function';
 import { httpListener, r } from '@marblejs/http';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { bodyParser$ } from '@marblejs/middleware-body';
-import { TESTING_REQUEST_ID_HEADER } from '@marblejs/core/dist/+internal/testing';
 import { mapTo, map } from 'rxjs/operators';
 import { TestBedType } from '../testBed.interface';
 import { createHttpTestBed } from './http.testBed';
@@ -34,7 +33,7 @@ describe('TetBed - HTTP', () => {
     expect(req.path).toEqual('/');
     expect(req.headers).toEqual(expect.objectContaining({
       ...defaultHeaders,
-      [TESTING_REQUEST_ID_HEADER]: expect.any(String),
+      'X-Request-Metadata-Id': expect.any(String),
     }));
 
     await testBed.finish();
