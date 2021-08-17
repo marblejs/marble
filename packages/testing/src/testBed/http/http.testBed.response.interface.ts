@@ -1,5 +1,4 @@
-import { HttpHeaders, HttpStatus } from '@marblejs/http';
-import { TestingMetadata } from '@marblejs/core/dist/+internal/testing';
+import { HttpHeaders, HttpRequestMetadata, HttpStatus } from '@marblejs/http';
 import { HttpTestBedRequest } from './http.testBed.request.interface';
 
 export interface HttpTestBedResponseProps {
@@ -11,7 +10,7 @@ export interface HttpTestBedResponseProps {
 
 export interface HttpTestBedResponse extends HttpTestBedResponseProps {
   req: HttpTestBedRequest<any>;
-  metadata: TestingMetadata;  // @TODO: move interface to "testbed" folder
+  metadata: HttpRequestMetadata;
   statusCode: HttpStatus;
   body?: any;
 }

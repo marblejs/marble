@@ -15,9 +15,9 @@ import {
   ServerIO,
   LoggerTag,
 } from '@marblejs/core';
-import { isTestingMetadataOn } from '@marblejs/core/dist/+internal/testing';
 import { insertIf, isNonNullable } from '@marblejs/core/dist/+internal/utils';
 import { HttpServer } from '../http.interface';
+import { provideConfig } from '../http.config';
 import { listening$, close$, error$ } from '../effects/http.effects';
 import { CreateServerConfig } from './http.server.interface';
 import { isCloseEvent } from './http.server.event';
@@ -30,6 +30,8 @@ import { HttpServerClient, HttpServerClientToken } from './internal-dependencies
 
 export const createServer = async (config: CreateServerConfig) => {
   const { listener, event$, port, hostname, dependencies = [], options = {} } = config;
+
+  const environmentConfig = provideConfig();
 
   const server = options.httpsOptions
     ? https.createServer(options.httpsOptions)
@@ -44,7 +46,7 @@ export const createServer = async (config: CreateServerConfig) => {
     boundHttpServerClient,
     boundHttpServerEvent,
     boundHttpRequestBus,
-    ...insertIf(isTestingMetadataOn())(boundHttpRequestMetadataStorage),
+    ...insertIf(environmentConfig.useHttpRequestMetadata())(boundHttpRequestMetadataStorage),
     ...filter(isNonNullable)(dependencies),
   );
 

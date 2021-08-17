@@ -1,7 +1,7 @@
 import * as t from 'io-ts';
 import { of } from 'rxjs';
 import { isLeft, getOrElse } from 'fp-ts/lib/Either';
-import { HttpError, HttpStatus } from '@marblejs/http';
+import { HttpError, HttpStatus, MARBLE_HTTP_REQUEST_METADATA_ENV_KEY } from '@marblejs/http';
 import { createHttpRequest } from '@marblejs/http/dist/+internal/testing.util';
 import { requestValidator$ } from '../io.request.middleware';
 
@@ -40,7 +40,7 @@ describe('#requestValidator$', () => {
 
   test('applies JSON schema when testing is enabled', done => {
     // given
-    process.env.MARBLE_TESTING_METADATA_ON = 'true';
+    process.env[MARBLE_HTTP_REQUEST_METADATA_ENV_KEY] = 'true';
     const defaultSchema = t.type({ test: t.string });
     const headersSchema = t.type({ 'content-type': t.literal('application/json') });
     const input = createHttpRequest({
@@ -62,7 +62,7 @@ describe('#requestValidator$', () => {
     // then
     stream$.subscribe({
       next: outgoingData => {
-        delete process.env.MARBLE_TESTING_METADATA_ON;
+        delete process.env[MARBLE_HTTP_REQUEST_METADATA_ENV_KEY];
         expect(outgoingData.meta).toEqual({
           body: {
             properties: { test: { type: 'string' } },

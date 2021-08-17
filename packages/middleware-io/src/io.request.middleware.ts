@@ -1,6 +1,5 @@
 import * as t from 'io-ts';
-import { HttpError, HttpRequest, HttpStatus } from '@marblejs/http';
-import { isTestingMetadataOn } from '@marblejs/core/dist/+internal/testing';
+import { provideConfig, HttpError, HttpRequest, HttpStatus } from '@marblejs/http';
 import { pipe } from 'fp-ts/lib/function';
 import { forkJoin, Observable, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap, tap } from 'rxjs/operators';
@@ -34,6 +33,8 @@ export const requestValidator$ = <
   const queryValidator$ = schema.query ? validator$(schema.query, { ...options, context: Context.QUERY }) : unknown$;
   const headersValidator$ = schema.headers ? validator$(schema.headers, { ...options, context: Context.HEADERS }) : unknown$;
 
+  const environmentConfig = provideConfig();
+
   const addMetadata = (req: HttpRequest, name: keyof typeof schema) => {
     req.meta = {
       ...req.meta,
@@ -46,7 +47,7 @@ export const requestValidator$ = <
 
   return <T extends HttpRequest>(req$: Observable<T>) => req$.pipe(
     tap(req => {
-      if (isTestingMetadataOn()) {
+      if (environmentConfig.useHttpRequestMetadata()) {
         addMetadata(req, 'body');
         addMetadata(req, 'params');
         addMetadata(req, 'query');

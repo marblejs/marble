@@ -1,7 +1,6 @@
 import * as O from 'fp-ts/lib/Option';
 import * as A from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/function';
-import { TESTING_REQUEST_ID_HEADER } from '@marblejs/core/dist/+internal/testing';
 import { HttpHeaders } from '../http.interface';
 
 /**
@@ -29,11 +28,3 @@ export const normalizeHeaders = (headers: HttpHeaders): HttpHeaders =>
     Object.entries(headers).map(([key, value]) => [key.toLowerCase(), value]),
     Object.fromEntries,
   );
-
-/**
- * Get custom `X-Testing-Request-Id` header value
- *
- * @param req
- */
-export const getTestingRequestIdHeader =
-  getHeaderValue(TESTING_REQUEST_ID_HEADER);

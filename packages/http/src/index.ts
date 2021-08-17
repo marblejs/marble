@@ -1,3 +1,10 @@
+// config
+export {
+  provideConfig,
+  MARBLE_HTTP_HEADERS_NORMALIZATION_ENV_KEY,
+  MARBLE_HTTP_REQUEST_METADATA_ENV_KEY,
+} from './http.config';
+
 // http
 export { defaultError$ } from './error/http.error.effect';
 export { HttpError, HttpRequestError, isHttpError, isHttpRequestError } from './error/http.error.model';

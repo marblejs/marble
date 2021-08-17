@@ -30,7 +30,7 @@ describe('TestBed - HTTP request', () => {
         'Accept': 'text/html',
         'Authorization': 'Bearer TOKEN',
         'Content-Type': 'application/json',
-        'X-Testing-Request-Id': expect.any(String),
+        'X-Request-Metadata-Id': expect.any(String),
         'X-User-Id': '123',
       },
     });
@@ -52,7 +52,7 @@ describe('TestBed - HTTP request', () => {
 
     expect(builtRequest.headers).toEqual({
       'Content-Type': 'text/html',
-      'X-Testing-Request-Id': expect.any(String),
+      'X-Request-Metadata-Id': expect.any(String),
     });
   });
 
@@ -71,7 +71,7 @@ describe('TestBed - HTTP request', () => {
 
     expect(builtRequest.headers).toEqual({
       'Content-Type': 'application/json',
-      'X-Testing-Request-Id': expect.any(String),
+      'X-Request-Metadata-Id': expect.any(String),
     });
   });
 });

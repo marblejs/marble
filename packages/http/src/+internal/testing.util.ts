@@ -1,5 +1,6 @@
 import * as http from 'http';
 import { EventEmitter } from 'events';
+import { of } from 'rxjs';
 import { delay, tap, mapTo } from 'rxjs/operators';
 import {
   createContext,
@@ -69,7 +70,7 @@ export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
     setHeader = jest.fn();
     getHeader = jest.fn();
     end = jest.fn();
-    send = jest.fn();
+    send = jest.fn(() => of(true));
   } as any as HttpResponse;
 
 export const createMockEffectContext = () => {
