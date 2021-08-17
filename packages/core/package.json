@@ -35,7 +35,6 @@
     "rxjs": "^7.1.0"
   },
   "dependencies": {
-    "@types/json-schema": "^7.0.3",
     "@types/uuid": "^7.0.0",
     "chalk": "^3.0.0",
     "io-ts": "^2.2.4",

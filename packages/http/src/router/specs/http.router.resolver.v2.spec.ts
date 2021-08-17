@@ -13,7 +13,6 @@ describe('#resolveRouting', () => {
     // given
     const ctx = createMockEffectContext();
     const response = createHttpResponse();
-    response.send = jest.fn();
 
     const path1 = factorizeRegExpWithParams('/');
     const path2 = factorizeRegExpWithParams('/group');

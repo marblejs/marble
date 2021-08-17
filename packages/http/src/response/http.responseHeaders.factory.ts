@@ -1,10 +1,11 @@
 import * as O from 'fp-ts/lib/Option';
 import * as IO from 'fp-ts/lib/IO';
 import { constant, pipe } from 'fp-ts/lib/function';
-import { isStream, getEnvConfigOrElseAsBoolean, isString, isNullable } from '@marblejs/core/dist/+internal/utils';
+import { isStream, isString, isNullable } from '@marblejs/core/dist/+internal/utils';
 import { ContentType, getContentLength, getContentType, getMimeType } from '../+internal/contentType.util';
 import { normalizeHeaders } from '../+internal/header.util';
 import { HttpHeaders, HttpStatus } from '../http.interface';
+import { provideConfig } from '../http.config';
 
 interface HttpResponseLike {
   body: any;
@@ -17,17 +18,7 @@ export const DEFAULT_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
 };
 
-/**
- * Flag to indicate whether we should prevent converting (normalizing) all headers to lower case.
- * This flag was introduced to prevent breaking changes, for more details see:
- * https://github.com/marblejs/marble/issues/311
- *
- * Flag will be removed in the next major version,
- * where all headers are normalized by default.
- */
-export const MARBLE_HTTP_HEADERS_NORMALIZATION_ENV_KEY = 'MARBLE_HTTP_HEADERS_NORMALIZATION';
-
-const useHttpHeadersNormalization = getEnvConfigOrElseAsBoolean(MARBLE_HTTP_HEADERS_NORMALIZATION_ENV_KEY, true);
+const config = provideConfig();
 
 export const provideContentLengthHeader = (response: HttpResponseLike): HttpHeaders => {
   if (isStream(response.body)) return {};
@@ -80,7 +71,7 @@ export const factorizeHeaders = (response: HttpResponseLike) => (providedHeaders
   };
 
   return pipe(
-    useHttpHeadersNormalization,
+    config.useHttpHeadersNormalization,
     IO.map(shouldNormalize => shouldNormalize ? normalizeHeaders(mergedHeaders) : mergedHeaders),
   );
 };
