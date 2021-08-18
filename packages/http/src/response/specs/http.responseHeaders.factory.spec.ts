@@ -2,7 +2,7 @@ import { normalizeHeaders } from '../../+internal/header.util';
 import { DEFAULT_HEADERS, factorizeHeaders } from '../http.responseHeaders.factory';
 
 describe('#factorizeHeaders', () => {
-  test.each([ null, undefined, {}, '' ])(`returns normalized default headers for "%s" body`, (body: any) => {
+  test.each([ null, undefined, '' ])(`returns normalized default headers for "%s" body`, (body: any) => {
     const REQUEST = { status: 400, path: '/', body };
 
     expect(factorizeHeaders(REQUEST)()()).toEqual(normalizeHeaders({
@@ -17,6 +17,15 @@ describe('#factorizeHeaders', () => {
     expect(factorizeHeaders(REQUEST)()()).toEqual(normalizeHeaders({
       ...DEFAULT_HEADERS,
       'content-length': 1,
+    }));
+  });
+
+  test('returns normalized default headers if custom are not provided for empty object sent as body', () => {
+    const REQUEST = { status: 400, path: '/', body: {} };
+
+    expect(factorizeHeaders(REQUEST)()()).toEqual(normalizeHeaders({
+      ...DEFAULT_HEADERS,
+      'content-length': 2,
     }));
   });
 
