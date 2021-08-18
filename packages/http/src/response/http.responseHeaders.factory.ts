@@ -1,7 +1,7 @@
 import * as O from 'fp-ts/lib/Option';
 import * as IO from 'fp-ts/lib/IO';
 import { constant, pipe } from 'fp-ts/lib/function';
-import { isStream, isEmpty, getEnvConfigOrElseAsBoolean, isString } from '@marblejs/core/dist/+internal/utils';
+import { isStream, getEnvConfigOrElseAsBoolean, isString, isNullable } from '@marblejs/core/dist/+internal/utils';
 import { ContentType, getContentLength, getContentType, getMimeType } from '../+internal/contentType.util';
 import { normalizeHeaders } from '../+internal/header.util';
 import { HttpHeaders, HttpStatus } from '../http.interface';
@@ -32,7 +32,7 @@ const useHttpHeadersNormalization = getEnvConfigOrElseAsBoolean(MARBLE_HTTP_HEAD
 const provideContentLengthHeader = (response: HttpResponseLike): HttpHeaders => {
   if (isStream(response.body)) return {};
 
-  const contentLength = isEmpty(response.body) ? 0 : Buffer.byteLength(
+  const contentLength = isNullable(response.body) ? 0 : Buffer.byteLength(
     isString(response.body) || Buffer.isBuffer(response.body)
       ? response.body
       : JSON.stringify(response.body)

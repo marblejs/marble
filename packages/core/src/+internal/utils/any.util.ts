@@ -52,11 +52,6 @@ export const pipeFromArray = <T, R>(fns: Array<UnaryFunction<T, R>>): UnaryFunct
   };
 };
 
-export const isEmpty = (obj: Record<string, unknown>): boolean =>
-  isNullable(obj)
-    ? true
-    : Object.keys(obj).length === 0;
-
 const fromIO = <T>(fa: IO<T>): Observable<T> =>
   defer(() => of(fa()));
 
