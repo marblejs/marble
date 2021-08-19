@@ -1,9 +1,12 @@
 import { of } from 'rxjs';
 import { Marbles } from '@marblejs/core/dist/+internal/testing';
+import { createHttpRequest } from '@marblejs/http/dist/+internal/testing.util';
 import { cors$, CORSOptions } from '../middleware';
 import { createMockRequest, createMockEffectContext } from '../util';
 
 describe('CORS middleware', () => {
+  afterEach(jest.clearAllMocks);
+
   test('pass through non CORS requests', () => {
     // given
     const request = createMockRequest('OPTIONS', { origin: null });
@@ -20,9 +23,8 @@ describe('CORS middleware', () => {
   });
 
   test('handle CORS preflight request', done => {
-    expect.assertions(1);
 
-    const request = createMockRequest('OPTIONS', { origin: 'fake-origin' });
+    const request = createHttpRequest({ method: 'OPTIONS', headers: { origin: 'fake-origin' } });
     const ctx = createMockEffectContext();
     const request$ = of(request);
 
@@ -31,7 +33,8 @@ describe('CORS middleware', () => {
     middleware$(request$, ctx).subscribe({
       next: () => fail('Should not return any further value.'),
       complete: () => {
-        expect(request.response.setHeader).toBeCalledWith('Access-Control-Allow-Origin', 'fake-origin');
+        expect(request.response.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Origin', 'fake-origin');
+        expect(request.response.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Methods', 'HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS');
         done();
       },
     });

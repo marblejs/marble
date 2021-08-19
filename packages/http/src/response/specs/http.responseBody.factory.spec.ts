@@ -8,7 +8,7 @@ describe('#bodyFactory', () => {
     const body = { test: 'test' };
 
     // when
-    const factorizedBody = factorizeBody(headers)(body);
+    const factorizedBody = factorizeBody({ headers, body });
 
     // then
     expect(factorizedBody).toEqual('test=test');
@@ -20,7 +20,7 @@ describe('#bodyFactory', () => {
     const body = { test: 'test' };
 
     // when
-    const factorizedBody = factorizeBody(headers)(body);
+    const factorizedBody = factorizeBody({ headers, body });
 
     // then
     expect(factorizedBody).toEqual(JSON.stringify(body));
@@ -32,7 +32,7 @@ describe('#bodyFactory', () => {
     const bodies = [33, 'test', false];
 
     // when
-    const factorizedBodies = bodies.map(factorizeBody(headers));
+    const factorizedBodies = bodies.map(body => factorizeBody({ headers, body }));
 
     // then
     expect(factorizedBodies).toEqual(bodies.map(String));
@@ -44,7 +44,7 @@ describe('#bodyFactory', () => {
     const body = 'test=test';
 
     // when
-    const factorizedBody = factorizeBody(headers)(body);
+    const factorizedBody = factorizeBody({ body, headers });
 
     // then
     expect(factorizedBody).toEqual('test=test');
@@ -56,7 +56,7 @@ describe('#bodyFactory', () => {
     const body = '1234';
 
     // when
-    const factorizedBody = factorizeBody(headers)(body);
+    const factorizedBody = factorizeBody({ headers, body });
 
     // then
     expect(factorizedBody).toEqual('1234');

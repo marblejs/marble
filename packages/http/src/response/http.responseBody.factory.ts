@@ -5,9 +5,9 @@ import { HttpHeaders } from '../http.interface';
 import { ContentType, getContentTypeUnsafe, isJsonContentType } from '../+internal/contentType.util';
 import { transformUrlEncoded } from '../+internal/urlEncoded.util';
 
-export type ResponseBodyFactory = (headers: HttpHeaders) => (body: any) => string | Stream | Buffer;
+export type ResponseBodyFactory = (data: { headers: HttpHeaders, body: any }) => string | Stream | Buffer;
 
-export const factorizeBody: ResponseBodyFactory = headers => body => {
+export const factorizeBody: ResponseBodyFactory = ({ headers, body }) => {
   const contentType = getContentTypeUnsafe(headers);
 
   if (isStream(body))

@@ -52,13 +52,8 @@ export const pipeFromArray = <T, R>(fns: Array<UnaryFunction<T, R>>): UnaryFunct
   };
 };
 
-const fromIO = <T>(fa: IO<T>): Observable<T> =>
+export const fromIO = <T>(fa: IO<T>): Observable<T> =>
   defer(() => of(fa()));
 
-const fromTask = <T>(fa: Task<T>): Observable<T> =>
+export const fromTask = <T>(fa: Task<T>): Observable<T> =>
   defer(fa);
-
-export const FpRx = {
-  fromIO,
-  fromTask,
-};
