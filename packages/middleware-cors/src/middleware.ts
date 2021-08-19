@@ -1,7 +1,9 @@
-import { of, EMPTY } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { of, EMPTY, defer } from 'rxjs';
+import { mergeMap, mergeMapTo } from 'rxjs/operators';
 import { isString } from '@marblejs/core/dist/+internal/utils';
-import { HttpMethod, HttpMiddlewareEffect, HttpStatus } from '@marblejs/http';
+import { endRequest } from '@marblejs/http/dist/response/http.responseHandler';
+import { HttpMethod, HttpMiddlewareEffect, HttpRequest, HttpStatus } from '@marblejs/http';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { configurePreflightResponse } from './configurePreflightResponse';
 import { configureResponse } from './configureResponse';
 
@@ -22,26 +24,26 @@ const DEFAULT_OPTIONS: CORSOptions = {
   optionsSuccessStatus: HttpStatus.NO_CONTENT,
 };
 
-export const cors$ = (options: CORSOptions = {}): HttpMiddlewareEffect => (req$) => {
+const isCORSRequest = (req: HttpRequest): boolean =>
+  !isString(req.headers.origin);
+
+export const cors$ = (options: CORSOptions = {}): HttpMiddlewareEffect => req$ => {
   options = { ...DEFAULT_OPTIONS, ...options };
 
   return req$.pipe(
     mergeMap(req => {
-      // skip if not a CORS request
-      if (!isString(req.headers.origin)) {
+      if (isCORSRequest(req))
         return of(req);
-      }
 
       if (req.method === 'OPTIONS') {
         configurePreflightResponse(req, req.response, options);
-        req.response.end();
-
-        return EMPTY;
-      } else {
-        configureResponse(req, req.response, options);
-
-        return of(req);
+        return pipe(
+          defer(endRequest(req.response)),
+          mergeMapTo(EMPTY));
       }
+
+      configureResponse(req, req.response, options);
+      return of(req);
     }),
   );
 };

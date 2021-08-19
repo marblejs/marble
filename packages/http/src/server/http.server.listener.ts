@@ -31,13 +31,14 @@ export const httpListener = createListener<HttpListenerConfig, HttpListener>(con
   const client = useContext(HttpServerClientToken)(ask);
   const effectContext = createEffectContext({ ask, client });
   const routing = factorizeRoutingWithDefaults(effects, middlewares ?? []);
+  const sendResponse = handleResponse(ask);
   const { resolve } = resolveRouting(routing, effectContext)(output$, error$);
 
   const handle = (req: IncomingMessage, res: OutgoingMessage) => {
     const marbleReq = req as HttpRequest;
     const marbleRes = res as HttpResponse;
 
-    marbleRes.send = handleResponse(ask)(marbleRes)(marbleReq);
+    marbleRes.send = sendResponse(marbleRes)(marbleReq);
     marbleReq.response = marbleRes;
 
     resolve(marbleReq);

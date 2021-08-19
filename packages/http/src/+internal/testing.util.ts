@@ -69,7 +69,7 @@ export const createHttpResponse = (data: HttpResponseMockParams = {}) =>
     writeHead = jest.fn();
     setHeader = jest.fn();
     getHeader = jest.fn();
-    end = jest.fn();
+    end = jest.fn((_, cb) => cb());
     send = jest.fn(() => of(true));
   } as any as HttpResponse;
 

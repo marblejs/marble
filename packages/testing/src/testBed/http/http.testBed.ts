@@ -47,7 +47,7 @@ const sendRequest = async <T extends HttpMethod>(testBedRequest: HttpTestBedRequ
     }
 
     if (testBedRequest.body) {
-      const body = factorizeBody(testBedRequest.headers)(testBedRequest.body);
+      const body = factorizeBody({ headers: testBedRequest.headers, body: testBedRequest.body });
       return clientRequest.end(body);
     }
 

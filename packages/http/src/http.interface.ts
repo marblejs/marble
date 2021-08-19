@@ -29,7 +29,7 @@ export interface QueryParameters {
 }
 
 export interface HttpResponse extends http.ServerResponse {
-  send: (response: HttpEffectResponse) => Observable<never>;
+  send: (response: HttpEffectResponse) => Observable<boolean>;
 }
 
 export interface HttpHeaders extends http.OutgoingHttpHeaders {}
