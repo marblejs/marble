@@ -5,7 +5,7 @@ describe('#factorizeHeaders', () => {
   test.each([ null, undefined, '' ])(`returns normalized default headers for "%s" body`, (body: any) => {
     const REQUEST = { status: 400, path: '/', body };
 
-    expect(factorizeHeaders(REQUEST)()()).toEqual(normalizeHeaders({
+    expect(factorizeHeaders(REQUEST)()).toEqual(normalizeHeaders({
       ...DEFAULT_HEADERS,
       'content-length': 0,
     }));
@@ -14,7 +14,7 @@ describe('#factorizeHeaders', () => {
   test('returns normalized default headers if custom are not provided', () => {
     const REQUEST = { status: 400, path: '/', body: 'A' };
 
-    expect(factorizeHeaders(REQUEST)()()).toEqual(normalizeHeaders({
+    expect(factorizeHeaders(REQUEST)()).toEqual(normalizeHeaders({
       ...DEFAULT_HEADERS,
       'content-length': 1,
     }));
@@ -23,7 +23,7 @@ describe('#factorizeHeaders', () => {
   test('returns normalized default headers if custom are not provided for empty object sent as body', () => {
     const REQUEST = { status: 400, path: '/', body: {} };
 
-    expect(factorizeHeaders(REQUEST)()()).toEqual(normalizeHeaders({
+    expect(factorizeHeaders(REQUEST)()).toEqual(normalizeHeaders({
       ...DEFAULT_HEADERS,
       'content-length': 2,
     }));
@@ -33,7 +33,7 @@ describe('#factorizeHeaders', () => {
     const CUSTOM_HEADERS = { 'Content-Encoding': 'gzip' };
     const REQUEST = { status: 400, path: '/', body: 'A' };
 
-    expect(factorizeHeaders(REQUEST)(CUSTOM_HEADERS)()).toEqual(normalizeHeaders({
+    expect(factorizeHeaders({ ...REQUEST, headers: CUSTOM_HEADERS })()).toEqual(normalizeHeaders({
       ...DEFAULT_HEADERS,
       ...CUSTOM_HEADERS,
       'content-length': 1,
@@ -45,7 +45,7 @@ describe('#factorizeHeaders', () => {
     const CUSTOM_HEADERS = { 'Content-Encoding': 'gzip' };
     const REQUEST = { status: 400, path: '/', body: '123' };
 
-    expect(factorizeHeaders(REQUEST)(CUSTOM_HEADERS)()).toEqual(normalizeHeaders({
+    expect(factorizeHeaders({ ...REQUEST, headers: CUSTOM_HEADERS })()).toEqual(normalizeHeaders({
       ...DEFAULT_HEADERS,
       ...CUSTOM_HEADERS,
       'content-length': 3,
@@ -56,7 +56,7 @@ describe('#factorizeHeaders', () => {
     const CUSTOM_HEADERS = { 'Content-Encoding': 'gzip' };
     const REQUEST = { status: 400, path: '/', body: { test: 'TEST' } };
 
-    expect(factorizeHeaders(REQUEST)(CUSTOM_HEADERS)()).toEqual(normalizeHeaders({
+    expect(factorizeHeaders({ ...REQUEST, headers: CUSTOM_HEADERS })()).toEqual(normalizeHeaders({
       ...DEFAULT_HEADERS,
       ...CUSTOM_HEADERS,
       'content-length': 15,
@@ -67,7 +67,7 @@ describe('#factorizeHeaders', () => {
     const CUSTOM_HEADERS = { 'content-type': 'application/json' };
     const REQUEST = { status: 400, path: '/', body: 'A' };
 
-    expect(factorizeHeaders(REQUEST)(CUSTOM_HEADERS)()).toEqual(normalizeHeaders({
+    expect(factorizeHeaders({ ...REQUEST, headers: CUSTOM_HEADERS })()).toEqual(normalizeHeaders({
       ...DEFAULT_HEADERS,
       'content-length': 1,
     }));

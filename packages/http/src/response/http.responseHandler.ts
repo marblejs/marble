@@ -1,9 +1,14 @@
 import * as url from 'url';
-import { defer, EMPTY, Observable } from 'rxjs';
-import { ContextProvider } from '@marblejs/core';
-import { isStream } from '@marblejs/core/dist/+internal/utils';
+import { Stream } from 'stream';
+import { Observable } from 'rxjs';
+import { mapTo } from 'rxjs/operators';
+import * as IO from 'fp-ts/lib/IO';
+import * as T from 'fp-ts/lib/Task';
+import { pipe } from 'fp-ts/lib/function';
+import { ContextProvider, Logger, LoggerLevel, LoggerTag, LoggerToken, useContext } from '@marblejs/core';
+import { fromIO, fromTask, isStream } from '@marblejs/core/dist/+internal/utils';
 import { HttpEffectResponse } from '../effects/http.effects.interface';
-import { HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
+import { HttpHeaders, HttpRequest, HttpResponse, HttpStatus } from '../http.interface';
 import { factorizeHeaders } from './http.responseHeaders.factory';
 import { factorizeBody } from './http.responseBody.factory';
 
@@ -12,29 +17,62 @@ type HandleResponse =
   (res: HttpResponse) =>
   (req: HttpRequest) =>
   (effectResponse: HttpEffectResponse) =>
-    Observable<never>;
+    Observable<boolean>;
 
-const writeBodyAndEndRequest = (res: HttpResponse) => (body: any): Promise<unknown> =>
-  new Promise(resolve => res.end(body, () => resolve(undefined)));
+const warnIfOutgoingConnectionEnded = (logger: Logger): IO.IO<void> => () =>
+  logger({
+    tag: LoggerTag.HTTP,
+    level: LoggerLevel.WARN,
+    type: 'Server',
+    message: 'Attempted to send a response to an already finished connection',
+  });
 
-export const handleResponse: HandleResponse = _ask => res => req => effectResponse => {
-  if (res.finished) {
-    // @TODO: log that case
-    return EMPTY;
-  }
+const getResponseStatus = (effectResponse: HttpEffectResponse): HttpStatus =>
+  effectResponse.status ?? HttpStatus.OK;
 
-  const status = effectResponse.status || HttpStatus.OK;
-  const path = url.parse(req.url).pathname || '';
+const getRequestUrl = (request: HttpRequest): string =>
+  url.parse(request.url).pathname ?? '';
 
-  const headers = factorizeHeaders({ body: effectResponse.body, path, status })(effectResponse.headers)();
-  const body = factorizeBody(headers)(effectResponse.body);
+export const writeHead = (status: HttpStatus, headers: HttpHeaders) => (response: HttpResponse): IO.IO<HttpHeaders> =>
+  () => { response.writeHead(status, headers); return headers; };
 
-  res.writeHead(status, headers);
+export const endRequestAndWriteBody = (body: any) => (res: HttpResponse): T.Task<unknown> =>
+  () => new Promise(resolve => res.end(body, () => resolve(true)));
 
-  if (isStream(body)) {
-    body.pipe(res);
-    return EMPTY;
-  }
+export const endRequest = (res: HttpResponse): T.Task<unknown> =>
+  () => new Promise(resolve => res.end(undefined, () => resolve(true)));
 
-  return defer(() => writeBodyAndEndRequest(res)(body)) as Observable<never>;
+export const streamBody = (body: Stream) => (response: HttpResponse): T.Task<unknown> =>
+  () => (body.pipe(response), Promise.resolve(true));
+
+/**
+ * Send HTTP response
+ *
+ * @sig `ContextProvider -> HttpResponse -> HttpRequest -> HttpEffectResponse -> Observable`
+ * @since 1.0.0
+ */
+export const handleResponse: HandleResponse = ask => {
+  const logger = useContext(LoggerToken)(ask);
+
+  return res => req => effectRes => {
+    if (res.writableEnded)
+      return pipe(
+        warnIfOutgoingConnectionEnded(logger),
+        fromIO,
+        mapTo(false));
+
+    const status = getResponseStatus(effectRes);
+    const path = getRequestUrl(req);
+
+    return pipe(
+      factorizeHeaders({ body: effectRes.body, headers: effectRes.headers, path, status }),
+      IO.chain(headers => writeHead(status, headers)(res)),
+      IO.chain(headers => IO.of(factorizeBody({ headers, body: effectRes.body }))),
+      T.fromIO,
+      T.chain(body => isStream(body)
+        ? streamBody(body)(res)
+        : endRequestAndWriteBody(body)(res)),
+      fromTask,
+    ) as Observable<never>;
+  };
 };

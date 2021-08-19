@@ -11,6 +11,7 @@ interface HttpResponseLike {
   body: any;
   path: string;
   status: HttpStatus;
+  headers?: HttpHeaders;
 }
 
 export const DEFAULT_HEADERS = {
@@ -44,9 +45,9 @@ export const provideContentTypeHeader = (response: HttpResponseLike): HttpHeader
   };
 };
 
-export const factorizeHeaders = (response: HttpResponseLike) => (providedHeaders?: HttpHeaders): IO.IO<HttpHeaders> => {
+export const factorizeHeaders = (response: HttpResponseLike): IO.IO<HttpHeaders> => {
   const defaultContentTypeHeaders = pipe(
-    O.fromNullable(providedHeaders),
+    O.fromNullable(response.headers),
     O.chain(getContentType),
     O.fold(
       () => ({
@@ -54,7 +55,7 @@ export const factorizeHeaders = (response: HttpResponseLike) => (providedHeaders
         ...provideContentLengthHeader(response),
       }),
       () => pipe(
-        O.fromNullable(providedHeaders),
+        O.fromNullable(response.headers),
         O.chain(getContentLength),
         O.fold(
           () => ({ ...provideContentLengthHeader(response) }),
@@ -63,11 +64,10 @@ export const factorizeHeaders = (response: HttpResponseLike) => (providedHeaders
       )),
     );
 
-
   const mergedHeaders = {
     ...DEFAULT_HEADERS,
     ...defaultContentTypeHeaders,
-    ...providedHeaders,
+    ...response.headers,
   };
 
   return pipe(
