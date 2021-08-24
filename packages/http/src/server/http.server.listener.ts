@@ -4,7 +4,7 @@ import { HttpMiddlewareEffect, HttpErrorEffect, HttpOutputEffect } from '../effe
 import { HttpRequest, HttpResponse } from '../http.interface';
 import { handleResponse } from '../response/http.responseHandler';
 import { RouteEffect, RouteEffectGroup, Routing } from '../router/http.router.interface';
-import { resolveRouting } from '../router/http.router.resolver.v2';
+import { resolveRouting } from '../router/http.router.resolver';
 import { factorizeRoutingWithDefaults } from '../router/http.router.factory';
 import { HttpServerClientToken } from './internal-dependencies/httpServerClient.reader';
 

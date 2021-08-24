@@ -1,13 +1,13 @@
 import { Observable, Subject, fromEvent, merge } from 'rxjs';
 import { takeUntil, share, take, mergeMap, map, catchError } from 'rxjs/operators';
-import { pipe } from 'fp-ts/lib/function';
+import { flow, pipe } from 'fp-ts/lib/function';
 import { EffectContext, useContext, LoggerToken, LoggerTag, LoggerLevel } from '@marblejs/core';
+import { throwException } from '@marblejs/core/dist/+internal/utils';
 import { HttpServer, HttpRequest, HttpStatus } from '../http.interface';
 import { defaultError$ } from '../error/http.error.effect';
 import { HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http.effects.interface';
 import {
-  unexpectedErrorWhileSendingErrorFactory,
-  unexpectedErrorWhileSendingOutputFactory,
+  unexpectedErrorWhileSendingResponseFactory,
   errorNotBoundToRequestErrorFactory,
   responseNotBoundToRequestErrorFactory,
   isHttpRequestError,
@@ -23,19 +23,23 @@ import { ROUTE_NOT_FOUND_ERROR } from './http.router.effects';
 import { decorateEffect } from './http.router.helpers';
 import { combineRouteMiddlewares } from './http.router.combiner';
 
-export const resolveRouting = (config: {
+type ResolveRoutingConfig = Readonly<{
   routing: Routing,
   ctx: EffectContext<HttpServer>,
   output$?: HttpOutputEffect,
   error$?: HttpErrorEffect,
-}) => {
+}>
+
+export const resolveRouting = (config: ResolveRoutingConfig) => {
   const environmentConfig = provideConfig();
   const requestBus = useContext(HttpRequestBusToken)(config.ctx.ask);
   const logger = useContext(LoggerToken)(config.ctx.ask);
-
   const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
   const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
 
+  /**
+   * Server close stream (closes all active streams)
+   */
   const close$ = pipe(
     fromEvent(config.ctx.client, 'close'),
     take(1),
@@ -61,22 +65,22 @@ export const resolveRouting = (config: {
     takeUntil(close$),
   );
 
+  /**
+   * Subscribe to all outgoing HTTP responses and trigger side effect
+   * @param stream$ incoming `{ res, req }` pair
+   * @returns `Subscription`
+   */
   const subscribeResponse = (stream$: Observable<{ res: HttpEffectResponse, req: HttpRequest }>) =>
     stream$
       .pipe(mergeMap(({ res, req }) => req.response.send(res)))
       .subscribe({
-        error: err => { throw unexpectedErrorWhileSendingOutputFactory(err); },
-      });
-
-  const subscribeError = (stream$: Observable<{ res: HttpEffectResponse, req: HttpRequest }>) =>
-    stream$
-      .pipe(mergeMap(({ res, req }) => req.response.send(res)))
-      .subscribe({
-        error: err => { throw unexpectedErrorWhileSendingErrorFactory(err); },
+        error: flow(
+          unexpectedErrorWhileSendingResponseFactory,
+          throwException),
       });
 
   subscribeResponse(response$);
-  subscribeError(error$);
+  subscribeResponse(error$);
 
   const bootstrappedRrouting: BootstrappedRoutingItem[] = config.routing.map(item => ({
     ...item,
@@ -94,20 +98,20 @@ export const resolveRouting = (config: {
         message: `Effect mapped: ${item.path || '/'} ${method}`,
       })();
 
+      const processError = (error: any, originStream$: Observable<any>): Observable<any> => {
+        if (!error.request) throw errorNotBoundToRequestErrorFactory(error);
+        errorSubject.next({ error, req: error.request });
+        return originStream$;
+      };
+
       const output$ = pipe(
         subject.asObservable(),
         e$ => middleware(e$, config.ctx),
         e$ => decorate ? decorateEffect(e$, errorSubject) : e$,
         e$ => effect(e$, config.ctx),
-        catchError((error, stream) => processError(stream)(error)),
+        catchError(processError),
         takeUntil(close$),
       );
-
-      const processError = (originStream$: Observable<any>) => (error: any) => {
-        if (!error.request) throw errorNotBoundToRequestErrorFactory(error);
-        errorSubject.next({ error, req: error.request });
-        return originStream$;
-      };
 
       const subscribe = (stream$: Observable<HttpEffectResponse>) =>
         stream$.subscribe({
@@ -138,6 +142,11 @@ export const resolveRouting = (config: {
 
   const find = matchRoute(bootstrappedRrouting);
 
+  /**
+   * Resolve incoming request
+   * @param req `HttpRequest`
+   * @returns `void`
+   */
   const resolve = (req: HttpRequest) => {
     const [urlPath, urlQuery] = req.url.split('?');
 
