@@ -4,10 +4,10 @@ import { Event, EventWithPayload, EventWithoutPayload } from './event.interface'
 type Payload =
   | t.TypeC<any>
   | t.TupleC<any>
-  | t.TaggedUnionC<any, any>
+  | t.UnionC<any>
   | t.ReadonlyC<any>
   | t.ReadonlyArrayC<any>
-  | t.AnyC
+  | t.UnknownC
   | t.ArrayC<any>
   | t.StringC
   | t.BigIntC
@@ -18,11 +18,11 @@ type Payload =
   | t.UnionC<any>
   | t.UndefinedC
   | t.PartialC<any>
-  | t.RefinementC<any>
+  | t.BrandC<any, any>
   | t.RecordC<any, any>
   | t.IntersectionC<any>
   | t.ExactC<any>
-  | t.ObjectC
+  | t.UnknownRecordC
   | t.StringC
   | t.LiteralC<any>
   | t.KeyofC<any>
