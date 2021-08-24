@@ -15,7 +15,9 @@ export interface HttpMiddlewareEffect<
 
 export interface HttpErrorEffect<
   Err extends Error = Error,
-> extends HttpEffect<{ req: HttpRequest; error: Err }, HttpEffectResponse> {}
+  Req extends HttpRequest = HttpRequest,
+  Res extends HttpEffectResponse = HttpEffectResponse
+> extends HttpEffect<{ req: Req; error: Err }, { req: Req, res: Res }> {}
 
 export interface HttpServerEffect<
   Ev extends Event = Event

@@ -3,7 +3,7 @@ import { pipe } from 'fp-ts/lib/function';
 import { of, merge, firstValueFrom, lastValueFrom } from 'rxjs';
 import { mapTo, take, toArray, delay, mergeMap, map, first } from 'rxjs/operators';
 import { createMockEffectContext, createHttpResponse, createHttpRequest, createTestRoute } from '../../+internal/testing.util';
-import { HttpEffect, HttpOutputEffect } from '../../effects/http.effects.interface';
+import { HttpEffect, HttpErrorEffect, HttpOutputEffect } from '../../effects/http.effects.interface';
 import { Routing } from '../http.router.interface';
 import { resolveRouting } from '../http.router.resolver.v2';
 import { factorizeRegExpWithParams } from '../http.router.params.factory';
@@ -74,19 +74,15 @@ describe('#resolveRouting', () => {
     // given
     const effectSpy = jest.fn();
     const ctx = createMockEffectContext();
-
-    const testData = [
-      createTestRoute({ effectSpy }),
-    ];
-
-    const routing: Routing = testData.map(route => route.item);
+    const routes = [createTestRoute({ effectSpy })];
+    const routing: Routing = routes.map(route => route.item);
 
     // when
     const { resolve, response$ } = resolveRouting({ routing, ctx });
 
     const run: Task<any> = () => {
-      resolve(testData[0].req); // first call
-      resolve(testData[0].req); // second call
+      resolve(routes[0].req); // first call
+      resolve(routes[0].req); // second call
 
       return pipe(response$, take(2), toArray(), lastValueFrom);
     };
@@ -101,21 +97,18 @@ describe('#resolveRouting', () => {
     // given
     const effectSpy = jest.fn();
     const ctx = createMockEffectContext();
+    const routes = [createTestRoute()];
+    const routing: Routing = routes.map(route => route.item);
 
-    const testData = [
-      createTestRoute(),
-    ];
-
-    const routing: Routing = testData.map(route => route.item);
-
+    // given - output effect
     const output$: HttpOutputEffect = out$ => (effectSpy(), out$);
 
     // when
     const { resolve, response$ } = resolveRouting({ routing, ctx, output$ });
 
     const run: Task<any> = () => {
-      resolve(testData[0].req); // first call
-      resolve(testData[0].req); // second call
+      resolve(routes[0].req); // first call
+      resolve(routes[0].req); // second call
 
       return pipe(response$, take(2), toArray(), lastValueFrom);
     };
@@ -126,7 +119,34 @@ describe('#resolveRouting', () => {
     expect(effectSpy).toHaveBeenCalledTimes(1);
   });
 
-  test.todo('resolves `HttpErrorEffect` only once');
+  test('resolves `HttpErrorEffect` only once', async () => {
+    // given
+    const effectSpy = jest.fn();
+    const ctx = createMockEffectContext();
+    const routes = [createTestRoute({ throwError: true })];
+    const routing: Routing = routes.map(route => route.item);
+
+    // given - error effect
+    const error$: HttpErrorEffect = error$ => {
+      effectSpy();
+      return error$.pipe(map(({ req }) => ({ req, res: { body: 'ERROR' } })));
+    };
+
+    // when
+    const { resolve, response$ } = resolveRouting({ routing, ctx, error$ });
+
+    const run: Task<any> = () => {
+      resolve(routes[0].req); // first call
+      resolve(routes[0].req); // second call
+
+      return pipe(response$, take(2), toArray(), lastValueFrom);
+    };
+
+    await run();
+
+    // then
+    expect(effectSpy).toHaveBeenCalledTimes(1);
+  });
 
   test(`returns ${HttpStatus.NOT_FOUND} (Not Found) response if route cannot be resolved`, async () => {
     // given
