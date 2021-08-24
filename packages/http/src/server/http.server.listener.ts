@@ -29,10 +29,10 @@ export const httpListener = createListener<HttpListenerConfig, HttpListener>(con
   } = config ?? {};
 
   const client = useContext(HttpServerClientToken)(ask);
-  const effectContext = createEffectContext({ ask, client });
+  const ctx = createEffectContext({ ask, client });
   const routing = factorizeRoutingWithDefaults(effects, middlewares ?? []);
   const sendResponse = handleResponse(ask);
-  const { resolve } = resolveRouting(routing, effectContext)(output$, error$);
+  const { resolve } = resolveRouting({ routing, ctx, output$, error$ });
 
   const handle = (req: IncomingMessage, res: OutgoingMessage) => {
     const marbleReq = req as HttpRequest;
