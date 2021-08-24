@@ -2,7 +2,7 @@ import * as WebSocket from 'ws';
 import * as O from 'fp-ts/lib/Option';
 import * as T from 'fp-ts/lib/Task';
 import * as TE from 'fp-ts/lib/TaskEither';
-import { lastValueFrom, forkJoin, Observable, of } from 'rxjs';
+import { forkJoin, Observable, of, defer } from 'rxjs';
 import { catchError, mapTo } from 'rxjs/operators';
 import { constant, constVoid, flow, pipe } from 'fp-ts/lib/function';
 import { ContextProvider, Event, LoggerToken, LoggerTag, LoggerLevel } from '@marblejs/core';
@@ -33,7 +33,6 @@ const logError = log(LoggerLevel.ERROR);
 
 /**
  * Try to emit an event to given WebSocket client
- * @TODO fix from eager to lazy evaluation (with introduction of 4.0)
  */
 export const emitEvent: ClientResponseHandler = ({ client, eventTransformer, ask }) => <T extends Event>(event: T) => {
   const skipSendingEvent: T.Task<boolean> =
@@ -54,33 +53,17 @@ export const emitEvent: ClientResponseHandler = ({ client, eventTransformer, ask
 
   const isConnectionOpen = client.readyState === WebSocket.OPEN;
 
-  // @TODO connect it with observable with an introduction of version 4.0
-  // return pipe(
-  //   defer(pipe(isConnectionOpen ? tryToSendEvent : skipSendingEvent)),
-  //   catchError(constant(of(false))));
-
-  isConnectionOpen ? tryToSendEvent() : skipSendingEvent();
-
-  return of(true);
+  return pipe(
+    defer(pipe(isConnectionOpen ? tryToSendEvent : skipSendingEvent)),
+    catchError(constant(of(false))));
 };
 
 /**
  * Broadcast event to all connected clients
  */
-export const broadcastEvent: ServerResponseHandler = ({ server, eventTransformer, ask }) => <T extends Event>(event: T) => {
-
-  // @TODO connect it with observable with an introduction of version 4.0
-  // return pipe(
-  //   forkJoin([...server.clients].map(client => emitEvent({ client, eventTransformer, ask })(event))),
-  //   catchError(constant(of(false))),
-  //   mapTo(true),
-  // );
-
-  lastValueFrom(pipe(
+export const broadcastEvent: ServerResponseHandler = ({ server, eventTransformer, ask }) => <T extends Event>(event: T) =>
+  pipe(
     forkJoin([...server.clients].map(client => emitEvent({ client, eventTransformer, ask })(event))),
     catchError(constant(of(false))),
     mapTo(true),
-  ));
-
-  return of(true);
-};
+  );
