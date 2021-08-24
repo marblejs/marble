@@ -10,11 +10,11 @@ export const requestMetadata$: HttpOutputEffect = (out$, ctx) => {
   const httpRequestMetadataStorage = useContext(HttpRequestMetadataStorageToken)(ctx.ask);
 
   return out$.pipe(
-    map(({ req, res }) => pipe(
-      getHttpRequestMetadataIdHeader(req.headers),
-      O.fold(constant(res), requestId => {
-        httpRequestMetadataStorage.set(requestId, req.meta);
-        return res;
+    map(out => pipe(
+      getHttpRequestMetadataIdHeader(out.req.headers),
+      O.fold(constant(out), requestId => {
+        httpRequestMetadataStorage.set(requestId, out.req.meta);
+        return out;
       }),
     )),
   );
