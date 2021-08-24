@@ -84,19 +84,22 @@ export const createMockEffectContext = () => {
   return createEffectContext({ ask: lookup(context), client });
 };
 
-export const createTestRoute = (opts?: { throwError?: boolean; delay?: number; method?: HttpMethod }) => {
+export const createTestRoute = (opts?: { throwError?: boolean; delay?: number; method?: HttpMethod; effectSpy?: jest.Mock }) => {
   const method = opts?.method ?? 'GET';
   const routeDelay = opts?.delay ?? 0;
 
   const req = createHttpRequest(({ url: `/delay_${routeDelay}`, method }));
   const path = factorizeRegExpWithParams(`/delay_${routeDelay}`);
 
-  const effect: HttpEffect = req$ =>
-    req$.pipe(
+  const effect: HttpEffect = req$ => {
+    opts?.effectSpy?.();
+
+    return req$.pipe(
       delay(routeDelay),
       tap(() => { if (opts?.throwError) throw new Error(); }),
       mapTo({ body: `delay_${routeDelay}` }),
     );
+  };
 
   const item: RoutingItem = {
     regExp: path.regExp,

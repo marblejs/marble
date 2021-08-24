@@ -23,39 +23,35 @@ import { ROUTE_NOT_FOUND_ERROR } from './http.router.effects';
 import { decorateEffect } from './http.router.helpers';
 import { combineRouteMiddlewares } from './http.router.combiner';
 
-export const resolveRouting = (
+export const resolveRouting = ({ routing, ctx, output$, error$ } : {
   routing: Routing,
   ctx: EffectContext<HttpServer>,
-) => (
   output$?: HttpOutputEffect,
   error$?: HttpErrorEffect,
-) => {
+}) => {
   const environmentConfig = provideConfig();
   const requestBus = useContext(HttpRequestBusToken)(ctx.ask);
   const logger = useContext(LoggerToken)(ctx.ask);
 
-  const close$ = fromEvent(ctx.client, 'close').pipe(take(1), share());
   const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
   const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
 
-  /**
-   * @TODO investigate HttpOutputEffect lazy loading
-   */
-  const outputFlow$ = outputSubject.asObservable().pipe(
-    mergeMap(data => {
-      const stream = environmentConfig.useHttpRequestMetadata() ? requestMetadata$(of(data), ctx) : of(data.res);
-      return stream.pipe(map(res => ({ res, req: data.req })));
-    }),
-    mergeMap(data => {
-      const stream = output$ ? output$(of(data), ctx) : of(data.res);
-      return stream.pipe(
-        map(res => ([res, data.req] as [HttpEffectResponse, HttpRequest])),
-      );
-    }),
-    takeUntil(close$),
-  );
+  const close$ = pipe(
+    fromEvent(ctx.client, 'close'),
+    take(1),
+    share());
 
   /**
+   * Outgoing response stream (the result triggers HTTP response call)
+   */
+  const response$ = pipe(
+    outputSubject.asObservable(),
+    out$ => environmentConfig.useHttpRequestMetadata() ? requestMetadata$(out$, ctx) : out$,
+    out$ => output$ ? output$(out$, ctx) : out$,
+    takeUntil(close$));
+
+  /**
+   * Outgoing error response stream (the result triggers HTTP response call)
    * @TODO investigate HttpErrorEffect lazy loading
    */
   const errorFlow$ = errorSubject.asObservable().pipe(
@@ -69,9 +65,9 @@ export const resolveRouting = (
     takeUntil(close$),
   );
 
-  const subscribeOutput = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
+  const subscribeResponse = (stream$: Observable<{ res: HttpEffectResponse, req: HttpRequest }>) =>
     stream$
-      .pipe(mergeMap(([res, req]) => req.response.send(res)))
+      .pipe(mergeMap(({ res, req }) => req.response.send(res)))
       .subscribe({
         error: err => { throw unexpectedErrorWhileSendingOutputFactory(err); },
       });
@@ -83,7 +79,7 @@ export const resolveRouting = (
         error: err => { throw unexpectedErrorWhileSendingErrorFactory(err); },
       });
 
-  subscribeOutput(outputFlow$);
+  subscribeResponse(response$);
   subscribeError(errorFlow$);
 
   const bootstrappedRrouting: BootstrappedRoutingItem[] = routing.map(item => ({
@@ -176,5 +172,6 @@ export const resolveRouting = (
     resolve,
     errorSubject,
     outputSubject,
+    response$,
   };
 };

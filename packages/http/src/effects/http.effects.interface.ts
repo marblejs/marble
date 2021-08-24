@@ -24,7 +24,7 @@ export interface HttpServerEffect<
 export interface HttpOutputEffect<
   Req extends HttpRequest = HttpRequest,
   Res extends HttpEffectResponse = HttpEffectResponse
-> extends HttpEffect<{ req: Req; res: Res }, HttpEffectResponse> {}
+> extends HttpEffect<{ req: Req; res: Res }, { req: Req; res: Res }> {}
 
 export interface HttpEffect<
   I = HttpRequest,

@@ -1,7 +1,9 @@
-import { of, merge, firstValueFrom } from 'rxjs';
+import { Task } from 'fp-ts/lib/Task';
+import { pipe } from 'fp-ts/lib/function';
+import { of, merge, firstValueFrom, lastValueFrom } from 'rxjs';
 import { mapTo, take, toArray, delay, mergeMap, map, first } from 'rxjs/operators';
 import { createMockEffectContext, createHttpResponse, createHttpRequest, createTestRoute } from '../../+internal/testing.util';
-import { HttpEffect } from '../../effects/http.effects.interface';
+import { HttpEffect, HttpOutputEffect } from '../../effects/http.effects.interface';
 import { Routing } from '../http.router.interface';
 import { resolveRouting } from '../http.router.resolver.v2';
 import { factorizeRegExpWithParams } from '../http.router.params.factory';
@@ -9,7 +11,7 @@ import { HttpError } from '../../error/http.error.model';
 import { HttpStatus } from '../../http.interface';
 
 describe('#resolveRouting', () => {
-  test('resolves routes inside collection', async (done) => {
+  test('resolves routes inside collection', async done => {
     // given
     const ctx = createMockEffectContext();
     const response = createHttpResponse();
@@ -48,7 +50,7 @@ describe('#resolveRouting', () => {
     ];
 
     // when
-    const { resolve, outputSubject } = resolveRouting(routing, ctx)();
+    const { resolve, outputSubject } = resolveRouting({ routing, ctx });
 
     // then
     outputSubject.pipe(take(4), toArray()).subscribe(
@@ -68,6 +70,64 @@ describe('#resolveRouting', () => {
     resolve(req5);
   });
 
+  test('resolves `HttpEffect` only once', async () => {
+    // given
+    const effectSpy = jest.fn();
+    const ctx = createMockEffectContext();
+
+    const testData = [
+      createTestRoute({ effectSpy }),
+    ];
+
+    const routing: Routing = testData.map(route => route.item);
+
+    // when
+    const { resolve, response$ } = resolveRouting({ routing, ctx });
+
+    const run: Task<any> = () => {
+      resolve(testData[0].req); // first call
+      resolve(testData[0].req); // second call
+
+      return pipe(response$, take(2), toArray(), lastValueFrom);
+    };
+
+    await run();
+
+    // then
+    expect(effectSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('resolves `HttpOutputEffect` only once', async () => {
+    // given
+    const effectSpy = jest.fn();
+    const ctx = createMockEffectContext();
+
+    const testData = [
+      createTestRoute(),
+    ];
+
+    const routing: Routing = testData.map(route => route.item);
+
+    const output$: HttpOutputEffect = out$ => (effectSpy(), out$);
+
+    // when
+    const { resolve, response$ } = resolveRouting({ routing, ctx, output$ });
+
+    const run: Task<any> = () => {
+      resolve(testData[0].req); // first call
+      resolve(testData[0].req); // second call
+
+      return pipe(response$, take(2), toArray(), lastValueFrom);
+    };
+
+    await run();
+
+    // then
+    expect(effectSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test.todo('resolves `HttpErrorEffect` only once');
+
   test(`returns ${HttpStatus.NOT_FOUND} (Not Found) response if route cannot be resolved`, async () => {
     // given
     const ctx = createMockEffectContext();
@@ -84,7 +144,7 @@ describe('#resolveRouting', () => {
     }];
 
     // when
-    const { resolve, errorSubject } = resolveRouting(routing, ctx)();
+    const { resolve, errorSubject } = resolveRouting({ routing, ctx });
     const errorPromise = firstValueFrom(errorSubject.pipe(first()));
 
     resolve(req);
@@ -112,7 +172,7 @@ describe('#resolveRouting', () => {
     }];
 
     // when
-    const { resolve, errorSubject } = resolveRouting(routing, ctx)();
+    const { resolve, errorSubject } = resolveRouting({ routing, ctx });
     const errorPromise = firstValueFrom(errorSubject.pipe(first()));
 
     resolve(req);
@@ -147,7 +207,7 @@ describe('#resolveRouting', () => {
     }];
 
     // when
-    const { resolve, outputSubject } = resolveRouting(routing, ctx)();
+    const { resolve, outputSubject } = resolveRouting({ routing, ctx });
     const run = () => {
       resolve(testData[0]); // 10 delay
       resolve(testData[3]); // 40 delay
@@ -183,7 +243,7 @@ describe('#resolveRouting', () => {
     const routing: Routing = testData.map(route => route.item);
 
     // when
-    const { resolve, outputSubject } = resolveRouting(routing, ctx)();
+    const { resolve, outputSubject } = resolveRouting({ routing, ctx });
     const run = () => {
       resolve(testData[0].req); // 10 delay
       resolve(testData[3].req); // 40 delay
@@ -219,7 +279,7 @@ describe('#resolveRouting', () => {
     const routing: Routing = testData.map(route => route.item);
 
     // when
-    const { resolve, outputSubject, errorSubject } = resolveRouting(routing, ctx)();
+    const { resolve, outputSubject, errorSubject } = resolveRouting({ routing, ctx });
     const run = () => {
       resolve(testData[0].req); // 10 delay
       resolve(testData[1].req); // 20 delay
