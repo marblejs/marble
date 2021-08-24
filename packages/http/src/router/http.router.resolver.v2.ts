@@ -1,4 +1,4 @@
-import { Subject, of, fromEvent, Observable } from 'rxjs';
+import { Observable, Subject, fromEvent, merge } from 'rxjs';
 import { takeUntil, share, take, mergeMap, map, catchError } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/function';
 import { EffectContext, useContext, LoggerToken, LoggerTag, LoggerLevel } from '@marblejs/core';
@@ -23,21 +23,21 @@ import { ROUTE_NOT_FOUND_ERROR } from './http.router.effects';
 import { decorateEffect } from './http.router.helpers';
 import { combineRouteMiddlewares } from './http.router.combiner';
 
-export const resolveRouting = ({ routing, ctx, output$, error$ } : {
+export const resolveRouting = (config: {
   routing: Routing,
   ctx: EffectContext<HttpServer>,
   output$?: HttpOutputEffect,
   error$?: HttpErrorEffect,
 }) => {
   const environmentConfig = provideConfig();
-  const requestBus = useContext(HttpRequestBusToken)(ctx.ask);
-  const logger = useContext(LoggerToken)(ctx.ask);
+  const requestBus = useContext(HttpRequestBusToken)(config.ctx.ask);
+  const logger = useContext(LoggerToken)(config.ctx.ask);
 
   const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
   const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
 
   const close$ = pipe(
-    fromEvent(ctx.client, 'close'),
+    fromEvent(config.ctx.client, 'close'),
     take(1),
     share());
 
@@ -46,22 +46,18 @@ export const resolveRouting = ({ routing, ctx, output$, error$ } : {
    */
   const response$ = pipe(
     outputSubject.asObservable(),
-    out$ => environmentConfig.useHttpRequestMetadata() ? requestMetadata$(out$, ctx) : out$,
-    out$ => output$ ? output$(out$, ctx) : out$,
-    takeUntil(close$));
+    o$ => environmentConfig.useHttpRequestMetadata() ? requestMetadata$(o$, config.ctx) : o$,
+    o$ => config.output$ ? config.output$(o$, config.ctx) : o$,
+    takeUntil(close$),
+  );
 
   /**
    * Outgoing error response stream (the result triggers HTTP response call)
-   * @TODO investigate HttpErrorEffect lazy loading
    */
-  const errorFlow$ = errorSubject.asObservable().pipe(
-    map(data => isHttpRequestError(data.error) ? { ...data, error: data.error.error } : data),
-    mergeMap(data => {
-      const stream = error$ ? error$(of(data), ctx) : defaultError$(of(data), ctx);
-      return stream.pipe(
-        map(res => ([res, data.req] as [HttpEffectResponse, HttpRequest])),
-      );
-    }),
+  const error$ = pipe(
+    errorSubject.asObservable(),
+    map(({ error , req }) => isHttpRequestError(error) ? { req, error: error.error } : ({ error, req })),
+    e$ => config.error$ ? config.error$(e$, config.ctx) : defaultError$(e$, config.ctx),
     takeUntil(close$),
   );
 
@@ -72,17 +68,17 @@ export const resolveRouting = ({ routing, ctx, output$, error$ } : {
         error: err => { throw unexpectedErrorWhileSendingOutputFactory(err); },
       });
 
-  const subscribeError = (stream$: Observable<[HttpEffectResponse, HttpRequest]>) =>
+  const subscribeError = (stream$: Observable<{ res: HttpEffectResponse, req: HttpRequest }>) =>
     stream$
-      .pipe(mergeMap(([res, req]) => req.response.send(res)))
+      .pipe(mergeMap(({ res, req }) => req.response.send(res)))
       .subscribe({
         error: err => { throw unexpectedErrorWhileSendingErrorFactory(err); },
       });
 
   subscribeResponse(response$);
-  subscribeError(errorFlow$);
+  subscribeError(error$);
 
-  const bootstrappedRrouting: BootstrappedRoutingItem[] = routing.map(item => ({
+  const bootstrappedRrouting: BootstrappedRoutingItem[] = config.routing.map(item => ({
     ...item,
     methods: Object.entries(item.methods).reduce((acc, [method, methodItem]) => {
       if (!methodItem) return { [method]: undefined };
@@ -100,9 +96,9 @@ export const resolveRouting = ({ routing, ctx, output$, error$ } : {
 
       const output$ = pipe(
         subject.asObservable(),
-        e$ => middleware(e$, ctx),
+        e$ => middleware(e$, config.ctx),
         e$ => decorate ? decorateEffect(e$, errorSubject) : e$,
-        e$ => effect(e$, ctx),
+        e$ => effect(e$, config.ctx),
         catchError((error, stream) => processError(stream)(error)),
         takeUntil(close$),
       );
@@ -172,6 +168,6 @@ export const resolveRouting = ({ routing, ctx, output$, error$ } : {
     resolve,
     errorSubject,
     outputSubject,
-    response$,
+    response$: merge(response$, error$),
   };
 };

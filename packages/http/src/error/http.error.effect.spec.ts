@@ -10,7 +10,6 @@ describe('defaultError$', () => {
 
   test('maps HttpError', () => {
     const error = new HttpError('test-message', 400);
-    const incomingRequest = { req, error };
     const outgoingResponse = {
       status: 400,
       body: { error: {
@@ -20,14 +19,13 @@ describe('defaultError$', () => {
     };
 
     Marbles.assertEffect(defaultError$, [
-      ['-a-', { a: incomingRequest }],
-      ['-a-', { a: outgoingResponse }],
+      ['-a-', { a: { req, error } }],
+      ['-a-', { a: { req, res: outgoingResponse } }],
     ], { ctx });
   });
 
   test('maps other errors', () => {
     const error = new Error('test-message');
-    const incomingRequest = { req, error };
     const outgoingResponse = {
       status: 500,
       body: { error: {
@@ -37,14 +35,13 @@ describe('defaultError$', () => {
     };
 
     Marbles.assertEffect(defaultError$, [
-      ['-a-', { a: incomingRequest }],
-      ['-a-', { a: outgoingResponse }],
+      ['-a-', { a: { req, error } }],
+      ['-a-', { a: { req, res: outgoingResponse } }],
     ], { ctx });
   });
 
   test('maps to "Internal server error" if "error" is not provided', () => {
     const error = undefined;
-    const incomingRequest = { req, error };
     const outgoingResponse = {
       status: 500,
       body: { error: {
@@ -54,8 +51,8 @@ describe('defaultError$', () => {
     };
 
     Marbles.assertEffect(defaultError$, [
-      ['-a-', { a: incomingRequest }],
-      ['-a-', { a: outgoingResponse }],
+      ['-a-', { a: { req, error } }],
+      ['-a-', { a: { req, res: outgoingResponse } }],
     ], { ctx });
   });
 });
