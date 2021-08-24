@@ -29,6 +29,13 @@ export interface QueryParameters {
 }
 
 export interface HttpResponse extends http.ServerResponse {
+  /**
+   * Send HTTP response
+   *
+   * @param response `HttpEffectResponse`
+   * @returns `Observable<boolean>` (indicates whether the response was sent or not)
+   * @since 1.0.0
+   */
   send: (response: HttpEffectResponse) => Observable<boolean>;
 }
 
