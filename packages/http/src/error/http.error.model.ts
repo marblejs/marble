@@ -36,13 +36,8 @@ export const isHttpError = (error: Error | undefined): error is HttpError =>
 export const isHttpRequestError = (error: Error | undefined): error is HttpRequestError =>
   error?.name === HttpErrorType.HTTP_REQUEST_ERROR;
 
-export const unexpectedErrorWhileSendingErrorFactory = (error: Error): CoreError => {
-  const message = `An unexpected error ${chalk.red(`"${error.message}"`)} occured while sending an error response. Please check your error effect.`;
-  return coreErrorFactory(message, { printStacktrace: false });
-};
-
-export const unexpectedErrorWhileSendingOutputFactory = (error: Error): CoreError => {
-  const message = `An unexpected error ${chalk.red(`"${error.message}"`)} occured while sending a response. Please check your output effect.`;
+export const unexpectedErrorWhileSendingResponseFactory = (error: Error): CoreError => {
+  const message = `An unexpected error ${chalk.red(`"${error.message}"`)} occured while sending a response. Please check your output/error effect.`;
   return coreErrorFactory(message, { printStacktrace: false });
 };
 

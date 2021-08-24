@@ -5,7 +5,7 @@ import { mapTo, take, toArray, delay, mergeMap, map, first } from 'rxjs/operator
 import { createMockEffectContext, createHttpResponse, createHttpRequest, createTestRoute } from '../../+internal/testing.util';
 import { HttpEffect, HttpErrorEffect, HttpOutputEffect } from '../../effects/http.effects.interface';
 import { Routing } from '../http.router.interface';
-import { resolveRouting } from '../http.router.resolver.v2';
+import { resolveRouting } from '../http.router.resolver';
 import { factorizeRegExpWithParams } from '../http.router.params.factory';
 import { HttpError } from '../../error/http.error.model';
 import { HttpStatus } from '../../http.interface';
