@@ -1,5 +1,5 @@
 import { Event, Effect } from '@marblejs/core';
-import { HttpRequest, HttpStatus, HttpHeaders, HttpServer } from '../http.interface';
+import { HttpRequest, HttpStatus, HttpHeaders, HttpServer, WithHttpRequest } from '../http.interface';
 
 export interface HttpEffectResponse<T = any> {
   request?: HttpRequest;
@@ -16,8 +16,10 @@ export interface HttpMiddlewareEffect<
 export interface HttpErrorEffect<
   Err extends Error = Error,
   Req extends HttpRequest = HttpRequest,
-  Res extends HttpEffectResponse = HttpEffectResponse
-> extends HttpEffect<{ req: Req; error: Err }, { req: Req, res: Res }> {}
+> extends HttpEffect<
+  WithHttpRequest<{ error: Err }, Req>,
+  WithHttpRequest<HttpEffectResponse>
+> {}
 
 export interface HttpServerEffect<
   Ev extends Event = Event
@@ -25,8 +27,10 @@ export interface HttpServerEffect<
 
 export interface HttpOutputEffect<
   Req extends HttpRequest = HttpRequest,
-  Res extends HttpEffectResponse = HttpEffectResponse
-> extends HttpEffect<{ req: Req; res: Res }, { req: Req; res: Res }> {}
+> extends HttpEffect<
+  WithHttpRequest<HttpEffectResponse, Req>,
+  WithHttpRequest<HttpEffectResponse>
+> {}
 
 export interface HttpEffect<
   I = HttpRequest,

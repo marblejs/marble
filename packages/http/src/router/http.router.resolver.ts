@@ -3,7 +3,7 @@ import { takeUntil, share, take, mergeMap, map, catchError } from 'rxjs/operator
 import { flow, pipe } from 'fp-ts/lib/function';
 import { EffectContext, useContext, LoggerToken, LoggerTag, LoggerLevel } from '@marblejs/core';
 import { throwException } from '@marblejs/core/dist/+internal/utils';
-import { HttpServer, HttpRequest, HttpStatus } from '../http.interface';
+import { HttpServer, HttpRequest, HttpStatus, WithHttpRequest } from '../http.interface';
 import { defaultError$ } from '../error/http.error.effect';
 import { HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http.effects.interface';
 import {
@@ -34,8 +34,8 @@ export const resolveRouting = (config: ResolveRoutingConfig) => {
   const environmentConfig = provideConfig();
   const requestBus = useContext(HttpRequestBusToken)(config.ctx.ask);
   const logger = useContext(LoggerToken)(config.ctx.ask);
-  const outputSubject = new Subject<{ res: HttpEffectResponse; req: HttpRequest}>();
-  const errorSubject = new Subject<{ error: Error; req: HttpRequest }>();
+  const outputSubject = new Subject<WithHttpRequest<HttpEffectResponse>>();
+  const errorSubject = new Subject<WithHttpRequest<{ error: Error }>>();
 
   /**
    * Server close stream (closes all active streams)
@@ -60,19 +60,19 @@ export const resolveRouting = (config: ResolveRoutingConfig) => {
    */
   const error$ = pipe(
     errorSubject.asObservable(),
-    map(({ error , req }) => isHttpRequestError(error) ? { req, error: error.error } : ({ error, req })),
+    map(({ request, error }) => isHttpRequestError(error) ? { request, error: error.error } : ({ request, error })),
     e$ => config.error$ ? config.error$(e$, config.ctx) : defaultError$(e$, config.ctx),
     takeUntil(close$),
   );
 
   /**
    * Subscribe to all outgoing HTTP responses and trigger side effect
-   * @param stream$ incoming `{ res, req }` pair
+   * @param stream$ incoming `HttpEffectResponse`
    * @returns `Subscription`
    */
-  const subscribeResponse = (stream$: Observable<{ res: HttpEffectResponse, req: HttpRequest }>) =>
+  const subscribeResponse = (stream$: Observable<WithHttpRequest<HttpEffectResponse>>) =>
     stream$
-      .pipe(mergeMap(({ res, req }) => req.response.send(res)))
+      .pipe(mergeMap(({ request, ...res }) => request.response.send(res)))
       .subscribe({
         error: flow(
           unexpectedErrorWhileSendingResponseFactory,
@@ -100,7 +100,7 @@ export const resolveRouting = (config: ResolveRoutingConfig) => {
 
       const processError = (error: any, originStream$: Observable<any>): Observable<any> => {
         if (!error.request) throw errorNotBoundToRequestErrorFactory(error);
-        errorSubject.next({ error, req: error.request });
+        errorSubject.next({ error, request: error.request });
         return originStream$;
       };
 
@@ -117,7 +117,7 @@ export const resolveRouting = (config: ResolveRoutingConfig) => {
         stream$.subscribe({
           next: res => {
             if (!res.request) throw responseNotBoundToRequestErrorFactory(res);
-            outputSubject.next({ res, req: res.request });
+            outputSubject.next({ ...res, request: res.request });
           },
           error: err => {
             const type = 'RouterResolver';
@@ -144,32 +144,32 @@ export const resolveRouting = (config: ResolveRoutingConfig) => {
 
   /**
    * Resolve incoming request
-   * @param req `HttpRequest`
+   * @param request `HttpRequest`
    * @returns `void`
    */
-  const resolve = (req: HttpRequest) => {
-    const [urlPath, urlQuery] = req.url.split('?');
+  const resolve = (request: HttpRequest) => {
+    const [urlPath, urlQuery] = request.url.split('?');
 
     try {
-      const resolvedRoute = find(urlPath, req.method);
+      const resolvedRoute = find(urlPath, request.method);
 
       if (!resolvedRoute) {
-        return errorSubject.next({ req, error: ROUTE_NOT_FOUND_ERROR });
+        return errorSubject.next({ request, error: ROUTE_NOT_FOUND_ERROR });
       }
 
-      req.query = queryParamsFactory(urlQuery);
-      req.params = resolvedRoute.params;
-      req.meta = {};
-      req.meta.path = resolvedRoute.path;
+      request.query = queryParamsFactory(urlQuery);
+      request.params = resolvedRoute.params;
+      request.meta = {};
+      request.meta.path = resolvedRoute.path;
 
-      resolvedRoute.subject.next(req);
-      requestBus.next(req);
+      resolvedRoute.subject.next(request);
+      requestBus.next(request);
     } catch (error) {
       if (error.name === 'URIError') {
-        return errorSubject.next({ req, error: new HttpError(error.message, HttpStatus.BAD_REQUEST) });
+        return errorSubject.next({ request, error: new HttpError(error.message, HttpStatus.BAD_REQUEST) });
       }
 
-      return errorSubject.next({ req, error: new HttpError(`Internal server error: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR) });
+      return errorSubject.next({ request, error: new HttpError(`Internal server error: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR) });
     }
   };
 

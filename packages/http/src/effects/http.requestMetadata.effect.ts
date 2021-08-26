@@ -6,15 +6,15 @@ import { HttpRequestMetadataStorageToken } from '../server/internal-dependencies
 import { getHttpRequestMetadataIdHeader } from '../+internal/metadata.util';
 import { HttpOutputEffect } from './http.effects.interface';
 
-export const requestMetadata$: HttpOutputEffect = (out$, ctx) => {
+export const requestMetadata$: HttpOutputEffect = (output$, ctx) => {
   const httpRequestMetadataStorage = useContext(HttpRequestMetadataStorageToken)(ctx.ask);
 
-  return out$.pipe(
-    map(out => pipe(
-      getHttpRequestMetadataIdHeader(out.req.headers),
-      O.fold(constant(out), requestId => {
-        httpRequestMetadataStorage.set(requestId, out.req.meta);
-        return out;
+  return output$.pipe(
+    map(response => pipe(
+      getHttpRequestMetadataIdHeader(response.request.headers),
+      O.fold(constant(response), requestId => {
+        httpRequestMetadataStorage.set(requestId, response.request.meta);
+        return response;
       }),
     )),
   );
