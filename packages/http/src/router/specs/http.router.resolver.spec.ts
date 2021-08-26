@@ -1,7 +1,7 @@
 import { Task } from 'fp-ts/lib/Task';
 import { pipe } from 'fp-ts/lib/function';
 import { of, merge, firstValueFrom, lastValueFrom } from 'rxjs';
-import { mapTo, take, toArray, delay, mergeMap, map, first } from 'rxjs/operators';
+import { mapTo, take, toArray, delay, mergeMap, map } from 'rxjs/operators';
 import { createMockEffectContext, createHttpResponse, createHttpRequest, createTestRoute } from '../../+internal/testing.util';
 import { HttpEffect, HttpErrorEffect, HttpOutputEffect } from '../../effects/http.effects.interface';
 import { Routing } from '../http.router.interface';
@@ -55,10 +55,10 @@ describe('#resolveRouting', () => {
     // then
     outputSubject.pipe(take(4), toArray()).subscribe(
       result => {
-        expect(result[0].res).toEqual({ body: 'test_1', request: req1 });
-        expect(result[1].res).toEqual({ body: 'test_2', request: req2 });
-        expect(result[2].res).toEqual({ body: 'test_3', request: req3 });
-        expect(result[3].res).toEqual({ body: 'test_4', request: req4 });
+        expect(result[0]).toEqual({ body: 'test_1', request: req1 });
+        expect(result[1]).toEqual({ body: 'test_2', request: req2 });
+        expect(result[2]).toEqual({ body: 'test_3', request: req3 });
+        expect(result[3]).toEqual({ body: 'test_4', request: req4 });
         done();
       },
     );
@@ -129,7 +129,7 @@ describe('#resolveRouting', () => {
     // given - error effect
     const error$: HttpErrorEffect = error$ => {
       effectSpy();
-      return error$.pipe(map(({ req }) => ({ req, res: { body: 'ERROR' } })));
+      return error$.pipe(map(({ request }) => ({ request, body: 'ERROR' })));
     };
 
     // when
@@ -152,7 +152,7 @@ describe('#resolveRouting', () => {
     // given
     const ctx = createMockEffectContext();
     const response = createHttpResponse();
-    const req = createHttpRequest(({ url: '/unknown', method: 'GET', response }));
+    const request = createHttpRequest(({ url: '/unknown', method: 'GET', response }));
     const path = factorizeRegExpWithParams('/');
 
     const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
@@ -165,13 +165,13 @@ describe('#resolveRouting', () => {
 
     // when
     const { resolve, errorSubject } = resolveRouting({ routing, ctx });
-    const errorPromise = firstValueFrom(errorSubject.pipe(first()));
+    const errorPromise = firstValueFrom(errorSubject);
 
-    resolve(req);
+    resolve(request);
 
     // then
     await expect(errorPromise).resolves.toEqual({
-      req,
+      request,
       error: new HttpError('Route not found', HttpStatus.NOT_FOUND),
     });
   });
@@ -180,7 +180,7 @@ describe('#resolveRouting', () => {
     // given
     const ctx = createMockEffectContext();
     const response = createHttpResponse();
-    const req = createHttpRequest(({ url: '/group/%test', method: 'GET', response }));
+    const request = createHttpRequest(({ url: '/group/%test', method: 'GET', response }));
     const path = factorizeRegExpWithParams('/group/:id');
 
     const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
@@ -193,13 +193,13 @@ describe('#resolveRouting', () => {
 
     // when
     const { resolve, errorSubject } = resolveRouting({ routing, ctx });
-    const errorPromise = firstValueFrom(errorSubject.pipe(first()));
+    const errorPromise = firstValueFrom(errorSubject);
 
-    resolve(req);
+    resolve(request);
 
     // then
     await expect(errorPromise).resolves.toEqual({
-      req,
+      request,
       error: new HttpError('URI malformed', HttpStatus.BAD_REQUEST),
     });
   });
@@ -238,10 +238,10 @@ describe('#resolveRouting', () => {
     // then
     outputSubject.pipe(take(4), toArray()).subscribe(
       result => {
-        expect(result[0].res).toEqual({ body: 'delay_10', request: testData[0] });
-        expect(result[1].res).toEqual({ body: 'delay_20', request: testData[1] });
-        expect(result[2].res).toEqual({ body: 'delay_30', request: testData[2] });
-        expect(result[3].res).toEqual({ body: 'delay_40', request: testData[3] });
+        expect(result[0]).toEqual({ body: 'delay_10', request: testData[0] });
+        expect(result[1]).toEqual({ body: 'delay_20', request: testData[1] });
+        expect(result[2]).toEqual({ body: 'delay_30', request: testData[2] });
+        expect(result[3]).toEqual({ body: 'delay_40', request: testData[3] });
         done();
       },
     );
@@ -274,10 +274,10 @@ describe('#resolveRouting', () => {
     // then
     outputSubject.pipe(take(4), toArray()).subscribe(
       result => {
-        expect(result[0].res).toEqual({ body: 'delay_10', request: testData[0].req });
-        expect(result[1].res).toEqual({ body: 'delay_20', request: testData[1].req });
-        expect(result[2].res).toEqual({ body: 'delay_30', request: testData[2].req });
-        expect(result[3].res).toEqual({ body: 'delay_40', request: testData[3].req });
+        expect(result[0]).toEqual({ body: 'delay_10', request: testData[0].req });
+        expect(result[1]).toEqual({ body: 'delay_20', request: testData[1].req });
+        expect(result[2]).toEqual({ body: 'delay_30', request: testData[2].req });
+        expect(result[3]).toEqual({ body: 'delay_40', request: testData[3].req });
         done();
       },
     );
@@ -309,7 +309,7 @@ describe('#resolveRouting', () => {
 
     // then
     merge(
-      outputSubject.pipe(take(3), map(res => res.res)),
+      outputSubject.pipe(take(3)),
       errorSubject.pipe(take(1), map(res => res.error)),
     ).pipe(
       toArray(),

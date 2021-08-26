@@ -18,7 +18,7 @@ export const decorateEffect = (stream: Observable<HttpRequest>, errorSubject: Er
       ...operations,
       map((res: HttpEffectResponse) => ({ ...res, request })),
       catchError((error: Error) => {
-        errorSubject.next({ error, req: request });
+        errorSubject.next({ error, request });
         return EMPTY;
       }),
     ])(of(request)) as Observable<HttpEffectResponse>),
@@ -32,7 +32,7 @@ export const decorateMiddleware = (stream: Observable<HttpRequest>, errorSubject
     mergeMap((request: HttpRequest) => pipeFromArray([
       ...operations,
       catchError((error: Error) => {
-        errorSubject.next({ error, req: request });
+        errorSubject.next({ error, request });
         return EMPTY;
       }),
     ])(of(request)) as Observable<HttpRequest>),

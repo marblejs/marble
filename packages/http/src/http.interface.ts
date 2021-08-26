@@ -20,6 +20,9 @@ export interface HttpRequest<
   [key: string]: any;
 }
 
+export type WithHttpRequest<T, Req extends HttpRequest = HttpRequest> =
+  { request: Req } & T;
+
 export interface RouteParameters {
   [key: string]: any;
 }

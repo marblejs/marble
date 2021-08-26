@@ -30,9 +30,9 @@ const errorFactory = (status: HttpStatus) => (error: Error): HttpErrorResponse =
 
 export const defaultError$: HttpErrorEffect = req$ =>
   req$.pipe(
-    map(({ req, error = defaultHttpError }) => {
+    map(({ request, error = defaultHttpError }) => {
       const status = getStatusCode(error);
       const body = errorFactory(status)(error);
-      return ({ req, res: { status, body } });
+      return ({ status, body, request });
     }),
   );
