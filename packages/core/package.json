@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/core",
-  "version": "4.0.0-rc.0",
+  "version": "4.0.0-rc.1",
   "description": "Reactive Node APIs made easy",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -42,5 +42,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "208643c17d76a01d0a9cb304611d4474c4a3bff6"
 }

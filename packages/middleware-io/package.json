@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/middleware-io",
-  "version": "4.0.0-rc.0",
+  "version": "4.0.0-rc.1",
   "description": "IO middleware for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -40,10 +40,11 @@
     "io-ts": "^2.2.10"
   },
   "devDependencies": {
-    "@marblejs/core": "^4.0.0-rc.0",
-    "@marblejs/http": "^4.0.0-rc.0"
+    "@marblejs/core": "^4.0.0-rc.1",
+    "@marblejs/http": "^4.0.0-rc.1"
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "208643c17d76a01d0a9cb304611d4474c4a3bff6"
 }

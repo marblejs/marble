@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/http",
-  "version": "4.0.0-rc.0",
+  "version": "4.0.0-rc.1",
   "description": "HTTP module for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -46,11 +46,12 @@
     "uuid": "^7.0.1"
   },
   "devDependencies": {
-    "@marblejs/core": "^4.0.0-rc.0",
+    "@marblejs/core": "^4.0.0-rc.1",
     "@types/file-type": "^5.2.1",
     "@types/mime": "^2.0.1"
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "208643c17d76a01d0a9cb304611d4474c4a3bff6"
 }
