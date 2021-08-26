@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/http",
-  "version": "3.5.1",
+  "version": "4.0.0-rc.0",
   "description": "HTTP module for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -46,7 +46,7 @@
     "uuid": "^7.0.1"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.5.0",
+    "@marblejs/core": "^4.0.0-rc.0",
     "@types/file-type": "^5.2.1",
     "@types/mime": "^2.0.1"
   },
