@@ -4,7 +4,7 @@ import { defaultError$ } from './http.error.effect';
 import { HttpError } from './http.error.model';
 
 describe('defaultError$', () => {
-  const req = createHttpRequest();
+  const request = createHttpRequest();
   const client = createHttpResponse();
   const ctx = { client };
 
@@ -19,8 +19,8 @@ describe('defaultError$', () => {
     };
 
     Marbles.assertEffect(defaultError$, [
-      ['-a-', { a: { req, error } }],
-      ['-a-', { a: { req, res: outgoingResponse } }],
+      ['-a-', { a: { request, error } }],
+      ['-a-', { a: { request, ...outgoingResponse } }],
     ], { ctx });
   });
 
@@ -35,8 +35,8 @@ describe('defaultError$', () => {
     };
 
     Marbles.assertEffect(defaultError$, [
-      ['-a-', { a: { req, error } }],
-      ['-a-', { a: { req, res: outgoingResponse } }],
+      ['-a-', { a: { request, error } }],
+      ['-a-', { a: { request, ...outgoingResponse } }],
     ], { ctx });
   });
 
@@ -51,8 +51,8 @@ describe('defaultError$', () => {
     };
 
     Marbles.assertEffect(defaultError$, [
-      ['-a-', { a: { req, error } }],
-      ['-a-', { a: { req, res: outgoingResponse } }],
+      ['-a-', { a: { request, error } }],
+      ['-a-', { a: { request, ...outgoingResponse } }],
     ], { ctx });
   });
 });
