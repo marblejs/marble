@@ -11,7 +11,9 @@ import {
   errorNotBoundToRequestErrorFactory,
   responseNotBoundToRequestErrorFactory,
   isHttpRequestError,
-  HttpError
+  HttpError,
+  isURIError,
+  getErrorMessage
 } from '../error/http.error.model';
 import { HttpRequestBusToken } from '../server/internal-dependencies/httpRequestBus.reader';
 import { requestMetadata$ } from '../effects/http.requestMetadata.effect';
@@ -165,11 +167,14 @@ export const resolveRouting = (config: ResolveRoutingConfig) => {
       resolvedRoute.subject.next(request);
       requestBus.next(request);
     } catch (error) {
-      if (error.name === 'URIError') {
-        return errorSubject.next({ request, error: new HttpError(error.message, HttpStatus.BAD_REQUEST) });
-      }
+      let httpError: HttpError;
 
-      return errorSubject.next({ request, error: new HttpError(`Internal server error: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR) });
+      if (isURIError(error))
+        httpError = new HttpError(error.message, HttpStatus.BAD_REQUEST);
+      else
+        httpError = new HttpError(`Internal server error: ${getErrorMessage(error)}`, HttpStatus.INTERNAL_SERVER_ERROR);
+
+      errorSubject.next({ request, error: httpError });
     }
   };
 
