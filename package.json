@@ -73,7 +73,7 @@
     "eslint-plugin-deprecation": "^1.2.1",
     "husky": "^4.2.5",
     "jest": "^26.4.2",
-    "lerna": "^3.22.1",
+    "lerna": "^4.0.0",
     "mock-req": "^0.2.0",
     "rimraf": "^3.0.1",
     "ts-jest": "^26.3.0",
