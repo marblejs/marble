@@ -1,6 +1,6 @@
 import * as http from 'http';
-import { EventEmitter } from 'events';
-import { forkJoin, firstValueFrom } from 'rxjs';
+import { Socket } from 'net';
+import { forkJoin, lastValueFrom } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { createContext } from '@marblejs/core';
 import {
@@ -31,11 +31,12 @@ describe('#HttpServerEventStream', () => {
 
   test('emits mapped event types', async () => {
     // given
+    const socketMock = new Socket();
     const hostname = '127.0.0.1';
     const event$ = HttpServerEventStream({ hostname, server })(createContext());
 
     // when
-    const result = firstValueFrom(forkJoin([
+    const result = lastValueFrom(forkJoin([
       event$.pipe(filter(isErrorEvent), take(1)),
       event$.pipe(filter(isClientErrorEvent), take(1)),
       event$.pipe(filter(isCloseEvent), take(1)),
@@ -51,13 +52,14 @@ describe('#HttpServerEventStream', () => {
     server.emit(ServerEventType.CLIENT_ERROR);
     server.emit(ServerEventType.CLOSE);
     server.emit(ServerEventType.CONNECT);
-    server.emit(ServerEventType.CONNECTION, new EventEmitter());
+    server.emit(ServerEventType.CONNECTION, socketMock);
     server.emit(ServerEventType.LISTENING);
     server.emit(ServerEventType.UPGRADE);
     server.emit(ServerEventType.CHECK_CONTINUE);
     server.emit(ServerEventType.CHECK_EXPECTATION);
 
     // then
-    expect(result).resolves.toHaveLength(9);
+    expect(await result).toHaveLength(9);
+    socketMock.destroy();
   });
 });
