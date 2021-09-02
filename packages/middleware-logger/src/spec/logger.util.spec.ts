@@ -3,6 +3,9 @@ import { createHttpRequest, createHttpResponse } from '@marblejs/http/dist/+inte
 import { formatTime, getTimeDifferenceInMs, filterResponse, isNotSilent } from '../logger.util';
 
 describe('Logger util', () => {
+  afterEach(jest.useRealTimers);
+  afterEach(jest.clearAllMocks);
+
   test('#formatTime formats time to miliseconds or seconds', () => {
     // given
     const moreThanSecond = 1200;
@@ -20,7 +23,9 @@ describe('Logger util', () => {
   test('#getTimeDifferenceInMs returns time difference in miliseconds', () => {
     // given
     const startTime = new Date(1000);
-    spyOn(global, 'Date').and.returnValue({ getTime: () => 2000 });
+
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(new Date(2000));
 
     // when
     const timeDifference = getTimeDifferenceInMs(startTime);

@@ -9,6 +9,7 @@ const config = {
   testEnvironment: 'node',
   testRegex: 'spec\.ts$',
   coverageDirectory: './coverage/',
+  setupFiles: ['./scripts/test-helpers.js'],
   coveragePathIgnorePatterns: [
     'dist',
     '\\+internal/testing',

@@ -1,7 +1,8 @@
 import { Event } from '@marblejs/core';
 import { wait } from '@marblejs/core/dist/+internal/utils';
-import { throwError, fromEvent, forkJoin } from 'rxjs';
+import { throwError, fromEvent, firstValueFrom, concat, Observable, lastValueFrom, ReplaySubject } from 'rxjs';
 import { tap, map, mergeMap, first, toArray, take, mapTo } from 'rxjs/operators';
+import { pipe } from 'fp-ts/lib/function';
 import { webSocketListener } from '../websocket.server.listener';
 import { WsEffect, WsMiddlewareEffect } from '../../effects/websocket.effects.interface';
 import { EventTransformer } from '../../transformer/websocket.transformer.interface';
@@ -9,8 +10,9 @@ import { bootstrapWebSocketClient, bootstrapHttpServer, bootstrapWebSocketServer
 
 describe('WebSocket server', () => {
   describe('JSON transformer', () => {
-    test('echoes back', async done => {
+    test('echoes back', async () => {
       // given
+      const eventSubject = new ReplaySubject<Event>(1);
       const echo$: WsEffect = event$ => event$;
       const event = { type: 'EVENT', payload: 'test' };
       const listener = webSocketListener({ effects: [echo$] });
@@ -20,23 +22,23 @@ describe('WebSocket server', () => {
       const webSocketServer = await bootstrapWebSocketServer({ server: httpServer }, listener);
       const webSocketClient = await bootstrapWebSocketClient(httpServer);
 
+      webSocketClient.once('message', message => eventSubject.next(JSON.parse(message)));
       webSocketClient.send(JSON.stringify(event));
 
       // then
-      webSocketClient.once('message', message => {
-        expect(JSON.parse(message)).toEqual(event);
-        webSocketServer.close();
-        webSocketClient.close();
-        httpServer.close();
-        done();
-      });
+      const result = await firstValueFrom(eventSubject);
+      expect(result).toEqual(event);
+
+      webSocketServer.close();
+      webSocketClient.close();
+      httpServer.close();
     });
 
-    test('echoes back to all clients', async done => {
+    test('echoes back to all clients', async () => {
       // given
+      const eventSubject = new ReplaySubject<Event>(2);
       const echo$: WsEffect = (event$, ctx) => event$.pipe(
-        mergeMap(event => ctx.client.sendBroadcastResponse({ type: event.type, payload: event.payload }).pipe(mapTo(event))),
-      );
+        mergeMap(event => ctx.client.sendBroadcastResponse({ type: event.type, payload: event.payload }).pipe(mapTo(event))));
       const event = { type: 'EVENT', payload: 'test' };
       const listener = webSocketListener({ effects: [echo$] });
 
@@ -46,25 +48,30 @@ describe('WebSocket server', () => {
       const webSocketclient1 = await bootstrapWebSocketClient(httpServer);
       const webSocketclient2 = await bootstrapWebSocketClient(httpServer);
 
+      concat(
+        fromEvent(webSocketclient1, 'message').pipe(first()) as Observable<any>,
+        fromEvent(webSocketclient2, 'message').pipe(first()) as Observable<any>,
+      ).subscribe(message =>
+        eventSubject.next(JSON.parse(message.data))
+      );
+
       webSocketclient1.send(JSON.stringify(event));
 
       // then
-      const client1$ = fromEvent(webSocketclient1, 'message').pipe(first());
-      const client2$ = fromEvent(webSocketclient2, 'message').pipe(first());
+      const result = await lastValueFrom(pipe(eventSubject, take(2), toArray()));
 
-      forkJoin([client1$, client2$]).subscribe(([ message1, message2 ]: [any, any]) => {
-        expect(JSON.parse(message1.data)).toEqual(event);
-        expect(JSON.parse(message2.data)).toEqual(event);
-        webSocketclient1.close();
-        webSocketclient2.close();
-        webSocketServer.close();
-        httpServer.close();
-        done();
-      });
+      expect(result[0]).toEqual(event);
+      expect(result[1]).toEqual(event);
+
+      webSocketclient1.close();
+      webSocketclient2.close();
+      webSocketServer.close();
+      httpServer.close();
     });
 
-    test('echoes back on upgraded http server', async done => {
+    test('echoes back on upgraded http server', async () => {
       // given
+      const eventSubject = new ReplaySubject<Event>(1);
       const echo$: WsEffect = event$ => event$;
       const event = { type: 'EVENT', payload: 'test' };
       const listener = webSocketListener({ effects: [echo$] });
@@ -81,26 +88,28 @@ describe('WebSocket server', () => {
 
       const webSocketClient = await bootstrapWebSocketClient(httpServer);
 
+      webSocketClient.once('message', message => eventSubject.next(JSON.parse(message)));
       webSocketClient.send(JSON.stringify(event));
 
+      const result = await firstValueFrom(eventSubject);
+
       // then
-      webSocketClient.once('message', message => {
-        expect(JSON.parse(message)).toEqual(event);
-        webSocketServer.close();
-        webSocketClient.close();
-        httpServer.close();
-        done();
-      });
+      expect(result).toEqual(event);
+
+      webSocketServer.close();
+      webSocketClient.close();
+      httpServer.close();
     });
 
-    test('passes through middlewares', async done => {
+    test('passes through middlewares', async () => {
       // given
+      const eventSubject = new ReplaySubject<Event>(1);
       const incomingEvent = { type: 'EVENT', payload: 0 };
       const outgoingEvent = { type: 'EVENT', payload: 3 };
       const e$: WsEffect = event$ => event$;
-      const m$: WsMiddlewareEffect = event$ => event$.pipe(
-        tap(event  => event.payload !== undefined && (event.payload as number)++)
-      );
+      const m$: WsMiddlewareEffect = event$ =>
+        event$.pipe(tap(event  => event.payload !== undefined && (event.payload as number)++));
+
       const listener = webSocketListener({
         effects: [e$],
         middlewares: [m$, m$, m$],
@@ -111,20 +120,22 @@ describe('WebSocket server', () => {
       const webSocketServer = await bootstrapWebSocketServer({ server: httpServer }, listener);
       const webSocketClient = await bootstrapWebSocketClient(httpServer);
 
+      webSocketClient.once('message', message => eventSubject.next(JSON.parse(message)));
       webSocketClient.send(JSON.stringify(incomingEvent));
 
+      const result = await firstValueFrom(eventSubject);
+
       // then
-      webSocketClient.once('message', message => {
-        expect(JSON.parse(message)).toEqual(outgoingEvent);
-        webSocketClient.close();
-        webSocketServer.close();
-        httpServer.close();
-        done();
-      });
+      expect(result).toEqual(outgoingEvent);
+
+      webSocketClient.close();
+      webSocketServer.close();
+      httpServer.close();
     });
 
-    test('passes error (thrown by invalid JSON object) through stream multiple times', async done => {
+    test('passes error (thrown by invalid JSON object) through stream multiple times', async () => {
       // given
+      const eventSubject = new ReplaySubject<Event>(2);
       const incomingEvent = '{ some: wrong JSON object }';
       const outgoingEvent = {
         type: 'UNHANDLED_ERROR',
@@ -136,24 +147,24 @@ describe('WebSocket server', () => {
       const webSocketServer = await bootstrapWebSocketServer({ server: httpServer }, webSocketListener());
       const webSocketClient = await bootstrapWebSocketClient(httpServer);
 
+      webSocketClient.on('message', (message: string) => eventSubject.next(JSON.parse(message)));
       webSocketClient.send(incomingEvent);
       webSocketClient.send(incomingEvent);
+
+      const result = await lastValueFrom(pipe(eventSubject, take(2), toArray()));
 
       // then
-      fromEvent(webSocketClient, 'message')
-        .pipe(take(2), toArray())
-        .subscribe((messages: any[]) => {
-          expect(JSON.parse(messages[0].data)).toEqual(outgoingEvent);
-          expect(JSON.parse(messages[1].data)).toEqual(outgoingEvent);
-          webSocketClient.close();
-          webSocketServer.close();
-          httpServer.close();
-          done();
-        });
+      expect(result[0]).toEqual(outgoingEvent);
+      expect(result[1]).toEqual(outgoingEvent);
+
+      webSocketClient.close();
+      webSocketServer.close();
+      httpServer.close();
     });
 
-    test('passes error (thrown by effect) through stream multiple times', async done => {
+    test('passes error (thrown by effect) through stream multiple times', async () => {
       // given
+      const eventSubject = new ReplaySubject<Event>(2);
       const incomingEvent = { type: 'EVENT' };
       const outgoingEvent = { type: 'UNHANDLED_ERROR', error: { name: 'Error', message: 'test_message' } };
 
@@ -163,24 +174,23 @@ describe('WebSocket server', () => {
       const listener = webSocketListener({ effects: [effect$] });
 
       // when
-      const httpSever = await bootstrapHttpServer();
-      const webSocketServer = await bootstrapWebSocketServer({ server: httpSever }, listener);
-      const webSocketClient = await bootstrapWebSocketClient(httpSever);
+      const httpServer = await bootstrapHttpServer();
+      const webSocketServer = await bootstrapWebSocketServer({ server: httpServer }, listener);
+      const webSocketClient = await bootstrapWebSocketClient(httpServer);
 
+      webSocketClient.on('message', (message: string) => eventSubject.next(JSON.parse(message)));
       webSocketClient.send(JSON.stringify(incomingEvent));
       webSocketClient.send(JSON.stringify(incomingEvent));
+
+      const result = await lastValueFrom(pipe(eventSubject, take(2), toArray()));
 
       // then
-      fromEvent(webSocketClient, 'message')
-        .pipe(take(2), toArray())
-        .subscribe((messages: any[]) => {
-          expect(JSON.parse(messages[0].data)).toEqual(outgoingEvent);
-          expect(JSON.parse(messages[1].data)).toEqual(outgoingEvent);
-          webSocketClient.close();
-          webSocketServer.close();
-          httpSever.close();
-          done();
-        });
+      expect(result[0]).toEqual(outgoingEvent);
+      expect(result[1]).toEqual(outgoingEvent);
+
+      webSocketClient.close();
+      webSocketServer.close();
+      httpServer.close();
     });
 
     test('server doesn\'t try to push an event to the client that is already closing', async () => {
@@ -208,8 +218,9 @@ describe('WebSocket server', () => {
   });
 
   describe('binary transformer', () => {
-    test('operates over binary events', async done => {
+    test('operates over binary events', async () => {
       // given
+      const eventSubject = new ReplaySubject<string>(1);
       const message = 'hello world';
 
       const eventTransformer: EventTransformer<Buffer> = {
@@ -227,16 +238,16 @@ describe('WebSocket server', () => {
       const webSocketServer = await bootstrapWebSocketServer({ server: httpServer }, listener);
       const webSocketClient = await bootstrapWebSocketClient(httpServer);
 
+      webSocketClient.on('message', (message: Buffer) => eventSubject.next(message.toString('utf8')));
       webSocketClient.send(Buffer.from(message));
+      const result = await firstValueFrom(eventSubject);
 
       // then
-      webSocketClient.once('message', (incomingMessage: Buffer) => {
-        expect(incomingMessage.toString('utf8')).toEqual(message);
-        webSocketClient.close();
-        webSocketServer.close();
-        httpServer.close();
-        done();
-      });
+      expect(result).toEqual(message);
+
+      webSocketClient.close();
+      webSocketServer.close();
+      httpServer.close();
     });
   });
 });

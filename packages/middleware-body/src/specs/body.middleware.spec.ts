@@ -10,8 +10,8 @@ describe('bodyParser$ middleware', () => {
   const ctx = createMockEffectContext();
 
   beforeEach(() => {
-    spyOn(console, 'log').and.stub();
-    spyOn(console, 'error').and.stub();
+    jest.spyOn(console, 'log').mockImplementation(jest.fn());
+    jest.spyOn(console, 'error').mockImplementation(jest.fn());
   });
 
   test('passes through non POST || PATCH || PUT requests', async () => {

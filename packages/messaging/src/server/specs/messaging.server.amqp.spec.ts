@@ -95,9 +95,10 @@ describe('messagingServer::AMQP', () => {
     }));
   });
 
-  test('handles non-blocking communication and routes the event back to origin channel', async done => {
+  test('handles non-blocking communication and routes the event back to origin channel', async () => {
     // given
     const options = Util.createAmqpOptions();
+    const { output$, output } = Util.prepareTestOutput({ take: 1 });
 
     const increment$: MsgEffect = event$ =>
       event$.pipe(
@@ -109,23 +110,24 @@ describe('messagingServer::AMQP', () => {
         ))
       );
 
-    // then
-    const output$ = Util.assertOutputEvent({
-      type: 'INCREMENT_RESULT',
-      payload: 2,
-      metadata: expect.objectContaining({ replyTo: options.queue, correlationId: expect.any(String) }),
-    })(done);
-
-    // when
     microservice = await Util.createAmqpMicroservice(options)({ effects: [increment$], output$ });
     client = await Util.createAmqpClient(options);
 
+    // when
     await client.emit({ type: 'INCREMENT', payload: 1 });
+    const result = await output;
+
+    // then
+    expect(result).toEqual([{
+      type: 'INCREMENT_RESULT',
+      payload: 2,
+      metadata: expect.objectContaining({ replyTo: options.queue, correlationId: expect.any(String) }),
+    }]);
   });
 
-
-  test('acks subssequent events and doesn\'t block the consumer', async done => {
+  test('acks subssequent events and doesn\'t block the consumer', async () => {
     // given
+    const { output$, output } = Util.prepareTestOutput({ take: 2 });
     const optionsMicroservice = Util.createAmqpOptions({ expectAck: true });
     const optionsClient = Util.createAmqpOptions({ queue: optionsMicroservice.queue });
 
@@ -137,22 +139,29 @@ describe('messagingServer::AMQP', () => {
         map(event => ({ type: 'ACK_RESPONSE', payload: event.payload })),
       );
 
-    // then
-    const output$ = Util.assertOutputEvent(
-      { type: 'ACK_RESPONSE' },
-      { type: 'ACK_RESPONSE' },
-    )(done);
-
-    // when
     microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ effects: [ack$], output$ });
     client = await Util.createAmqpClient(optionsClient);
 
+    // when
     await client.emit({ type: 'ACK', payload: 1 });
     await client.emit({ type: 'ACK', payload: 2 });
+    const result = await output;
+
+    // then
+    expect(result).toEqual([{
+      type: 'ACK_RESPONSE',
+      payload: 1,
+      metadata: expect.anything(),
+    }, {
+      type: 'ACK_RESPONSE',
+      payload: 2,
+      metadata: expect.anything(),
+    }]);
   });
 
-  test('rejects unhandled event events and doesn\'t block the consumer', async done => {
+  test('rejects unhandled event events and doesn\'t block the consumer', async () => {
     // given
+    const { output$, output } = Util.prepareTestOutput({ take: 1 });
     const optionsMicroservice = Util.createAmqpOptions({ expectAck: true, timeout: 100 });
     const optionsClient = Util.createAmqpOptions({ queue: optionsMicroservice.queue });
 
@@ -164,21 +173,25 @@ describe('messagingServer::AMQP', () => {
         map(event => ({ type: 'ACK_RESPONSE', payload: event.payload })),
       );
 
-    // then
-    const output$ = Util.assertOutputEvent(
-      { type: 'ACK_RESPONSE' },
-    )(done);
-
-    // when
     microservice = await Util.createAmqpMicroservice(optionsMicroservice)({ effects: [ack$], output$ });
     client = await Util.createAmqpClient(optionsClient);
 
+    // when
     await client.emit({ type: 'TEST' });
     await client.emit({ type: 'ACK', payload: 1 });
+    const result = await output;
+
+    // then
+    expect(result).toEqual([{
+      type: 'ACK_RESPONSE',
+      payload: 1,
+      metadata: expect.anything(),
+    }]);
   });
 
-  test('chains events by sending back to origin channel when no reply is defined', async done => {
+  test('chains events by sending back to origin channel when no reply is defined', async () => {
     // given
+    const { output$, output } = Util.prepareTestOutput({ take: 2 });
     const options = Util.createAmqpOptions();
 
     const test1$: MsgEffect = event$ =>
@@ -195,21 +208,26 @@ describe('messagingServer::AMQP', () => {
         mapTo({ type: 'TEST_3' }),
       );
 
-    // then
-    const output$ = Util.assertOutputEvent(
-      { type: 'TEST_2' },
-      { type: 'TEST_3' },
-    )(done);
-
-    // when
     microservice = await Util.createAmqpMicroservice(options)({ effects: [test1$, test2$], output$ });
     client = await Util.createAmqpClient(options);
 
+    // when
     await client.emit({ type: 'TEST_1' });
+    const result = await output;
+
+    // then
+    expect(result).toEqual([{
+      type: 'TEST_2',
+      metadata: expect.anything(),
+    }, {
+      type: 'TEST_3',
+      metadata: expect.anything(),
+    }]);
   });
 
-  test('sends outgoing event to different channel and doesn\'t cause infinite loop', async done => {
+  test('sends outgoing event to different channel and doesn\'t cause infinite loop', async () => {
     // given
+    const { output$, output } = Util.prepareTestOutput({ take: 1 });
     const options = Util.createAmqpOptions();
     const replyTo = createUuid();
 
@@ -219,21 +237,23 @@ describe('messagingServer::AMQP', () => {
         map(reply(replyTo)),
       );
 
-    // then
-    const output$ = Util.assertOutputEvent({
-      type: 'TEST',
-      metadata: expect.objectContaining({ replyTo }),
-    })(done);
-
-    // when
     microservice = await Util.createAmqpMicroservice(options)({ effects: [test$], output$ });
     client = await Util.createAmqpClient(options);
 
+    // when
     await client.emit({ type: 'TEST' });
+    const result = await output;
+
+    // then
+    expect(result).toEqual([{
+      type: 'TEST',
+      metadata: expect.objectContaining({ replyTo }),
+    }]);
   });
 
-  test('consumes pending messages after startup', async done => {
+  test('consumes pending messages after startup', async () => {
     // given
+    const { output$, output } = Util.prepareTestOutput({ take: 1 });
     const options = Util.createAmqpOptions();
     const replyTo = createUuid();
 
@@ -243,17 +263,19 @@ describe('messagingServer::AMQP', () => {
         mapTo(reply(replyTo)({ type: 'TEST_RESULT' })),
       );
 
-    // then
-    const output$ = Util.assertOutputEvent({
-      type: 'TEST_RESULT',
-    })(done);
-
     // when (order matters)
     client = await Util.createAmqpClient(options);
 
     await client.emit({ type: 'TEST' });
 
     microservice = await Util.createAmqpMicroservice(options)({ effects: [test$], output$ });
+    const result = await output;
+
+    // then
+    expect(result).toEqual([{
+      type: 'TEST_RESULT',
+      metadata: expect.anything(),
+    }]);
   });
 
   test('microservice connection exposes raw configuration object', async () => {

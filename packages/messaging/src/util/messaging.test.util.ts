@@ -1,9 +1,9 @@
 import { v4 as uuid } from 'uuid';
 import { bindTo, Event, LoggerToken, mockLogger, contextFactory, Context, bindEagerlyTo, lookup, useContext } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { merge } from 'rxjs';
-import { tap, catchError, take, toArray, filter, ignoreElements, map } from 'rxjs/operators';
+import { pipe } from 'fp-ts/lib/function';
+import { lastValueFrom, ReplaySubject } from 'rxjs';
+import { tap, take, toArray, map, delay } from 'rxjs/operators';
 import { createMicroservice } from '../server/messaging.server';
 import { TransportMessage, Transport } from '../transport/transport.interface';
 import { MsgOutputEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
@@ -74,31 +74,23 @@ export const createTestContext = (): Promise<Context> => contextFactory(
   bindTo(LoggerToken)(mockLogger),
 );
 
-export const assertOutputEvent = (...outEvent: Event[]) => (done: jest.DoneCallback): MsgOutputEffect => event$ => {
-  const isAssertionEvent = (event: Event) =>
-    outEvent.map(e => e.type).includes(event.type);
+export const prepareTestOutput = (opts: { take: number} ) => {
+  const outputSubject = new ReplaySubject<Event>(opts.take);
 
-  return merge(
-    event$.pipe(
-      filter(isAssertionEvent),
-      take(outEvent.length),
-      toArray(),
-      tap(events => events.forEach((event, i) => expect(event).toEqual(expect.objectContaining(outEvent[i])))),
-      tap(teardown(done)),
-      catchError(fail),
-      ignoreElements(),
-    ),
-    event$,
+  const output$: MsgOutputEffect = event$ => event$.pipe(
+    tap(event => outputSubject.next(event)),
   );
-};
 
-export const assertError = (error: any) => (done: jest.DoneCallback): MsgErrorEffect => error$ =>
-  error$.pipe(
+  const error$: MsgErrorEffect = error$ => error$.pipe(
     map(error => ({ type: 'UNHANDLED_ERROR', error: { name: error.name, message: error.message }})),
-    tap(event => expect(event.error).toEqual(error)),
-    tap(teardown(done)),
-    catchError(fail),
+    tap(event => outputSubject.next(event)),
   );
 
-export const teardown = (done: jest.DoneCallback) => () =>
-  setTimeout(done, 1000);
+  const output = lastValueFrom(outputSubject.pipe(
+    delay(100),
+    take(opts.take),
+    toArray(),
+  ));
+
+  return { output, output$, error$ };
+};
