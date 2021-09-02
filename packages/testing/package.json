@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/testing",
-  "version": "4.0.0-rc.1",
+  "version": "4.0.0-rc.2",
   "description": "Testing module for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -38,10 +38,10 @@
     "rxjs": "^7.1.0"
   },
   "devDependencies": {
-    "@marblejs/core": "^4.0.0-rc.1",
-    "@marblejs/http": "^4.0.0-rc.1",
-    "@marblejs/messaging": "^4.0.0-rc.1",
-    "@marblejs/websockets": "^4.0.0-rc.1"
+    "@marblejs/core": "^4.0.0-rc.2",
+    "@marblejs/http": "^4.0.0-rc.2",
+    "@marblejs/messaging": "^4.0.0-rc.2",
+    "@marblejs/websockets": "^4.0.0-rc.2"
   },
   "publishConfig": {
     "access": "public"
