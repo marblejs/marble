@@ -11,7 +11,7 @@ import { HttpError } from '../../error/http.error.model';
 import { HttpStatus } from '../../http.interface';
 
 describe('#resolveRouting', () => {
-  test('resolves routes inside collection', async done => {
+  test('resolves routes inside collection', async () => {
     // given
     const ctx = createMockEffectContext();
     const response = createHttpResponse();
@@ -53,21 +53,24 @@ describe('#resolveRouting', () => {
     const { resolve, outputSubject } = resolveRouting({ routing, ctx });
 
     // then
-    outputSubject.pipe(take(4), toArray()).subscribe(
-      result => {
-        expect(result[0]).toEqual({ body: 'test_1', request: req1 });
-        expect(result[1]).toEqual({ body: 'test_2', request: req2 });
-        expect(result[2]).toEqual({ body: 'test_3', request: req3 });
-        expect(result[3]).toEqual({ body: 'test_4', request: req4 });
-        done();
-      },
-    );
+    const resultPromise = lastValueFrom(pipe(
+      outputSubject,
+      take(4),
+      toArray(),
+    ));
 
     resolve(req1);
     resolve(req2);
     resolve(req3);
     resolve(req4);
     resolve(req5);
+
+    const result = await resultPromise;
+
+    expect(result[0]).toEqual({ body: 'test_1', request: req1 });
+    expect(result[1]).toEqual({ body: 'test_2', request: req2 });
+    expect(result[2]).toEqual({ body: 'test_3', request: req3 });
+    expect(result[3]).toEqual({ body: 'test_4', request: req4 });
   });
 
   test('resolves `HttpEffect` only once', async () => {

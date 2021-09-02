@@ -1,23 +1,22 @@
 import * as fs from 'fs';
 import { readFile } from './fileReader.helper';
 
-type ReadFileStup = (_: any, callback: (error?: any, data?: any) => void) => unknown;
-
 describe('File reader', () => {
   beforeEach(() => {
-    spyOn(console, 'log').and.stub();
-    spyOn(console, 'info').and.stub();
-    spyOn(console, 'error').and.stub();
+    jest.spyOn(console, 'log').mockImplementation(jest.fn());
+    jest.spyOn(console, 'info').mockImplementation(jest.fn());
+    jest.spyOn(console, 'error').mockImplementation(jest.fn());
   });
 
   test('#readFile returns error when not found', done => {
     // given
     const expectedError = { code: 'ENOENT', message: 'ENOENT, no such file or directory' };
+    const readFileStub = jest.fn((_, callback) => callback(expectedError));
+
+    jest.spyOn(fs, 'readFile').mockImplementation(readFileStub);
 
     // when
-    const readFileStub: ReadFileStup = (_, callback) => callback(expectedError);
     const subscription = readFile('test/url')('index.html');
-    spyOn(fs, 'readFile').and.callFake(readFileStub);
 
     // then
     subscription.subscribe({
@@ -34,11 +33,12 @@ describe('File reader', () => {
     // given
     const mockedData = 'test_data';
     const mockedBuffer = Buffer.from(mockedData);
+    const readFileStub = jest.fn((_, callback) => callback(undefined, mockedBuffer));
+
+    jest.spyOn(fs, 'readFile').mockImplementation(readFileStub);
 
     // when
-    const readFileStub: ReadFileStup = (_, callback) => callback(undefined, mockedBuffer);
     const subscription = readFile('test/url')('index.html');
-    spyOn(fs, 'readFile').and.callFake(readFileStub);
 
     // then
     subscription.subscribe({

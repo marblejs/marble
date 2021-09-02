@@ -2,10 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import { EventEmitter } from 'events';
-import { forkJoin } from 'rxjs';
+import { forkJoin, lastValueFrom, ReplaySubject } from 'rxjs';
 import { tap, filter, take } from 'rxjs/operators';
 import { pipe, constant } from 'fp-ts/lib/function';
-import { lookup, bindTo, useContext, createContextToken } from '@marblejs/core';
+import { lookup, bindTo, useContext, createContextToken, Event } from '@marblejs/core';
 import { HttpServer } from '../http.interface';
 import { HttpServerClientToken } from './internal-dependencies/httpServerClient.reader';
 import { httpListener } from './http.server.listener';
@@ -123,27 +123,17 @@ describe('#createServer', () => {
     expect(boundDependency).toEqual(someDependency);
   });
 
-  test(`emits server events`, async done => {
+  test(`emits server events`, async () => {
+    // given
+    const eventSubject = new ReplaySubject<Event>(9);
     const app = await createServer({
       listener: httpListener(),
-      event$: event$ => pipe(
-        forkJoin([
-          event$.pipe(filter(isErrorEvent), take(1)),
-          event$.pipe(filter(isClientErrorEvent), take(1)),
-          event$.pipe(filter(isCloseEvent), take(1)),
-          event$.pipe(filter(isConnectEvent), take(1)),
-          event$.pipe(filter(isConnectionEvent), take(1)),
-          event$.pipe(filter(isListeningEvent), take(1)),
-          event$.pipe(filter(isUpgradeEvent), take(1)),
-          event$.pipe(filter(isCheckContinueEvent), take(1)),
-          event$.pipe(filter(isCheckExpectationEvent), take(1)),
-        ]),
-        tap(() => done()),
-      ),
+      event$: event$ => event$.pipe(tap(event => eventSubject.next(event))),
     });
 
     server = await app();
 
+    // when
     server.emit(ServerEventType.ERROR, new Error('test_error'));
     server.emit(ServerEventType.CLIENT_ERROR);
     server.emit(ServerEventType.CONNECT);
@@ -153,5 +143,21 @@ describe('#createServer', () => {
     server.emit(ServerEventType.CHECK_CONTINUE);
     server.emit(ServerEventType.CHECK_EXPECTATION);
     server.emit(ServerEventType.CLOSE);
+
+    // then
+    await pipe(
+      forkJoin([
+        eventSubject.pipe(filter(isErrorEvent), take(1)),
+        eventSubject.pipe(filter(isClientErrorEvent), take(1)),
+        eventSubject.pipe(filter(isCloseEvent), take(1)),
+        eventSubject.pipe(filter(isConnectEvent), take(1)),
+        eventSubject.pipe(filter(isConnectionEvent), take(1)),
+        eventSubject.pipe(filter(isListeningEvent), take(1)),
+        eventSubject.pipe(filter(isUpgradeEvent), take(1)),
+        eventSubject.pipe(filter(isCheckContinueEvent), take(1)),
+        eventSubject.pipe(filter(isCheckExpectationEvent), take(1)),
+      ]),
+      lastValueFrom,
+    );
   });
 });

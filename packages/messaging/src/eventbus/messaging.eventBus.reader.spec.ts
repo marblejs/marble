@@ -1,8 +1,8 @@
 import { Event, matchEvent, combineEffects, act, EventError, contextFactory, bindEagerlyTo, lookup, useContext } from '@marblejs/core';
 import { wait, NamedError } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
-import { throwError, of, firstValueFrom } from 'rxjs';
-import { delay, map, tap, ignoreElements } from 'rxjs/operators';
+import { throwError, of, firstValueFrom, lastValueFrom, ReplaySubject } from 'rxjs';
+import { delay, map, tap, ignoreElements, take } from 'rxjs/operators';
 import { flow, pipe } from 'fp-ts/lib/function';
 import { MsgEffect } from '../effects/messaging.effects.interface';
 import { reply } from '../reply/reply';
@@ -114,26 +114,31 @@ describe('#eventBus', () => {
     await eventBusClient.close();
   });
 
-  test('handles published event', async done => {
+  test('handles published event', async () => {
+    // given
+    const eventSubject = new ReplaySubject<Event>(1);
+
     const foo$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('TEST'),
-        tap(async event => {
-          expect(event.type).toEqual('TEST');
-          expect(event.payload).toEqual(1);
-
-          await wait();
-          await eventBus.close();
-          await eventBusClient.close();
-          done();
-        }),
+        tap(event => eventSubject.next(event)),
         ignoreElements(),
       );
 
     const [eventBus, eventBusClient] = await createEventBusTestBed({ effects: [foo$] });
     const event: Event = { type: 'TEST', payload: 1 };
 
+    // when
     await eventBusClient.emit(event);
+    const result = await lastValueFrom(eventSubject.pipe(take(1)));
+
+    // then
+    expect(result.type).toEqual('TEST');
+    expect(result.payload).toEqual(1);
+
+    await wait();
+    await eventBus.close();
+    await eventBusClient.close();
   });
 
   test('handles RPC event error with direct mapping', async () => {
