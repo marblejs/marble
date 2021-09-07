@@ -1,3 +1,5 @@
+import { isString } from './string.util';
+
 export class NamedError extends Error {
   constructor(public name: string, message: string) {
     super(message);
@@ -19,3 +21,10 @@ export const encodeError = (error: any) =>
     }, Object.create(null));
 
 export const throwException = (error: any) => { throw error; };
+
+export const getErrorMessage = (error: unknown): string =>
+  error instanceof Error
+    ? error.message
+    : isString(error)
+      ? error
+      : JSON.stringify(error);
