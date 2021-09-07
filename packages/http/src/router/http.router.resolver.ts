@@ -2,7 +2,7 @@ import { Observable, Subject, fromEvent, merge } from 'rxjs';
 import { takeUntil, share, take, mergeMap, map, catchError } from 'rxjs/operators';
 import { flow, pipe } from 'fp-ts/lib/function';
 import { EffectContext, useContext, LoggerToken, LoggerTag, LoggerLevel } from '@marblejs/core';
-import { throwException } from '@marblejs/core/dist/+internal/utils';
+import { throwException, getErrorMessage } from '@marblejs/core/dist/+internal/utils';
 import { HttpServer, HttpRequest, HttpStatus, WithHttpRequest } from '../http.interface';
 import { defaultError$ } from '../error/http.error.effect';
 import { HttpEffectResponse, HttpErrorEffect, HttpOutputEffect } from '../effects/http.effects.interface';
@@ -13,7 +13,6 @@ import {
   isHttpRequestError,
   HttpError,
   isURIError,
-  getErrorMessage
 } from '../error/http.error.model';
 import { HttpRequestBusToken } from '../server/internal-dependencies/httpRequestBus.reader';
 import { requestMetadata$ } from '../effects/http.requestMetadata.effect';

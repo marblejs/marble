@@ -1,6 +1,6 @@
 import * as chalk from 'chalk';
 import { CoreError, coreErrorFactory } from '@marblejs/core';
-import { isString, NamedError } from '@marblejs/core/dist/+internal/utils';
+import { NamedError } from '@marblejs/core/dist/+internal/utils';
 import { HttpStatus, HttpRequest } from '../http.interface';
 import { HttpEffectResponse } from '../effects/http.effects.interface';
 
@@ -53,10 +53,3 @@ export const errorNotBoundToRequestErrorFactory = (error: Error): CoreError => {
   const message = `An effect or middleware thrown an error ${chalk.red(`"${error.message}"`)} without bound request.`;
   return coreErrorFactory(message, { printStacktrace: false });
 };
-
-export const getErrorMessage = (error: unknown): string =>
-  error instanceof Error
-    ? error.message
-    : isString(error)
-      ? error
-      : JSON.stringify(error);
