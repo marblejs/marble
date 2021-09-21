@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/messaging",
-  "version": "4.0.0-rc.2",
+  "version": "4.0.0-rc.3",
   "description": "Messaging module for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -38,8 +38,8 @@
     "chalk": "~2.4.1"
   },
   "devDependencies": {
-    "@marblejs/core": "^4.0.0-rc.2",
-    "@marblejs/middleware-io": "^4.0.0-rc.2",
+    "@marblejs/core": "^4.0.0-rc.3",
+    "@marblejs/middleware-io": "^4.0.0-rc.3",
     "@types/amqp-connection-manager": "^2.0.4",
     "@types/amqplib": "^0.5.11",
     "@types/redis": "^2.8.14",
