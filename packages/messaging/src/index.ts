@@ -1,6 +1,5 @@
 // client
 export * from './client/messaging.client';
-export * from './client/messaging.client.interface';
 
 // transport
 export * from './transport/transport.interface';

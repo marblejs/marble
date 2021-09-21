@@ -8,8 +8,8 @@ import { MsgEffect } from '../effects/messaging.effects.interface';
 import { reply } from '../reply/reply';
 import { messagingListener } from '../server/messaging.server.listener';
 import { createEventBusTestBed } from '../util/messaging.test.util';
-import { EventBusToken, eventBus } from './messaging.eventBus.reader';
-import { EventBusClientToken, eventBusClient } from './messaging.eventBusClient.reader';
+import { EventBusToken, EventBus } from './messaging.eventBus.reader';
+import { EventBusClientToken, EventBusClient } from './messaging.eventBusClient.reader';
 
 describe('#eventBus', () => {
   test('handles RPC event', async () => {
@@ -227,8 +227,8 @@ describe('#eventBus', () => {
 
     const ask = pipe(
       await contextFactory(
-        bindEagerlyTo(EventBusToken)(eventBus({ listener, timeout })),
-        bindEagerlyTo(EventBusClientToken)(eventBusClient),
+        bindEagerlyTo(EventBusToken)(EventBus({ listener, timeout })),
+        bindEagerlyTo(EventBusClientToken)(EventBusClient),
       ),
       lookup,
     );
@@ -250,8 +250,8 @@ describe('#eventBus', () => {
 
   test('doesn\'t fail if event bus client is registered before main EventBus reader', async () => {
     const context = contextFactory(
-      bindEagerlyTo(EventBusClientToken)(eventBusClient),
-      bindEagerlyTo(EventBusToken)(eventBus({ listener: messagingListener() })),
+      bindEagerlyTo(EventBusClientToken)(EventBusClient),
+      bindEagerlyTo(EventBusToken)(EventBus({ listener: messagingListener() })),
     );
 
     await expect(context).resolves.toBeDefined();

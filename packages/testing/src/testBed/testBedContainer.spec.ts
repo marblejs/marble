@@ -1,6 +1,6 @@
 import { bindEagerlyTo, useContext, bindTo, createContextToken } from '@marblejs/core';
 import { httpListener } from '@marblejs/http';
-import { EventBusClientToken, eventBusClient, EventBusToken, eventBus, messagingListener } from '@marblejs/messaging';
+import { EventBusClientToken, EventBusClient, EventBusToken, EventBus, messagingListener } from '@marblejs/messaging';
 import { createHttpTestBed } from './http/http.testBed';
 import { createTestBedSetup } from './testBedSetup';
 import { DependencyCleanup } from './testBedContainer.interface';
@@ -13,8 +13,8 @@ describe('#createTestBedSetup cleanup container', () => {
   });
 
   const dependencies = [
-    bindEagerlyTo(EventBusToken)(eventBus({ listener: messagingListener() })),
-    bindEagerlyTo(EventBusClientToken)(eventBusClient),
+    bindEagerlyTo(EventBusToken)(EventBus({ listener: messagingListener() })),
+    bindEagerlyTo(EventBusClientToken)(EventBusClient),
   ];
 
   const customDependencyToken = createContextToken<CustomDependency>();

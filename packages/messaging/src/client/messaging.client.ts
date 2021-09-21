@@ -19,10 +19,24 @@ import {
 import { isNamedError, NamedError, throwException } from '@marblejs/core/dist/+internal/utils';
 import { from, Observable, EMPTY, throwError, of, defer } from 'rxjs';
 import { mergeMap, take, map, timeout } from 'rxjs/operators';
-import { TransportMessage, DEFAULT_TIMEOUT } from '../transport/transport.interface';
+import { TransportMessage, DEFAULT_TIMEOUT, TransportMessageTransformer, TransportStrategy } from '../transport/transport.interface';
 import { provideTransportLayer } from '../transport/transport.provider';
 import { jsonTransformer } from '../transport/transport.transformer';
-import { MessagingClient, MessagingClientConfig } from './messaging.client.interface';
+
+export interface MessagingClient {
+  send: <T extends Event = Event, U extends Event = Event>(data: U) => Observable<T>;
+  emit: <T extends Event = Event>(data: T) => Promise<void>;
+  close: () => Promise<void>;
+}
+
+type ConfigurationBase =  {
+  msgTransformer?: TransportMessageTransformer;
+}
+
+export type MessagingClientConfig =
+  & TransportStrategy
+  & ConfigurationBase
+  ;
 
 const getHttpModule: T.Task<O.Some<typeof import('@marblejs/http')> | O.None> =
   pipe(
@@ -30,7 +44,12 @@ const getHttpModule: T.Task<O.Some<typeof import('@marblejs/http')> | O.None> =
     TE.map(O.some),
     TE.getOrElseW(constant(T.of(O.none))));
 
-export const messagingClient = (config: MessagingClientConfig) => {
+/**
+ * @param config `MessagingClientConfig`
+ * @returns asynchronous reader of `MessagingClient`
+ * @since v3.0
+ */
+export const MessagingClient = (config: MessagingClientConfig) => {
   const {
     transport,
     options,
@@ -114,3 +133,11 @@ export const messagingClient = (config: MessagingClientConfig) => {
       };
     }));
 };
+
+/**
+ * An alias for `MessagingClient`
+ *
+ * @deprecated since version `v4.0`. Use `MessagingClient` instead.
+ * Will be removed in version `v5.0`
+ */
+export const messagingClient = MessagingClient;
