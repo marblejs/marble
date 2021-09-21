@@ -1,6 +1,6 @@
 import { logger$ } from '@marblejs/middleware-logger';
 import { requestValidator$, t } from '@marblejs/middleware-io';
-import { messagingClient, MessagingClient, Transport } from '@marblejs/messaging';
+import { MessagingClient, Transport } from '@marblejs/messaging';
 import { createContextToken, useContext, bindEagerlyTo, ContextToken } from '@marblejs/core';
 import { r, createServer, combineRoutes, httpListener } from '@marblejs/http';
 import { isTestEnv, getPortEnv } from '@marblejs/core/dist/+internal/utils';
@@ -12,7 +12,7 @@ import { map, mergeMap } from 'rxjs/operators';
 const AmqpClientToken = createContextToken<MessagingClient>('AmqpMessagingClient');
 const RedisClientToken = createContextToken<MessagingClient>('RedisMessagingClient');
 
-const amqpClient = messagingClient({
+const AmqpClient = MessagingClient({
   transport: Transport.AMQP,
   options: {
     host: 'amqp://localhost:5672',
@@ -22,7 +22,7 @@ const amqpClient = messagingClient({
   },
 });
 
-const redisClient = messagingClient({
+const RedisClient = MessagingClient({
   transport: Transport.REDIS,
   options: {
     host: 'redis://127.0.0.1:6379',
@@ -67,8 +67,8 @@ const redis$ = combineRoutes('/redis', [
 ]);
 
 export const dependencies = [
-  bindEagerlyTo(AmqpClientToken)(amqpClient),
-  bindEagerlyTo(RedisClientToken)(redisClient),
+  bindEagerlyTo(AmqpClientToken)(AmqpClient),
+  bindEagerlyTo(RedisClientToken)(RedisClient),
 ];
 
 export const listener = httpListener({
