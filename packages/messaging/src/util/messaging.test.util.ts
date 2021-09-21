@@ -8,22 +8,24 @@ import { createMicroservice } from '../server/messaging.server';
 import { TransportMessage, Transport } from '../transport/transport.interface';
 import { MsgOutputEffect, MsgErrorEffect } from '../effects/messaging.effects.interface';
 import { messagingListener, MessagingListenerConfig } from '../server/messaging.server.listener';
-import { EventBusToken, eventBus } from '../eventbus/messaging.eventBus.reader';
-import { EventBusClientToken, eventBusClient } from '../eventbus/messaging.eventBusClient.reader';
-import { messagingClient } from '../client/messaging.client';
+import { EventBusToken, EventBus } from '../eventbus/messaging.eventBus.reader';
+import { EventBusClientToken, EventBusClient } from '../eventbus/messaging.eventBusClient.reader';
+import { MessagingClient } from '../client/messaging.client';
 import { AmqpStrategyOptions } from '../transport/strategies/amqp.strategy.interface';
 import { RedisStrategyOptions } from '../transport/strategies/redis.strategy.interface';
-import { MessagingClient } from '../client/messaging.client.interface';
 
 // event bus
 export const createEventBusTestBed = async (config: MessagingListenerConfig) =>
   pipe(
     await contextFactory(
-      bindEagerlyTo(EventBusToken)(eventBus({ listener: messagingListener(config) })),
-      bindEagerlyTo(EventBusClientToken)(eventBusClient),
+      bindEagerlyTo(EventBusToken)(EventBus({ listener: messagingListener(config) })),
+      bindEagerlyTo(EventBusClientToken)(EventBusClient),
     ),
     lookup,
-    ask => ([useContext(EventBusToken)(ask), useContext(EventBusClientToken)(ask)] as const),
+    ask => ([
+      useContext(EventBusToken)(ask),
+      useContext(EventBusClientToken)(ask),
+    ] as const),
   );
 
 // microservice
@@ -35,7 +37,7 @@ export const createTestMicroservice = (transport: any, options: any) => async (c
 export const createTestClient = (transport: any, options: any): Promise<MessagingClient>  =>
   pipe(
     createTestContext(),
-    async ctx => messagingClient({ transport, options: { ...options, expectAck: false } })(await ctx),
+    async ctx => MessagingClient({ transport, options: { ...options, expectAck: false } })(await ctx),
   );
 
 export const createAmqpClient = (options: AmqpStrategyOptions) =>

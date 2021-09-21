@@ -10,11 +10,10 @@ import {
   EventError,
 } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal/testing';
-import { constUndefined } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { io } from 'fp-ts/lib/IO';
+import { constUndefined, pipe } from 'fp-ts/lib/function';
 import { messagingListener } from '../server/messaging.server.listener';
-import { eventBus, EventBus } from '../eventbus/messaging.eventBus.reader';
+import { EventBus } from '../eventbus/messaging.eventBus.reader';
 import { inputLogger$, outputLogger$, exceptionLogger$ } from './messaging.eventLogger.middleware';
 
 describe('inputLogger$', () => {
@@ -26,7 +25,7 @@ describe('inputLogger$', () => {
 
   const provideEventBus = async (logger: any) => pipe(
     await contextFactory(bindEagerlyTo(LoggerToken)(createReader(() => logger))),
-    eventBus({ listener: messagingListener() }));
+    EventBus({ listener: messagingListener() }));
 
   const provideEffectContextForLogger = async (logger: any) => pipe(
     await provideEventBus(logger),

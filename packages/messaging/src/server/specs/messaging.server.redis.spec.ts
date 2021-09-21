@@ -6,10 +6,10 @@ import { map, tap, delay, mapTo } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
 import { TransportLayerConnection } from '../../transport/transport.interface';
 import { MsgEffect } from '../../effects/messaging.effects.interface';
-import { MessagingClient } from '../../client/messaging.client.interface';
 import { reply } from '../../reply/reply';
 import * as Util from '../../util/messaging.test.util';
 import { ackEvent } from '../../ack/ack';
+import { MessagingClient } from '../../client/messaging.client';
 
 describe('messagingServer::Redis', () => {
   let client: MessagingClient;
