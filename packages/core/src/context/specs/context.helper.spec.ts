@@ -1,9 +1,11 @@
+import * as R from 'fp-ts/lib/Reader';
 import * as O from 'fp-ts/lib/Option';
 import { size } from 'fp-ts/lib/Map';
+import { pipe } from 'fp-ts/lib/function';
 import { createContextToken } from '../context.token.factory';
 import { createReader } from '../context.reader.factory';
 import { contextFactory, constructContext } from '../context.helper';
-import { bindTo, lookup, DerivedContextToken, bindEagerlyTo, createContext } from '../context';
+import { bindTo, lookup, DerivedContextToken, bindEagerlyTo, createContext, Context } from '../context';
 import { LoggerToken } from '../../logger';
 
 describe('#contextFactory', () => {
@@ -25,6 +27,34 @@ describe('#contextFactory', () => {
     expect(lookup(context)(LoggerToken)).toEqual(O.some(expect.anything()));
     expect(lookup(context)(token1)).toEqual(O.some('test_1'));
     expect(lookup(context)(token2)).toEqual(O.some('test_2'));
+  });
+
+  test('resolves async dependencies', async () => {
+    // given
+    const token1 = createContextToken('token_1');
+    const token2 = createContextToken('token_2');
+    const token3 = createContextToken('token_3');
+
+    // 1. "raw" Reader
+    const dependency1 = pipe(R.ask<Context>(), R.map(async _ => token1.name));
+
+    // 2. createReader
+    const dependency2 = createReader(async _ => await Promise.resolve(token2.name));
+
+    // 3. async factory function
+    const dependency3 = async () => token3.name;
+
+    // when
+    const context = await contextFactory(
+      bindEagerlyTo(token1)(dependency1),
+      bindEagerlyTo(token2)(dependency2),
+      bindEagerlyTo(token3)(dependency3),
+    );
+
+    // then
+    expect(lookup(context)(token1)).toEqual(O.some(token1.name));
+    expect(lookup(context)(token2)).toEqual(O.some(token2.name));
+    expect(lookup(context)(token3)).toEqual(O.some(token3.name));
   });
 });
 
