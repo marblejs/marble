@@ -17,6 +17,7 @@
     "test:integration": "SCOPE=integration ./scripts/run-tests.sh",
     "clean": "lerna run clean && rimraf packages/*/tsconfig.tsbuildinfo",
     "purge": "yarn clean && rimraf node_modules",
+    "prepare": "husky install",
     "prepublishOnly": "yarn clean && yarn build && yarn test",
     "publish": "lerna publish --no-push --force-publish=*",
     "publish:canary:patch": "lerna publish --no-push --dist-tag dev --canary patch --preid dev --force-publish=* --ignore-scripts",
@@ -24,12 +25,6 @@
     "publish:canary:major": "lerna publish --no-push --dist-tag next --canary major --preid next --force-publish=* --ignore-scripts",
     "publish:canary:major:github": "lerna publish --dist-tag next --canary major --preid next --yes --force-publish=* --no-verify-access --no-git-reset --ignore-scripts",
     "publish:rc": "lerna publish --no-push --dist-tag rc --force-publish=* --ignore-scripts"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn lint",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
   },
   "private": true,
   "repository": {
@@ -71,7 +66,7 @@
     "eslint": "^7.28.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-deprecation": "^1.2.1",
-    "husky": "^4.2.5",
+    "husky": "^7.0.2",
     "jest": "^27.2.1",
     "lerna": "^4.0.0",
     "mock-req": "^0.2.0",
