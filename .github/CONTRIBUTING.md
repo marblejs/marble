@@ -37,28 +37,41 @@ We are using [GitHub Issues][issues] for bugs. We keep a close eye on this and t
 
 ## <a name="workflow"></a> Development Workflow
 
-After cloning, run `npm install` to fetch all project related dependencies. Then, you can run several commands:
+Tools of choice:
+- `jest` - test runner
+- `yarn 1.x` - package manager
 
-- `yarn build` - installs + builds internal packages
+After cloning, run `yarn` to fetch and install all project related dependencies. Then, you can run several commands:
+
+- `yarn build` - builds internal packages
 - `yarn benchmark` - runs benchmarking scripts
 - `yarn lint` - checks the code style
 - `yarn test` - runs complete test suite
-- `yarn test:coverage` - runs complete test suite with coverage report
 - `yarn test:watch` - runs an interactive test watcher
+- `yarn test:unit` - runs unit test suite only
+- `yarn test:integration` - runs integration test suite only
+- `yarn clean` - cleans up build artifacts (skipping *node_modules*)
+- `yarn purge` - cleans everything (including installed *node_modules*)
 
-You can also check built in examples by visiting `./example/` folder. Then, run `npm install` to fetch all example related dependencies. There are two commands available for you:
+You can also check built in examples by visiting `./packages/@integration` folder. Then, run `yarn` to fetch all example related dependencies. There are two several commands available for you:
 
-- `yarn start` - run example
-- `yarn watch` - run example in watch mode (development)
+- `yarn start:http` - runs example HTTP server
+- `yarn start:cqrs` - runs example HTTP server with EventBus integration
+- `yarn start:websockets` - runs example HTTP server wtih WebSocket integration
+- `yarn start:messaging:client` - runs example messaging client (HTTP server)
+- `yarn start:messaging:server` - runs example messaging consumer (microservice) (Redis + RabbitMQ)
+- `yarn test` - run test suite written for already existing examples
+- `yarn watch:dev` - run examples in watch mode (development)
+- `yarn clean` - cleans up examples build artifacts (skipping *node_modules*)
 
 ## <a name="commit"></a> Commit Message Guidelines
 
-There are some rules over how our git commit messages should be formatted. This leads to more readable messages that are easy to follow when looking through the project history.
+There are some rules over how our git commit messages should be formatted. This leads to more readable messages that are easy to follow when looking through the project history. Marble.js repository follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) naming convention.
 
 ```
 <type>(<scope>): <subject>
 ```
-sample:
+example:
 ```
 docs(changelog): update changelog to beta.5
 ```
@@ -79,7 +92,7 @@ Must be one of the following:
 
 ### Scope
 
-The scope should be the name of the npm package affected (as perceived by the person reading the changelog generated from commit messages).
+The scope should be the name of the package affected (as perceived by the person reading the changelog generated from commit messages).
 
 
 [coc]: https://github.com/marblejs/marble/blob/master/docs/CODE_OF_CONDUCT.md
