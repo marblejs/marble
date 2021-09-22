@@ -30,6 +30,7 @@ Functional reactive <a href="http://nodejs.org" target="blank">Node.js</a> frame
 | Name                        | Description                                                                                  |
 | --------------------------- | -------------------------------------------------------------------------------------------- |
 | [@marblejs/core](https://www.npmjs.com/package/@marblejs/core)                           | Framework core module           |
+| [@marblejs/http](https://www.npmjs.com/package/@marblejs/http)                           | HTTP module                     |
 | [@marblejs/websockets](https://www.npmjs.com/package/@marblejs/websockets)               | WebSockets module               |
 | [@marblejs/messaging](https://www.npmjs.com/package/@marblejs/messaging)                 | Messaging module                |
 | [@marblejs/testing](https://www.npmjs.com/package/@marblejs/testing)                     | Testing module                  |
@@ -45,7 +46,7 @@ For the latest updates, documentation, change log, and release information visit
 
 ## <a name="examples"></a> Examples
 
-To view the example project, visit the [example](https://github.com/marblejs/example) repository.
+To view example projects, reach out the [@integration](https://github.com/marblejs/marble/tree/master/packages/%40integration) package available in the main repository.
 
 ## License
 
