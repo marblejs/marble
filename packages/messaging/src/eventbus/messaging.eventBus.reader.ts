@@ -73,7 +73,7 @@ export const EventBus = (config: EventBusConfig) =>
 /**
  * An alias for `EventBus`
  *
- * @deprecated since version `v4.0`. Use `EventBusClient` instead.
+ * @deprecated since version `v4.0`. Use `EventBus` instead.
  * Will be removed in version `v5.0`
  */
  export const eventBus = EventBus;
