@@ -1,6 +1,6 @@
 {
   "name": "marblejs",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Reactive Node APIs made easy",
   "scripts": {
     "build": "lerna run build",
