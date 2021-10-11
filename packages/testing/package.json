@@ -30,10 +30,10 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "@marblejs/core": "^4.0.0-rc.1",
-    "@marblejs/http": "^4.0.0-rc.1",
-    "@marblejs/messaging": "^4.0.0-rc.1",
-    "@marblejs/websockets": "^4.0.0-rc.1",
+    "@marblejs/core": "^4.0.0",
+    "@marblejs/http": "^4.0.0",
+    "@marblejs/messaging": "^4.0.0",
+    "@marblejs/websockets": "^4.0.0",
     "fp-ts": "^2.4.2",
     "rxjs": "^7.1.0"
   },
