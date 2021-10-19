@@ -10,7 +10,8 @@
       "message": "chore: publish %s",
       "allowBranch": [
         "master",
-        "feat/*"
+        "feat/*",
+        "3.x"
       ]
     }
   }
