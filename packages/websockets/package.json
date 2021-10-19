@@ -1,6 +1,6 @@
 {
   "name": "@marblejs/websockets",
-  "version": "3.5.1",
+  "version": "3.5.2",
   "description": "Websockets module for Marble.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -40,7 +40,7 @@
     "ws": "~7.4.6"
   },
   "devDependencies": {
-    "@marblejs/core": "^3.5.1"
+    "@marblejs/core": "^3.5.2"
   },
   "publishConfig": {
     "access": "public"
