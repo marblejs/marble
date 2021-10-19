@@ -94,9 +94,8 @@ describe('#handleClientBrokenConnection', () => {
     // then
     scheduler.run(({ expectObservable, flush }) => {
       expectObservable(brokenConnection$).toBe(
-        `100ms a ${HEART_BEAT_TERMINATE_INTERVAL - 1}ms #`,
-        { a: isAlive },
-        expect.objectContaining({ name: 'TimeoutError' }),
+        `100ms a ${HEART_BEAT_TERMINATE_INTERVAL - 1}ms (b|)`,
+        { a: isAlive, b: expect.objectContaining({ name: 'TimeoutError' }) },
       );
       flush();
       expect(client.terminate).toHaveBeenCalled();

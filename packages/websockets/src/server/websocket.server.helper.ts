@@ -1,5 +1,5 @@
 import * as WebSocket from 'ws';
-import { EMPTY, fromEvent, merge, SchedulerLike, throwError, interval, from, iif, of } from 'rxjs';
+import { EMPTY, fromEvent, merge, SchedulerLike, interval, from, iif, of } from 'rxjs';
 import { takeUntil, catchError, tap, mapTo, timeout, map, mergeMap, mergeMapTo } from 'rxjs/operators';
 import { Context, lookup } from '@marblejs/core';
 import { WebSocketStatus, WebSocketConnectionLiveness } from '../websocket.interface';
@@ -54,7 +54,7 @@ export const handleClientBrokenConnection = (client: WebSocketClientConnection, 
     map(client => client.isAlive),
     catchError(error => {
       client.terminate();
-      return throwError(() => error);
+      return of(error);
     }),
   );
 
