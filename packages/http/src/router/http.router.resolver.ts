@@ -1,6 +1,7 @@
 import { Observable, Subject, fromEvent, merge } from 'rxjs';
-import { takeUntil, share, take, mergeMap, map, catchError } from 'rxjs/operators';
-import { flow, pipe } from 'fp-ts/lib/function';
+import { takeUntil, share, take, mergeMap, map, catchError, tap } from 'rxjs/operators';
+import { constVoid, flow, pipe } from 'fp-ts/lib/function';
+import * as O from 'fp-ts/lib/Option';
 import { EffectContext, useContext, LoggerToken, LoggerTag, LoggerLevel } from '@marblejs/core';
 import { throwException, getErrorMessage } from '@marblejs/core/dist/+internal/utils';
 import { HttpServer, HttpRequest, HttpStatus, WithHttpRequest } from '../http.interface';
@@ -15,8 +16,7 @@ import {
   isURIError,
 } from '../error/http.error.model';
 import { HttpRequestBusToken } from '../server/internal-dependencies/httpRequestBus.reader';
-import { requestMetadata$ } from '../effects/http.requestMetadata.effect';
-import { provideConfig } from '../http.config';
+import { HttpRequestMetadataStorageToken } from '../server/internal-dependencies/httpRequestMetadataStorage.reader';
 import { Routing, BootstrappedRoutingItem } from './http.router.interface';
 import { queryParamsFactory } from './http.router.query.factory';
 import { matchRoute } from './http.router.matcher';
@@ -32,11 +32,11 @@ type ResolveRoutingConfig = Readonly<{
 }>
 
 export const resolveRouting = (config: ResolveRoutingConfig) => {
-  const environmentConfig = provideConfig();
   const requestBus = useContext(HttpRequestBusToken)(config.ctx.ask);
   const logger = useContext(LoggerToken)(config.ctx.ask);
   const outputSubject = new Subject<WithHttpRequest<HttpEffectResponse>>();
   const errorSubject = new Subject<WithHttpRequest<{ error: Error }>>();
+  const requestMetadataStorage = config.ctx.ask(HttpRequestMetadataStorageToken);
 
   /**
    * Server close stream (closes all active streams)
@@ -51,7 +51,6 @@ export const resolveRouting = (config: ResolveRoutingConfig) => {
    */
   const response$ = pipe(
     outputSubject.asObservable(),
-    o$ => environmentConfig.useHttpRequestMetadata() ? requestMetadata$(o$, config.ctx) : o$,
     o$ => config.output$ ? config.output$(o$, config.ctx) : o$,
     takeUntil(close$),
   );
@@ -73,7 +72,11 @@ export const resolveRouting = (config: ResolveRoutingConfig) => {
    */
   const subscribeResponse = (stream$: Observable<WithHttpRequest<HttpEffectResponse>>) =>
     stream$
-      .pipe(mergeMap(({ request, ...res }) => request.response.send(res)))
+      .pipe(
+        tap(output => pipe(
+          requestMetadataStorage,
+          O.fold(constVoid, metadataStorage => metadataStorage.collect(output)))),
+        mergeMap(({ request, ...res }) => request.response.send(res)))
       .subscribe({
         error: flow(
           unexpectedErrorWhileSendingResponseFactory,
