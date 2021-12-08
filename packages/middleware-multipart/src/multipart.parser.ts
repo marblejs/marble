@@ -1,4 +1,4 @@
-import * as Busboy from 'busboy';
+import * as Busboy from '@fastify/busboy';
 import { HttpRequest, HttpError, HttpStatus, isHttpError } from '@marblejs/http';
 import { fromEvent, Observable, throwError, forkJoin } from 'rxjs';
 import { mapTo, mergeMap, takeUntil, catchError, share, defaultIfEmpty } from 'rxjs/operators';
@@ -7,8 +7,8 @@ import { parseField, FieldEvent } from './multipart.parser.field';
 import { parseFile, FileEvent } from './multipart.parser.file';
 
 export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observable<HttpRequest> => {
-  const busboy = new Busboy({
-    headers: req.headers,
+  const busboy = new Busboy.Busboy({
+    headers: req.headers as Busboy.BusboyHeaders,
     limits: {
       fileSize: opts.maxFileSize,
       files: opts.maxFileCount,
