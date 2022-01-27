@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/lib/function';
-import { httpListener, r } from '@marblejs/http';
+import { httpListener, HttpStatus, r } from '@marblejs/http';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { bodyParser$ } from '@marblejs/middleware-body';
 import { mapTo, map } from 'rxjs/operators';
@@ -128,6 +128,45 @@ describe('TetBed - HTTP', () => {
     expect(response.metadata.query).not.toBeDefined();
     expect(response.metadata.params).not.toBeDefined();
     expect(response.metadata.headers).not.toBeDefined();
+
+    await finish();
+  });
+
+  test('parses response body to "undefined" if not provided', async () => {
+    // given
+    const test$ = r.pipe(
+      r.matchPath('/test'),
+      r.matchType('GET'),
+      r.useEffect(req$ => req$.pipe(
+        mapTo({ status: HttpStatus.NO_CONTENT }),
+      )));
+
+    const listener = httpListener({ effects: [test$] });
+    const { request: req, finish } = await createHttpTestBed({ listener })();
+
+    // when
+    const response = await pipe(
+      req('GET'),
+      req.withPath('/test'),
+      req.withHeaders({ 'Content-Type': 'application/json' }),
+      req.send,
+    );
+
+    // then
+    expect(response.req).toEqual(expect.objectContaining({
+      method: 'GET',
+      path: '/test',
+    }));
+
+    expect(response).toEqual(expect.objectContaining({
+      body: undefined,
+      statusCode: 204,
+      statusMessage: 'No Content',
+      headers: expect.objectContaining({
+        'content-length': '0',
+        'content-type': 'application/json',
+      }),
+    }));
 
     await finish();
   });
