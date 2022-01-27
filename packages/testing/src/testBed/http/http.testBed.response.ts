@@ -12,7 +12,11 @@ const parseResponseBody = (props: HttpTestBedResponseProps): string | Array<any>
     O.map(body => {
       switch (getContentTypeUnsafe(props.headers)) {
         case ContentType.APPLICATION_JSON:
-          return pipe(body.toString(), parseJson);
+          return pipe(
+            body.toString(),
+            O.fromPredicate(Boolean),
+            O.map(parseJson),
+            O.toUndefined);
         case ContentType.TEXT_PLAIN:
         case ContentType.TEXT_HTML:
           return body.toString();
