@@ -39,7 +39,7 @@
     "@types/qs": "^6.9.0",
     "@types/uuid": "^7.0.0",
     "chalk": "^3.0.0",
-    "file-type": "^8.0.0",
+    "file-type": "^16.5.4",
     "mime": "^2.4.4",
     "path-to-regexp": "^6.1.0",
     "qs": "^6.9.1",
