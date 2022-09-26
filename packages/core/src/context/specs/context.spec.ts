@@ -22,6 +22,8 @@ import {
 import { createContextToken } from '../context.token.factory';
 import { contextFactory } from '../context.helper';
 import { wait } from '../../+internal/utils';
+import { createReader } from '../context.reader.factory';
+import { useContext } from '../context.hook';
 
 describe('#bindTo', () => {
   test('binds lazy reader to token', () => {
@@ -157,6 +159,60 @@ describe('#resolve', () => {
 
     // then
     expect(lookup(resolvedContext)(token)).toEqual(O.some('test'));
+  });
+
+  test('rejects when dependency throws an error', async () => {
+    // given
+    const error = new Error('unknown error');
+    const token = createContextToken();
+    const dependency = pipe(R.ask<Context>(), R.map(_ => { throw error; }));
+    const boundDependency = bindEagerlyTo(token)(dependency);
+
+    // when
+    const context = register(boundDependency)(createContext());
+    const resolvedContext = () => resolve(context);
+
+    // then
+    expect(resolvedContext()).rejects.toEqual(error);
+  });
+
+  test('rejects when ASYNC dependency rejects with an error', async () => {
+    // given
+    const error = 'unknown error';
+    const token = createContextToken();
+    const dependency = pipe(R.ask<Context>(), R.map(async _ => Promise.reject(error)));
+    const boundDependency = bindEagerlyTo(token)(dependency);
+
+    // when
+    const context = register(boundDependency)(createContext());
+    const resolvedContext = () => resolve(context);
+
+    // then
+    expect(resolvedContext()).rejects.toEqual(error);
+  });
+
+  test('rejects when inner injected ASYNC dependency rejects with an error', async () => {
+
+    // given - dependencies
+    const dependency_1_token = createContextToken();
+    const dependency_1 = createReader(async () => {
+      throw new Error('unknown error');
+    });
+
+    const dependency_2_token = createContextToken();
+    const dependency_2 = createReader(ask => {
+      return useContext(dependency_1_token)(ask);
+    });
+
+    // when
+    const context = registerAll([
+      bindEagerlyTo(dependency_1_token)(dependency_1),
+      bindLazilyTo(dependency_2_token)(dependency_2),
+    ])(createContext());
+    const resolvedContext = () => resolve(context);
+
+    // then
+    expect(resolvedContext()).rejects.toEqual(new Error('unknown error'));
   });
 });
 
