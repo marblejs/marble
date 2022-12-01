@@ -52,8 +52,8 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "dependencies": {
-    "rxjs": "^7.1.0",
-    "fp-ts": "^2.8.2"
+    "rxjs": "^7.5.7",
+    "fp-ts": "^2.13.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.1.0",
@@ -78,7 +78,7 @@
     "packages/*"
   ],
   "resolutions": {
-    "fp-ts": "^2.8.2",
-    "io-ts": "^2.2.10"
+    "fp-ts": "^2.13.1",
+    "io-ts": "^2.2.19"
   }
 }

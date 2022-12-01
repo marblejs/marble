@@ -31,13 +31,13 @@
   },
   "homepage": "https://github.com/marblejs/marble#readme",
   "peerDependencies": {
-    "fp-ts": "^2.4.2",
-    "rxjs": "^7.1.0"
+    "fp-ts": "^2.13.1",
+    "rxjs": "^7.5.7"
   },
   "dependencies": {
     "@types/uuid": "^7.0.0",
     "chalk": "^3.0.0",
-    "io-ts": "^2.2.4",
+    "io-ts": "^2.2.19",
     "uuid": "^7.0.1"
   },
   "publishConfig": {
