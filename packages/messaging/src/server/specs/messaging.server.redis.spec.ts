@@ -2,7 +2,7 @@ import { matchEvent, act } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { forkJoin, firstValueFrom } from 'rxjs';
-import { map, tap, delay, mapTo } from 'rxjs/operators';
+import { map, mapTo, tap, delay } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
 import { TransportLayerConnection } from '../../transport/transport.interface';
 import { MsgEffect } from '../../effects/messaging.effects.interface';
@@ -129,18 +129,19 @@ describe('messagingServer::Redis', () => {
     }]);
   });
 
-  test('throws an "UnsupportedError" when calling "ackMessage/nackMessage"', async () => {
+  test('doesn\'t throw an "UnsupportedError" when calling "ackMessage/nackMessage"', async () => {
     // given
-    const { error$, output } = Util.prepareTestOutput({ take: 1 });
+    const { output$, error$, output } = Util.prepareTestOutput({ take: 1 });
     const options = Util.createRedisOptions();
 
     const test$: MsgEffect = (event$, ctx) =>
       event$.pipe(
         matchEvent('TEST'),
         tap(event => ackEvent(ctx)(event)()),
+        map(() => ({ type: 'TEST_OUTPUT' })),
       );
 
-    microservice = await Util.createRedisMicroservice(options)({ effects: [test$], error$ });
+    microservice = await Util.createRedisMicroservice(options)({ effects: [test$], error$, output$ });
     client = await Util.createRedisClient(options);
 
     // when
@@ -148,13 +149,9 @@ describe('messagingServer::Redis', () => {
     const result = await output;
 
     // then
-    expect(result).toEqual([{
-      type: 'UNHANDLED_ERROR',
-      error: {
-        name: 'UnsupportedError',
-        message: 'Unsupported operation. Method \"ackMessage\" is unsupported for Redis transport layer.',
-      },
-    }]);
+    expect(result).toEqual([expect.objectContaining({
+      type: 'TEST_OUTPUT',
+    })]);
   });
 
   test('chains events by sending back to origin channel when no reply is defined', async () => {
