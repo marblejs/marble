@@ -5,7 +5,7 @@ import { pipe } from 'fp-ts/lib/function';
 import { EventMetadata } from '@marblejs/core';
 import { pathToRegexp } from 'path-to-regexp';
 import { Observable, from, EMPTY } from 'rxjs';
-import { filter, mergeMap, map, tap, mapTo, toArray, mergeMapTo } from 'rxjs/operators';
+import { filter, mergeMap, map, tap, toArray } from 'rxjs/operators';
 import { WebSocketServerConnection } from '../../server/websocket.server.interface';
 
 export type UpgradeEvent = {
@@ -43,11 +43,11 @@ export const mapToServer = (...serverMapping: WebSocketServerPathMapping) => {
             server.emit('connection', ws, request)
           ))),
         ),
-        mapTo(true),
+        map(() => true),
         toArray(),
         filter(matchedResults => !matchedResults.includes(true)),
         tap(() => socket.destroy()),
       )),
-      mergeMapTo(EMPTY),
+      mergeMap(() => EMPTY),
     );
 };

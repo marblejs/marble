@@ -1,4 +1,4 @@
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { createRequest, withHeaders, withBody, withPath } from './http.testBed.request';
 
 describe('TestBed - HTTP request', () => {

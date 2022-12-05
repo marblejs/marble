@@ -1,13 +1,12 @@
 import * as chalk from 'chalk';
-import { IO, io } from 'fp-ts/lib/IO';
+import * as IO from 'fp-ts/lib/IO';
 import * as O from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity, constUndefined } from 'fp-ts/lib/function';
+import { identity, constUndefined, pipe } from 'fp-ts/lib/function';
 import { createReader } from '../context/context.reader.factory';
 import { trunc } from '../+internal/utils';
 import { Logger, LoggerLevel } from './logger.interface';
 
-const print = (message: string): IO<void> => () => {
+const print = (message: string): IO.IO<void> => () => {
   process.stdout.write(message + '\n');
 };
 
@@ -42,4 +41,4 @@ export const logger = createReader<Logger>(() => opts => {
   return print(sign + sep + pid + sep + now + sep + tag + sep + message);
 });
 
-export const mockLogger = createReader<Logger>(() => _ => io.of(constUndefined));
+export const mockLogger = createReader<Logger>(() => _ => IO.of(constUndefined));

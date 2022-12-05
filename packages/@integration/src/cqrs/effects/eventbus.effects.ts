@@ -2,7 +2,7 @@
 
 import { of } from 'rxjs';
 import { map, tap, delay } from 'rxjs/operators';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { act, matchEvent, useContext, LoggerToken, LoggerTag } from '@marblejs/core';
 import { MsgEffect, EventBusClientToken } from '@marblejs/messaging';
 import { GenerateOfferDocumentCommand } from '../domain/Offer.command';

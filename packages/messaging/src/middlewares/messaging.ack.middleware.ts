@@ -1,7 +1,7 @@
 import { useContext, LoggerToken, LoggerTag, Event } from '@marblejs/core';
 import { tap } from 'rxjs/operators';
 import * as T from 'fp-ts/lib/Task';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { MsgEffect } from '../effects/messaging.effects.interface';
 import { EventTimerStoreToken } from '../eventStore/eventTimerStore';
 import { Transport, TransportLayerConnection } from '../transport/transport.interface';

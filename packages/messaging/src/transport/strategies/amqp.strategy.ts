@@ -1,6 +1,6 @@
 import { pipe } from 'fp-ts/lib/function';
 import { Subject, fromEvent, merge, from, lastValueFrom, Observable } from 'rxjs';
-import { map, filter, take, mapTo, first, mergeMap, share, tap } from 'rxjs/operators';
+import { map, filter, take, first, mergeMap, share, tap } from 'rxjs/operators';
 import { Channel, ConsumeMessage, Replies } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
@@ -51,20 +51,20 @@ class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP>
   get status$() {
     const connect$ = pipe(
       fromEvent(this.connectionManager, 'connect'),
-      mapTo(AmqpConnectionStatus.CONNECTED));
+      map(() => AmqpConnectionStatus.CONNECTED));
 
     const connectChannel$ = pipe(
       fromEvent(this.channelWrapper, 'connect'),
-      mapTo(AmqpConnectionStatus.CHANNEL_CONNECTED));
+      map(() => AmqpConnectionStatus.CHANNEL_CONNECTED));
 
     const diconnect$ = pipe(
       fromEvent(this.connectionManager, 'disconnect') as Observable<{ err?: Error }>,
       tap(({ err }) => err && this.errorSubject$.next(err)),
-      mapTo(AmqpConnectionStatus.CONNECTION_LOST));
+      map(() => AmqpConnectionStatus.CONNECTION_LOST));
 
     const diconnectChannel$ = pipe(
       fromEvent(this.channelWrapper, 'close'),
-      mapTo(AmqpConnectionStatus.CHANNEL_CONNECTION_LOST));
+      map(() => AmqpConnectionStatus.CHANNEL_CONNECTION_LOST));
 
     return merge(
       connect$,
@@ -146,7 +146,7 @@ class AmqpStrategyConnection implements TransportLayerConnection<Transport.AMQP>
       mergeMap(raw =>
         pipe(
           from(removeChannelSetupForConsumerTag(raw.tag)),
-          mapTo(({
+          map(() => ({
             data: raw.msg.content,
             replyTo: raw.msg.properties.replyTo,
             correlationId: raw.msg.properties.correlationId,

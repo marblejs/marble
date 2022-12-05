@@ -10,7 +10,7 @@ import {
   EventError,
 } from '@marblejs/core';
 import { Marbles } from '@marblejs/core/dist/+internal/testing';
-import { io } from 'fp-ts/lib/IO';
+import * as IO from 'fp-ts/lib/IO';
 import { constUndefined, pipe } from 'fp-ts/lib/function';
 import { messagingListener } from '../server/messaging.server.listener';
 import { EventBus } from '../eventbus/messaging.eventBus.reader';
@@ -21,7 +21,7 @@ describe('inputLogger$', () => {
   let ctx: EffectContext<EventBus>;
 
   const provideLoggerMock = () =>
-    jest.fn(io.of(constUndefined));
+    jest.fn(IO.of(constUndefined));
 
   const provideEventBus = async (logger: any) => pipe(
     await contextFactory(bindEagerlyTo(LoggerToken)(createReader(() => logger))),

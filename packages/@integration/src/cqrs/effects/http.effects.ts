@@ -2,7 +2,7 @@ import { useContext } from '@marblejs/core';
 import { r, HttpStatus } from '@marblejs/http';
 import { EventBusClientToken } from '@marblejs/messaging';
 import { requestValidator$, t } from '@marblejs/middleware-io';
-import { tap, mapTo, map } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
 import { GenerateOfferDocumentCommand } from '../domain/Offer.command';
 
 const generateDocumentValidator$ = requestValidator$({
@@ -21,6 +21,6 @@ export const postDocumentsGenerate$ = r.pipe(
       generateDocumentValidator$,
       map(req => GenerateOfferDocumentCommand.create({ offerId: req.params.id })),
       tap(eventBusClient.emit),
-      mapTo({ status: HttpStatus.ACCEPTED }),
+      map(() => ({ status: HttpStatus.ACCEPTED })),
     );
   }));

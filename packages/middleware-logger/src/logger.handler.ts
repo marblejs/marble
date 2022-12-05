@@ -1,7 +1,7 @@
 import { Logger, LoggerTag, LoggerLevel } from '@marblejs/core';
 import { HttpRequest } from '@marblejs/http';
 import { fromEvent, Timestamp, Observable } from 'rxjs';
-import { take, filter, mapTo, map, tap } from 'rxjs/operators';
+import { take, filter, map, tap } from 'rxjs/operators';
 import { factorizeLog } from './logger.factory';
 import { LoggerOptions } from './logger.model';
 import { isNotSilent, filterResponse } from './logger.util';
@@ -12,7 +12,7 @@ export const loggerHandler = (opts: LoggerOptions, logger: Logger) => (stamp: Ti
 
   return fromEvent(res, 'finish').pipe(
     take(1),
-    mapTo(req),
+    map(() => req),
     filter(isNotSilent(opts)),
     filter(filterResponse(opts)),
     map(factorizeLog(stamp)),

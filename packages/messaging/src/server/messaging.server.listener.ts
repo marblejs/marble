@@ -9,8 +9,7 @@ import {
   LoggerTag,
   LoggerLevel,
 } from '@marblejs/core';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
+import { identity, pipe } from 'fp-ts/lib/function';
 import { Observable, Subject, defer } from 'rxjs';
 import { map, catchError, takeUntil } from 'rxjs/operators';
 import { TransportMessageTransformer, TransportLayerConnection } from '../transport/transport.interface';

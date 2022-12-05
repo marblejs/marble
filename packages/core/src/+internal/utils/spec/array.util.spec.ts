@@ -1,5 +1,5 @@
 import { getOrElse } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { getArrayFromEnum, getHead, getLast, filterArray, mapArray, insertIf, insertIfElse } from '../array.util';
 
 describe('Array util', () => {

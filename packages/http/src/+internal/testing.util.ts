@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { EventEmitter } from 'events';
 import { of } from 'rxjs';
-import { delay, tap, mapTo } from 'rxjs/operators';
+import { delay, tap, map } from 'rxjs/operators';
 import {
   createContext,
   createEffectContext,
@@ -97,7 +97,7 @@ export const createTestRoute = (opts?: { throwError?: boolean; delay?: number; m
     return req$.pipe(
       delay(routeDelay),
       tap(() => { if (opts?.throwError) throw new Error(); }),
-      mapTo({ body: `delay_${routeDelay}` }),
+      map(() => ({ body: `delay_${routeDelay}` })),
     );
   };
 

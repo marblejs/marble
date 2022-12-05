@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { mapTo, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import * as t from 'io-ts';
 import { Marbles } from '../../+internal/testing';
 import { event } from '../../event/event';
@@ -20,7 +20,7 @@ describe('#matchEvent operator', () => {
     const effect$ = (event$: Observable<Event>) =>
       event$.pipe(
         matchEvent('TEST_EVENT_3', 'TEST_EVENT_2'),
-        mapTo(outgoingEvent),
+        map(() => outgoingEvent),
       );
 
     // then
@@ -42,7 +42,7 @@ describe('#matchEvent operator', () => {
     const effect$ = (event$: Observable<Event>) =>
       event$.pipe(
         matchEvent({ type: 'TEST_EVENT_3' }, { type: 'TEST_EVENT_2' }),
-        mapTo(outgoingEvent),
+        map(() => outgoingEvent),
       );
 
     // then

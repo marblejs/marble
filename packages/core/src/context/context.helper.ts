@@ -1,8 +1,7 @@
 import * as T from 'fp-ts/lib/Task';
 import * as O from 'fp-ts/lib/Option';
 import * as IO from 'fp-ts/lib/IO';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { constant } from 'fp-ts/lib/function';
+import { constant, pipe } from 'fp-ts/lib/function';
 import { logger, LoggerToken, mockLogger } from '../logger';
 import { isTestEnv } from '../+internal/utils';
 import { registerAll, BoundDependency, createContext, bindTo, resolve, Context, lookup, DerivedContextToken } from './context';

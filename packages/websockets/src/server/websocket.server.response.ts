@@ -3,7 +3,7 @@ import * as O from 'fp-ts/lib/Option';
 import * as T from 'fp-ts/lib/Task';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { forkJoin, Observable, of, defer } from 'rxjs';
-import { catchError, mapTo } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { constant, constVoid, flow, pipe } from 'fp-ts/lib/function';
 import { ContextProvider, Event, LoggerToken, LoggerTag, LoggerLevel } from '@marblejs/core';
 import { EventTransformer } from '../transformer/websocket.transformer.interface';
@@ -65,5 +65,5 @@ export const broadcastEvent: ServerResponseHandler = ({ server, eventTransformer
   pipe(
     forkJoin([...server.clients].map(client => emitEvent({ client, eventTransformer, ask })(event))),
     catchError(constant(of(false))),
-    mapTo(true),
+    map(() => true),
   );

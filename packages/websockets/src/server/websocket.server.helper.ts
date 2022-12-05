@@ -1,6 +1,6 @@
 import * as WebSocket from 'ws';
 import { EMPTY, fromEvent, merge, SchedulerLike, interval, from, iif, of } from 'rxjs';
-import { takeUntil, catchError, tap, mapTo, timeout, map, mergeMap, mergeMapTo } from 'rxjs/operators';
+import { takeUntil, catchError, tap, timeout, map, mergeMap } from 'rxjs/operators';
 import { Context, lookup } from '@marblejs/core';
 import { WebSocketStatus, WebSocketConnectionLiveness } from '../websocket.interface';
 import { WebSocketConnectionError } from '../error/websocket.error.model';
@@ -24,19 +24,19 @@ export const sendMessage = (client: WebSocket) => (outgoingEvent: any): Promise<
 export const handleServerBrokenConnections = (server: WebSocketServerConnection, scheduler?: SchedulerLike) =>
   interval(HEART_BEAT_INTERVAL, scheduler).pipe(
     takeUntil(fromEvent(server, 'close')),
-    mergeMapTo(from(server.clients)),
+    mergeMap(() => from(server.clients)),
     map(client => client as WebSocketClientConnection),
     mergeMap(client => iif(
       () => !client.isAlive,
       of(client).pipe(
         tap(client => client.isAlive = false),
         tap(() => client.terminate()),
-        mapTo(WebSocketConnectionLiveness.DEAD),
+        map(() => WebSocketConnectionLiveness.DEAD),
       ),
       of(client).pipe(
         tap(client => client.isAlive = false),
         tap(client => client.ping()),
-        mapTo(WebSocketConnectionLiveness.ALIVE),
+        map(() => WebSocketConnectionLiveness.ALIVE),
       ),
     )),
   );
@@ -49,7 +49,7 @@ export const handleClientBrokenConnection = (client: WebSocketClientConnection, 
   ).pipe(
     takeUntil(fromEvent(client, 'close')),
     timeout(HEART_BEAT_TERMINATE_INTERVAL, scheduler),
-    mapTo(client),
+    map(() => client),
     tap(client => client.isAlive = true),
     map(client => client.isAlive),
     catchError(error => {

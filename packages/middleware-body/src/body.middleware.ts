@@ -1,6 +1,6 @@
 import { HttpError, HttpStatus, HttpMiddlewareEffect } from '@marblejs/http';
 import { of, throwError } from 'rxjs';
-import { catchError, map, tap, mapTo, mergeMap } from 'rxjs/operators';
+import { catchError, map, tap, mergeMap } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/function';
 import { defaultParser } from './parsers';
 import { RequestBodyParser } from './body.model';
@@ -27,7 +27,7 @@ export const bodyParser$ = ({
         getBody(req),
         map(parser(req)),
         tap(body => req.body = body),
-        mapTo(req),
+        map(() => req),
         catchError(error => throwError(() =>
           new HttpError(`Request body parse error: "${error.toString()}"`, HttpStatus.BAD_REQUEST, undefined, req),
         )))

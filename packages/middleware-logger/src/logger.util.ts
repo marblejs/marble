@@ -1,6 +1,5 @@
 import * as O from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { flow } from 'fp-ts/lib/function';
+import { flow, pipe } from 'fp-ts/lib/function';
 import { HttpRequest } from '@marblejs/http';
 import { LoggerOptions } from './logger.model';
 

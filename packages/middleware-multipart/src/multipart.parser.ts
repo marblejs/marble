@@ -1,7 +1,7 @@
 import * as Busboy from '@fastify/busboy';
 import { HttpRequest, HttpError, HttpStatus, isHttpError } from '@marblejs/http';
 import { fromEvent, Observable, throwError, forkJoin } from 'rxjs';
-import { mapTo, mergeMap, takeUntil, catchError, share, defaultIfEmpty } from 'rxjs/operators';
+import { map, mergeMap, takeUntil, catchError, share, defaultIfEmpty } from 'rxjs/operators';
 import { ParserOpts } from './multipart.interface';
 import { parseField, FieldEvent } from './multipart.parser.field';
 import { parseFile, FileEvent } from './multipart.parser.file';
@@ -55,7 +55,7 @@ export const parseMultipart = (opts: ParserOpts) => (req: HttpRequest): Observab
     parseFile$,
     parseField$,
   ]).pipe(
-    mapTo(req),
+    map(() => req),
     catchError((error: Error) => isHttpError(error)
       ? throwError(() => error)
       : throwError(() => new HttpError(error.message, HttpStatus.INTERNAL_SERVER_ERROR, undefined, req))

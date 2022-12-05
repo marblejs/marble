@@ -1,5 +1,4 @@
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
+import { identity, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
 import { ContextError } from '../error/error.model';
 import { coreErrorFactory, CoreErrorOptions } from '../error/error.factory';

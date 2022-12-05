@@ -1,5 +1,5 @@
 import { firstValueFrom, of } from 'rxjs';
-import { tap, mapTo, filter } from 'rxjs/operators';
+import { tap, map, filter } from 'rxjs/operators';
 import { Marbles } from '../+internal/testing';
 import { Event } from '../event/event.interface';
 import { combineMiddlewares, combineEffects } from './effects.combiner';
@@ -43,9 +43,9 @@ describe('#combineMiddlewares', () => {
 describe('#combineEffects', () => {
   test('combines effects into multiple streams', () => {
     // given
-    const a$: EventEffect = event$ => event$.pipe(filter(event => event.type === 'FOO_1'), mapTo({ type: 'FOO_1_RESULT', payload: 1 }));
-    const b$: EventEffect = event$ => event$.pipe(filter(event => event.type === 'FOO_2'), mapTo({ type: 'FOO_2_RESULT', payload: 2 }));
-    const c$: EventEffect = event$ => event$.pipe(filter(event => event.type === 'FOO_3'), mapTo({ type: 'FOO_3_RESULT', payload: 3 }));
+    const a$: EventEffect = event$ => event$.pipe(filter(event => event.type === 'FOO_1'), map(() => ({ type: 'FOO_1_RESULT', payload: 1 })));
+    const b$: EventEffect = event$ => event$.pipe(filter(event => event.type === 'FOO_2'), map(() => ({ type: 'FOO_2_RESULT', payload: 2 })));
+    const c$: EventEffect = event$ => event$.pipe(filter(event => event.type === 'FOO_3'), map(() => ({ type: 'FOO_3_RESULT', payload: 3 })));
     const a: Event<number> = { type: 'FOO_1', payload: 0 };
     const b: Event<number> = { type: 'FOO_2', payload: 0 };
     const c: Event<number> = { type: 'FOO_3', payload: 0 };

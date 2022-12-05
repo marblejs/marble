@@ -1,7 +1,6 @@
 import * as IO from 'fp-ts/lib/IO';
 import * as O from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { constant } from 'fp-ts/lib/function';
+import { constant, pipe } from 'fp-ts/lib/function';
 import { createReader, createContextToken, Event } from '@marblejs/core';
 
 type StoreKey = string;
