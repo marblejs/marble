@@ -1,4 +1,4 @@
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { tap } from 'rxjs/operators';
 import { useContext, LoggerToken, LoggerLevel, Event, EventError, isEventError } from '@marblejs/core';
 import { NamedError } from '@marblejs/core/dist/+internal/utils';

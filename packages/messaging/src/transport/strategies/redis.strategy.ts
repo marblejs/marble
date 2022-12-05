@@ -1,6 +1,6 @@
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { Subject, fromEvent, merge, lastValueFrom, Observable } from 'rxjs';
-import { map, mapTo, take, tap, share, filter } from 'rxjs/operators';
+import { map, take, tap, share, filter } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/function';
 import { RedisClient, ClientOpts } from 'redis';
 import { TransportLayer, TransportLayerConnection, TransportMessage, Transport, DEFAULT_TIMEOUT } from '../transport.interface';
@@ -50,19 +50,19 @@ class RedisStrategyConnection implements TransportLayerConnection<Transport.REDI
   get status$() {
     const ready$ = pipe(
       merge(fromEvent(this.subscriber, 'ready')),
-      mapTo(RedisConnectionStatus.READY));
+      map(() => RedisConnectionStatus.READY));
 
     const connect$ = pipe(
       merge(fromEvent(this.subscriber, 'connect')),
-      mapTo(RedisConnectionStatus.CONNECT));
+      map(() => RedisConnectionStatus.CONNECT));
 
     const reconnecting$ = pipe(
       merge(fromEvent(this.subscriber, 'reconnecting')),
-      mapTo(RedisConnectionStatus.RECONNECTING));
+      map(() => RedisConnectionStatus.RECONNECTING));
 
     const end$ = pipe(
       merge(fromEvent(this.subscriber, 'end')),
-      mapTo(RedisConnectionStatus.END));
+      map(() => RedisConnectionStatus.END));
 
     return pipe(
       merge(ready$, connect$, reconnecting$, end$, this.statusSubject$.asObservable()),

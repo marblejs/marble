@@ -1,9 +1,9 @@
 import { of, EMPTY, defer } from 'rxjs';
-import { mergeMap, mergeMapTo } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { isString } from '@marblejs/core/dist/+internal/utils';
 import { endRequest } from '@marblejs/http/dist/response/http.responseHandler';
 import { HttpMethod, HttpMiddlewareEffect, HttpRequest, HttpStatus } from '@marblejs/http';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { configurePreflightResponse } from './configurePreflightResponse';
 import { configureResponse } from './configureResponse';
 
@@ -39,7 +39,7 @@ export const cors$ = (options: CORSOptions = {}): HttpMiddlewareEffect => req$ =
         configurePreflightResponse(req, req.response, options);
         return pipe(
           defer(endRequest(req.response)),
-          mergeMapTo(EMPTY));
+          mergeMap(() => EMPTY));
       }
 
       configureResponse(req, req.response, options);

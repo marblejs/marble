@@ -1,6 +1,5 @@
 import { isEmpty, size } from 'fp-ts/lib/Map';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { flow } from 'fp-ts/lib/function';
+import { flow, pipe } from 'fp-ts/lib/function';
 import * as R from 'fp-ts/lib/Reader';
 import * as O from 'fp-ts/lib/Option';
 import {

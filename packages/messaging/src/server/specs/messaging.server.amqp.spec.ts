@@ -2,7 +2,7 @@ import { matchEvent, act } from '@marblejs/core';
 import { createUuid } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { firstValueFrom, forkJoin } from 'rxjs';
-import { map, tap, delay, mapTo } from 'rxjs/operators';
+import { map, tap, delay } from 'rxjs/operators';
 import { flow } from 'fp-ts/lib/function';
 import { TransportLayerConnection } from '../../transport/transport.interface';
 import { MsgEffect } from '../../effects/messaging.effects.interface';
@@ -198,14 +198,14 @@ describe('messagingServer::AMQP', () => {
       event$.pipe(
         matchEvent('TEST_1'),
         delay(25),
-        mapTo({ type: 'TEST_2' }),
+        map(() => ({ type: 'TEST_2' })),
       );
 
     const test2$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('TEST_2'),
         delay(25),
-        mapTo({ type: 'TEST_3' }),
+        map(() => ({ type: 'TEST_3' })),
       );
 
     microservice = await Util.createAmqpMicroservice(options)({ effects: [test1$, test2$], output$ });
@@ -260,7 +260,7 @@ describe('messagingServer::AMQP', () => {
     const test$: MsgEffect = event$ =>
       event$.pipe(
         matchEvent('TEST'),
-        mapTo(reply(replyTo)({ type: 'TEST_RESULT' })),
+        map(() => reply(replyTo)({ type: 'TEST_RESULT' })),
       );
 
     // when (order matters)

@@ -1,6 +1,6 @@
 import * as E from 'fp-ts/lib/Either';
 import * as O from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { Context, lookup } from '@marblejs/core';
 import { EventBusToken } from '../eventbus/messaging.eventBus.reader';
 import { Transport, TransportLayer, isTransportLayerConnection } from './transport.interface';

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
 import * as FormData from 'form-data';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { map } from 'rxjs/operators';
 import { r, httpListener } from '@marblejs/http';
 import { createHttpTestBed, createTestBedSetup } from '@marblejs/testing';

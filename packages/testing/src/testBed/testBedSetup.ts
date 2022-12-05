@@ -1,6 +1,6 @@
 import { BoundDependency } from '@marblejs/core';
 import * as T from 'fp-ts/lib/Task';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { TestBedSetupConfig, TestBedSetup } from './testBedSetup.interface';
 import { createTestBedContainer } from './testBedContainer';
 import { TestBed } from './testBed.interface';

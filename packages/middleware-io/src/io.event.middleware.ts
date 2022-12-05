@@ -1,6 +1,6 @@
 import { Event, EventError, ValidatedEvent, isEventCodec } from '@marblejs/core';
 import { Observable, of, throwError, isObservable } from 'rxjs';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { mergeMap, catchError, map } from 'rxjs/operators';
 import { Schema, ValidatorOptions, validator$ } from './io.middleware';
 import { IOError } from './io.error';

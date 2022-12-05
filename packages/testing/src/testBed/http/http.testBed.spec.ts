@@ -2,7 +2,7 @@ import { pipe } from 'fp-ts/lib/function';
 import { httpListener, HttpStatus, r } from '@marblejs/http';
 import { requestValidator$, t } from '@marblejs/middleware-io';
 import { bodyParser$ } from '@marblejs/middleware-body';
-import { mapTo, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { TestBedType } from '../testBed.interface';
 import { createHttpTestBed } from './http.testBed';
 
@@ -45,7 +45,7 @@ describe('TetBed - HTTP', () => {
       r.matchPath('/test'),
       r.matchType('GET'),
       r.useEffect(req$ => req$.pipe(
-        mapTo({ body: { foo: 'bar' } }),
+        map(() => ({ body: { foo: 'bar' } })),
       )));
 
     const listener = httpListener({ effects: [test$] });
@@ -138,7 +138,7 @@ describe('TetBed - HTTP', () => {
       r.matchPath('/test'),
       r.matchType('GET'),
       r.useEffect(req$ => req$.pipe(
-        mapTo({ status: HttpStatus.NO_CONTENT }),
+        map(() => ({ status: HttpStatus.NO_CONTENT })),
       )));
 
     const listener = httpListener({ effects: [test$] });

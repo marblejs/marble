@@ -1,4 +1,4 @@
-import { mapTo } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { RouteEffect, RouteEffectGroup, Routing } from '../http.router.interface';
 import { factorizeRouting, factorizeRoutingWithDefaults } from '../http.router.factory';
 import { HttpEffect, HttpMiddlewareEffect } from '../../effects/http.effects.interface';
@@ -11,11 +11,11 @@ describe('#factorizeRouting', () => {
   test('factorizes routing with nested groups', () => {
     // given
     const m$: HttpMiddlewareEffect = req$ => req$;
-    const e1$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test1' }));
-    const e2$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test2' }));
-    const e3$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test3' }));
-    const e4$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test4' }));
-    const e5$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test5' }));
+    const e1$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test1' })));
+    const e2$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test2' })));
+    const e3$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test3' })));
+    const e4$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test4' })));
+    const e5$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test5' })));
 
     const routing: (RouteEffect | RouteEffectGroup)[] = [
       // effect 1
@@ -119,7 +119,7 @@ describe('#factorizeRouting', () => {
 
   test('throws error if route is redefined', () => {
     // given
-    const e$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const e$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test' })));
 
     const route1: RouteEffect = { path: '/test', method: 'GET', effect: e$ };
     const route2: RouteEffect = { path: '/test', method: 'GET', effect: e$ };
@@ -161,7 +161,7 @@ describe('#factorizeRoutingWithDefaults', () => {
     const fallback$ = r.pipe(
       r.matchPath('*'),
       r.matchType('*'),
-      r.useEffect(req$ => req$.pipe(mapTo({ body: 'fallback' }))));
+      r.useEffect(req$ => req$.pipe(map(() => ({ body: 'fallback' })))));
 
     const factorizedRouting = factorizeRoutingWithDefaults([ fallback$ ]);
 

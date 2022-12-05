@@ -1,7 +1,7 @@
 import * as url from 'url';
 import { Stream } from 'stream';
 import { Observable } from 'rxjs';
-import { mapTo } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import * as IO from 'fp-ts/lib/IO';
 import * as T from 'fp-ts/lib/Task';
 import { pipe } from 'fp-ts/lib/function';
@@ -59,7 +59,7 @@ export const handleResponse: HandleResponse = ask => {
       return pipe(
         warnIfOutgoingConnectionEnded(logger),
         fromIO,
-        mapTo(false));
+        map(() => false));
 
     const status = getResponseStatus(effectRes);
     const path = getRequestUrl(req);

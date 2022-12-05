@@ -5,7 +5,7 @@ import { isTestEnv } from '@marblejs/core/dist/+internal/utils';
 import { eventValidator$, t } from '@marblejs/middleware-io';
 import { createMicroservice, messagingListener, Transport, MsgEffect, reply } from '@marblejs/messaging';
 import { IO } from 'fp-ts/lib/IO';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 
 const fib = (n: number): number =>
   (n === 0 || n === 1) ? n : fib(n - 1) + fib(n - 2);

@@ -3,11 +3,12 @@ import * as M from 'fp-ts/lib/Map';
 import * as O from 'fp-ts/lib/Option';
 import * as E from 'fp-ts/lib/Eq';
 import * as T from 'fp-ts/lib/Task';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { contramap, ordString, Ord } from 'fp-ts/lib/Ord';
+import * as S from 'fp-ts/lib/string';
+import { contramap, Ord } from 'fp-ts/lib/Ord';
+import { pipe } from 'fp-ts/lib/function';
 import { ContextToken, createContextToken } from './context.token.factory';
 
-export const ordContextToken: Ord<ContextToken<unknown>> = contramap((t: ContextToken<unknown>) => t._id)(ordString);
+export const ordContextToken: Ord<ContextToken<unknown>> = contramap((t: ContextToken<unknown>) => t._id)(S.Ord);
 export const setoidContextToken: E.Eq<ContextToken> = { equals: ordContextToken.equals };
 
 export interface Context extends Map<ContextToken, ContextDependency | any> {}

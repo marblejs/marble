@@ -1,5 +1,5 @@
 import { createHttpTestBed, createTestBedSetup } from '@marblejs/testing';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { listener } from './io-http.integration';
 
 const testBed = createHttpTestBed({ listener });

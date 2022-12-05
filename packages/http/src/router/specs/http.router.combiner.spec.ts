@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { mapTo } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { combineRoutes } from '../http.router.combiner';
 import { r } from '../http.router.ixbuilder';
 import { HttpMiddlewareEffect } from '../../effects/http.effects.interface';
@@ -8,7 +8,7 @@ import { HttpRequest } from '../../http.interface';
 describe('#combineRoutes', () => {
   test('factorizes combined routes for effects only', () => {
     // given
-    const effect$ = (req$: Observable<HttpRequest>) => req$.pipe(mapTo({}));
+    const effect$ = (req$: Observable<HttpRequest>) => req$.pipe(map(() => ({})));
 
     const a$ = r.pipe(
       r.matchPath('/a'),
@@ -33,7 +33,7 @@ describe('#combineRoutes', () => {
 
   test('factorizes combined routes for effects with middlewares', () => {
     // given
-    const effect$ = (req$: Observable<HttpRequest>) => req$.pipe(mapTo({}));
+    const effect$ = (req$: Observable<HttpRequest>) => req$.pipe(map(() => ({})));
 
     const a$ = r.pipe(
       r.matchPath('/a'),
@@ -64,7 +64,7 @@ describe('#combineRoutes', () => {
 
   test('factorizes combined routes for effects with empty middlewares', () => {
     // given
-    const effect$ = (req$: Observable<HttpRequest>) => req$.pipe(mapTo({}));
+    const effect$ = (req$: Observable<HttpRequest>) => req$.pipe(map(() => ({})));
 
     const a$ = r.pipe(
       r.matchPath('/a'),

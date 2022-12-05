@@ -1,7 +1,7 @@
 import { Task } from 'fp-ts/lib/Task';
 import { pipe } from 'fp-ts/lib/function';
 import { of, merge, firstValueFrom, lastValueFrom } from 'rxjs';
-import { mapTo, take, toArray, delay, mergeMap, map } from 'rxjs/operators';
+import { take, toArray, delay, mergeMap, map } from 'rxjs/operators';
 import { createMockEffectContext, createHttpResponse, createHttpRequest, createTestRoute } from '../../+internal/testing.util';
 import { HttpEffect, HttpErrorEffect, HttpOutputEffect } from '../../effects/http.effects.interface';
 import { Routing } from '../http.router.interface';
@@ -20,10 +20,10 @@ describe('#resolveRouting', () => {
     const path2 = factorizeRegExpWithParams('/group');
     const path3 = factorizeRegExpWithParams('/group/:id/foo');
 
-    const e1$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_1' }));
-    const e2$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_2' }));
-    const e3$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_3' }));
-    const e4$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test_4' }));
+    const e1$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test_1' })));
+    const e2$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test_2' })));
+    const e3$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test_3' })));
+    const e4$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test_4' })));
 
     const req1 = createHttpRequest(({ url: '/', method: 'GET', response }));
     const req2 = createHttpRequest(({ url: '/', method: 'POST', response }));
@@ -158,7 +158,7 @@ describe('#resolveRouting', () => {
     const request = createHttpRequest(({ url: '/unknown', method: 'GET', response }));
     const path = factorizeRegExpWithParams('/');
 
-    const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const effect$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test' })));
 
     const routing: Routing = [{
       regExp: path.regExp,
@@ -186,7 +186,7 @@ describe('#resolveRouting', () => {
     const request = createHttpRequest(({ url: '/group/%test', method: 'GET', response }));
     const path = factorizeRegExpWithParams('/group/:id');
 
-    const effect$: HttpEffect = req$ => req$.pipe(mapTo({ body: 'test' }));
+    const effect$: HttpEffect = req$ => req$.pipe(map(() => ({ body: 'test' })));
 
     const routing: Routing = [{
       regExp: path.regExp,
@@ -219,7 +219,7 @@ describe('#resolveRouting', () => {
         map(req => req.params as { delay: number }),
         mergeMap(params => of({}).pipe(
           delay(params.delay),
-          mapTo({ body: `delay_${params.delay}` }),
+          map(() => ({ body: `delay_${params.delay}` })),
         )),
       );
 

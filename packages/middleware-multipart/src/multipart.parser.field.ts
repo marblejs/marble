@@ -1,6 +1,6 @@
 import { HttpRequest } from '@marblejs/http';
 import { Observable } from 'rxjs';
-import { takeUntil, tap, defaultIfEmpty, mapTo } from 'rxjs/operators';
+import { takeUntil, tap, defaultIfEmpty, map } from 'rxjs/operators';
 
 export type FieldEvent = [string, any, boolean, boolean, string, string];
 
@@ -13,6 +13,6 @@ export const parseField = (req: HttpRequest<any>) => (event$: Observable<FieldEv
         [fieldname]: value,
       };
     }),
-    mapTo(req),
+    map(() => req),
     defaultIfEmpty(req),
   );

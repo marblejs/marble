@@ -1,6 +1,5 @@
 import { Subject } from 'rxjs';
-import { flow, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { flow, identity, pipe } from 'fp-ts/lib/function';
 import * as E from 'fp-ts/lib/Either';
 import { Event } from '@marblejs/core';
 import { TransportMessageTransformer, TransportMessage } from './transport.interface';

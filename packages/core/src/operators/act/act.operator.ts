@@ -1,5 +1,5 @@
 import * as O from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { Observable, of, defer, isObservable } from 'rxjs';
 import { mergeMap, catchError, map } from 'rxjs/operators';
 import { encodeError } from '../../+internal/utils';

@@ -1,7 +1,7 @@
 import { Event } from '@marblejs/core';
 import { wait } from '@marblejs/core/dist/+internal/utils';
 import { throwError, fromEvent, firstValueFrom, concat, Observable, lastValueFrom, ReplaySubject } from 'rxjs';
-import { tap, map, mergeMap, first, toArray, take, mapTo } from 'rxjs/operators';
+import { tap, map, mergeMap, first, toArray, take } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/function';
 import { webSocketListener } from '../websocket.server.listener';
 import { WsEffect, WsMiddlewareEffect } from '../../effects/websocket.effects.interface';
@@ -38,7 +38,7 @@ describe('WebSocket server', () => {
       // given
       const eventSubject = new ReplaySubject<Event>(2);
       const echo$: WsEffect = (event$, ctx) => event$.pipe(
-        mergeMap(event => ctx.client.sendBroadcastResponse({ type: event.type, payload: event.payload }).pipe(mapTo(event))));
+        mergeMap(event => ctx.client.sendBroadcastResponse({ type: event.type, payload: event.payload }).pipe(map(() => event))));
       const event = { type: 'EVENT', payload: 'test' };
       const listener = webSocketListener({ effects: [echo$] });
 

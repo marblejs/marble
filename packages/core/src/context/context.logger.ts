@@ -1,7 +1,7 @@
 import * as M from 'fp-ts/lib/Map';
 import * as A from 'fp-ts/lib/Array';
-import { io } from 'fp-ts/lib/IO';
-import { pipe } from 'fp-ts/lib/pipeable';
+import * as IO from 'fp-ts/lib/IO';
+import { pipe } from 'fp-ts/lib/function';
 import { LoggerToken } from '../logger';
 import { Context, lookup, ordContextToken } from './context';
 import { useContext } from './context.hook';
@@ -21,7 +21,7 @@ export const logContext = (tag: string) => (context: Context): Context => {
       : `Registered unnamed token: ${token._id}`,
   });
 
-  const logDependencies = A.array.sequence(io)(
+  const logDependencies = IO.sequenceArray(
     pipe(
       context,
       M.keys(ordContextToken),

@@ -1,4 +1,4 @@
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { createTestBedSetup, createHttpTestBed } from '@marblejs/testing';
 import { createMicroserviceTestBed } from '@marblejs/messaging/dist/+internal/testing';
 import { dependencies, listener } from '../src/messaging/client';

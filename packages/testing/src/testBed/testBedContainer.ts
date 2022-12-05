@@ -1,7 +1,7 @@
 import * as T from 'fp-ts/lib/Task';
 import * as O from 'fp-ts/lib/Option';
 import * as A from 'fp-ts/lib/Array';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { EventBusClientToken } from '@marblejs/messaging';
 import { TestBed } from './testBed.interface';
 import { TestBedContainer, TestBedContainerConfig, DependencyCleanup } from './testBedContainer.interface';
