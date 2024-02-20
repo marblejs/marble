@@ -1,5 +1,5 @@
 {
-  "name": "marblejs",
+  "name": "@besrabasant/marblejs",
   "version": "4.0.0",
   "description": "Reactive Node APIs made easy",
   "scripts": {
@@ -29,7 +29,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/marblejs/marble.git"
+    "url": "git+https://github.com/besrabasant/marble.git"
   },
   "engines": {
     "node": ">= 8.0.0",
@@ -44,13 +44,14 @@
     "Reactive"
   ],
   "authors": [
-    "Józef Flakus <jozef.flakus@jflakus.com>"
+    "Józef Flakus <jozef.flakus@jflakus.com>",
+    "Basant Besra <besrabasant@gmail.co>"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/marblejs/marble/issues"
+    "url": "https://github.com/besrabasant/marble/issues"
   },
-  "homepage": "https://github.com/marblejs/marble#readme",
+  "homepage": "https://github.com/besrabasant/marble#readme",
   "dependencies": {
     "rxjs": "^7.5.7",
     "fp-ts": "^2.13.1"
