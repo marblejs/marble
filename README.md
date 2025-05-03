@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://marblejs.com">
+  <a href="https://marblejs.gitbook.io">
     <img src="https://github.com/marblejs/marble/blob/master/assets/img/logo.png?raw=true" width="320" alt="Marble.js logo"/>
   </a>
 </p>
@@ -42,7 +42,7 @@ Functional reactive <a href="http://nodejs.org" target="blank">Node.js</a> frame
 
 ## <a name="docs"></a> Documentation
 
-For the latest updates, documentation, change log, and release information visit [docs.marblejs.com](https://docs.marblejs.com) and follow [@marble_js](https://twitter.com/marble_js) on Twitter.
+For the latest updates, documentation, change log, and release information visit [marblejs.gitbook.io](https://marblejs.gitbook.io).
 
 ## <a name="examples"></a> Examples
 
